@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Users, Calendar, Megaphone } from "lucide-react";
+import { Briefcase, Users, Calendar, Megaphone, UserCircle } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 
 const Dashboard = () => {
@@ -32,6 +32,7 @@ const Dashboard = () => {
     { icon: Briefcase, title: "דרושים", desc: "הזדמנויות בשכונה", to: "/jobs" },
     { icon: Users, title: "אינדקס חברים", desc: "חברי המועדון", to: "/members" },
     { icon: Calendar, title: "אירועים", desc: "מפגשים קרובים", to: "/events" },
+    { icon: UserCircle, title: "הפרופיל שלי", desc: "ערוך פרטים אישיים", to: "/profile" },
   ];
 
   return (
@@ -46,7 +47,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 md:gap-6">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 md:gap-6">
         {cards.map((item, i) => (
           <Link key={i} to={item.to} className="group rounded-lg border border-border bg-card p-5 md:p-8 transition-all duration-300 hover:border-gold/30 hover:-translate-y-1 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)]">
             <item.icon className="mb-3 h-6 w-6 md:mb-4 md:h-8 md:w-8 text-gold" />

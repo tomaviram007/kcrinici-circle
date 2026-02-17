@@ -5,11 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  full_name: z.string().trim().min(2, "שם חייב להכיל לפחות 2 תווים").max(100, "שם ארוך מדי"),
+  phone: z.string().trim().min(9, "מספר טלפון לא תקין").max(15, "מספר טלפון לא תקין").regex(/^[\d\-+() ]+$/, "מספר טלפון לא תקין"),
+  address: z.string().trim().min(3, "כתובת חייבת להכיל לפחות 3 תווים").max(200, "כתובת ארוכה מדי"),
+  profession: z.string().trim().min(2, "מקצוע חייב להכיל לפחות 2 תווים").max(100, "מקצוע ארוך מדי"),
+  expertise: z.string().max(200, "מומחיות ארוכה מדי").optional().or(z.literal("")),
+  bio: z.string().max(500, "ביוגרפיה ארוכה מדי").optional().or(z.literal("")),
+  email: z.string().trim().email("כתובת אימייל לא תקינה"),
+  password: z.string().min(6, "סיסמה חייבת להכיל לפחות 6 תווים").max(72, "סיסמה ארוכה מדי"),
+});
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -22,13 +35,29 @@ const Register = () => {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (errors[name]) {
+      setErrors((prev) => { const n = { ...prev }; delete n[name]; return n; });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setErrors({});
 
+    const result = registerSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as string;
+        if (!fieldErrors[field]) fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setLoading(true);
     try {
       const { error } = await supabase.auth.signUp({
         email: form.email,
@@ -50,19 +79,49 @@ const Register = () => {
 
       toast({
         title: "בקשתך נשלחה",
-        description: "תקבל הודעה במייל ברגע שהגישה תאושר.",
+        description: "אנא אשר את כתובת האימייל שלך. תקבל הודעה ברגע שהגישה תאושר.",
       });
       navigate("/pending");
     } catch (error: any) {
+      const msg = error.message === "User already registered"
+        ? "כתובת אימייל זו כבר רשומה במערכת. נסה להתחבר."
+        : error.message;
       toast({
-        title: "שגיאה",
-        description: error.message,
+        title: "שגיאה ברישום",
+        description: msg,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
+
+  const Field = ({ name, label, required = false, ...props }: any) => (
+    <div>
+      <label className="mb-1.5 block font-body text-sm text-muted-foreground">
+        {label} {required && <span className="text-gold">*</span>}
+      </label>
+      {props.textarea ? (
+        <Textarea
+          name={name}
+          value={(form as any)[name]}
+          onChange={handleChange}
+          className={`bg-card border-border ${errors[name] ? "border-destructive" : ""}`}
+          {...props}
+          textarea={undefined}
+        />
+      ) : (
+        <Input
+          name={name}
+          value={(form as any)[name]}
+          onChange={handleChange}
+          className={`bg-card border-border ${errors[name] ? "border-destructive" : ""}`}
+          {...props}
+        />
+      )}
+      {errors[name] && <p className="mt-1 font-body text-xs text-destructive">{errors[name]}</p>}
+    </div>
+  );
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
@@ -73,54 +132,28 @@ const Register = () => {
               הגברים של <span className="text-gold">ק. קריניצי</span>
             </h1>
           </Link>
-          <p className="mt-3 font-body text-muted-foreground">
-            בקשת הצטרפות למועדון
-          </p>
+          <p className="mt-3 font-body text-muted-foreground">בקשת הצטרפות למועדון</p>
           <div className="mt-3 mx-auto h-px w-12 gradient-gold opacity-40" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
           <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block font-body text-sm text-muted-foreground">שם מלא *</label>
-              <Input name="full_name" value={form.full_name} onChange={handleChange} required className="bg-card border-border" />
-            </div>
-            <div>
-              <label className="mb-1.5 block font-body text-sm text-muted-foreground">מספר טלפון *</label>
-              <Input name="phone" value={form.phone} onChange={handleChange} required className="bg-card border-border" dir="ltr" />
-            </div>
+            <Field name="full_name" label="שם מלא" required />
+            <Field name="phone" label="מספר טלפון" required dir="ltr" />
           </div>
 
-          <div>
-            <label className="mb-1.5 block font-body text-sm text-muted-foreground">כתובת מגורים (רחוב ומספר) *</label>
-            <Input name="address" value={form.address} onChange={handleChange} required className="bg-card border-border" />
-          </div>
+          <Field name="address" label="כתובת מגורים (רחוב ומספר)" required />
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block font-body text-sm text-muted-foreground">מקצוע *</label>
-              <Input name="profession" value={form.profession} onChange={handleChange} required className="bg-card border-border" />
-            </div>
-            <div>
-              <label className="mb-1.5 block font-body text-sm text-muted-foreground">מומחיות</label>
-              <Input name="expertise" value={form.expertise} onChange={handleChange} className="bg-card border-border" placeholder="למשל: מומחה ליין, טכנולוגיה..." />
-            </div>
+            <Field name="profession" label="מקצוע" required />
+            <Field name="expertise" label="מומחיות" placeholder="למשל: מומחה ליין, טכנולוגיה..." />
           </div>
 
-          <div>
-            <label className="mb-1.5 block font-body text-sm text-muted-foreground">משהו שהשכנים צריכים לדעת עליך</label>
-            <Textarea name="bio" value={form.bio} onChange={handleChange} className="bg-card border-border min-h-[80px]" placeholder="ביוגרפיה קצרה..." />
-          </div>
+          <Field name="bio" label="משהו שהשכנים צריכים לדעת עליך" textarea placeholder="ביוגרפיה קצרה..." />
 
           <div className="border-t border-border pt-5 space-y-4">
-            <div>
-              <label className="mb-1.5 block font-body text-sm text-muted-foreground">אימייל *</label>
-              <Input name="email" type="email" value={form.email} onChange={handleChange} required className="bg-card border-border" dir="ltr" />
-            </div>
-            <div>
-              <label className="mb-1.5 block font-body text-sm text-muted-foreground">סיסמה *</label>
-              <Input name="password" type="password" value={form.password} onChange={handleChange} required minLength={6} className="bg-card border-border" dir="ltr" />
-            </div>
+            <Field name="email" label="אימייל" required type="email" dir="ltr" />
+            <Field name="password" label="סיסמה" required type="password" dir="ltr" />
           </div>
 
           <Button type="submit" disabled={loading} className="w-full gradient-gold text-primary-foreground font-body py-6 text-base hover:opacity-90">
@@ -129,9 +162,7 @@ const Register = () => {
 
           <p className="text-center font-body text-sm text-muted-foreground">
             כבר חבר?{" "}
-            <Link to="/login" className="text-gold hover:underline">
-              כניסה למועדון
-            </Link>
+            <Link to="/login" className="text-gold hover:underline">כניסה למועדון</Link>
           </p>
         </form>
       </div>
