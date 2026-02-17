@@ -1,45 +1,48 @@
 
+# תיקון: יציאה מהטאב גורמת להתנתקות וטעינה אינסופית
 
-# Fix: ProtectedRoute Infinite Loading / Wrong State
+## מה קורה בפועל
 
-## Root Cause
+כשגולש עוזב את הטאב (למשל עובר לטאב אחר או מצמצם את הדפדפן) ואז חוזר, מתרחש התהליך הבא:
 
-The `ProtectedRoute` component has a **race condition** between `getSession()` and `onAuthStateChange`:
+1. בזמן שהטאב לא פעיל, ה-Access Token פג תוקף (בד"כ אחרי שעה)
+2. כשהגולש חוזר לטאב, המערכת מנסה לרענן את הטוקן
+3. **בעיה קריטית:** לפני שהרענון מספיק להסתיים, האירוע `INITIAL_SESSION` נשלח עם Session שהטוקן שלו כבר פג תוקף
+4. הקוד מנסה לשלוף נתוני פרופיל מהדאטאבייס עם הטוקן הפגום -- השאילתא נכשלת
+5. השגיאה מתפרשת כ-"no-session" -- ומופיע מסך "תוכן בלעדי לחברי המועדון"
+6. גם אם `TOKEN_REFRESHED` מגיע אחר כך עם טוקן תקין, לפעמים ה-state כבר התעדכן ל-"no-session" והקומפוננטה לא מתאוששת
 
-1. When navigating to a protected page, `getSession()` is called immediately
-2. But Supabase may not have finished hydrating the session from localStorage yet, so `getSession()` returns `null`
-3. The component immediately resolves to `"no-session"` -- showing the "exclusive content" overlay
-4. The `onAuthStateChange` listener fires an `INITIAL_SESSION` event shortly after, but the current code **does not handle it** (only `SIGNED_OUT`, `SIGNED_IN`, and `TOKEN_REFRESHED` are handled). So the event is ignored
-5. On the **first visit** it sometimes works because the session loads fast enough. On **subsequent visits** or route changes, the timing shifts and the bug appears
+## הפתרון
 
-This is why the **homepage works fine** (it's not wrapped in `ProtectedRoute`) but all other pages show the lock overlay or get stuck loading.
+### קובץ: `src/components/auth/ProtectedRoute.tsx`
 
-## Solution
+שלושה שינויים מרכזיים:
 
-Rewrite the `ProtectedRoute` auth logic to use `onAuthStateChange` as the **primary** source of truth (the Supabase-recommended pattern), instead of relying on `getSession()` which can return stale/null data:
+### 1. טיפול בשגיאות DB כ-"נסה שוב" ולא כ-"אין חיבור"
+כרגע, כל שגיאה בשאילתת פרופיל (`profileError`) גורמת ל-`setResolved("no-session")`. במקום זה, אם יש session קיים אבל השאילתא נכשלה (כי הטוקן פג), נחכה לאירוע `TOKEN_REFRESHED` שיתן טוקן חדש ונריץ את הבדיקה שוב -- במקום להניח מיד שהגולש לא מחובר.
 
-### File: `src/components/auth/ProtectedRoute.tsx`
+### 2. הוספת מאזין `visibilitychange`
+כשהטאב חוזר להיות פעיל (visible), נבצע בדיקה מחדש עם `getSession()` -- בשלב הזה הרענון כבר הסתיים והטוקן תקין. זה מכסה מצבים שבהם אירועי Auth הוחמצו בזמן שהטאב היה ברקע.
 
-1. **Handle the `INITIAL_SESSION` event** -- treat it the same as `SIGNED_IN`: run the full check with the session from the callback
-2. **Use the session from the callback** parameter instead of calling `getSession()` again -- the callback always provides the correct session object
-3. **Remove the separate `getSession()` call** as the initial check -- `onAuthStateChange` with `INITIAL_SESSION` covers this
-4. **Keep silent re-check for `TOKEN_REFRESHED`** -- don't reset to loading state
-5. **Keep the 10-second safety timeout** as a fallback
+### 3. לא לאפס ל-loading על TOKEN_REFRESHED
+כשמגיע `TOKEN_REFRESHED`, להריץ את הבדיקה ברקע בלי להראות ספינר טעינה. אם הגולש כבר במצב "ok", הוא ישאר ב-"ok" עד שהבדיקה תסתיים.
 
-### Technical Details
-
-The key change is refactoring `check()` to accept a `session` parameter from the callback rather than calling `getSession()` internally:
+## פירוט טכני
 
 ```text
-Before:
-  check() -> calls getSession() internally -> may get null
-  onAuthStateChange -> ignores INITIAL_SESSION
+לפני:
+  INITIAL_SESSION(expired token) -> query DB -> error -> "no-session" (BUG!)
+  profileError -> setResolved("no-session") (always)
 
-After:
-  onAuthStateChange(INITIAL_SESSION, session) -> check(session)
-  onAuthStateChange(SIGNED_IN, session) -> check(session)  
-  onAuthStateChange(TOKEN_REFRESHED, session) -> silent check(session)
-  onAuthStateChange(SIGNED_OUT) -> set "no-session"
+אחרי:
+  INITIAL_SESSION(expired token) -> query DB -> error -> stay in "loading", wait for TOKEN_REFRESHED
+  TOKEN_REFRESHED(valid token) -> query DB -> success -> "ok"
+  visibilitychange(visible) -> getSession() -> check(session) -> handles tab-return gracefully
+  profileError + session exists -> don't resolve to "no-session", wait for refresh
 ```
 
-This ensures the session object used for checking is always the one Supabase provides directly, eliminating the race condition entirely.
+### שינויים בקוד:
+
+1. **פונקציית `check`**: אם יש session אבל שאילתת הפרופיל נכשלה, לא לקרוא ל-`setResolved("no-session")` -- במקום זה, פשוט להחזיר (return) בלי לעדכן state, כדי שה-`TOKEN_REFRESHED` יטפל בזה
+2. **הוספת `visibilitychange` listener** ב-useEffect: כשהדף חוזר להיות visible, לקרוא ל-`supabase.auth.getSession()` ולהריץ `check` עם התוצאה
+3. **ניקוי ה-listener** ב-cleanup function של ה-useEffect
