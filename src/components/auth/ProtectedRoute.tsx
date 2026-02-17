@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -55,22 +55,35 @@ const TeaserOverlay = ({ type }: { type: "no-session" | "not-approved" }) => (
 
 const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false }: ProtectedRouteProps) => {
   const [state, setState] = useState<"loading" | "no-session" | "not-approved" | "not-admin" | "ok">("loading");
+  const resolved = useRef(false);
 
   useEffect(() => {
     let alive = true;
+    resolved.current = false;
+
+    const setResolved = (newState: "no-session" | "not-approved" | "not-admin" | "ok") => {
+      if (alive) {
+        resolved.current = true;
+        setState(newState);
+      }
+    };
 
     const check = async () => {
       try {
+        console.log("ProtectedRoute: checking session...");
         const { data: { session } } = await supabase.auth.getSession();
         if (!alive) return;
 
         if (!session) {
-          setState("no-session");
+          console.log("ProtectedRoute: no session found");
+          setResolved("no-session");
           return;
         }
 
+        console.log("ProtectedRoute: session found, checking profile...");
+
         if (requireApproval || requireAdmin) {
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from("profiles")
             .select("is_approved")
             .eq("user_id", session.user.id)
@@ -78,54 +91,71 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
           if (!alive) return;
 
+          console.log("ProtectedRoute: profile result:", { profile, profileError });
+
+          if (profileError) {
+            console.error("ProtectedRoute: profile query error:", profileError);
+            setResolved("no-session");
+            return;
+          }
+
           if (!profile?.is_approved) {
-            setState("not-approved");
+            setResolved("not-approved");
             return;
           }
         }
 
         if (requireAdmin) {
-          const { data: roles } = await supabase
+          const { data: roles, error: rolesError } = await supabase
             .from("user_roles")
             .select("role")
             .eq("user_id", session.user.id);
 
           if (!alive) return;
 
+          console.log("ProtectedRoute: roles result:", { roles, rolesError });
+
+          if (rolesError) {
+            console.error("ProtectedRoute: roles query error:", rolesError);
+            setResolved("no-session");
+            return;
+          }
+
           const admin = roles?.some((r: any) => r.role === "admin");
           if (!admin) {
-            setState("not-admin");
+            setResolved("not-admin");
             return;
           }
         }
 
-        if (alive) setState("ok");
+        console.log("ProtectedRoute: access granted");
+        setResolved("ok");
       } catch (err) {
-        console.error("ProtectedRoute check failed:", err);
-        if (alive) setState("no-session");
+        console.error("ProtectedRoute: check failed:", err);
+        if (alive) setResolved("no-session");
       }
     };
 
-    // Run check immediately
     check();
 
-    // Also listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (!alive) return;
       if (event === "SIGNED_OUT") {
-        setState("no-session");
+        setResolved("no-session");
       } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        resolved.current = false;
+        setState("loading");
         check();
       }
     });
 
-    // Safety timeout
+    // Safety timeout — only fire if check hasn't resolved yet
     const timeout = setTimeout(() => {
-      if (alive && state === "loading") {
-        console.warn("ProtectedRoute: timed out, defaulting to no-session");
-        setState("no-session");
+      if (alive && !resolved.current) {
+        console.warn("ProtectedRoute: timed out after 10s, defaulting to no-session");
+        setResolved("no-session");
       }
-    }, 8000);
+    }, 10000);
 
     return () => {
       alive = false;
