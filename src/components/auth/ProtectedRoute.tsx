@@ -60,6 +60,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
   useEffect(() => {
     let alive = true;
     resolved.current = false;
+    setState("loading");
 
     const setResolved = (newState: "no-session" | "not-approved" | "not-admin" | "ok") => {
       if (alive) {
@@ -68,19 +69,12 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
       }
     };
 
-    const check = async () => {
+    const check = async (session: import("@supabase/supabase-js").Session | null) => {
       try {
-        
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!alive) return;
-
         if (!session) {
-          
           setResolved("no-session");
           return;
         }
-
-        
 
         if (requireApproval || requireAdmin) {
           const { data: profile, error: profileError } = await supabase
@@ -90,8 +84,6 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
             .maybeSingle();
 
           if (!alive) return;
-
-          
 
           if (profileError) {
             console.error("ProtectedRoute: profile query error:", profileError);
@@ -113,8 +105,6 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
           if (!alive) return;
 
-          
-
           if (rolesError) {
             console.error("ProtectedRoute: roles query error:", rolesError);
             setResolved("no-session");
@@ -128,7 +118,6 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
           }
         }
 
-        
         setResolved("ok");
       } catch (err) {
         console.error("ProtectedRoute: check failed:", err);
@@ -136,23 +125,20 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
       }
     };
 
-    check();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!alive) return;
       if (event === "SIGNED_OUT") {
         setResolved("no-session");
-      } else if (event === "SIGNED_IN") {
+      } else if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
         resolved.current = false;
         setState("loading");
-        check();
+        check(session);
       } else if (event === "TOKEN_REFRESHED") {
-        // Silent re-check without showing loading spinner
-        check();
+        check(session);
       }
     });
 
-    // Safety timeout — only fire if check hasn't resolved yet
+    // Safety timeout
     const timeout = setTimeout(() => {
       if (alive && !resolved.current) {
         console.warn("ProtectedRoute: timed out after 10s, defaulting to no-session");
