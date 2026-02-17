@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Phone, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User } from "lucide-react";
+import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
@@ -22,11 +23,15 @@ const JOB_TYPES = [
 
 const EMPTY_FORM = { title: "", description: "", contact: "", contact_name: "", category: "", location: "", job_type: "", salary: "", requirements: "", company_name: "" };
 
+type ViewMode = "grid" | "list";
+
 const Jobs = () => {
   const { toast } = useToast();
   const [jobs, setJobs] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
   const fetchJobs = async () => {
@@ -75,7 +80,7 @@ const Jobs = () => {
     <>
     <PageHero image={heroImg} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה" />
     <ClubAboutSection />
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="font-serif text-xl font-bold text-foreground sm:text-3xl">
@@ -84,9 +89,27 @@ const Jobs = () => {
           <p className="mt-1 font-body text-sm text-muted-foreground">לוח דרושים אקסקלוסיבי לחברי המועדון</p>
           <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
         </div>
-        <Button size="sm" onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
-          <Plus className="h-4 w-4 ml-1" /> פרסם משרה
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center rounded-md border border-border overflow-hidden">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2 transition-colors ${viewMode === "grid" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`}
+              title="תצוגת רשת"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 transition-colors ${viewMode === "list" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`}
+              title="תצוגת רשימה"
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
+          <Button size="sm" onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
+            <Plus className="h-4 w-4 ml-1" /> פרסם משרה
+          </Button>
+        </div>
       </div>
 
       {showForm && (
@@ -120,71 +143,123 @@ const Jobs = () => {
         </form>
       )}
 
-      <div ref={cardsRef} className="grid gap-3 sm:gap-5 md:grid-cols-2">
+      <div
+        ref={cardsRef}
+        className={
+          viewMode === "grid"
+            ? "grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            : "grid gap-4 grid-cols-1"
+        }
+      >
         {jobs.map((job) => (
-          <div key={job.id} className="job-card rounded-lg border border-border bg-card p-4 sm:p-6 transition-shadow hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)]">
+          <div
+            key={job.id}
+            onClick={() => setSelectedJob(job)}
+            className="job-card cursor-pointer rounded-lg border border-border bg-card p-4 transition-all hover:shadow-[0_0_30px_hsl(43_72%_52%/0.1)] hover:border-gold/30"
+          >
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary">
                 <Briefcase className="h-5 w-5 text-gold" />
               </div>
-              <div className="flex-1">
-                <h3 className="font-serif text-lg font-bold text-foreground">{job.title}</h3>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-serif text-base font-bold text-foreground truncate">{job.title}</h3>
                 {job.company_name && (
-                  <p className="font-body text-sm text-gold flex items-center gap-1 mt-0.5">
-                    <Building2 className="h-3.5 w-3.5" /> {job.company_name}
+                  <p className="font-body text-sm text-gold flex items-center gap-1 mt-0.5 truncate">
+                    <Building2 className="h-3.5 w-3.5 shrink-0" /> {job.company_name}
                   </p>
                 )}
-                <div className="mt-1 flex items-center gap-2 flex-wrap">
+                <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
                   {job.job_type && <span className="inline-block rounded bg-secondary px-2 py-0.5 font-body text-xs text-foreground">{jobTypeLabel(job.job_type)}</span>}
                   {job.category && <span className="inline-block rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold">{job.category}</span>}
                 </div>
               </div>
             </div>
-            <p className="mt-3 font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{job.description}</p>
-            {job.requirements && (
-              <div className="mt-3">
-                <p className="font-body text-xs font-medium text-foreground flex items-center gap-1 mb-1">
-                  <FileText className="h-3 w-3 text-gold" /> דרישות:
-                </p>
-                <p className="font-body text-sm text-muted-foreground whitespace-pre-line">{job.requirements}</p>
-              </div>
-            )}
-            <div className="mt-3 flex items-center gap-3 flex-wrap font-body text-sm text-muted-foreground">
+            <p className="mt-2 font-body text-sm leading-relaxed text-muted-foreground line-clamp-2">{job.description}</p>
+            <div className="mt-2 flex items-center gap-3 flex-wrap font-body text-xs text-muted-foreground">
               {job.location && (
                 <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5 text-gold" /> {job.location}
+                  <MapPin className="h-3 w-3 text-gold" /> {job.location}
                 </span>
               )}
               {job.salary && (
                 <span className="flex items-center gap-1">
-                  <Banknote className="h-3.5 w-3.5 text-gold" /> {job.salary}
+                  <Banknote className="h-3 w-3 text-gold" /> {job.salary}
                 </span>
               )}
             </div>
-            {(job.contact_name || job.contact) && (
-              <div className="mt-3 flex items-center gap-3 flex-wrap">
-                {job.contact_name && (
-                  <span className="font-body text-sm text-gold flex items-center gap-1">
-                    <User className="h-3.5 w-3.5" /> {job.contact_name}
-                  </span>
-                )}
-                {job.contact && (
-                  <a
-                    href={`https://wa.me/${job.contact.replace(/[^0-9]/g, '').replace(/^0/, '972')}?text=${encodeURIComponent(`היי ${job.contact_name || ''} ראיתי את הפרסום של המשרה "${job.title}" שלך, אשמח לשמוע עוד פרטים`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-1.5 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    {job.contact}
-                  </a>
-                )}
-              </div>
-            )}
           </div>
         ))}
       </div>
       {jobs.length === 0 && <p className="font-body text-muted-foreground">אין משרות פעילות כרגע.</p>}
+
+      {/* Job Detail Dialog */}
+      <Dialog open={!!selectedJob} onOpenChange={(open) => !open && setSelectedJob(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {selectedJob && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-serif text-xl font-bold text-foreground">{selectedJob.title}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-2">
+                {selectedJob.company_name && (
+                  <p className="font-body text-sm text-gold flex items-center gap-1.5">
+                    <Building2 className="h-4 w-4" /> {selectedJob.company_name}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {selectedJob.job_type && <span className="inline-block rounded bg-secondary px-2.5 py-1 font-body text-xs text-foreground">{jobTypeLabel(selectedJob.job_type)}</span>}
+                  {selectedJob.category && <span className="inline-block rounded bg-secondary px-2.5 py-1 font-body text-xs text-gold">{selectedJob.category}</span>}
+                </div>
+                <div>
+                  <p className="font-body text-sm font-medium text-foreground mb-1">תיאור המשרה</p>
+                  <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{selectedJob.description}</p>
+                </div>
+                {selectedJob.requirements && (
+                  <div>
+                    <p className="font-body text-sm font-medium text-foreground flex items-center gap-1 mb-1">
+                      <FileText className="h-3.5 w-3.5 text-gold" /> דרישות
+                    </p>
+                    <p className="font-body text-sm text-muted-foreground whitespace-pre-line">{selectedJob.requirements}</p>
+                  </div>
+                )}
+                <div className="flex items-center gap-4 flex-wrap font-body text-sm text-muted-foreground">
+                  {selectedJob.location && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4 text-gold" /> {selectedJob.location}
+                    </span>
+                  )}
+                  {selectedJob.salary && (
+                    <span className="flex items-center gap-1">
+                      <Banknote className="h-4 w-4 text-gold" /> {selectedJob.salary}
+                    </span>
+                  )}
+                </div>
+                {(selectedJob.contact_name || selectedJob.contact) && (
+                  <div className="border-t border-border pt-4 space-y-2">
+                    <p className="font-body text-sm font-medium text-foreground">פרטי יצירת קשר</p>
+                    {selectedJob.contact_name && (
+                      <span className="font-body text-sm text-gold flex items-center gap-1.5">
+                        <User className="h-4 w-4" /> {selectedJob.contact_name}
+                      </span>
+                    )}
+                    {selectedJob.contact && (
+                      <a
+                        href={`https://wa.me/${selectedJob.contact.replace(/[^0-9]/g, '').replace(/^0/, '972')}?text=${encodeURIComponent(`היי ${selectedJob.contact_name || ''} ראיתי את הפרסום של המשרה "${selectedJob.title}" שלך, אשמח לשמוע עוד פרטים`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        {selectedJob.contact}
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
     </>
   );
