@@ -6,6 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const registerSchema = z.object({
   full_name: z.string().trim().min(2, "שם חייב להכיל לפחות 2 תווים").max(100, "שם ארוך מדי"),
@@ -14,6 +19,7 @@ const registerSchema = z.object({
   profession: z.string().trim().min(2, "מקצוע חייב להכיל לפחות 2 תווים").max(100, "מקצוע ארוך מדי"),
   expertise: z.string().max(200, "מומחיות ארוכה מדי").optional().or(z.literal("")),
   bio: z.string().max(500, "ביוגרפיה ארוכה מדי").optional().or(z.literal("")),
+  birth_date: z.string().min(1, "יש לבחור תאריך לידה"),
   email: z.string().trim().email("כתובת אימייל לא תקינה"),
   password: z.string().min(6, "סיסמה חייבת להכיל לפחות 6 תווים").max(72, "סיסמה ארוכה מדי"),
 });
@@ -71,6 +77,7 @@ const Register = () => {
     profession: "",
     expertise: "",
     bio: "",
+    birth_date: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -110,6 +117,7 @@ const Register = () => {
             profession: form.profession,
             expertise: form.expertise,
             bio: form.bio,
+            birth_date: form.birth_date,
           },
         },
       });
@@ -161,6 +169,50 @@ const Register = () => {
           <div className="grid gap-4 md:grid-cols-2">
             <Field name="profession" label="מקצוע" required {...fieldProps} />
             <Field name="expertise" label="מומחיות" placeholder="למשל: מומחה ליין, טכנולוגיה..." {...fieldProps} />
+          </div>
+
+          {/* Date of birth picker */}
+          <div>
+            <label className="mb-1.5 block font-body text-sm text-muted-foreground">
+              תאריך לידה <span className="text-gold">*</span>
+            </label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  type="button"
+                  className={cn(
+                    "w-full justify-start text-right font-normal bg-card border-border",
+                    !form.birth_date && "text-muted-foreground",
+                    errors.birth_date && "border-destructive"
+                  )}
+                >
+                  <CalendarIcon className="ml-2 h-4 w-4" />
+                  {form.birth_date ? format(new Date(form.birth_date), "dd/MM/yyyy") : "בחר תאריך"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={form.birth_date ? new Date(form.birth_date) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      setForm((prev) => ({ ...prev, birth_date: format(date, "yyyy-MM-dd") }));
+                      if (errors.birth_date) {
+                        setErrors((prev) => { const n = { ...prev }; delete n.birth_date; return n; });
+                      }
+                    }
+                  }}
+                  disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                  captionLayout="dropdown-buttons"
+                  fromYear={1920}
+                  toYear={new Date().getFullYear()}
+                />
+              </PopoverContent>
+            </Popover>
+            {errors.birth_date && <p className="mt-1 font-body text-xs text-destructive">{errors.birth_date}</p>}
           </div>
 
           <Field name="bio" label="משהו שהשכנים צריכים לדעת עליך" textarea placeholder="ביוגרפיה קצרה..." {...fieldProps} />
