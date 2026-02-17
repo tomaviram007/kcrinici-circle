@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Phone, Plus, MapPin, Banknote, Building2, FileText } from "lucide-react";
+import { Briefcase, Phone, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +20,7 @@ const JOB_TYPES = [
   { value: "service", label: "שירות / עבודה חד פעמית" },
 ];
 
-const EMPTY_FORM = { title: "", description: "", contact: "", category: "", location: "", job_type: "", salary: "", requirements: "", company_name: "" };
+const EMPTY_FORM = { title: "", description: "", contact: "", contact_name: "", category: "", location: "", job_type: "", salary: "", requirements: "", company_name: "" };
 
 const Jobs = () => {
   const { toast } = useToast();
@@ -51,6 +51,7 @@ const Jobs = () => {
       title: form.title.trim(),
       description: form.description.trim(),
       contact: form.contact.trim() || null,
+      contact_name: form.contact_name.trim() || null,
       category: form.category.trim() || null,
       location: form.location.trim() || null,
       job_type: form.job_type || null,
@@ -103,10 +104,13 @@ const Jobs = () => {
             </Select>
             <Input placeholder="מיקום (עיר / אזור)" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="bg-background" autoComplete="off" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input placeholder="שכר / תמורה" value={form.salary} onChange={(e) => setForm({ ...form, salary: e.target.value })} className="bg-background" autoComplete="off" />
             <Input placeholder="קטגוריה" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="bg-background" autoComplete="off" />
-            <Input placeholder="איש קשר / טלפון" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="bg-background" autoComplete="off" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input placeholder="שם איש קשר" value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} className="bg-background" autoComplete="off" />
+            <Input placeholder="טלפון איש קשר" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="bg-background" dir="ltr" autoComplete="off" />
           </div>
           <p className="font-body text-xs text-muted-foreground">* המשרה תפורסם לאחר אישור מנהל המערכת</p>
           <div className="flex gap-2">
@@ -156,12 +160,27 @@ const Jobs = () => {
                   <Banknote className="h-3.5 w-3.5 text-gold" /> {job.salary}
                 </span>
               )}
-              {job.contact && (
-                <span className="flex items-center gap-1 text-gold">
-                  <Phone className="h-3.5 w-3.5" /> {job.contact}
-                </span>
-              )}
             </div>
+            {(job.contact_name || job.contact) && (
+              <div className="mt-3 flex items-center gap-3 flex-wrap">
+                {job.contact_name && (
+                  <span className="font-body text-sm text-gold flex items-center gap-1">
+                    <User className="h-3.5 w-3.5" /> {job.contact_name}
+                  </span>
+                )}
+                {job.contact && (
+                  <a
+                    href={`https://wa.me/${job.contact.replace(/[^0-9]/g, '').replace(/^0/, '972')}?text=${encodeURIComponent(`היי ${job.contact_name || ''} ראיתי את הפרסום של המשרה "${job.title}" שלך, אשמח לשמוע עוד פרטים`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-1.5 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    {job.contact}
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>

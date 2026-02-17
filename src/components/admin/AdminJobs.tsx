@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Check, Clock, Plus, X, Power, Tag, Building2, MapPin, Banknote } from "lucide-react";
+import { Trash2, Check, Clock, Plus, X, Power, Tag, Building2, MapPin, Banknote, User } from "lucide-react";
 import { fireConfetti } from "@/lib/confetti";
 
 const JOB_TYPES = [
@@ -17,7 +17,7 @@ const JOB_TYPES = [
   { value: "service", label: "שירות / עבודה חד פעמית" },
 ];
 
-const EMPTY_FORM = { title: "", description: "", contact: "", category: "", location: "", job_type: "", salary: "", requirements: "", company_name: "" };
+const EMPTY_FORM = { title: "", description: "", contact: "", contact_name: "", category: "", location: "", job_type: "", salary: "", requirements: "", company_name: "" };
 
 const AdminJobs = () => {
   const { toast } = useToast();
@@ -43,6 +43,7 @@ const AdminJobs = () => {
       title: form.title.trim(),
       description: form.description.trim(),
       contact: form.contact.trim() || null,
+      contact_name: form.contact_name.trim() || null,
       category: form.category.trim() || null,
       location: form.location.trim() || null,
       job_type: form.job_type || null,
@@ -135,10 +136,13 @@ const AdminJobs = () => {
               </Select>
               <Input placeholder="מיקום (עיר / אזור)" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input placeholder="שכר / תמורה" value={form.salary} onChange={(e) => setForm({ ...form, salary: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
               <Input placeholder="קטגוריה (לדוגמה: שיפוצים)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
-              <Input placeholder="איש קשר / טלפון" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input placeholder="שם איש קשר" value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
+              <Input placeholder="טלפון איש קשר" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="font-body" dir="ltr" autoComplete="off" />
             </div>
             <Button onClick={handleCreate} disabled={submitting} className="gradient-gold text-primary-foreground font-body">
               {submitting ? "מפרסם..." : "פרסם משרה"}
@@ -176,7 +180,8 @@ const AdminJobs = () => {
                   {job.category && <span className="rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold">{job.category}</span>}
                   {job.location && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><MapPin className="h-3 w-3" />{job.location}</span>}
                   {job.salary && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><Banknote className="h-3 w-3" />{job.salary}</span>}
-                  {job.contact && <span className="font-body text-xs text-muted-foreground">קשר: {job.contact}</span>}
+                  {job.contact_name && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><User className="h-3 w-3" />{job.contact_name}</span>}
+                  {job.contact && <span className="font-body text-xs text-muted-foreground">טלפון: {job.contact}</span>}
                   <span className="font-body text-xs text-muted-foreground">פורסם: {new Date(job.created_at).toLocaleDateString("he-IL")}</span>
                 </div>
                 {job.requirements && <p className="font-body text-xs text-muted-foreground">דרישות: {job.requirements}</p>}
@@ -218,7 +223,8 @@ const AdminJobs = () => {
                   {job.category && <span className="rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold">{job.category}</span>}
                   {job.location && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><MapPin className="h-3 w-3" />{job.location}</span>}
                   {job.salary && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><Banknote className="h-3 w-3" />{job.salary}</span>}
-                  {job.contact && <span className="font-body text-xs text-muted-foreground">קשר: {job.contact}</span>}
+                  {job.contact_name && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><User className="h-3 w-3" />{job.contact_name}</span>}
+                  {job.contact && <span className="font-body text-xs text-muted-foreground">טלפון: {job.contact}</span>}
                   <span className="font-body text-xs text-muted-foreground">פורסם: {new Date(job.created_at).toLocaleDateString("he-IL")}</span>
                 </div>
               </div>
