@@ -256,6 +256,41 @@ export type Database = {
           },
         ]
       }
+      poll_popup_views: {
+        Row: {
+          created_at: string
+          id: string
+          poll_id: string
+          updated_at: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          poll_id: string
+          updated_at?: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          poll_id?: string
+          updated_at?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_popup_views_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_votes: {
         Row: {
           created_at: string
@@ -304,6 +339,8 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean
+          max_displays: number
+          show_popup: boolean
           title: string
           updated_at: string
         }
@@ -315,6 +352,8 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          max_displays?: number
+          show_popup?: boolean
           title: string
           updated_at?: string
         }
@@ -326,6 +365,8 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          max_displays?: number
+          show_popup?: boolean
           title?: string
           updated_at?: string
         }

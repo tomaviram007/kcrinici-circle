@@ -14,6 +14,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const { userId, action } = await req.json();
@@ -25,7 +26,6 @@ serve(async (req) => {
       });
     }
 
-    // Get user email from auth
     const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
@@ -34,7 +34,6 @@ serve(async (req) => {
       });
     }
 
-    // Get profile name
     const { data: profile } = await supabase
       .from("profiles")
       .select("full_name")
@@ -58,7 +57,7 @@ serve(async (req) => {
             כעת יש לך גישה מלאה לכל הלוחות, האינדקס והאירועים.
           </p>
           <div style="text-align: center; margin-top: 30px;">
-            <a href="${supabaseUrl.replace('.supabase.co', '.lovable.app')}" style="display: inline-block; padding: 12px 32px; background: linear-gradient(135deg, #D4AF37, #8B6914); color: #1a1410; text-decoration: none; border-radius: 8px; font-weight: bold;">כניסה למועדון</a>
+            <a href="https://kcrinici-circle.lovable.app" style="display: inline-block; padding: 12px 32px; background: linear-gradient(135deg, #D4AF37, #8B6914); color: #1a1410; text-decoration: none; border-radius: 8px; font-weight: bold;">כניסה למועדון</a>
           </div>
         </div>
       `;
@@ -76,26 +75,38 @@ serve(async (req) => {
       `;
     }
 
-    // Send email via Supabase Auth admin
-    // Note: Using Supabase's built-in email sending
-    const res = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY not configured");
+      return new Response(
+        JSON.stringify({ error: "Email service not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Send email via Resend
+    const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${serviceRoleKey}`,
-        "apikey": serviceRoleKey,
+        "Authorization": `Bearer ${resendApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        type: "magiclink",
-        email: email,
+        from: "מועדון ק. קריניצי <onboarding@resend.dev>",
+        to: [email],
+        subject,
+        html: htmlBody,
       }),
     });
 
-    // For now, log the notification - actual email sending would require an email service
-    console.log(`Notification sent to ${email}: ${action} - ${subject}`);
+    const resendData = await resendRes.json();
+    console.log("Resend response:", JSON.stringify(resendData));
+
+    if (!resendRes.ok) {
+      throw new Error(`Resend error: ${JSON.stringify(resendData)}`);
+    }
 
     return new Response(
-      JSON.stringify({ success: true, message: `Notification logged for ${email}` }),
+      JSON.stringify({ success: true, message: `Email sent to ${email}` }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

@@ -5,6 +5,7 @@ import BirthdaysSection from "@/components/landing/BirthdaysSection";
 import BulletinSection from "@/components/landing/BulletinSection";
 import EventsPreviewSection from "@/components/landing/EventsPreviewSection";
 import CTASection from "@/components/landing/CTASection";
+import PollPopup from "@/components/PollPopup";
 
 const Index = () => {
   const [isApproved, setIsApproved] = useState(false);
@@ -34,6 +35,7 @@ const Index = () => {
       <BulletinSection isApproved={isApproved} />
       <EventsPreviewSection isApproved={isApproved} />
       {!isLoggedIn && <CTASection />}
+      <PollPopup />
 
       <footer className="border-t border-border py-8 sm:py-12 text-center px-4">
         <p className="font-body text-xs sm:text-sm text-muted-foreground">

@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import AdminJobs from "@/components/admin/AdminJobs";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminAnnouncements from "@/components/admin/AdminAnnouncements";
+import AdminPolls from "@/components/admin/AdminPolls";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroAdmin from "@/assets/hero-admin.jpg";
@@ -20,6 +21,7 @@ const AdminDashboard = () => {
     { id: "announcements", label: "מודעות", icon: Megaphone },
     { id: "jobs", label: "דרושים", icon: Briefcase },
     { id: "events", label: "אירועים", icon: Calendar },
+    { id: "polls", label: "סקרים", icon: BarChart3 },
   ];
 
   return (
@@ -54,6 +56,7 @@ const AdminDashboard = () => {
         {activeTab === "announcements" && <AdminAnnouncements />}
         {activeTab === "jobs" && <AdminJobs />}
         {activeTab === "events" && <AdminEvents />}
+        {activeTab === "polls" && <AdminPolls />}
       </div>
     </>
   );

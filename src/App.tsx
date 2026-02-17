@@ -18,7 +18,6 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import Gallery from "./pages/Gallery";
-import Polls from "./pages/Polls";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +42,6 @@ const AppLayout = () => {
         <Route path="/members" element={<Members />} />
         <Route path="/events" element={<Events />} />
         <Route path="/gallery" element={<Gallery />} />
-        <Route path="/polls" element={<Polls />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
