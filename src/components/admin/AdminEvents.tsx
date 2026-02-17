@@ -3,8 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2 } from "lucide-react";
+import { Plus, Trash2, Edit2, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { he } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 const AdminEvents = () => {
   const { toast } = useToast();
@@ -60,8 +65,42 @@ const AdminEvents = () => {
         <form onSubmit={handleSubmit} className="mb-6 rounded-lg border border-border bg-card p-5 space-y-3">
           <Input placeholder="כותרת האירוע" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="bg-background" />
           <Textarea placeholder="תיאור" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required className="bg-background" />
-          <div className="grid grid-cols-2 gap-3">
-            <Input type="datetime-local" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} required className="bg-background" dir="ltr" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal bg-background border-border", !form.event_date && "text-muted-foreground")} dir="ltr">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {form.event_date ? format(new Date(form.event_date), "dd/MM/yyyy", { locale: he }) : "בחר תאריך"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={form.event_date ? new Date(form.event_date) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        const existing = form.event_date ? new Date(form.event_date) : new Date();
+                        date.setHours(existing.getHours(), existing.getMinutes());
+                        setForm({ ...form, event_date: format(date, "yyyy-MM-dd'T'HH:mm") });
+                      }
+                    }}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              <Input
+                type="time"
+                value={form.event_date ? form.event_date.slice(11, 16) : ""}
+                onChange={(e) => {
+                  const dateStr = form.event_date ? form.event_date.slice(0, 10) : format(new Date(), "yyyy-MM-dd");
+                  setForm({ ...form, event_date: `${dateStr}T${e.target.value}` });
+                }}
+                className="bg-background w-28"
+                dir="ltr"
+              />
+            </div>
             <Input placeholder="מיקום" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="bg-background" />
           </div>
           <Button type="submit" className="gradient-gold text-primary-foreground font-body">{editId ? "עדכן" : "הוסף"}</Button>
