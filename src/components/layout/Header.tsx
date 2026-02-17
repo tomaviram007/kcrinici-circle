@@ -82,6 +82,8 @@ const Header = () => {
     { to: "/jobs", label: "דרושים", protected: true },
     { to: "/members", label: "חברי המועדון", protected: true },
     { to: "/events", label: "לוח אירועים", protected: true },
+    { to: "/gallery", label: "גלריה", protected: true },
+    { to: "/polls", label: "סקרים", protected: true },
     ...(isAdmin ? [{ to: "/admin", label: "שולחן המנהל", protected: true }] : []),
   ];
 

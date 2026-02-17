@@ -18,6 +18,8 @@ import Events from "./pages/Events";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
+import Gallery from "./pages/Gallery";
+import Polls from "./pages/Polls";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,8 @@ const AppLayout = () => {
         <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
         <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
         <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
+        <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
+        <Route path="/polls" element={<ProtectedRoute><Polls /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
