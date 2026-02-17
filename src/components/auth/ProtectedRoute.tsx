@@ -69,7 +69,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
       }
     };
 
-    const check = async (session: import("@supabase/supabase-js").Session | null) => {
+    const check = async (session: import("@supabase/supabase-js").Session | null, silent = false) => {
       try {
         if (!session) {
           setResolved("no-session");
@@ -86,8 +86,9 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
           if (!alive) return;
 
           if (profileError) {
-            console.error("ProtectedRoute: profile query error:", profileError);
-            setResolved("no-session");
+            console.warn("ProtectedRoute: profile query error (will retry on token refresh):", profileError.message);
+            // Don't resolve to "no-session" — the token may have expired.
+            // Stay in current state and wait for TOKEN_REFRESHED or visibilitychange.
             return;
           }
 
@@ -106,8 +107,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
           if (!alive) return;
 
           if (rolesError) {
-            console.error("ProtectedRoute: roles query error:", rolesError);
-            setResolved("no-session");
+            console.warn("ProtectedRoute: roles query error (will retry on token refresh):", rolesError.message);
             return;
           }
 
@@ -120,8 +120,8 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
         setResolved("ok");
       } catch (err) {
-        console.error("ProtectedRoute: check failed:", err);
-        if (alive) setResolved("no-session");
+        console.warn("ProtectedRoute: check failed, waiting for refresh:", err);
+        // Don't resolve to "no-session" — wait for token refresh
       }
     };
 
@@ -134,15 +134,37 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
         setState("loading");
         check(session);
       } else if (event === "TOKEN_REFRESHED") {
-        check(session);
+        // Silent re-check: don't show loading spinner
+        check(session, true);
       }
     });
+
+    // Re-check when tab becomes visible again (handles missed auth events)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && alive) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (alive) {
+            check(session, true);
+          }
+        });
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // Safety timeout
     const timeout = setTimeout(() => {
       if (alive && !resolved.current) {
-        console.warn("ProtectedRoute: timed out after 10s, defaulting to no-session");
-        setResolved("no-session");
+        console.warn("ProtectedRoute: timed out after 10s, retrying with getSession");
+        // Instead of defaulting to no-session, try one more time
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (alive && !resolved.current) {
+            if (!session) {
+              setResolved("no-session");
+            } else {
+              check(session);
+            }
+          }
+        });
       }
     }, 10000);
 
@@ -150,6 +172,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
       alive = false;
       clearTimeout(timeout);
       subscription.unsubscribe();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [requireApproval, requireAdmin]);
 
