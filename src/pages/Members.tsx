@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Phone, Briefcase, MapPin, Pencil } from "lucide-react";
+import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
@@ -167,6 +168,19 @@ const Members = () => {
           <DialogDescription className="sr-only">עריכת פרטי הכרטיסיה שלך</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 mt-2">
+          {editMember && currentUserId && (
+            <div className="flex justify-center">
+              <AvatarUpload
+                userId={currentUserId}
+                currentUrl={editMember.avatar_url}
+                onUpload={(url) => {
+                  setEditMember((prev: any) => prev ? { ...prev, avatar_url: url } : prev);
+                  fetchMembers();
+                }}
+                size="lg"
+              />
+            </div>
+          )}
           <div>
             <Label className="font-body text-sm">שם מלא</Label>
             <Input value={editForm.full_name} onChange={(e) => setEditForm(f => ({ ...f, full_name: e.target.value }))} autoComplete="off" />
