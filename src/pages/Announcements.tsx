@@ -123,9 +123,20 @@ const Announcements = () => {
     setSaleData(EMPTY_SALE_DATA);
   };
 
+  const [creatorProfiles, setCreatorProfiles] = useState<Record<string, any>>({});
+
   const fetchItems = async () => {
     const { data } = await supabase.from("announcements").select("*").eq("is_approved", true).order("created_at", { ascending: false });
     setItems(data || []);
+
+    // Fetch creator profiles
+    const creatorIds = [...new Set((data || []).map((a: any) => a.created_by).filter(Boolean))];
+    if (creatorIds.length > 0) {
+      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, phone").in("user_id", creatorIds);
+      const map: Record<string, any> = {};
+      profiles?.forEach((p: any) => { map[p.user_id] = p; });
+      setCreatorProfiles(map);
+    }
   };
 
   const fetchUpcomingBirthdays = async () => {
@@ -252,6 +263,14 @@ const Announcements = () => {
         entries.forEach(([k, v]) => {
           msg += `\n• ${saleFieldLabel(k, item.sale_type || "general")}: ${v}`;
         });
+      }
+    }
+    // Add publisher details
+    if (item.created_by && creatorProfiles[item.created_by]) {
+      const creator = creatorProfiles[item.created_by];
+      msg += `\n\n👤 *מפרסם:* ${creator.full_name}`;
+      if (creator.phone) {
+        msg += `\n📱 ${creator.phone}`;
       }
     }
     msg += "\n\n🏘️ _מודעה מלוח המודעות של הגברים של ק. קריניצי_";
@@ -463,8 +482,11 @@ const Announcements = () => {
                 <div className="relative z-[1] mt-3 flex items-center justify-between">
                   <span className="font-body text-[11px] text-gray-400">
                     {new Date(item.created_at).toLocaleDateString("he-IL")}
+                    {item.created_by && creatorProfiles[item.created_by] && (
+                      <> • {creatorProfiles[item.created_by].full_name}</>
+                    )}
                   </span>
-                  {item.category === "sale" && isTuesday && (
+                  {item.category === "sale" && (
                     <a
                       href={`https://api.whatsapp.com/send?text=${buildShareMessage(item)}`}
                       target="_blank"

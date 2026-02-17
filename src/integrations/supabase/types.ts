@@ -132,6 +132,7 @@ export type Database = {
           description: string | null
           event_id: string | null
           id: string
+          is_approved: boolean
           title: string
           updated_at: string
         }
@@ -142,6 +143,7 @@ export type Database = {
           description?: string | null
           event_id?: string | null
           id?: string
+          is_approved?: boolean
           title: string
           updated_at?: string
         }
@@ -152,6 +154,7 @@ export type Database = {
           description?: string | null
           event_id?: string | null
           id?: string
+          is_approved?: boolean
           title?: string
           updated_at?: string
         }
@@ -483,7 +486,7 @@ export type Database = {
       is_approved_user: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "chief_editor" | "editor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -611,7 +614,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "chief_editor", "editor"],
     },
   },
 } as const
