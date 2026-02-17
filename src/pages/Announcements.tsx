@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import PageHero from "@/components/PageHero";
+import { fireConfetti } from "@/lib/confetti";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroImg from "@/assets/hero-announcements.jpg";
 
@@ -52,6 +53,7 @@ const Announcements = () => {
       return;
     }
     toast({ title: "המודעה נשלחה לאישור!", description: "המודעה תפורסם לאחר אישור מנהל המערכת." });
+    fireConfetti();
     setForm({ title: "", content: "" });
     setShowForm(false);
   };
