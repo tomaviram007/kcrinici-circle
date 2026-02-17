@@ -1,0 +1,1 @@
+ALTER TABLE public.quotes ALTER COLUMN section_height SET DEFAULT 48;

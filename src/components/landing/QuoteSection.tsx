@@ -85,7 +85,7 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
   return (
     <section
       className="relative overflow-hidden"
-      style={{ height: `${height}vw`, minHeight: "260px", maxHeight: "520px" }}
+      style={{ height: `${height}vw`, minHeight: "260px" }}
     >
       <div
         ref={bgRef}
