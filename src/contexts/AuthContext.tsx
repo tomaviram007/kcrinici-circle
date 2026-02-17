@@ -78,17 +78,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        // TOKEN_REFRESHED על אותו משתמש — אין צורך לטעון שוב
-        if (event === "TOKEN_REFRESHED" && lastFetchedUserRef.current === currentUser.id) {
+        // אם כבר טענו פרופיל לאותו משתמש — דילוג (TOKEN_REFRESHED או SIGNED_IN כפול)
+        if (lastFetchedUserRef.current === currentUser.id) {
           setLoading(false);
           return;
         }
 
-        // מניעת ריצה כפולה מקבילה
-        if (fetchingRef.current) return;
+        // מניעת ריצה כפולה מקבילה — אם כבר רץ, דילוג בלי לחסום loading
+        if (fetchingRef.current) {
+          // לא עושים return בלי setLoading(false) — ה-fetch הראשון יטפל
+          return;
+        }
         fetchingRef.current = true;
 
-        if (event !== "TOKEN_REFRESHED") setLoading(true);
+        setLoading(true);
 
         const result = await fetchProfileAndRoles(currentUser.id);
 
