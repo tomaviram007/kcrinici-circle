@@ -92,25 +92,20 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
         className="absolute inset-0 bg-cover bg-center scale-110"
         style={{ backgroundImage: `url(${bgImage})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/50 to-background" />
+      <div className="absolute inset-0 bg-black/50" />
 
       <div
         ref={ref}
-        className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
+        className="relative z-10 flex h-full flex-col items-center justify-end px-6 pb-[8%] text-center"
       >
-        <Quote className="h-8 w-8 text-gold/30 mb-6 rotate-180 opacity-0" />
         <blockquote
-          className="font-serif font-bold text-foreground leading-relaxed opacity-0"
+          className="font-serif font-bold text-white leading-relaxed opacity-0"
           style={{ fontSize: `${fontSize}px` }}
         >
           {quote.text}
         </blockquote>
-        <div className="mt-6 h-px w-12 gradient-gold opacity-40 opacity-0" />
-        <p className="mt-4 font-body text-sm sm:text-base text-gold opacity-0">
-          {quote.author}
-        </p>
-        <p className="font-body text-xs text-muted-foreground opacity-0">
-          {quote.author_title}
+        <p className="mt-4 font-body text-sm sm:text-base text-gold/80 opacity-0">
+          {quote.author}{quote.author_title ? ` — ${quote.author_title}` : ""}
         </p>
       </div>
     </section>
