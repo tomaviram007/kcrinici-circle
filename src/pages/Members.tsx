@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Phone, Briefcase, MapPin, Pencil } from "lucide-react";
+import { User, Phone, Briefcase, MapPin, Pencil, Search } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroImg from "@/assets/hero-members.jpg";
 import {
@@ -25,6 +26,8 @@ const Members = () => {
   const [editMember, setEditMember] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "" });
   const [saving, setSaving] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [filterProfession, setFilterProfession] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
 
   const fetchMembers = async () => {
@@ -101,9 +104,31 @@ const Members = () => {
         <p className="mt-1 font-body text-sm text-muted-foreground">אנשי המקצוע של השכונה</p>
         <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
       </div>
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <Input placeholder="חיפוש לפי שם, מקצוע, מומחיות..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-48 sm:w-64 h-9 font-body text-sm" autoComplete="off" />
+        <Select value={filterProfession} onValueChange={setFilterProfession}>
+          <SelectTrigger className="bg-background font-body w-36 h-9 text-sm"><SelectValue placeholder="מקצוע" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">כל המקצועות</SelectItem>
+            {[...new Set(members.map(m => m.profession).filter(Boolean))].sort().map(p => (
+              <SelectItem key={p} value={p}>{p}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
+      {(() => {
+        const filtered = members.filter((m) => {
+          if (filterProfession !== "all" && m.profession !== filterProfession) return false;
+          if (searchText.trim()) {
+            const q = searchText.trim().toLowerCase();
+            if (!(m.full_name || "").toLowerCase().includes(q) && !(m.profession || "").toLowerCase().includes(q) && !(m.expertise || "").toLowerCase().includes(q) && !(m.address || "").toLowerCase().includes(q)) return false;
+          }
+          return true;
+        });
+        return (
       <div ref={gridRef} className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-        {members.map((member) => (
+        {filtered.map((member) => (
           <div
             key={member.id}
             className={`member-card rounded-lg border border-border bg-card p-4 sm:p-6 transition-shadow hover:border-gold/20 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)] ${isOwnCard(member) ? "cursor-pointer ring-1 ring-gold/30" : ""}`}
@@ -162,6 +187,8 @@ const Members = () => {
           </div>
         ))}
       </div>
+        );
+      })()}
       {members.length === 0 && <p className="font-body text-muted-foreground">אין חברים מאושרים עדיין.</p>}
     </div>
 

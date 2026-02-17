@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
@@ -36,6 +38,8 @@ const Events = () => {
   const [eventCreator, setEventCreator] = useState<any | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [searchText, setSearchText] = useState("");
+  const [filterMonth, setFilterMonth] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -164,9 +168,34 @@ const Events = () => {
         <p className="mt-1 font-body text-sm text-muted-foreground">מפגשים קרובים לחברי המועדון</p>
         <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
       </div>
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <Input placeholder="חיפוש אירוע..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
+        <Select value={filterMonth} onValueChange={setFilterMonth}>
+          <SelectTrigger className="bg-background font-body w-32 h-9 text-sm"><SelectValue placeholder="חודש" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">כל החודשים</SelectItem>
+            {Array.from({ length: 12 }, (_, i) => (
+              <SelectItem key={i} value={i.toString()}>{new Date(2000, i).toLocaleDateString("he-IL", { month: "long" })}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
+      {(() => {
+        const filtered = events.filter((event) => {
+          if (filterMonth !== "all") {
+            const month = new Date(event.event_date).getMonth().toString();
+            if (month !== filterMonth) return false;
+          }
+          if (searchText.trim()) {
+            const q = searchText.trim().toLowerCase();
+            if (!event.title.toLowerCase().includes(q) && !event.description.toLowerCase().includes(q) && !(event.location || "").toLowerCase().includes(q)) return false;
+          }
+          return true;
+        });
+        return (
       <div ref={gridRef} className="columns-1 sm:columns-2 lg:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4">
-        {events.map((event, i) => {
+        {filtered.map((event, i) => {
           const date = new Date(event.event_date);
           const bgClass = BG_VARIANTS[i % BG_VARIANTS.length];
           const isAttending = rsvps[event.id] === "attending";
@@ -235,6 +264,8 @@ const Events = () => {
           );
         })}
       </div>
+        );
+      })()}
 
       {events.length === 0 && (
         <p className="font-body text-muted-foreground text-center py-16">אין אירועים קרובים כרגע.</p>
