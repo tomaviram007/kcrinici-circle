@@ -124,12 +124,12 @@ const Header = () => {
                 התנתקות
               </Button> :
             <>
-                <Link to="/login">
-                  <Button variant="ghost" size="sm" className="text-muted-foreground font-body text-sm">כניסה</Button>
-                </Link>
-                <Link to="/register">
-                  <Button size="sm" className="gradient-gold text-primary-foreground font-body text-sm">הצטרפות</Button>
-                </Link>
+              <Button asChild variant="ghost" size="sm" className="text-muted-foreground font-body text-sm">
+                  <Link to="/login">כניסה</Link>
+                </Button>
+                <Button asChild size="sm" className="gradient-gold text-primary-foreground font-body text-sm">
+                  <Link to="/register">הצטרפות</Link>
+                </Button>
               </>
             }
           </div>

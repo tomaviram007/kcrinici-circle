@@ -43,9 +43,7 @@ const Index = () => {
         <EventsPreviewSection isApproved={isApproved} />
       </ScrollReveal>
 
-      <ScrollReveal>
-        <QuoteSection />
-      </ScrollReveal>
+      <QuoteSection />
 
       <ScrollReveal delay={0.05}>
         <JobsPreviewSection isApproved={isApproved} />
