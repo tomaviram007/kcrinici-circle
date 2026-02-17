@@ -25,7 +25,7 @@ const AdminQuotes = () => {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({
     text: "", author: "", author_title: "",
-    background_image_url: "", section_height: 28, font_size: 24, page_location: "home",
+    background_image_url: "", section_height: 48, font_size: 24, page_location: "home",
   });
   const [adding, setAdding] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -113,7 +113,7 @@ const AdminQuotes = () => {
     setForm({
       text: q.text, author: q.author, author_title: q.author_title || "",
       background_image_url: q.background_image_url || "",
-      section_height: q.section_height || 28,
+      section_height: q.section_height || 48,
       font_size: q.font_size || 24,
       page_location: q.page_location || "home",
     });
@@ -123,7 +123,7 @@ const AdminQuotes = () => {
   const resetForm = () => {
     setAdding(false);
     setEditId(null);
-    setForm({ text: "", author: "", author_title: "", background_image_url: "", section_height: 28, font_size: 24, page_location: "home" });
+    setForm({ text: "", author: "", author_title: "", background_image_url: "", section_height: 48, font_size: 24, page_location: "home" });
   };
 
   if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
@@ -226,7 +226,7 @@ const AdminQuotes = () => {
                   {PAGE_OPTIONS.find(p => p.value === q.page_location)?.label || "דף הבית"}
                 </span>
                 <span className="font-body text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
-                  גובה: {q.section_height || 28}vw
+                  גובה: {q.section_height || 48}vw
                 </span>
                 <span className="font-body text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
                   גופן: {q.font_size || 24}px

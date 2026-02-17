@@ -78,7 +78,7 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
   if (!quote) return null;
 
-  const height = quote.section_height || 28;
+  const height = quote.section_height || 48;
   const fontSize = quote.font_size || 24;
   const bgImage = quote.background_image_url || heroQuote;
 
