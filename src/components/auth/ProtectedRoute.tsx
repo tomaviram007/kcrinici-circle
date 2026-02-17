@@ -42,8 +42,8 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
     check();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session && mounted) setState("no-session");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" && mounted) setState("no-session");
     });
 
     return () => {
