@@ -70,7 +70,7 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
           observer.disconnect();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.05 }
     );
     observer.observe(ref.current);
     return () => observer.disconnect();
@@ -96,20 +96,20 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
       <div
         ref={ref}
-        className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
+        className="relative z-10 flex h-full flex-col items-center justify-end pb-10 px-6 text-center"
       >
-        <Quote className="h-8 w-8 text-gold/30 mb-6 rotate-180 opacity-0" />
+        <Quote className="h-8 w-8 text-gold/30 mb-6 rotate-180" style={{ opacity: 0 }} />
         <blockquote
-          className="font-serif font-bold text-foreground leading-relaxed opacity-0"
-          style={{ fontSize: `${fontSize}px` }}
+          className="font-serif font-bold text-foreground leading-relaxed"
+          style={{ fontSize: `${fontSize}px`, opacity: 0 }}
         >
           {quote.text}
         </blockquote>
-        <div className="mt-6 h-px w-12 gradient-gold opacity-40 opacity-0" />
-        <p className="mt-4 font-body text-sm sm:text-base text-gold opacity-0">
+        <div className="mt-6 h-px w-12 gradient-gold opacity-40" style={{ opacity: 0 }} />
+        <p className="mt-4 font-body text-sm sm:text-base text-gold" style={{ opacity: 0 }}>
           {quote.author}
         </p>
-        <p className="font-body text-xs text-muted-foreground opacity-0">
+        <p className="font-body text-xs text-muted-foreground" style={{ opacity: 0 }}>
           {quote.author_title}
         </p>
       </div>
