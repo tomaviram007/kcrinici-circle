@@ -160,9 +160,17 @@ const AdminEvents = () => {
               <Input
                 placeholder="הדבק קישור לתמונה (URL)"
                 value={form.image_url}
-                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                onChange={(e) => setForm(f => ({ ...f, image_url: e.target.value }))}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData('text');
+                  if (pasted) {
+                    e.preventDefault();
+                    setForm(f => ({ ...f, image_url: pasted }));
+                  }
+                }}
                 className="bg-background flex-1"
                 dir="ltr"
+                autoComplete="off"
               />
               <Button
                 type="button"
