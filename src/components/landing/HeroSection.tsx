@@ -2,31 +2,41 @@ import { useEffect, useRef } from "react";
 import heroBg from "@/assets/hero-bg.jpg";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import gsap from "gsap";
 
 const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Parallax
     const handleScroll = () => {
-      if (heroRef.current) {
-        const scrolled = window.scrollY;
-        heroRef.current.style.transform = `translateY(${scrolled * 0.4}px)`;
+      if (bgRef.current) {
+        bgRef.current.style.transform = `translateY(${window.scrollY * 0.4}px)`;
       }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
+
+    // GSAP entrance
+    if (contentRef.current) {
+      const els = contentRef.current.children;
+      gsap.fromTo(els, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, stagger: 0.15, ease: "power3.out", delay: 0.3 });
+    }
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <section className="relative h-screen overflow-hidden">
+    <section className="relative h-screen overflow-hidden" ref={heroRef}>
       <div
-        ref={heroRef}
-        className="absolute inset-0 bg-cover bg-center"
+        ref={bgRef}
+        className="absolute inset-0 bg-cover bg-center scale-110"
         style={{ backgroundImage: `url(${heroBg})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
-      
-      <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+
+      <div ref={contentRef} className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
         <div className="mb-4 h-px w-24 gradient-gold opacity-60" />
         <p className="mb-4 font-body text-sm tracking-[0.3em] text-gold uppercase">
           מועדון חברים אקסקלוסיבי
