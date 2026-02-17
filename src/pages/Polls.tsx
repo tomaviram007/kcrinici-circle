@@ -9,6 +9,9 @@ import { Plus, BarChart3, ArrowRight, Trash2, X, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import type { Tables } from "@/integrations/supabase/types";
+import PageHero from "@/components/PageHero";
+import ClubAboutSection from "@/components/ClubAboutSection";
+import heroImg from "@/assets/hero-polls.jpg";
 
 type Poll = Tables<"polls">;
 type PollOption = Tables<"poll_options">;
@@ -157,6 +160,9 @@ const Polls = () => {
   }
 
   return (
+    <>
+    <PageHero image={heroImg} title="הצבעות" highlight="וסקרים" subtitle="השפיעו על החלטות המועדון — הצביעו וקבלו החלטות יחד" />
+    <ClubAboutSection />
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-12">
       <div className="mb-2">
         <Link to="/dashboard" className="inline-flex items-center gap-1 font-body text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -288,6 +294,7 @@ const Polls = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 };
 

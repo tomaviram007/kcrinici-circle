@@ -4,6 +4,9 @@ import { Calendar, MapPin, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import gsap from "gsap";
+import PageHero from "@/components/PageHero";
+import ClubAboutSection from "@/components/ClubAboutSection";
+import heroImg from "@/assets/hero-events.jpg";
 
 const GRID_SPANS = [
   "md:col-span-1 md:row-span-2",
@@ -96,6 +99,9 @@ const Events = () => {
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
 
   return (
+    <>
+    <PageHero image={heroImg} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
+    <ClubAboutSection />
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-10">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
@@ -192,6 +198,7 @@ const Events = () => {
         <p className="font-body text-muted-foreground text-center py-16">אין אירועים קרובים כרגע.</p>
       )}
     </div>
+    </>
   );
 };
 

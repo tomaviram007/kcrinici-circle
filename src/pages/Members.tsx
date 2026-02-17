@@ -2,6 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "lucide-react";
 import gsap from "gsap";
+import PageHero from "@/components/PageHero";
+import ClubAboutSection from "@/components/ClubAboutSection";
+import heroImg from "@/assets/hero-members.jpg";
 
 const Members = () => {
   const [members, setMembers] = useState<any[]>([]);
@@ -37,6 +40,9 @@ const Members = () => {
   }, [members]);
 
   return (
+    <>
+    <PageHero image={heroImg} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
+    <ClubAboutSection />
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
@@ -65,6 +71,7 @@ const Members = () => {
       </div>
       {members.length === 0 && <p className="font-body text-muted-foreground">אין חברים מאושרים עדיין.</p>}
     </div>
+    </>
   );
 };
 

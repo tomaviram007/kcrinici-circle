@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import PageHero from "@/components/PageHero";
+import ClubAboutSection from "@/components/ClubAboutSection";
+import heroImg from "@/assets/hero-announcements.jpg";
 
 const TAPE_COLORS = [
   "bg-gold/80",
@@ -79,6 +82,9 @@ const Announcements = () => {
   const canModify = (item: any) => item.created_by === userId;
 
   return (
+    <>
+    <PageHero image={heroImg} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון" />
+    <ClubAboutSection />
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8 md:px-6 md:py-12">
       {/* Header Section */}
       <div className="mb-6 sm:mb-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -173,6 +179,7 @@ const Announcements = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

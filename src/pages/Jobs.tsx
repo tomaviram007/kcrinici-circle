@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import gsap from "gsap";
+import PageHero from "@/components/PageHero";
+import ClubAboutSection from "@/components/ClubAboutSection";
+import heroImg from "@/assets/hero-jobs.jpg";
 
 const Jobs = () => {
   const { toast } = useToast();
@@ -70,6 +73,9 @@ const Jobs = () => {
   const canModify = (job: any) => job.created_by === userId;
 
   return (
+    <>
+    <PageHero image={heroImg} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה" />
+    <ClubAboutSection />
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex items-start sm:items-center justify-between gap-3">
         <div>
@@ -128,6 +134,7 @@ const Jobs = () => {
       </div>
       {jobs.length === 0 && <p className="font-body text-muted-foreground">אין משרות פעילות כרגע.</p>}
     </div>
+    </>
   );
 };
 
