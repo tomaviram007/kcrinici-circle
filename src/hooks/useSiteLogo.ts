@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+
 const DEFAULT_LOGO = "/images/default-logo.png";
 
 export interface SiteLogoSettings {
