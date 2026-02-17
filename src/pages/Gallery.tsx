@@ -37,6 +37,8 @@ const Gallery = () => {
   const [loadingPhotos, setLoadingPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
 
   // Album info dialog
   const [showAlbumInfo, setShowAlbumInfo] = useState(false);
@@ -368,8 +370,8 @@ const Gallery = () => {
                 </div>
               )}
             </div>
-            {/* Cover image preview */}
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-secondary border border-border shrink-0">
+            {/* Cover image preview with change button */}
+            <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-secondary border border-border shrink-0 group/cover">
               {selectedAlbum.cover_image_url ? (
                 <img src={selectedAlbum.cover_image_url} alt="cover" className="h-full w-full object-cover" />
               ) : (
@@ -377,6 +379,53 @@ const Gallery = () => {
                   <Image className="h-8 w-8 text-muted-foreground" />
                 </div>
               )}
+              {canManageAlbum(selectedAlbum) && (
+                <button
+                  onClick={() => coverInputRef.current?.click()}
+                  disabled={uploadingCover}
+                  className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 group-hover/cover:opacity-100 transition-opacity"
+                >
+                  {uploadingCover ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+                  ) : (
+                    <Pencil className="h-5 w-5 text-gold" />
+                  )}
+                </button>
+              )}
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file || !selectedAlbum || !userId) return;
+                  const validation = validateImageFile(file);
+                  if (!validation.valid) {
+                    toast({ ...validation.error!, variant: "destructive" });
+                    return;
+                  }
+                  setUploadingCover(true);
+                  try {
+                    const ext = file.name.split(".").pop();
+                    const path = `${userId}/${selectedAlbum.id}/cover.${ext}`;
+                    const { error: uploadErr } = await supabase.storage.from("gallery").upload(path, file, { upsert: true });
+                    if (uploadErr) throw uploadErr;
+                    const { data: { publicUrl } } = supabase.storage.from("gallery").getPublicUrl(path);
+                    const coverUrl = `${publicUrl}?t=${Date.now()}`;
+                    const { error } = await supabase.from("gallery_albums").update({ cover_image_url: coverUrl }).eq("id", selectedAlbum.id);
+                    if (error) throw error;
+                    setSelectedAlbum({ ...selectedAlbum, cover_image_url: coverUrl });
+                    toast({ title: "תמונת קאבר עודכנה!" });
+                    await fetchAlbums();
+                  } catch (err: any) {
+                    toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+                  } finally {
+                    setUploadingCover(false);
+                    if (coverInputRef.current) coverInputRef.current.value = "";
+                  }
+                }}
+              />
             </div>
           </div>
 
