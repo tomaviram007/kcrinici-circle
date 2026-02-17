@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ['"Frank Ruhl Libre"', 'serif'],
-        body: ['"Heebo"', 'sans-serif'],
+        serif: ['"Tel Aviv"', 'sans-serif'],
+        body: ['"Tel Aviv"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

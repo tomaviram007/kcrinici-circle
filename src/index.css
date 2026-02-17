@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Tel Aviv';
+  src: url('/fonts/TelAviv-ModernistBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tel Aviv';
+  src: url('/fonts/TelAviv-ModernistRegular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -59,22 +75,27 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground;
+    font-family: 'Tel Aviv', sans-serif;
+    font-weight: 400;
     direction: rtl;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Frank Ruhl Libre', serif;
+    font-family: 'Tel Aviv', sans-serif;
+    font-weight: 700;
   }
 }
 
 @layer utilities {
   .font-serif-display {
-    font-family: 'Frank Ruhl Libre', serif;
+    font-family: 'Tel Aviv', sans-serif;
+    font-weight: 700;
   }
 
   .font-body {
-    font-family: 'Heebo', sans-serif;
+    font-family: 'Tel Aviv', sans-serif;
+    font-weight: 400;
   }
 
   .text-gold {
