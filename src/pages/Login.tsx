@@ -24,9 +24,18 @@ const Login = () => {
       if (error) throw error;
       navigate("/dashboard");
     } catch (error: any) {
+      const msg = error.message?.toLowerCase() || "";
+      let description = error.message;
+      if (msg.includes("invalid login credentials")) {
+        description = "אימייל או סיסמה שגויים";
+      } else if (msg.includes("email not confirmed")) {
+        description = "האימייל לא אומת. בדוק את תיבת הדואר שלך";
+      } else if (msg.includes("too many requests")) {
+        description = "יותר מדי ניסיונות. נסה שוב בעוד כמה דקות";
+      }
       toast({
         title: "שגיאה בכניסה",
-        description: error.message,
+        description,
         variant: "destructive",
       });
     } finally {
