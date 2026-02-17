@@ -43,12 +43,35 @@ const ResetPassword = () => {
 
     setLoading(true);
     try {
+      // Ensure session is ready before updating password
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        // Try refreshing session from URL hash tokens
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          throw new Error("הסשן פג תוקף. נסה לבקש קישור איפוס חדש.");
+        }
+      }
+
       const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
+      if (error) {
+        // Handle LockManager timeout specifically
+        if (error.message?.toLowerCase().includes("lock")) {
+          // Retry once after a short delay
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const { error: retryError } = await supabase.auth.updateUser({ password });
+          if (retryError) throw retryError;
+        } else {
+          throw error;
+        }
+      }
       toast({ title: "הסיסמה עודכנה בהצלחה", description: "מעביר אותך לדף הראשי..." });
       setTimeout(() => navigate("/dashboard"), 1500);
     } catch (error: any) {
-      toast({ title: "שגיאה", description: error.message, variant: "destructive" });
+      const msg = error.message?.toLowerCase().includes("lock")
+        ? "שגיאת תזמון בדפדפן. נסה שוב בעוד רגע."
+        : error.message;
+      toast({ title: "שגיאה", description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
