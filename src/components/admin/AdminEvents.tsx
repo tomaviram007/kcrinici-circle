@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { fireConfetti } from "@/lib/confetti";
+import { validateImageFile } from "@/lib/file-validation";
 
 const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "" };
 
@@ -73,6 +74,13 @@ const AdminEvents = () => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      toast({ ...validation.error!, variant: "destructive" });
+      return;
+    }
+
     setUploading(true);
     try {
       const ext = file.name.split(".").pop();

@@ -11,6 +11,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroImg from "@/assets/hero-gallery.jpg";
+import { validateImageFile } from "@/lib/file-validation";
 
 type Album = Tables<"gallery_albums">;
 type Photo = Tables<"gallery_photos">;
@@ -97,6 +98,16 @@ const Gallery = () => {
   const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || !selectedAlbum || !userId) return;
+
+    // Validate all files first
+    for (const file of Array.from(files)) {
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        toast({ ...validation.error!, variant: "destructive" });
+        return;
+      }
+    }
+
     setUploading(true);
     try {
       for (const file of Array.from(files)) {
