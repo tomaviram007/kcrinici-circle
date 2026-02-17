@@ -50,20 +50,20 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
   const displayEvents = isApproved && events.length > 0 ? events : mockEvents;
 
   return (
-    <section className="py-24 px-6" ref={sectionRef}>
+    <section className="py-12 px-4 sm:py-24 sm:px-6" ref={sectionRef}>
       <div className="mx-auto max-w-5xl">
-        <div className="mb-16 text-center">
-          <p className="mb-2 font-body text-sm tracking-[0.3em] text-gold/70 uppercase">אירועים קרובים</p>
-          <h2 className="font-serif text-4xl font-bold text-foreground md:text-5xl">
+        <div className="mb-8 sm:mb-16 text-center">
+          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">אירועים קרובים</p>
+          <h2 className="font-serif text-2xl font-bold text-foreground sm:text-4xl md:text-5xl">
             מה <span className="text-gold">בתוכנית</span>
           </h2>
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
 
-        <div className="relative grid gap-6 md:grid-cols-3">
+        <div className="relative grid gap-4 sm:gap-6 md:grid-cols-3">
           {displayEvents.map((event, i) => (
             <div key={i} className="event-card opacity-0">
-              <div className={`rounded-lg border border-border bg-card p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)] ${!isApproved ? "select-none" : ""}`}>
+              <div className={`rounded-lg border border-border bg-card p-5 sm:p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)] ${!isApproved ? "select-none" : ""}`}>
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-secondary">
                   <Calendar className="h-6 w-6 text-gold" />
                 </div>

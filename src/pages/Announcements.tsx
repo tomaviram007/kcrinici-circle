@@ -79,15 +79,15 @@ const Announcements = () => {
   const canModify = (item: any) => item.created_by === userId;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8 md:px-6 md:py-12">
       {/* Header Section */}
-      <div className="mb-10 flex items-start justify-between">
+      <div className="mb-6 sm:mb-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <div className="flex items-baseline gap-3 mb-2">
-            <span className="font-serif text-5xl font-bold text-gold/30 md:text-6xl">01</span>
-            <span className="font-body text-sm tracking-widest text-gold uppercase">עדכונים</span>
+            <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">01</span>
+            <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">עדכונים</span>
           </div>
-          <h1 className="font-serif text-3xl font-bold text-foreground md:text-4xl">
+          <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
             לוח מודעות
           </h1>
           <p className="mt-3 font-body text-sm text-muted-foreground max-w-md leading-relaxed">

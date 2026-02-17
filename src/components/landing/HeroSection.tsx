@@ -43,17 +43,17 @@ const HeroSection = ({ isLoggedIn = false, isApproved = false }: HeroSectionProp
         <p className="mb-4 font-body text-sm tracking-[0.3em] text-gold uppercase">
           מועדון חברים אקסקלוסיבי
         </p>
-        <h1 className="font-serif text-5xl font-bold leading-tight text-foreground md:text-7xl lg:text-8xl text-shadow-luxury">
+        <h1 className="font-serif text-3xl font-bold leading-tight text-foreground sm:text-5xl md:text-7xl lg:text-8xl text-shadow-luxury">
           הגברים של
           <br />
           <span className="text-gold">ק. קריניצי</span>
         </h1>
-        <p className="mt-6 max-w-md font-body text-lg text-muted-foreground">
+        <p className="mt-4 max-w-md font-body text-sm sm:text-base md:text-lg text-muted-foreground px-4">
           קהילה סגורה של שכנים, מקצוענים ואנשי עשייה.
           <br />
           ברוכים הבאים למועדון.
         </p>
-        <div className="mt-10 flex gap-4">
+        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full px-8 sm:w-auto sm:px-0">
           {isLoggedIn && isApproved ? (
             <Link to="/dashboard">
               <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">

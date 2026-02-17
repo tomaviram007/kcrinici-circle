@@ -96,16 +96,16 @@ const Events = () => {
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="mb-10">
-        <h1 className="font-serif text-3xl font-bold text-foreground">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mb-6 sm:mb-10">
+        <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
           אירועים <span className="text-gold">ומפגשים</span>
         </h1>
         <p className="mt-1 font-body text-sm text-muted-foreground">מפגשים קרובים לחברי המועדון</p>
         <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
       </div>
 
-      <div ref={gridRef} className="grid grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[220px]">
+      <div ref={gridRef} className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3 md:auto-rows-[220px]">
         {events.map((event, i) => {
           const date = new Date(event.event_date);
           const spanClass = GRID_SPANS[i % GRID_SPANS.length];
@@ -139,8 +139,8 @@ const Events = () => {
               </div>
 
               {/* Content */}
-              <div className="relative z-10 mt-auto p-5">
-                <h3 className="font-serif text-xl font-bold text-foreground group-hover:text-gold transition-colors duration-300">
+              <div className="relative z-10 mt-auto p-3 sm:p-5">
+                <h3 className="font-serif text-base sm:text-xl font-bold text-foreground group-hover:text-gold transition-colors duration-300">
                   {event.title}
                 </h3>
                 <p className="mt-1 font-body text-sm leading-relaxed text-muted-foreground line-clamp-2">

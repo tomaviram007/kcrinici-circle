@@ -20,26 +20,26 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl font-bold text-foreground">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
           שולחן <span className="text-gold">המנהל</span>
         </h1>
         <p className="mt-1 font-body text-sm text-muted-foreground">ניהול המועדון והחברים</p>
       </div>
 
-      <div className="mb-8 flex gap-2 overflow-x-auto border-b border-border pb-px">
+      <div className="mb-6 sm:mb-8 flex gap-1 sm:gap-2 overflow-x-auto border-b border-border pb-px -mx-4 px-4 sm:mx-0 sm:px-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setSearchParams({ tab: tab.id })}
-            className={`flex items-center gap-2 whitespace-nowrap rounded-t-md px-4 py-2.5 font-body text-sm transition-colors ${
+            className={`flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-t-md px-2.5 sm:px-4 py-2 sm:py-2.5 font-body text-xs sm:text-sm transition-colors ${
               activeTab === tab.id
                 ? "border-b-2 border-gold text-gold bg-secondary/50"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <tab.icon className="h-4 w-4" />
+            <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             {tab.label}
           </button>
         ))}
