@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -11,6 +11,7 @@ import AdminEvents from "@/components/admin/AdminEvents";
 import AdminAnnouncements from "@/components/admin/AdminAnnouncements";
 import AdminPolls from "@/components/admin/AdminPolls";
 import AdminQuotes from "@/components/admin/AdminQuotes";
+import AdminLogo from "@/components/admin/AdminLogo";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroAdmin from "@/assets/hero-admin.jpg";
@@ -55,6 +56,7 @@ const AdminDashboard = () => {
     { id: "polls", label: "סקרים", icon: BarChart3 },
     { id: "gallery", label: "גלריות", icon: Image },
     { id: "quotes", label: "ציטוטים", icon: Quote },
+    { id: "logo", label: "לוגו", icon: ImageIcon },
     { id: "team", label: "צוות", icon: Shield },
   ];
 
@@ -107,6 +109,7 @@ const AdminDashboard = () => {
         {activeTab === "polls" && <AdminPolls />}
         {activeTab === "gallery" && <AdminGalleryApproval />}
         {activeTab === "quotes" && <AdminQuotes />}
+        {activeTab === "logo" && <AdminLogo />}
         {activeTab === "team" && <AdminTeam />}
       </div>
     </>

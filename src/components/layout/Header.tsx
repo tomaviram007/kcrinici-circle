@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, Shield, Menu, X, Cake } from "lucide-react";
 import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
+import { useSiteLogo } from "@/hooks/useSiteLogo";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +20,7 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMemberDialog, setShowMemberDialog] = useState(false);
   const { birthdays } = useBirthdaysThisWeek();
-
+  const logoUrl = useSiteLogo();
   const handleLogout = async () => {
     const { supabase } = await import("@/integrations/supabase/client");
     await supabase.auth.signOut();
@@ -72,9 +73,11 @@ const Header = () => {
 
           <Link
             to={user ? "/dashboard" : "/"}
-            className="font-serif text-lg font-bold text-foreground md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0">
-
-            הגברים של <span className="text-gold">ק. קריניצי</span>
+            className="flex items-center gap-2 md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0">
+            <img src={logoUrl} alt="לוגו" className="h-10 w-10 rounded-full object-contain" />
+            <span className="font-serif text-lg font-bold text-foreground hidden md:inline">
+              הגברים של <span className="text-gold">ק. קריניצי</span>
+            </span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1 mr-auto">
