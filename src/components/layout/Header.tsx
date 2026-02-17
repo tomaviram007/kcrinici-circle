@@ -20,7 +20,7 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMemberDialog, setShowMemberDialog] = useState(false);
   const { birthdays } = useBirthdaysThisWeek();
-  const logoUrl = useSiteLogo();
+  const { logoUrl, logoSize, logoText, logoPosition } = useSiteLogo();
   const handleLogout = async () => {
     const { supabase } = await import("@/integrations/supabase/client");
     await supabase.auth.signOut();
@@ -74,10 +74,10 @@ const Header = () => {
           <Link
             to={user ? "/dashboard" : "/"}
             className="flex items-center gap-2 md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0">
-            <img src={logoUrl} alt="לוגו" className="h-10 w-10 md:h-10 md:w-10 rounded-full object-contain" />
-            <span className="font-serif text-lg font-bold text-foreground hidden md:inline">
-              הגברים של <span className="text-gold">ק. קריניצי</span>
-            </span>
+            <img src={logoUrl} alt="לוגו" className="rounded-full object-contain" style={{ height: `${logoSize}px`, width: `${logoSize}px` }} />
+            {logoText && (
+              <span className="font-serif text-lg font-bold text-foreground hidden md:inline">{logoText}</span>
+            )}
           </Link>
 
           <nav className="hidden md:flex items-center gap-1 mr-auto">
