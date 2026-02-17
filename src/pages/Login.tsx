@@ -33,7 +33,11 @@ const Login = () => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      navigate("/dashboard");
+      // Wait for session to be persisted before navigating
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       const msg = error.message?.toLowerCase() || "";
       let description = error.message;
