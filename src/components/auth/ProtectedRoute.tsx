@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, forwardRef } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ const TeaserOverlay = ({ type }: { type: "no-session" | "not-approved" }) => (
   </div>
 );
 
-const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false }: ProtectedRouteProps) => {
+const ProtectedRoute = forwardRef<HTMLDivElement, ProtectedRouteProps>(({ children, requireApproval = true, requireAdmin = false }, _ref) => {
   const [state, setState] = useState<"loading" | "no-session" | "not-approved" | "not-admin" | "ok">("loading");
   const resolvedOk = useRef(false);
   const signedOutExplicitly = useRef(false);
@@ -151,6 +151,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
   }
 
   return <>{children}</>;
-};
+});
+ProtectedRoute.displayName = "ProtectedRoute";
 
 export default ProtectedRoute;
