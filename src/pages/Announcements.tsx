@@ -10,6 +10,7 @@ import { toast as sonnerToast } from "sonner";
 import PageHero from "@/components/PageHero";
 import { fireConfetti } from "@/lib/confetti";
 import ClubAboutSection from "@/components/ClubAboutSection";
+import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-announcements.jpg";
 import gsap from "gsap";
 
@@ -531,6 +532,7 @@ const Announcements = () => {
         </div>
       )}
     </div>
+    <QuoteSection page="announcements" />
     </>
   );
 };

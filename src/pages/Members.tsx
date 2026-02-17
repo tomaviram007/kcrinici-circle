@@ -6,6 +6,7 @@ import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ClubAboutSection from "@/components/ClubAboutSection";
+import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-members.jpg";
 import {
   Dialog,
@@ -291,6 +292,7 @@ const Members = () => {
         </div>
       </DialogContent>
     </Dialog>
+    <QuoteSection page="members" />
     </>
   );
 };

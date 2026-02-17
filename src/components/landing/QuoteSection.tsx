@@ -9,19 +9,27 @@ interface QuoteData {
   text: string;
   author: string;
   author_title: string;
+  background_image_url: string | null;
+  section_height: number | null;
+  font_size: number | null;
 }
 
-const QuoteSection = () => {
+interface QuoteSectionProps {
+  page?: string;
+}
+
+const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
   const [quote, setQuote] = useState<QuoteData | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchQuote = async () => {
       const { data } = await supabase
         .from("quotes")
-        .select("id, text, author, author_title")
-        .eq("is_active", true);
+        .select("id, text, author, author_title, background_image_url, section_height, font_size, page_location")
+        .eq("is_active", true)
+        .eq("page_location", page);
       if (data && data.length > 0) {
         const dayOfYear = Math.floor(
           (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
@@ -29,8 +37,15 @@ const QuoteSection = () => {
         setQuote(data[dayOfYear % data.length]);
       }
     };
-    fetch();
-  }, []);
+    fetchQuote();
+
+    const channel = supabase
+      .channel(`quotes-realtime-${page}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "quotes" }, () => { fetchQuote(); })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [page]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,12 +78,19 @@ const QuoteSection = () => {
 
   if (!quote) return null;
 
+  const height = quote.section_height || 28;
+  const fontSize = quote.font_size || 24;
+  const bgImage = quote.background_image_url || heroQuote;
+
   return (
-    <section className="relative h-[28vw] min-h-[260px] max-h-[420px] overflow-hidden">
+    <section
+      className="relative overflow-hidden"
+      style={{ height: `${height}vw`, minHeight: "260px", maxHeight: "520px" }}
+    >
       <div
         ref={bgRef}
         className="absolute inset-0 bg-cover bg-center scale-110"
-        style={{ backgroundImage: `url(${heroQuote})` }}
+        style={{ backgroundImage: `url(${bgImage})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/50 to-background" />
 
@@ -77,7 +99,10 @@ const QuoteSection = () => {
         className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
       >
         <Quote className="h-8 w-8 text-gold/30 mb-6 rotate-180 opacity-0" />
-        <blockquote className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-relaxed opacity-0">
+        <blockquote
+          className="font-serif font-bold text-foreground leading-relaxed opacity-0"
+          style={{ fontSize: `${fontSize}px` }}
+        >
           {quote.text}
         </blockquote>
         <div className="mt-6 h-px w-12 gradient-gold opacity-40 opacity-0" />
