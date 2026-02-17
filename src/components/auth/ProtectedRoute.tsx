@@ -157,14 +157,16 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
       }
     }, 5000);
 
-    // Re-check when tab becomes visible
+    // Re-check when tab becomes visible — only if session might have expired
     const handleVisibility = () => {
       if (document.visibilityState === "visible" && alive) {
+        // Silently refresh the token without resetting state to loading
         supabase.auth.getSession().then(({ data: { session } }) => {
           if (!alive) return;
-          checkAccess(session, requireApproval, requireAdmin).then((result) => {
-            if (alive) setState(result);
-          });
+          if (!session) {
+            setState("no-session");
+          }
+          // If session exists, do nothing — TOKEN_REFRESHED event will fire if needed
         });
       }
     };
