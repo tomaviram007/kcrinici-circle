@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Quote } from "lucide-react";
 import gsap from "gsap";
+import heroQuote from "@/assets/hero-quote.jpg";
 
 interface QuoteData {
   id: string;
@@ -13,6 +14,7 @@ interface QuoteData {
 const QuoteSection = () => {
   const [quote, setQuote] = useState<QuoteData | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetch = async () => {
@@ -21,7 +23,6 @@ const QuoteSection = () => {
         .select("id, text, author, author_title")
         .eq("is_active", true);
       if (data && data.length > 0) {
-        // Pick quote based on day of year for daily rotation
         const dayOfYear = Math.floor(
           (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
         );
@@ -29,6 +30,16 @@ const QuoteSection = () => {
       }
     };
     fetch();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (bgRef.current) {
+        bgRef.current.style.transform = `translateY(${window.scrollY * 0.15}px)`;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -53,16 +64,19 @@ const QuoteSection = () => {
   if (!quote) return null;
 
   return (
-    <section className="relative py-16 px-4 sm:py-24 overflow-hidden">
-      {/* Warm vignette overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-card/60 to-background" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_hsl(var(--background))_100%)]" />
+    <section className="relative h-[28vw] min-h-[260px] max-h-[420px] overflow-hidden">
+      <div
+        ref={bgRef}
+        className="absolute inset-0 bg-cover bg-center scale-110"
+        style={{ backgroundImage: `url(${heroQuote})` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/50 to-background" />
 
       <div
         ref={ref}
-        className="relative z-10 mx-auto max-w-2xl text-center flex flex-col items-center"
+        className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
       >
-        <Quote className="h-8 w-8 text-gold/30 mb-6 rotate-180" />
+        <Quote className="h-8 w-8 text-gold/30 mb-6 rotate-180 opacity-0" />
         <blockquote className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-relaxed opacity-0">
           {quote.text}
         </blockquote>
