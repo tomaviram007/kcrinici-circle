@@ -14,10 +14,21 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { userId, action } = await req.json();
+    const { userId, action, newPassword } = await req.json();
+
+    // Admin password reset action
+    if (action === "admin-reset-password" && userId && newPassword) {
+      const { error } = await supabase.auth.admin.updateUserById(userId, {
+        password: newPassword,
+      });
+      if (error) throw error;
+      return new Response(
+        JSON.stringify({ success: true, message: "Password updated" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     if (!userId || !action) {
       return new Response(JSON.stringify({ error: "Missing userId or action" }), {
@@ -75,38 +86,36 @@ serve(async (req) => {
       `;
     }
 
-    if (!resendApiKey) {
-      console.error("RESEND_API_KEY not configured");
-      return new Response(
-        JSON.stringify({ error: "Email service not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Try to send email via Resend
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (resendApiKey) {
+      const resendRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "מועדון ק. קריניצי <onboarding@resend.dev>",
+          to: [email],
+          subject,
+          html: htmlBody,
+        }),
+      });
+
+      const resendData = await resendRes.json();
+      console.log("Resend response:", JSON.stringify(resendData));
+
+      if (!resendRes.ok) {
+        console.error("Resend error:", JSON.stringify(resendData));
+      }
+    } else {
+      console.log("RESEND_API_KEY not configured, skipping email");
     }
 
-    // Send email via Resend
-    const resendRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "מועדון ק. קריניצי <onboarding@resend.dev>",
-        to: [email],
-        subject,
-        html: htmlBody,
-      }),
-    });
-
-    const resendData = await resendRes.json();
-    console.log("Resend response:", JSON.stringify(resendData));
-
-    if (!resendRes.ok) {
-      throw new Error(`Resend error: ${JSON.stringify(resendData)}`);
-    }
-
+    // Always return success - email is best-effort
     return new Response(
-      JSON.stringify({ success: true, message: `Email sent to ${email}` }),
+      JSON.stringify({ success: true, message: `Notification processed for ${email}` }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
