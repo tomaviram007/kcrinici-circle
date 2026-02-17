@@ -14,15 +14,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-const GRID_SPANS = [
-  "md:col-span-1 md:row-span-2",
-  "md:col-span-1 md:row-span-1",
-  "md:col-span-1 md:row-span-1",
-  "md:col-span-1 md:row-span-1",
-  "md:col-span-2 md:row-span-1",
-  "md:col-span-1 md:row-span-2",
-];
-
 const BG_VARIANTS = [
   "bg-secondary",
   "bg-card",
@@ -174,10 +165,9 @@ const Events = () => {
         <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
       </div>
 
-      <div ref={gridRef} className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3 md:auto-rows-[220px]">
+      <div ref={gridRef} className="columns-1 sm:columns-2 lg:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4">
         {events.map((event, i) => {
           const date = new Date(event.event_date);
-          const spanClass = GRID_SPANS[i % GRID_SPANS.length];
           const bgClass = BG_VARIANTS[i % BG_VARIANTS.length];
           const isAttending = rsvps[event.id] === "attending";
           const count = rsvpCounts[event.id] || 0;
@@ -186,18 +176,19 @@ const Events = () => {
             <div
               key={event.id}
               onClick={() => openEventPopup(event)}
-              className={`event-card group relative overflow-hidden rounded-xl border border-border cursor-pointer ${spanClass} flex flex-col justify-between transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)]`}
+              className={`event-card group relative overflow-hidden rounded-xl border border-border cursor-pointer break-inside-avoid flex flex-col justify-between transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)]`}
             >
               {event.image_url ? (
-                <div className="absolute inset-0">
-                  <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
+                <div className="relative w-full">
+                  <img src={event.image_url} alt={event.title} className="w-full h-auto object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                 </div>
               ) : (
-                <div className={`absolute inset-0 ${bgClass}`} />
+                <div className={`w-full h-40 ${bgClass}`} />
               )}
 
-              <div className="relative z-10 p-4">
+              {/* Date badge - overlaid on top-right of image */}
+              <div className="absolute top-3 right-3 z-10">
                 <div className="inline-flex flex-col items-center rounded-lg bg-background/60 backdrop-blur-sm px-3 py-2 border border-border/50">
                   <span className="font-serif text-2xl font-bold text-gold leading-none">{date.getDate()}</span>
                   <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
@@ -206,7 +197,7 @@ const Events = () => {
                 </div>
               </div>
 
-              <div className="relative z-10 mt-auto p-3 sm:p-5">
+              <div className={`p-3 sm:p-5 ${event.image_url ? '' : 'pt-14'}`}>
                 <h3 className="font-serif text-base sm:text-xl font-bold text-foreground group-hover:text-gold transition-colors duration-300">
                   {event.title}
                 </h3>
