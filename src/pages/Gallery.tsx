@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Plus, Image, ArrowRight, Trash2, X, ChevronLeft, ChevronRight, Pencil, Link2, Upload, Star, Calendar, User } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import PageHero from "@/components/PageHero";
@@ -454,6 +454,7 @@ const Gallery = () => {
           <DialogContent dir="rtl">
             <DialogHeader>
               <DialogTitle className="font-serif text-xl">הוספת תמונה <span className="text-gold">מלינק</span></DialogTitle>
+              <DialogDescription className="sr-only">הוסף תמונה חדשה מקישור</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-2">
               <div>
@@ -477,6 +478,7 @@ const Gallery = () => {
           <DialogContent dir="rtl">
             <DialogHeader>
               <DialogTitle className="font-serif text-xl">עריכת <span className="text-gold">תמונה</span></DialogTitle>
+              <DialogDescription className="sr-only">עריכת פרטי התמונה</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-2">
               {editingPhoto && (
@@ -578,6 +580,7 @@ const Gallery = () => {
         <DialogContent dir="rtl">
           <DialogHeader>
             <DialogTitle className="font-serif text-xl">אלבום חדש</DialogTitle>
+            <DialogDescription className="sr-only">יצירת אלבום תמונות חדש</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>

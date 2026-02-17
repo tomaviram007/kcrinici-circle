@@ -142,9 +142,12 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
       if (!alive) return;
       if (event === "SIGNED_OUT") {
         setResolved("no-session");
-      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+      } else if (event === "SIGNED_IN") {
         resolved.current = false;
         setState("loading");
+        check();
+      } else if (event === "TOKEN_REFRESHED") {
+        // Silent re-check without showing loading spinner
         check();
       }
     });

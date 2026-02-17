@@ -10,6 +10,8 @@ import heroImg from "@/assets/hero-events.jpg";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 
 const GRID_SPANS = [
@@ -252,6 +254,8 @@ const Events = () => {
     {/* Event Detail Popup */}
     <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
       <DialogContent className="sm:max-w-4xl p-0 overflow-hidden gap-0" dir="rtl">
+        <DialogTitle className="sr-only">פרטי אירוע</DialogTitle>
+        <DialogDescription className="sr-only">מידע מפורט על האירוע</DialogDescription>
         <button
           onClick={() => setSelectedEvent(null)}
           className="absolute left-4 top-4 z-20 rounded-full bg-background/80 backdrop-blur-sm p-1.5 border border-border hover:bg-background transition-colors"
