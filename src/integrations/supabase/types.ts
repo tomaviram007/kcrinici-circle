@@ -150,6 +150,7 @@ export type Database = {
           address: string
           avatar_url: string | null
           bio: string | null
+          birth_date: string | null
           created_at: string
           expertise: string | null
           full_name: string
@@ -164,6 +165,7 @@ export type Database = {
           address: string
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           created_at?: string
           expertise?: string | null
           full_name: string
@@ -178,6 +180,7 @@ export type Database = {
           address?: string
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           created_at?: string
           expertise?: string | null
           full_name?: string
