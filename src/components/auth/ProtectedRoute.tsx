@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -53,88 +53,86 @@ const TeaserOverlay = ({ type }: { type: "no-session" | "not-approved" }) => (
   </div>
 );
 
-// Standard function component (not forwardRef)
 const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false }: ProtectedRouteProps) => {
   const [state, setState] = useState<"loading" | "no-session" | "not-approved" | "not-admin" | "ok">("loading");
-  const resolvedOk = useRef(false);
-  const signedOutExplicitly = useRef(false);
-
-  const check = useCallback(async (mounted: () => boolean) => {
-    if (signedOutExplicitly.current) return;
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        if (!resolvedOk.current && mounted()) setState("no-session");
-        return;
-      }
-
-      if (requireApproval || requireAdmin) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("is_approved")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-
-        if (!profile?.is_approved) {
-          if (!resolvedOk.current && mounted()) setState("not-approved");
-          return;
-        }
-      }
-
-      if (requireAdmin) {
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id);
-        const admin = roles?.some((r: any) => r.role === "admin");
-        if (!admin) {
-          if (!resolvedOk.current && mounted()) setState("not-admin");
-          return;
-        }
-      }
-
-      if (mounted()) {
-        resolvedOk.current = true;
-        setState("ok");
-      }
-    } catch {
-      if (!resolvedOk.current && mounted()) setState("no-session");
-    }
-  }, [requireApproval, requireAdmin]);
 
   useEffect(() => {
     let alive = true;
-    const isMounted = () => alive;
 
-    // Safety timeout — never stay loading forever
-    const timeout = setTimeout(() => {
-      if (alive && state === "loading") {
-        setState("no-session");
+    const check = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!alive) return;
+
+        if (!session) {
+          setState("no-session");
+          return;
+        }
+
+        if (requireApproval || requireAdmin) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("is_approved")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+
+          if (!alive) return;
+
+          if (!profile?.is_approved) {
+            setState("not-approved");
+            return;
+          }
+        }
+
+        if (requireAdmin) {
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id);
+
+          if (!alive) return;
+
+          const admin = roles?.some((r: any) => r.role === "admin");
+          if (!admin) {
+            setState("not-admin");
+            return;
+          }
+        }
+
+        if (alive) setState("ok");
+      } catch (err) {
+        console.error("ProtectedRoute check failed:", err);
+        if (alive) setState("no-session");
       }
-    }, 5000);
+    };
 
-    check(isMounted);
+    // Run check immediately
+    check();
 
+    // Also listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (!alive) return;
-
       if (event === "SIGNED_OUT") {
-        signedOutExplicitly.current = true;
-        resolvedOk.current = false;
         setState("no-session");
       } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        signedOutExplicitly.current = false;
-        check(isMounted);
+        check();
       }
     });
+
+    // Safety timeout
+    const timeout = setTimeout(() => {
+      if (alive && state === "loading") {
+        console.warn("ProtectedRoute: timed out, defaulting to no-session");
+        setState("no-session");
+      }
+    }, 8000);
 
     return () => {
       alive = false;
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, [check]);
+  }, [requireApproval, requireAdmin]);
 
   if (state === "loading") return (
     <div className="flex min-h-[60vh] items-center justify-center">
@@ -147,7 +145,6 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
   if (state === "not-admin") return <Navigate to="/dashboard" replace />;
 
-  // Teaser mode: show blurred content with overlay
   if (state === "no-session" || state === "not-approved") {
     return (
       <div className="relative min-h-[60vh]">
