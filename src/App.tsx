@@ -17,12 +17,13 @@ import Members from "./pages/Members";
 import Events from "./pages/Events";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
 const AppLayout = () => {
   const location = useLocation();
-  const hideHeader = ["/login", "/register", "/pending"].includes(location.pathname);
+  const hideHeader = ["/login", "/register", "/pending", "/reset-password"].includes(location.pathname);
 
   return (
     <>
@@ -32,6 +33,7 @@ const AppLayout = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/pending" element={<PendingApproval />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
