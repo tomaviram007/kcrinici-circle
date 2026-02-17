@@ -3,8 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Gift, Lock, Send } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import gsap from "gsap";
 
@@ -14,8 +12,6 @@ interface Props {
 
 const BirthdaysPreviewSection = ({ isApproved }: Props) => {
   const [birthdays, setBirthdays] = useState<any[]>([]);
-  const [greetingTarget, setGreetingTarget] = useState<{ name: string; userId: string } | null>(null);
-  const [greetingMsg, setGreetingMsg] = useState("");
   const [sending, setSending] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -56,25 +52,18 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
     return () => observer.disconnect();
   }, [birthdays]);
 
-  const handleSendGreeting = () => {
-    if (!greetingTarget || !greetingMsg.trim()) return;
-    // Find the phone number for this user
-    const person = birthdays.find(b => b.user_id === greetingTarget.userId);
-    if (!person) return;
-    // We need phone - fetch it
+  const handleSendGreeting = (name: string, userId: string) => {
     setSending(true);
-    supabase.from("profiles").select("phone").eq("user_id", greetingTarget.userId).maybeSingle().then(({ data }) => {
+    supabase.from("profiles").select("phone").eq("user_id", userId).maybeSingle().then(({ data }) => {
       setSending(false);
       if (!data?.phone) {
         toast.error("לא נמצא מספר טלפון לחבר זה");
         return;
       }
       const cleanPhone = data.phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
-      const msg = encodeURIComponent(`היי ${greetingTarget.name} 🎂\n\n${greetingMsg}`);
+      const msg = encodeURIComponent(`היי ${name}, המון מזל טוב ליום הולדתך 🎂`);
       window.open(`https://wa.me/${cleanPhone}?text=${msg}`, "_blank");
       toast.success("מועבר לוואטסאפ! 🎉");
-      setGreetingTarget(null);
-      setGreetingMsg("");
     });
   };
 
@@ -128,7 +117,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
                       variant="outline"
                       size="sm"
                       className="mt-4 border-gold/30 text-gold hover:bg-gold/10 font-body gap-1.5"
-                      onClick={() => setGreetingTarget({ name: person.full_name, userId: person.user_id })}
+                      onClick={() => handleSendGreeting(person.full_name, person.user_id)}
                     >
                       <Send className="h-3.5 w-3.5" />
                       שלח ברכה
@@ -156,23 +145,6 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
           )}
         </div>
       </section>
-
-      {/* Greeting Dialog */}
-      <Dialog open={!!greetingTarget} onOpenChange={(open) => !open && setGreetingTarget(null)}>
-        <DialogContent className="sm:max-w-md" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-xl">🎂 ברכת יום הולדת ל{greetingTarget?.name}</DialogTitle>
-          </DialogHeader>
-          <Textarea value={greetingMsg} onChange={(e) => setGreetingMsg(e.target.value)} placeholder="כתוב ברכה חמה..." className="min-h-[120px] font-body text-base" dir="rtl" />
-          <div className="flex gap-2 justify-end mt-2">
-            <Button variant="ghost" onClick={() => setGreetingTarget(null)} className="font-body">ביטול</Button>
-            <Button onClick={handleSendGreeting} disabled={!greetingMsg.trim() || sending} className="gradient-gold text-primary-foreground font-body gap-1.5">
-              <Send className="h-4 w-4" />
-              {sending ? "שולח..." : "שלח ברכה"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
