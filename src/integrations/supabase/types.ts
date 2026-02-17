@@ -22,6 +22,9 @@ export type Database = {
           created_by: string | null
           id: string
           is_approved: boolean
+          sale_data: Json | null
+          sale_image_url: string | null
+          sale_type: string | null
           title: string
           updated_at: string
         }
@@ -32,6 +35,9 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_approved?: boolean
+          sale_data?: Json | null
+          sale_image_url?: string | null
+          sale_type?: string | null
           title: string
           updated_at?: string
         }
@@ -42,6 +48,9 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_approved?: boolean
+          sale_data?: Json | null
+          sale_image_url?: string | null
+          sale_type?: string | null
           title?: string
           updated_at?: string
         }
