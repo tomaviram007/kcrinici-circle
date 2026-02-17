@@ -69,14 +69,18 @@ const MemberRequests = () => {
   const handleApprove = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({ is_approved: true }).eq("user_id", userId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-    toast({ title: "אושר!", description: "החבר אושר בהצלחה." });
+    // Send notification
+    supabase.functions.invoke("notify-member", { body: { userId, action: "approve" } });
+    toast({ title: "אושר!", description: "החבר אושר בהצלחה והודעה נשלחה." });
     fetchProfiles();
   };
 
   const handleReject = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({ is_approved: false }).eq("user_id", userId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-    toast({ title: "נדחה", description: "הבקשה נדחתה." });
+    // Send notification
+    supabase.functions.invoke("notify-member", { body: { userId, action: "reject" } });
+    toast({ title: "נדחה", description: "הבקשה נדחתה והודעה נשלחה." });
     fetchProfiles();
   };
 
