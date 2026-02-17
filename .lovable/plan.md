@@ -1,66 +1,42 @@
 
+# Plan: Fix Dialog Warnings and Infinite Loading Issue
 
-## תיקון העלאת תמונות + דשבורד נתונים מקיף לאדמין
+## Issue 1: Console Warning - Missing DialogDescription
+The Events page dialog (`DialogContent`) is missing `DialogTitle` and `DialogDescription` accessibility attributes, which causes the React warning shown in the screenshot. The dialog uses a custom layout without the standard `DialogHeader`/`DialogTitle`/`DialogDescription` components.
 
-### 1. תיקון קישור תמונה באירועים
+**Fix:** Add visually hidden `DialogTitle` and `DialogDescription` inside the Events page dialog using `sr-only` class so they exist for accessibility but don't affect the visual layout.
 
-**הבעיה**: כשמדביקים קישור לתמונה בשדה URL, התצוגה המקדימה לא מופיעה או שהקישור לא נשמר כראוי. כמו כן, תמונות מועלות ל-bucket "avatars" במקום ל-bucket ייעודי.
-
-**הפתרון**:
-- יצירת storage bucket חדש בשם `events` (public) לתמונות אירועים
-- תיקון פונקציית ההעלאה ב-`AdminEvents.tsx` להעלות ל-bucket הנכון
-- הוספת תצוגה מקדימה (preview) שמופיעה מיד כשמדביקים URL
-- תמיכה בהדבקת קישור ישיר וגם בהעלאה מקומית
-
-### 2. נתוני סקרים מורחבים (AdminPolls)
-
-הוספת מידע מפורט לכל סקר בדשבורד:
-- פירוט הצבעות לפי אפשרות (כמה הצביעו לכל אפשרות + אחוזים)
-- Progress bar ויזואלי לכל אפשרות
-- מספר גולשים ייחודיים שהצביעו
-- תאריך יצירה ותאריך הצבעה אחרונה
-- סטטוס פופאפ (כמה צפו, כמה עוד לא)
-
-### 3. נתוני אירועים מורחבים (AdminEvents)
-
-הוספת מידע מפורט לכל אירוע:
-- רשימת מי אישר הגעה (שם מלא + מקצוע)
-- ספירת אישורי הגעה
-- אפשרות לראות רשימת מאשרים בלחיצה (Dialog/Expandable)
-- תאריך יצירה ועדכון אחרון
-
-### 4. נתוני דרושים מורחבים (AdminJobs)
-
-הוספת מידע מפורט לכל משרה:
-- תאריך פרסום
-- תאריך אישור
-- סטטוס (פעיל/לא פעיל/ממתין)
-- אפשרות לכבות/להפעיל משרה (toggle is_active)
-- ספירת משרות לפי קטגוריה
-
-### 5. סיכום סטטיסטיקות כללי
-
-הוספת שורת סטטיסטיקות בראש הדשבורד:
-- סה"כ חברים מאושרים / ממתינים
-- סה"כ אירועים קרובים
-- סה"כ משרות פעילות
-- סה"כ סקרים פעילים
+Similarly, review all other dialogs in the Gallery page (lightbox, photo edit, add-by-link) for the same issue.
 
 ---
 
-### פרטים טכניים
+## Issue 2: Pages Stuck on Loading on Second Visit
+The `ProtectedRoute` component listens to `onAuthStateChange`. When `TOKEN_REFRESHED` fires (which happens frequently, especially on navigation), the component:
+1. Resets `resolved.current = false`
+2. Sets state back to `"loading"`
+3. Calls `check()` again
 
-**Migration SQL**:
-- יצירת bucket `events` ל-storage עם RLS מתאים
+This creates a loop where every token refresh re-triggers the full loading state, causing the spinner to show and the page to appear stuck -- especially on repeat visits when the token is being refreshed.
 
-**קבצים שישתנו**:
-- `src/components/admin/AdminEvents.tsx` - תיקון upload bucket + הוספת נתוני RSVP מפורטים (join עם profiles ו-event_rsvps)
-- `src/components/admin/AdminPolls.tsx` - הוספת פירוט הצבעות לפי אפשרות עם progress bars, נתוני צפיות פופאפ
-- `src/components/admin/AdminJobs.tsx` - הוספת תאריכים, toggle is_active, ספירה לפי קטגוריה
-- `src/pages/AdminDashboard.tsx` - הוספת שורת סטטיסטיקות כללית בראש העמוד
+**Fix:** Modify the `onAuthStateChange` handler in `ProtectedRoute.tsx`:
+- If the state is already `"ok"` and a `TOKEN_REFRESHED` event fires, do NOT reset to `"loading"`. Instead, silently re-check in the background without showing the spinner.
+- Only reset to `"loading"` on `SIGNED_IN` (which indicates a new login, not a refresh).
+- On `SIGNED_OUT`, immediately set to `"no-session"` (this already works correctly).
 
-**שאילתות נתונים חדשות**:
-- אירועים: `event_rsvps` join עם `profiles` לקבלת שמות המאשרים
-- סקרים: `poll_votes` join עם `poll_options` לפירוט הצבעות, `poll_popup_views` לנתוני צפיות
-- דרושים: aggregation לפי קטגוריה וסטטוס
+---
 
+## Technical Details
+
+### File: `src/components/auth/ProtectedRoute.tsx`
+- Lines 141-149: Change the `onAuthStateChange` handler:
+  - For `TOKEN_REFRESHED`: call `check()` without resetting state to `"loading"` (silent re-validation)
+  - For `SIGNED_IN`: keep current behavior (reset + re-check)
+
+### File: `src/pages/Events.tsx`
+- Line 254: Add visually hidden `DialogTitle` and `DialogDescription` inside the `DialogContent` for accessibility compliance
+
+### File: `src/pages/Gallery.tsx`
+- Review all `Dialog` instances (lightbox, photo edit, add-by-link dialogs) and add missing `DialogTitle`/`DialogDescription` where needed
+
+### File: `src/pages/Members.tsx`
+- Verify the edit profile dialog has proper accessibility attributes
