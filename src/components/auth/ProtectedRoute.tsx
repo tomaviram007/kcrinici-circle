@@ -72,9 +72,8 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
     const check = async (session: import("@supabase/supabase-js").Session | null) => {
       try {
         if (!session) {
-          // Don't resolve immediately — wait for a potential SIGNED_IN event
-          // that may follow INITIAL_SESSION(null) after storage hydration
-          return false;
+          setResolved("no-session");
+          return true;
         }
 
         if (requireApproval || requireAdmin) {
