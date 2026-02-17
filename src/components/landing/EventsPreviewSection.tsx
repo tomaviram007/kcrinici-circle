@@ -3,7 +3,7 @@ import { Calendar, MapPin, Lock, CheckCircle, CalendarPlus, X } from "lucide-rea
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import gsap from "gsap";
 
@@ -163,6 +163,8 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
       {/* Event Detail Popup */}
       <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
         <DialogContent dir="rtl" className="p-0 overflow-hidden max-w-lg">
+          <DialogTitle className="sr-only">פרטי אירוע</DialogTitle>
+          <DialogDescription className="sr-only">מידע על האירוע</DialogDescription>
           {selectedEvent && (() => {
             const date = new Date(selectedEvent.event_date);
             const isAttending = rsvps[selectedEvent.id] === "attending";
