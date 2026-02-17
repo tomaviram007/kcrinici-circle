@@ -191,6 +191,7 @@ export type Database = {
       jobs: {
         Row: {
           category: string | null
+          company_name: string | null
           contact: string | null
           created_at: string
           created_by: string | null
@@ -198,11 +199,16 @@ export type Database = {
           id: string
           is_active: boolean
           is_approved: boolean
+          job_type: string | null
+          location: string | null
+          requirements: string | null
+          salary: string | null
           title: string
           updated_at: string
         }
         Insert: {
           category?: string | null
+          company_name?: string | null
           contact?: string | null
           created_at?: string
           created_by?: string | null
@@ -210,11 +216,16 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_approved?: boolean
+          job_type?: string | null
+          location?: string | null
+          requirements?: string | null
+          salary?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           category?: string | null
+          company_name?: string | null
           contact?: string | null
           created_at?: string
           created_by?: string | null
@@ -222,6 +233,10 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_approved?: boolean
+          job_type?: string | null
+          location?: string | null
+          requirements?: string | null
+          salary?: string | null
           title?: string
           updated_at?: string
         }
