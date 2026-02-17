@@ -162,10 +162,10 @@ const Header = () => {
 
           {/* Desktop auth buttons */}
           <div className="hidden md:flex items-center gap-3 mr-3">
-            {loading ? null : user ? (
+            {loading ? null : canAccess ? (
               <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground font-body text-sm gap-1">
                 <LogOut className="h-4 w-4" />
-                יציאה
+                התנתקות
               </Button>
             ) : (
               <>
@@ -207,14 +207,14 @@ const Header = () => {
           </nav>
 
           <div className="px-6 pb-10 flex flex-col items-center gap-3">
-            {user ? (
+            {canAccess ? (
               <Button
                 variant="ghost"
                 onClick={() => { handleLogout(); setMenuOpen(false); }}
                 className="w-full max-w-xs text-muted-foreground font-body gap-2"
               >
                 <LogOut className="h-4 w-4" />
-                יציאה
+                התנתקות
               </Button>
             ) : (
               <>
