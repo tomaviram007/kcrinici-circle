@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -13,14 +13,53 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+    // --- Authentication: verify caller identity ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const callerClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const callerId = claimsData.claims.sub;
+
+    // --- Authorization: verify caller is admin ---
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+    const { data: roles } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', callerId);
+
+    if (!roles?.some((r: any) => r.role === 'admin')) {
+      return new Response(JSON.stringify({ error: 'Admin access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // --- Process request ---
     const { userId, action, newPassword } = await req.json();
 
     // Admin password reset action
     if (action === "admin-reset-password" && userId && newPassword) {
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
         password: newPassword,
       });
       if (error) throw error;
@@ -37,7 +76,7 @@ serve(async (req) => {
       });
     }
 
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
@@ -45,7 +84,7 @@ serve(async (req) => {
       });
     }
 
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("full_name")
       .eq("user_id", userId)
@@ -113,7 +152,6 @@ serve(async (req) => {
       console.log("RESEND_API_KEY not configured, skipping email");
     }
 
-    // Always return success - email is best-effort
     return new Response(
       JSON.stringify({ success: true, message: `Notification processed for ${email}` }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

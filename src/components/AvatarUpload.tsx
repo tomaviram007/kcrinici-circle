@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, User } from "lucide-react";
+import { validateImageFile } from "@/lib/file-validation";
 
 interface AvatarUploadProps {
   userId: string;
@@ -32,8 +33,9 @@ const AvatarUpload = ({ userId, currentUrl, onUpload, size = "md" }: AvatarUploa
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ title: "הקובץ גדול מדי", description: "גודל מקסימלי: 2MB", variant: "destructive" });
+    const validation = validateImageFile(file, 2);
+    if (!validation.valid) {
+      toast({ ...validation.error!, variant: "destructive" });
       return;
     }
 
