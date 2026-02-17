@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -163,6 +164,7 @@ const Members = () => {
       <DialogContent className="sm:max-w-md" dir="rtl">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">עריכת <span className="text-gold">הכרטיסיה שלך</span></DialogTitle>
+          <DialogDescription className="sr-only">עריכת פרטי הכרטיסיה שלך</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 mt-2">
           <div>
