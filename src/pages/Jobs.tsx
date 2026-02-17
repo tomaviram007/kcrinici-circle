@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List } from "lucide-react";
+import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +32,9 @@ const Jobs = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [selectedJob, setSelectedJob] = useState<any | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [filterJobType, setFilterJobType] = useState("all");
+  const [filterMonth, setFilterMonth] = useState("all");
   const cardsRef = useRef<HTMLDivElement>(null);
 
   const fetchJobs = async () => {
@@ -81,34 +84,43 @@ const Jobs = () => {
     <PageHero image={heroImg} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה" />
     <ClubAboutSection />
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mb-6 sm:mb-8 flex items-start sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="font-serif text-xl font-bold text-foreground sm:text-3xl">
-            הזדמנויות <span className="text-gold">בשכונה</span>
-          </h1>
-          <p className="mt-1 font-body text-sm text-muted-foreground">לוח דרושים אקסקלוסיבי לחברי המועדון</p>
-          <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center rounded-md border border-border overflow-hidden">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`p-2 transition-colors ${viewMode === "grid" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`}
-              title="תצוגת רשת"
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`p-2 transition-colors ${viewMode === "list" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`}
-              title="תצוגת רשימה"
-            >
-              <List className="h-4 w-4" />
-            </button>
+      <div className="mb-6 sm:mb-8 flex flex-col gap-4">
+        <div className="flex items-start sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="font-serif text-xl font-bold text-foreground sm:text-3xl">
+              הזדמנויות <span className="text-gold">בשכונה</span>
+            </h1>
+            <p className="mt-1 font-body text-sm text-muted-foreground">לוח דרושים אקסקלוסיבי לחברי המועדון</p>
+            <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
           </div>
-          <Button size="sm" onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
-            <Plus className="h-4 w-4 ml-1" /> פרסם משרה
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center rounded-md border border-border overflow-hidden">
+              <button onClick={() => setViewMode("grid")} className={`p-2 transition-colors ${viewMode === "grid" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`} title="תצוגת רשת"><LayoutGrid className="h-4 w-4" /></button>
+              <button onClick={() => setViewMode("list")} className={`p-2 transition-colors ${viewMode === "list" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`} title="תצוגת רשימה"><List className="h-4 w-4" /></button>
+            </div>
+            <Button size="sm" onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
+              <Plus className="h-4 w-4 ml-1" /> פרסם משרה
+            </Button>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Input placeholder="חיפוש חופשי..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
+          <Select value={filterJobType} onValueChange={setFilterJobType}>
+            <SelectTrigger className="bg-background font-body w-36 h-9 text-sm"><SelectValue placeholder="סוג משרה" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">כל הסוגים</SelectItem>
+              {JOB_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={filterMonth} onValueChange={setFilterMonth}>
+            <SelectTrigger className="bg-background font-body w-32 h-9 text-sm"><SelectValue placeholder="חודש" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">כל החודשים</SelectItem>
+              {Array.from({ length: 12 }, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>{new Date(2000, i).toLocaleDateString("he-IL", { month: "long" })}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -143,6 +155,20 @@ const Jobs = () => {
         </form>
       )}
 
+      {(() => {
+        const filtered = jobs.filter((job) => {
+          if (filterJobType !== "all" && job.job_type !== filterJobType) return false;
+          if (filterMonth !== "all") {
+            const month = new Date(job.created_at).getMonth().toString();
+            if (month !== filterMonth) return false;
+          }
+          if (searchText.trim()) {
+            const q = searchText.trim().toLowerCase();
+            if (!job.title.toLowerCase().includes(q) && !job.description.toLowerCase().includes(q) && !(job.company_name || "").toLowerCase().includes(q) && !(job.location || "").toLowerCase().includes(q)) return false;
+          }
+          return true;
+        });
+        return (
       <div
         ref={cardsRef}
         className={
@@ -151,7 +177,7 @@ const Jobs = () => {
             : "grid gap-4 grid-cols-1"
         }
       >
-        {jobs.map((job) => (
+        {filtered.map((job) => (
           <div
             key={job.id}
             onClick={() => setSelectedJob(job)}
@@ -190,6 +216,8 @@ const Jobs = () => {
           </div>
         ))}
       </div>
+        );
+      })()}
       {jobs.length === 0 && <p className="font-body text-muted-foreground">אין משרות פעילות כרגע.</p>}
 
       {/* Job Detail Dialog */}

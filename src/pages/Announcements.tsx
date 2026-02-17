@@ -109,6 +109,8 @@ const Announcements = () => {
   const [saleType, setSaleType] = useState("");
   const [saleData, setSaleData] = useState<Record<string, string>>(EMPTY_SALE_DATA);
   const [filter, setFilter] = useState("all");
+  const [searchText, setSearchText] = useState("");
+  const [filterMonth, setFilterMonth] = useState("all");
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<BirthdayMember[]>([]);
   const [birthdayToastShown, setBirthdayToastShown] = useState(false);
   const birthdayRef = useRef<HTMLDivElement>(null);
@@ -227,7 +229,20 @@ const Announcements = () => {
     setShowForm(false);
   };
 
-  const filteredItems = filter === "all" ? items : items.filter((i) => i.category === filter);
+  const filteredItems = items.filter((i) => {
+    if (filter !== "all" && i.category !== filter) return false;
+    if (filterMonth !== "all") {
+      const month = new Date(i.created_at).getMonth().toString();
+      if (month !== filterMonth) return false;
+    }
+    if (searchText.trim()) {
+      const q = searchText.trim().toLowerCase();
+      const creator = i.created_by && creatorProfiles[i.created_by];
+      const creatorName = creator?.full_name?.toLowerCase() || "";
+      if (!i.title.toLowerCase().includes(q) && !i.content.toLowerCase().includes(q) && !creatorName.includes(q)) return false;
+    }
+    return true;
+  });
 
   const buildWhatsAppUrl = (name: string, phone: string) => {
     const cleanPhone = phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
@@ -341,18 +356,23 @@ const Announcements = () => {
       )}
 
       {/* Header + Filters */}
-      <div className="mb-6 sm:mb-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div>
-          <div className="flex items-baseline gap-3 mb-2">
-            <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">01</span>
-            <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">עדכונים</span>
+      <div className="mb-6 sm:mb-10 flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <div className="flex items-baseline gap-3 mb-2">
+              <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">01</span>
+              <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">עדכונים</span>
+            </div>
+            <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">לוח מודעות</h1>
+            <p className="mt-3 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
+              המודעות שלנו נועד לתת לכם את המידע באופן רציף והכי עדכני שאפשר שלא תפספסו שום עדכון
+            </p>
           </div>
-          <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">לוח מודעות</h1>
-          <p className="mt-3 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
-            המודעות שלנו נועד לתת לכם את המידע באופן רציף והכי עדכני שאפשר שלא תפספסו שום עדכון
-          </p>
+          <Button size="sm" onClick={() => { setShowForm(!showForm); resetForm(); }} className="gradient-gold text-primary-foreground font-body self-start">
+            <Plus className="h-4 w-4 ml-1" /> פרסם מודעה
+          </Button>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center rounded-md border border-border overflow-hidden">
             {CATEGORIES.map((cat) => (
               <button key={cat.value} onClick={() => setFilter(cat.value)}
@@ -362,9 +382,16 @@ const Announcements = () => {
               </button>
             ))}
           </div>
-          <Button size="sm" onClick={() => { setShowForm(!showForm); resetForm(); }} className="gradient-gold text-primary-foreground font-body">
-            <Plus className="h-4 w-4 ml-1" /> פרסם מודעה
-          </Button>
+          <Input placeholder="חיפוש חופשי..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
+          <Select value={filterMonth} onValueChange={setFilterMonth}>
+            <SelectTrigger className="bg-background font-body w-32 h-9 text-sm"><SelectValue placeholder="חודש" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">כל החודשים</SelectItem>
+              {Array.from({ length: 12 }, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>{new Date(2000, i).toLocaleDateString("he-IL", { month: "long" })}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

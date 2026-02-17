@@ -56,26 +56,26 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
     return () => observer.disconnect();
   }, [birthdays]);
 
-  const handleSendGreeting = async () => {
+  const handleSendGreeting = () => {
     if (!greetingTarget || !greetingMsg.trim()) return;
+    // Find the phone number for this user
+    const person = birthdays.find(b => b.user_id === greetingTarget.userId);
+    if (!person) return;
+    // We need phone - fetch it
     setSending(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not logged in");
-      const { data: senderProfile } = await supabase.from("profiles").select("full_name").eq("user_id", session.user.id).maybeSingle();
-      await supabase.from("announcements").insert({
-        title: `🎂 ברכת יום הולדת ל${greetingTarget.name}`,
-        content: `${greetingMsg}\n\n— ${senderProfile?.full_name || "חבר מועדון"}`,
-        created_by: session.user.id,
-      });
-      toast.success("הברכה נשלחה בהצלחה! 🎉");
+    supabase.from("profiles").select("phone").eq("user_id", greetingTarget.userId).maybeSingle().then(({ data }) => {
+      setSending(false);
+      if (!data?.phone) {
+        toast.error("לא נמצא מספר טלפון לחבר זה");
+        return;
+      }
+      const cleanPhone = data.phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
+      const msg = encodeURIComponent(`היי ${greetingTarget.name} 🎂\n\n${greetingMsg}`);
+      window.open(`https://wa.me/${cleanPhone}?text=${msg}`, "_blank");
+      toast.success("מועבר לוואטסאפ! 🎉");
       setGreetingTarget(null);
       setGreetingMsg("");
-    } catch {
-      toast.error("שגיאה בשליחת הברכה");
-    } finally {
-      setSending(false);
-    }
+    });
   };
 
   const formatHebrewDate = (dateStr: string) => {
