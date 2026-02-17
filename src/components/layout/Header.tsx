@@ -51,7 +51,7 @@ const Header = () => {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center px-4 py-3 md:px-6 min-h-[3rem] md:min-h-0 relative">
+        <div className="mx-auto flex max-w-6xl items-center px-4 py-[5vw] md:py-3 md:px-6 relative">
           <button
             className="md:hidden text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 z-10"
             onClick={() => setMenuOpen(!menuOpen)}
