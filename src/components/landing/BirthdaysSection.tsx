@@ -1,6 +1,11 @@
 import { useEffect, useRef } from "react";
-import { Gift } from "lucide-react";
+import { Gift, Lock } from "lucide-react";
+import { Link } from "react-router-dom";
 import gsap from "gsap";
+
+interface Props {
+  isApproved?: boolean;
+}
 
 const mockBirthdays = [
   { name: "דוד כהן", date: "18 בפברואר", profession: "אדריכל" },
@@ -16,36 +21,24 @@ const createConfetti = (container: HTMLElement) => {
     container.appendChild(el);
     gsap.fromTo(el,
       { opacity: 1, x: container.offsetWidth / 2, y: container.offsetHeight / 2 },
-      {
-        x: Math.random() * container.offsetWidth,
-        y: -50 - Math.random() * 200,
-        rotation: Math.random() * 720,
-        opacity: 0,
-        duration: 1.5 + Math.random(),
-        ease: "power2.out",
-        delay: Math.random() * 0.5,
-        onComplete: () => el.remove(),
-      }
+      { x: Math.random() * container.offsetWidth, y: -50 - Math.random() * 200, rotation: Math.random() * 720, opacity: 0, duration: 1.5 + Math.random(), ease: "power2.out", delay: Math.random() * 0.5, onComplete: () => el.remove() }
     );
   }
 };
 
-const BirthdaysSection = () => {
+const BirthdaysSection = ({ isApproved = false }: Props) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const confettiTriggered = useRef(false);
 
   useEffect(() => {
     if (!sectionRef.current) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const cards = sectionRef.current?.querySelectorAll(".birthday-card");
-            if (cards) {
-              gsap.fromTo(cards, { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.15, ease: "back.out(1.3)" });
-            }
-            if (!confettiTriggered.current && sectionRef.current) {
+            if (cards) gsap.fromTo(cards, { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.15, ease: "back.out(1.3)" });
+            if (!confettiTriggered.current && sectionRef.current && isApproved) {
               confettiTriggered.current = true;
               setTimeout(() => createConfetti(sectionRef.current!), 600);
             }
@@ -54,10 +47,9 @@ const BirthdaysSection = () => {
       },
       { threshold: 0.3 }
     );
-
     observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [isApproved]);
 
   return (
     <section className="relative py-24 px-6 overflow-hidden" ref={sectionRef}>
@@ -70,20 +62,26 @@ const BirthdaysSection = () => {
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="relative grid gap-6 md:grid-cols-3">
           {mockBirthdays.map((person, i) => (
-            <div
-              key={i}
-              className="birthday-card opacity-0 rounded-lg border border-gold/20 bg-card p-8 text-center glow-gold hover:border-gold/40 transition-colors"
-            >
+            <div key={i} className="birthday-card opacity-0 rounded-lg border border-gold/20 bg-card p-8 text-center glow-gold hover:border-gold/40 transition-colors">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold/10">
                 <Gift className="h-7 w-7 text-gold" />
               </div>
-              <h3 className="font-serif text-xl font-bold text-foreground">{person.name}</h3>
-              <p className="mt-1 font-body text-sm text-gold">{person.date}</p>
-              <p className="mt-2 font-body text-sm text-muted-foreground">{person.profession}</p>
+              <h3 className={`font-serif text-xl font-bold text-foreground ${!isApproved ? "blur-[3px]" : ""}`}>{person.name}</h3>
+              <p className={`mt-1 font-body text-sm text-gold ${!isApproved ? "blur-[4px]" : ""}`}>{person.date}</p>
+              <p className={`mt-2 font-body text-sm text-muted-foreground ${!isApproved ? "blur-[4px]" : ""}`}>{person.profession}</p>
             </div>
           ))}
+
+          {!isApproved && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Link to="/register" className="flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur-sm px-6 py-3 font-body text-sm text-gold hover:bg-gold/10 transition-colors">
+                <Lock className="h-4 w-4" />
+                הצטרף כדי לראות
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </section>
