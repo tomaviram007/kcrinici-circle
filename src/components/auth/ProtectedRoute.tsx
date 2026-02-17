@@ -69,15 +69,14 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (!alive) return;
 
-      // ONLY redirect on explicit user-initiated sign out
       if (event === "SIGNED_OUT") {
         signedOutExplicitly.current = true;
         resolvedOk.current = false;
         setState("no-session");
+      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        signedOutExplicitly.current = false;
+        check(isMounted);
       }
-
-      // Ignore ALL other events once resolved — token refreshes,
-      // SIGNED_IN re-fires, etc. should never kick the user out.
     });
 
     return () => {
