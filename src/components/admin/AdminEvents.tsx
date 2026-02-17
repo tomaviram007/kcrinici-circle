@@ -111,12 +111,17 @@ const AdminEvents = () => {
                 className="bg-background flex-1"
                 dir="ltr"
               />
-              <label className="cursor-pointer">
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                <Button type="button" variant="outline" size="sm" disabled={uploading} className="h-10 border-border" asChild>
-                  <span>{uploading ? "מעלה..." : "העלה"}</span>
-                </Button>
-              </label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={uploading}
+                className="h-10 border-border shrink-0"
+                onClick={() => document.getElementById('event-image-upload')?.click()}
+              >
+                {uploading ? "מעלה..." : "העלה"}
+              </Button>
+              <input id="event-image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </div>
             {form.image_url && (
               <div className="relative w-32 h-20 rounded-md overflow-hidden border border-border">
