@@ -1,0 +1,1 @@
+ALTER TABLE public.announcements ADD COLUMN is_sold boolean NOT NULL DEFAULT false;
