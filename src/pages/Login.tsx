@@ -31,11 +31,9 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      // Wait for session to be persisted before navigating
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      if (data.session) {
         navigate("/dashboard");
       }
     } catch (error: any) {
