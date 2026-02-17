@@ -1,29 +1,26 @@
 
 
-# תיקון הדשבורד התקוע על "טוען..."
+# תוכנית תיקון - שיפור חוויית הטעינה והניווט
 
-## שורש הבעיה
+## מצב נוכחי
 
-ProtectedRoute ו-Header שניהם תלויים בשאילתות לטבלת profiles ו-user_roles. אם שאילתה נכשלת או נתקעת (שגיאת רשת, timeout, בעיית RLS), אין טיפול בשגיאות ולכן:
-- ProtectedRoute נשאר על מצב "loading" לנצח (אין try-catch)
-- Header לא מציג תפריט כי `loading` נשאר `true` (ה-`.then()` לא רץ אם יש שגיאה)
+התיקונים הקודמים (timeout, try-catch, finally) **עובדים** - אחרי 10 שניות מופנה לדף הכניסה. אבל:
+- 10 שניות זה ארוך מדי לחכות
+- ההדר מראה כפתור "יציאה" גם כשאין session תקף (race condition)
+- כשהשאילתות נכשלות, אין הודעה למשתמש
 
-## תוכנית התיקון
+## שינויים מוצעים
 
-### 1. ProtectedRoute - הוספת טיפול בשגיאות ו-timeout
-- עטיפת כל הלוגיקה ב-try-catch
-- אם יש שגיאה, הפניה ל-login במקום תקיעה על "טוען..."
-- הוספת timeout של 10 שניות - אם לא מתקבלת תשובה, הפניה ל-login
-- שימוש ב-`onAuthStateChange` כדי להאזין לשינויים בזמן אמת
+### 1. הקטנת Timeout ב-ProtectedRoute
+- הורדה מ-10 שניות ל-5 שניות
+- הוספת מסך טעינה יותר יפה (spinner במקום טקסט "טוען...")
 
-### 2. Header - תיקון מצב הטעינה
-- שימוש ב-`.finally()` במקום `.then()` כדי להבטיח ש-`setLoading(false)` תמיד ירוץ
-- הוספת timeout - אחרי 5 שניות, הצגת התפריט בכל מקרה
-- הצגת תפריט בסיסי (דף הבית + יציאה) גם אם הטעינה נכשלת
+### 2. תיקון Header - מניעת הצגת כפתור יציאה מוקדם מדי
+- לא להציג כפתור "יציאה" עד שה-session אומת בפועל
+- הוספת בדיקה ש-user קיים **וגם** loading הסתיים לפני הצגת אלמנטים
 
-### 3. Dashboard - הוספת טיפול בשגיאות
-- עטיפת הקריאה ל-profiles ב-try-catch
-- שימוש ב-user_metadata כ-fallback אם הקריאה ל-DB נכשלת
+### 3. שיפור הודעות שגיאה בכניסה
+- תרגום הודעות השגיאה של Supabase לעברית ("Invalid login credentials" -> "אימייל או סיסמה שגויים")
 
 ---
 
@@ -33,30 +30,24 @@ ProtectedRoute ו-Header שניהם תלויים בשאילתות לטבלת pro
 
 | קובץ | שינוי |
 |---|---|
-| `src/components/auth/ProtectedRoute.tsx` | try-catch, timeout 10 שניות, fallback ל-login |
-| `src/components/layout/Header.tsx` | finally() במקום then(), timeout 5 שניות, תפריט בסיסי כ-fallback |
-| `src/pages/Dashboard.tsx` | try-catch עם fallback ל-user_metadata |
+| `src/components/auth/ProtectedRoute.tsx` | timeout 5 שניות, spinner יפה |
+| `src/components/layout/Header.tsx` | הצגת כפתורים רק אחרי שloading נגמר |
+| `src/pages/Login.tsx` | תרגום הודעות שגיאה |
 
-### לוגיקת ProtectedRoute המתוקנת
+### Header - לוגיקה מתוקנת
 
-```text
-1. התחלה: state = "loading"
-2. getSession() עם timeout 10 שניות
-3. try:
-   a. אם אין session -> redirect ל-login
-   b. שאילתת profiles עם timeout
-   c. אם לא מאושר -> redirect ל-pending
-   d. (אם צריך) בדיקת admin role
-   e. state = "ok"
-4. catch: redirect ל-login (במקום תקיעה)
-5. timeout: אחרי 10 שניות -> redirect ל-login
-```
-
-### לוגיקת Header המתוקנת
+כרגע ההדר מציג כפתור "יציאה" מיד כש-user מוגדר, גם אם loading עדיין true. התיקון: להציג את כל ההדר רק אחרי ש-loading נגמר.
 
 ```text
-1. הגדרת onAuthStateChange BEFORE getSession
-2. fetchUserData עם finally(() => setLoading(false))
-3. timeout 5 שניות -> setLoading(false) בכל מקרה
-4. אם user קיים אבל isApproved/isAdmin נכשלו -> הצגת תפריט מינימלי
+אם loading -> הצגת לוגו בלבד (בלי כפתורים)
+אם !loading && user -> הצגת תפריט + יציאה
+אם !loading && !user -> הצגת כניסה + הצטרפות
 ```
+
+### ProtectedRoute - timeout קצר יותר
+
+```text
+timeout: 10 שניות -> 5 שניות
+מסך טעינה: spinner מונפש במקום טקסט רגיל
+```
+
