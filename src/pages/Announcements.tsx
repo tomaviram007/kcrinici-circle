@@ -47,7 +47,17 @@ const Announcements = () => {
     e.preventDefault();
     if (!form.title.trim() || !form.content.trim()) return;
 
-    const { error } = await supabase.from("announcements").insert({ title: form.title.trim(), content: form.content.trim() });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({ title: "שגיאה", description: "יש להתחבר כדי לפרסם מודעה", variant: "destructive" });
+      return;
+    }
+
+    const { error } = await supabase.from("announcements").insert({
+      title: form.title.trim(),
+      content: form.content.trim(),
+      created_by: session.user.id,
+    });
     if (error) {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
       return;
