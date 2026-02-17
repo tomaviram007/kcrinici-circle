@@ -8,6 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, Image, ArrowRight, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
+import PageHero from "@/components/PageHero";
+import ClubAboutSection from "@/components/ClubAboutSection";
+import heroImg from "@/assets/hero-gallery.jpg";
 
 type Album = Tables<"gallery_albums">;
 type Photo = Tables<"gallery_photos">;
@@ -243,6 +246,9 @@ const Gallery = () => {
 
   // Albums list
   return (
+    <>
+    <PageHero image={heroImg} title="גלריית" highlight="תמונות" subtitle="רגעים מיוחדים מאירועי ומפגשי המועדון" />
+    <ClubAboutSection />
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
       <div className="mb-2">
         <Link to="/dashboard" className="inline-flex items-center gap-1 font-body text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -325,6 +331,7 @@ const Gallery = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 };
 

@@ -40,7 +40,7 @@ const Header = () => {
   };
 
   useEffect(() => {
-    const loadingTimeout = setTimeout(() => setLoading(false), 5000);
+    const loadingTimeout = setTimeout(() => setLoading(false), 2000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
@@ -131,7 +131,7 @@ const Header = () => {
           </Link>
 
           {/* Desktop Nav */}
-          {!loading && (
+          {(
             <nav className="hidden md:flex items-center gap-1 mr-auto">
               {navLinks.map((link) => (
                 <Link
