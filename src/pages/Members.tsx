@@ -23,7 +23,7 @@ const Members = () => {
   const [members, setMembers] = useState<any[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [editMember, setEditMember] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "" });
+  const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "" });
   const [saving, setSaving] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +57,7 @@ const Members = () => {
       bio: member.bio || "",
       phone: member.phone || "",
       address: member.address || "",
+      birth_date: member.birth_date || "",
     });
   };
 
@@ -70,6 +71,7 @@ const Members = () => {
       bio: editForm.bio,
       phone: editForm.phone,
       address: editForm.address,
+      birth_date: editForm.birth_date || null,
     }).eq("id", editMember.id);
     setSaving(false);
 
@@ -162,14 +164,14 @@ const Members = () => {
 
     {/* Edit Profile Dialog */}
     <Dialog open={!!editMember} onOpenChange={(open) => !open && setEditMember(null)}>
-      <DialogContent className="sm:max-w-md" dir="rtl">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">עריכת <span className="text-gold">הכרטיסיה שלך</span></DialogTitle>
           <DialogDescription className="sr-only">עריכת פרטי הכרטיסיה שלך</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 mt-2">
           {editMember && currentUserId && (
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-2">
               <AvatarUpload
                 userId={currentUserId}
                 currentUrl={editMember.avatar_url}
@@ -179,6 +181,7 @@ const Members = () => {
                 }}
                 size="lg"
               />
+              <span className="text-xs text-muted-foreground font-body">לחץ על התמונה כדי לשנות</span>
             </div>
           )}
           <div>
@@ -204,6 +207,10 @@ const Members = () => {
           <div>
             <Label className="font-body text-sm">כתובת</Label>
             <Input value={editForm.address} onChange={(e) => setEditForm(f => ({ ...f, address: e.target.value }))} autoComplete="off" />
+          </div>
+          <div>
+            <Label className="font-body text-sm">תאריך לידה</Label>
+            <Input type="date" value={editForm.birth_date} onChange={(e) => setEditForm(f => ({ ...f, birth_date: e.target.value }))} dir="ltr" autoComplete="off" />
           </div>
           <Button onClick={handleSave} disabled={saving} className="w-full gradient-gold text-primary-foreground font-body">
             {saving ? "שומר..." : "עדכן כרטיסיה"}
