@@ -99,12 +99,21 @@ const AdminEvents = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...form, image_url: form.image_url || null };
+    const { data: { session } } = await supabase.auth.getSession();
+    const payload = { ...form, image_url: form.image_url || null, created_by: session?.user?.id || null };
     if (editId) {
-      await supabase.from("events").update(payload).eq("id", editId);
+      const { error } = await supabase.from("events").update(payload).eq("id", editId);
+      if (error) {
+        toast({ title: "שגיאה בעדכון", description: error.message, variant: "destructive" });
+        return;
+      }
       toast({ title: "עודכן!" });
     } else {
-      await supabase.from("events").insert(payload);
+      const { error } = await supabase.from("events").insert(payload);
+      if (error) {
+        toast({ title: "שגיאה בהוספה", description: error.message, variant: "destructive" });
+        return;
+      }
       toast({ title: "נוסף!" });
       fireConfetti();
     }
