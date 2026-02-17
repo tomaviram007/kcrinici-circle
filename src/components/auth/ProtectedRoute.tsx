@@ -53,6 +53,7 @@ const TeaserOverlay = ({ type }: { type: "no-session" | "not-approved" }) => (
   </div>
 );
 
+// Standard function component (not forwardRef)
 const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false }: ProtectedRouteProps) => {
   const [state, setState] = useState<"loading" | "no-session" | "not-approved" | "not-admin" | "ok">("loading");
   const resolvedOk = useRef(false);
