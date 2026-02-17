@@ -11,6 +11,7 @@ import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDow
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { fireConfetti } from "@/lib/confetti";
 
 const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "" };
 
@@ -97,6 +98,7 @@ const AdminEvents = () => {
     } else {
       await supabase.from("events").insert(payload);
       toast({ title: "נוסף!" });
+      fireConfetti();
     }
     setForm(EMPTY_FORM);
     setShowForm(false);

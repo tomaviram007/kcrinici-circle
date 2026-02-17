@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Progress } from "@/components/ui/progress";
 import { Plus, Trash2, X, Eye, EyeOff, Pause, Play, RefreshCw, BarChart3, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { fireConfetti } from "@/lib/confetti";
 
 interface OptionVotes {
   id: string;
@@ -124,6 +125,7 @@ const AdminPolls = () => {
       if (optErr) throw optErr;
 
       toast({ title: "הסקר נוצר בהצלחה!" });
+      fireConfetti();
       setNewTitle(""); setNewDesc(""); setNewOptions(["", ""]); setNewMaxDisplays(2);
       setShowCreate(false);
       await fetchPolls();
