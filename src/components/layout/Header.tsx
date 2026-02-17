@@ -77,13 +77,12 @@ const Header = () => {
 
   const navLinks = [
     { to: "/", label: "דף הבית", protected: false },
-    { to: "/dashboard", label: "ראשי", protected: true },
-    { to: "/announcements", label: "לוח מודעות", protected: true },
-    { to: "/jobs", label: "דרושים", protected: true },
-    { to: "/members", label: "חברי המועדון", protected: true },
-    { to: "/events", label: "לוח אירועים", protected: true },
-    { to: "/gallery", label: "גלריה", protected: true },
-    { to: "/polls", label: "סקרים", protected: true },
+    { to: "/announcements", label: "לוח מודעות", protected: false },
+    { to: "/jobs", label: "דרושים", protected: false },
+    { to: "/members", label: "חברי המועדון", protected: false },
+    { to: "/events", label: "לוח אירועים", protected: false },
+    { to: "/gallery", label: "גלריה", protected: false },
+    { to: "/polls", label: "סקרים", protected: false },
     ...(isAdmin ? [{ to: "/admin", label: "שולחן המנהל", protected: true }] : []),
   ];
 

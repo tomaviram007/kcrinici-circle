@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "lucide-react";
+import { User, Phone, MapPin, Briefcase } from "lucide-react";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
@@ -22,20 +22,6 @@ const Members = () => {
     if (members.length > 0 && gridRef.current) {
       const cards = gridRef.current.querySelectorAll(".member-card");
       gsap.fromTo(cards, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, stagger: 0.06, ease: "back.out(1.4)" });
-
-      // 3D tilt
-      cards.forEach((card) => {
-        const el = card as HTMLElement;
-        el.addEventListener("mousemove", (e: MouseEvent) => {
-          const rect = el.getBoundingClientRect();
-          const x = (e.clientX - rect.left) / rect.width - 0.5;
-          const y = (e.clientY - rect.top) / rect.height - 0.5;
-          gsap.to(el, { rotateY: x * 12, rotateX: -y * 12, duration: 0.3, ease: "power2.out", transformPerspective: 600 });
-        });
-        el.addEventListener("mouseleave", () => {
-          gsap.to(el, { rotateY: 0, rotateX: 0, duration: 0.5, ease: "power2.out" });
-        });
-      });
     }
   }, [members]);
 
@@ -52,20 +38,52 @@ const Members = () => {
         <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
       </div>
 
-      <div ref={gridRef} className="grid gap-3 grid-cols-2 sm:gap-5 lg:grid-cols-3">
+      <div ref={gridRef} className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
         {members.map((member) => (
-          <div key={member.id} className="member-card rounded-lg border border-border bg-card p-4 sm:p-6 text-center transition-shadow hover:border-gold/20 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)]">
-            <div className="mx-auto mb-3 sm:mb-4 flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-secondary border border-gold/20">
-              {member.avatar_url ? (
-                <img src={member.avatar_url} alt={member.full_name} className="h-full w-full rounded-full object-cover" />
-              ) : (
-                <User className="h-7 w-7 text-gold" />
+          <div key={member.id} className="member-card rounded-lg border border-border bg-card p-4 sm:p-6 transition-shadow hover:border-gold/20 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)]">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20">
+                {member.avatar_url ? (
+                  <img src={member.avatar_url} alt={member.full_name} className="h-full w-full rounded-full object-cover" />
+                ) : (
+                  <User className="h-7 w-7 text-gold" />
+                )}
+              </div>
+              <div>
+                <h3 className="font-serif text-base sm:text-lg font-bold text-foreground">{member.full_name}</h3>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Briefcase className="h-3 w-3 text-gold" />
+                  <span className="font-body text-sm text-gold">{member.profession}</span>
+                </div>
+              </div>
+            </div>
+
+            {member.expertise && (
+              <p className="font-body text-xs text-muted-foreground mb-2">
+                <span className="text-gold">מומחיות:</span> {member.expertise}
+              </p>
+            )}
+
+            {member.bio && (
+              <p className="font-body text-xs text-muted-foreground italic leading-relaxed mb-3">"{member.bio}"</p>
+            )}
+
+            <div className="border-t border-border pt-3 space-y-1.5">
+              {member.phone && (
+                <div className="flex items-center gap-2">
+                  <Phone className="h-3.5 w-3.5 text-gold" />
+                  <a href={`tel:${member.phone}`} className="font-body text-sm text-foreground hover:text-gold transition-colors" dir="ltr">
+                    {member.phone}
+                  </a>
+                </div>
+              )}
+              {member.address && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5 text-gold" />
+                  <span className="font-body text-sm text-muted-foreground">{member.address}</span>
+                </div>
               )}
             </div>
-            <h3 className="font-serif text-sm sm:text-lg font-bold text-foreground">{member.full_name}</h3>
-            <p className="mt-1 font-body text-sm text-gold">{member.profession}</p>
-            {member.expertise && <p className="mt-0.5 font-body text-xs text-muted-foreground">{member.expertise}</p>}
-            {member.bio && <p className="mt-3 font-body text-xs text-muted-foreground italic leading-relaxed">"{member.bio}"</p>}
           </div>
         ))}
       </div>

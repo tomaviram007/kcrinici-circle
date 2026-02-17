@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Phone, Plus, Trash2, Edit2 } from "lucide-react";
+import { Briefcase, Phone, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,21 +13,16 @@ import heroImg from "@/assets/hero-jobs.jpg";
 const Jobs = () => {
   const { toast } = useToast();
   const [jobs, setJobs] = useState<any[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", description: "", contact: "", category: "" });
   const cardsRef = useRef<HTMLDivElement>(null);
 
   const fetchJobs = async () => {
-    const { data } = await supabase.from("jobs").select("*").eq("is_active", true).order("created_at", { ascending: false });
+    const { data } = await supabase.from("jobs").select("*").eq("is_approved", true).eq("is_active", true).order("created_at", { ascending: false });
     setJobs(data || []);
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUserId(session?.user?.id ?? null);
-    });
     fetchJobs();
   }, []);
 
@@ -40,37 +35,22 @@ const Jobs = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId) return;
+    if (!form.title.trim() || !form.description.trim()) return;
 
-    if (editId) {
-      const { error } = await supabase.from("jobs").update(form).eq("id", editId);
-      if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-      toast({ title: "עודכן בהצלחה!" });
-    } else {
-      const { error } = await supabase.from("jobs").insert({ ...form, created_by: userId });
-      if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-      toast({ title: "מודעת דרושים פורסמה!" });
+    const { error } = await supabase.from("jobs").insert({
+      title: form.title.trim(),
+      description: form.description.trim(),
+      contact: form.contact.trim() || null,
+      category: form.category.trim() || null,
+    });
+    if (error) {
+      toast({ title: "שגיאה", description: error.message, variant: "destructive" });
+      return;
     }
+    toast({ title: "המשרה נשלחה לאישור!", description: "המשרה תפורסם לאחר אישור מנהל המערכת." });
     setForm({ title: "", description: "", contact: "", category: "" });
     setShowForm(false);
-    setEditId(null);
-    fetchJobs();
   };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("jobs").delete().eq("id", id);
-    if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-    toast({ title: "נמחק" });
-    fetchJobs();
-  };
-
-  const startEdit = (job: any) => {
-    setForm({ title: job.title, description: job.description, contact: job.contact || "", category: job.category || "" });
-    setEditId(job.id);
-    setShowForm(true);
-  };
-
-  const canModify = (job: any) => job.created_by === userId;
 
   return (
     <>
@@ -85,22 +65,23 @@ const Jobs = () => {
           <p className="mt-1 font-body text-sm text-muted-foreground">לוח דרושים אקסקלוסיבי לחברי המועדון</p>
           <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
         </div>
-        <Button size="sm" onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ title: "", description: "", contact: "", category: "" }); }} className="gradient-gold text-primary-foreground font-body">
+        <Button size="sm" onClick={() => { setShowForm(!showForm); setForm({ title: "", description: "", contact: "", category: "" }); }} className="gradient-gold text-primary-foreground font-body">
           <Plus className="h-4 w-4 ml-1" /> פרסם משרה
         </Button>
       </div>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 rounded-lg border border-border bg-card p-5 space-y-3">
-          <Input placeholder="כותרת המשרה" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="bg-background" />
-          <Textarea placeholder="תיאור המשרה" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required className="bg-background" />
+          <Input placeholder="כותרת המשרה" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="bg-background" autoComplete="off" />
+          <Textarea placeholder="תיאור המשרה" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required className="bg-background" autoComplete="off" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input placeholder="איש קשר / טלפון" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="bg-background" />
-            <Input placeholder="קטגוריה" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="bg-background" />
+            <Input placeholder="איש קשר / טלפון" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="bg-background" autoComplete="off" />
+            <Input placeholder="קטגוריה" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="bg-background" autoComplete="off" />
           </div>
+          <p className="font-body text-xs text-muted-foreground">* המשרה תפורסם לאחר אישור מנהל המערכת</p>
           <div className="flex gap-2">
-            <Button type="submit" className="gradient-gold text-primary-foreground font-body">{editId ? "עדכן" : "פרסם"}</Button>
-            <Button type="button" variant="ghost" onClick={() => { setShowForm(false); setEditId(null); setForm({ title: "", description: "", contact: "", category: "" }); }} className="font-body">ביטול</Button>
+            <Button type="submit" className="gradient-gold text-primary-foreground font-body">שלח לאישור</Button>
+            <Button type="button" variant="ghost" onClick={() => { setShowForm(false); setForm({ title: "", description: "", contact: "", category: "" }); }} className="font-body">ביטול</Button>
           </div>
         </form>
       )}
@@ -116,12 +97,6 @@ const Jobs = () => {
                 <h3 className="font-serif text-lg font-bold text-foreground">{job.title}</h3>
                 {job.category && <span className="inline-block rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold mt-1">{job.category}</span>}
               </div>
-              {canModify(job) && (
-                <div className="flex gap-1 shrink-0">
-                  <Button variant="ghost" size="sm" onClick={() => startEdit(job)}><Edit2 className="h-3.5 w-3.5" /></Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(job.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
-                </div>
-              )}
             </div>
             <p className="mt-3 font-body text-sm leading-relaxed text-muted-foreground">{job.description}</p>
             {job.contact && (
