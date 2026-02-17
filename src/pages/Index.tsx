@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import HeroSection from "@/components/landing/HeroSection";
-import BirthdaysSection from "@/components/landing/BirthdaysSection";
-import BulletinSection from "@/components/landing/BulletinSection";
+import SalesPreviewSection from "@/components/landing/SalesPreviewSection";
 import EventsPreviewSection from "@/components/landing/EventsPreviewSection";
+import JobsPreviewSection from "@/components/landing/JobsPreviewSection";
+import BirthdaysPreviewSection from "@/components/landing/BirthdaysPreviewSection";
+import QuoteSection from "@/components/landing/QuoteSection";
 import CTASection from "@/components/landing/CTASection";
 import PollPopup from "@/components/PollPopup";
 
@@ -31,9 +33,11 @@ const Index = () => {
   return (
     <main className="min-h-screen bg-background">
       <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
-      <BirthdaysSection isApproved={isApproved} />
-      <BulletinSection isApproved={isApproved} />
+      <SalesPreviewSection isApproved={isApproved} />
       <EventsPreviewSection isApproved={isApproved} />
+      <JobsPreviewSection isApproved={isApproved} />
+      <BirthdaysPreviewSection isApproved={isApproved} />
+      <QuoteSection />
       {!isLoggedIn && <CTASection />}
       <PollPopup />
 

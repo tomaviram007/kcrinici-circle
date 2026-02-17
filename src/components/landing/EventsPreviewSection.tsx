@@ -158,6 +158,14 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
             </div>
           )}
         </div>
+
+        {isApproved && (
+          <div className="mt-8 text-center">
+            <Link to="/events" className="font-body text-sm text-gold hover:underline">
+              לכל האירועים ←
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Event Detail Popup */}

@@ -30,7 +30,7 @@ const HeroSection = ({ isLoggedIn = false, isApproved = false }: HeroSectionProp
   }, []);
 
   return (
-    <section className="relative h-screen overflow-hidden">
+    <section className="relative h-[48vw] min-h-[400px] max-h-screen overflow-hidden">
       <div
         ref={bgRef}
         className="absolute inset-0 bg-cover bg-center scale-110"
