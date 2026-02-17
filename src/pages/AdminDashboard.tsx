@@ -20,7 +20,7 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 min-h-[calc(100dvh-4rem)] overflow-x-hidden">
       <div className="mb-6 sm:mb-8">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
           שולחן <span className="text-gold">המנהל</span>
@@ -64,7 +64,21 @@ const MemberRequests = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchProfiles(); }, []);
+  useEffect(() => {
+    fetchProfiles();
+
+    // Realtime subscription for new/updated profiles
+    const channel = supabase
+      .channel('admin-profiles')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        () => { fetchProfiles(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const handleApprove = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({ is_approved: true }).eq("user_id", userId);
