@@ -107,6 +107,13 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
     let alive = true;
     const isMounted = () => alive;
 
+    // Safety timeout — never stay loading forever
+    const timeout = setTimeout(() => {
+      if (alive && state === "loading") {
+        setState("no-session");
+      }
+    }, 5000);
+
     check(isMounted);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
@@ -124,6 +131,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
     return () => {
       alive = false;
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, [check]);
