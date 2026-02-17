@@ -84,7 +84,7 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
   return (
     <section
-      className="relative overflow-hidden"
+      className="relative overflow-hidden flex items-center justify-center"
       style={{ height: `${height}vw`, minHeight: "260px" }}
     >
       <div
@@ -96,7 +96,7 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
       <div
         ref={ref}
-        className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
+        className="relative z-10 flex flex-col items-center justify-center px-6 text-center"
       >
         <blockquote
           className="font-serif font-bold text-white leading-relaxed opacity-0 drop-shadow-lg"
