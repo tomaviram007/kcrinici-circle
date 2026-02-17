@@ -57,8 +57,7 @@ const Events = () => {
       const { data: eventsData } = await supabase
         .from("events")
         .select("*")
-        .gte("event_date", new Date().toISOString())
-        .order("event_date", { ascending: true });
+        .order("event_date", { ascending: false });
       setEvents(eventsData || []);
 
       if (uid && eventsData?.length) {
