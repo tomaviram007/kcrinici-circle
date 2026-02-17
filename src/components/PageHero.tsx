@@ -29,7 +29,7 @@ const PageHero = ({ image, title, highlight, subtitle }: PageHeroProps) => {
   }, []);
 
   return (
-    <section className="relative h-[45vh] min-h-[320px] overflow-hidden">
+    <section className="relative h-[48vw] min-h-[320px] max-h-[70vh] overflow-hidden">
       <div
         ref={bgRef}
         className="absolute inset-0 bg-cover bg-center scale-110"
