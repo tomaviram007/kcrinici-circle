@@ -5,13 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin } from "lucide-react";
+import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
 const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "" };
+
+interface RsvpProfile {
+  full_name: string;
+  profession: string;
+  status: string;
+}
 
 const AdminEvents = () => {
   const { toast } = useToast();
@@ -20,10 +27,44 @@ const AdminEvents = () => {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [uploading, setUploading] = useState(false);
+  const [rsvpData, setRsvpData] = useState<Record<string, RsvpProfile[]>>({});
+  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+  const [rsvpDialogEvent, setRsvpDialogEvent] = useState<any | null>(null);
 
   const fetchEvents = async () => {
     const { data } = await supabase.from("events").select("*").order("event_date", { ascending: true });
     setEvents(data || []);
+
+    // Fetch all RSVPs with profile data
+    if (data && data.length > 0) {
+      const eventIds = data.map(e => e.id);
+      const { data: rsvps } = await supabase
+        .from("event_rsvps")
+        .select("event_id, status, user_id")
+        .in("event_id", eventIds);
+
+      if (rsvps && rsvps.length > 0) {
+        const userIds = [...new Set(rsvps.map(r => r.user_id))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, profession")
+          .in("user_id", userIds);
+
+        const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+        const grouped: Record<string, RsvpProfile[]> = {};
+        
+        for (const rsvp of rsvps) {
+          if (!grouped[rsvp.event_id]) grouped[rsvp.event_id] = [];
+          const profile = profileMap.get(rsvp.user_id);
+          grouped[rsvp.event_id].push({
+            full_name: profile?.full_name || "לא ידוע",
+            profession: profile?.profession || "",
+            status: rsvp.status,
+          });
+        }
+        setRsvpData(grouped);
+      }
+    }
   };
 
   useEffect(() => { fetchEvents(); }, []);
@@ -34,10 +75,10 @@ const AdminEvents = () => {
     setUploading(true);
     try {
       const ext = file.name.split(".").pop();
-      const path = `events/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("avatars").upload(path, file);
+      const path = `${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("events").upload(path, file);
       if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { data: { publicUrl } } = supabase.storage.from("events").getPublicUrl(path);
       setForm({ ...form, image_url: publicUrl });
       toast({ title: "תמונה הועלתה בהצלחה" });
     } catch (err: any) {
@@ -84,6 +125,8 @@ const AdminEvents = () => {
   const googleMapsUrl = (location: string) =>
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
 
+  const getAttendingCount = (eventId: string) => (rsvpData[eventId] || []).filter(r => r.status === "attending").length;
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
@@ -105,7 +148,7 @@ const AdminEvents = () => {
             </label>
             <div className="flex gap-2">
               <Input
-                placeholder="הכנס קישור לתמונה"
+                placeholder="הדבק קישור לתמונה (URL)"
                 value={form.image_url}
                 onChange={(e) => setForm({ ...form, image_url: e.target.value })}
                 className="bg-background flex-1"
@@ -119,13 +162,18 @@ const AdminEvents = () => {
                 className="h-10 border-border shrink-0"
                 onClick={() => document.getElementById('event-image-upload')?.click()}
               >
-                {uploading ? "מעלה..." : "העלה"}
+                {uploading ? "מעלה..." : "העלה קובץ"}
               </Button>
               <input id="event-image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </div>
             {form.image_url && (
-              <div className="relative w-32 h-20 rounded-md overflow-hidden border border-border">
-                <img src={form.image_url} alt="preview" className="w-full h-full object-cover" />
+              <div className="relative w-40 h-24 rounded-md overflow-hidden border border-border">
+                <img
+                  src={form.image_url}
+                  alt="preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
+                />
                 <button type="button" onClick={() => setForm({ ...form, image_url: "" })} className="absolute top-0.5 right-0.5 bg-background/80 rounded-full p-0.5">
                   <Trash2 className="h-3 w-3 text-destructive" />
                 </button>
@@ -186,32 +234,84 @@ const AdminEvents = () => {
       )}
 
       <div className="space-y-3">
-        {events.map((event) => (
-          <div key={event.id} className="flex items-start justify-between rounded-lg border border-border bg-card p-4 gap-3">
-            {event.image_url && (
-              <img src={event.image_url} alt={event.title} className="w-16 h-16 rounded-md object-cover shrink-0 border border-border" />
-            )}
-            <div className="flex-1 min-w-0">
-              <h4 className="font-serif text-base font-bold text-foreground">{event.title}</h4>
-              <p className="font-body text-sm text-muted-foreground truncate">{event.description}</p>
-              <div className="mt-1 flex items-center gap-2 flex-wrap">
-                <span className="font-body text-xs text-gold">
-                  {event.event_date && new Date(event.event_date).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                </span>
-                {event.location && (
-                  <a href={googleMapsUrl(event.location)} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-gold hover:underline flex items-center gap-0.5">
-                    <MapPin className="h-3 w-3" /> {event.location}
-                  </a>
+        {events.map((event) => {
+          const attending = getAttendingCount(event.id);
+          const rsvps = rsvpData[event.id] || [];
+
+          return (
+            <div key={event.id} className="rounded-lg border border-border bg-card p-4 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                {event.image_url && (
+                  <img src={event.image_url} alt={event.title} className="w-16 h-16 rounded-md object-cover shrink-0 border border-border" />
                 )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-serif text-base font-bold text-foreground">{event.title}</h4>
+                  <p className="font-body text-sm text-muted-foreground truncate">{event.description}</p>
+                  <div className="mt-1 flex items-center gap-2 flex-wrap">
+                    <span className="font-body text-xs text-gold">
+                      {event.event_date && new Date(event.event_date).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                    {event.location && (
+                      <a href={googleMapsUrl(event.location)} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-gold hover:underline flex items-center gap-0.5">
+                        <MapPin className="h-3 w-3" /> {event.location}
+                      </a>
+                    )}
+                  </div>
+                  <p className="font-body text-xs text-muted-foreground mt-1">
+                    נוצר: {new Date(event.created_at).toLocaleDateString("he-IL")}
+                    {event.updated_at !== event.created_at && ` · עודכן: ${new Date(event.updated_at).toLocaleDateString("he-IL")}`}
+                  </p>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="sm" onClick={() => startEdit(event)}><Edit2 className="h-3.5 w-3.5" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(event.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                </div>
+              </div>
+
+              {/* RSVP summary */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => rsvps.length > 0 && setRsvpDialogEvent(event)}
+                  className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 font-body text-xs text-foreground hover:bg-secondary/80 transition-colors"
+                >
+                  <Users className="h-3.5 w-3.5 text-gold" />
+                  {attending} אישרו הגעה
+                  {rsvps.length > 0 && <ChevronDown className="h-3 w-3 text-muted-foreground" />}
+                </button>
               </div>
             </div>
-            <div className="flex gap-1 shrink-0">
-              <Button variant="ghost" size="sm" onClick={() => startEdit(event)}><Edit2 className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="sm" onClick={() => handleDelete(event.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {/* RSVP Dialog */}
+      <Dialog open={!!rsvpDialogEvent} onOpenChange={() => setRsvpDialogEvent(null)}>
+        <DialogContent dir="rtl" className="max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl">
+              מאשרי הגעה – {rsvpDialogEvent?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {rsvpDialogEvent && (
+            <div className="space-y-2 mt-2">
+              {(rsvpData[rsvpDialogEvent.id] || [])
+                .filter(r => r.status === "attending")
+                .map((r, i) => (
+                  <div key={i} className="flex items-center justify-between rounded-md border border-border p-3">
+                    <div>
+                      <p className="font-body text-sm font-medium text-foreground">{r.full_name}</p>
+                      <p className="font-body text-xs text-muted-foreground">{r.profession}</p>
+                    </div>
+                    <span className="rounded-full bg-green-500/10 px-2 py-0.5 font-body text-xs text-green-600">מגיע/ה</span>
+                  </div>
+                ))}
+              {(rsvpData[rsvpDialogEvent.id] || []).filter(r => r.status === "attending").length === 0 && (
+                <p className="font-body text-sm text-muted-foreground text-center py-4">אין אישורי הגעה עדיין</p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
