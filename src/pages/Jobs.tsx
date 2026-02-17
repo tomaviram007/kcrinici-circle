@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import { fireConfetti } from "@/lib/confetti";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroImg from "@/assets/hero-jobs.jpg";
 
@@ -62,6 +63,7 @@ const Jobs = () => {
       return;
     }
     toast({ title: "המשרה נשלחה לאישור!", description: "המשרה תפורסם לאחר אישור מנהל המערכת." });
+    fireConfetti();
     setForm(EMPTY_FORM);
     setShowForm(false);
   };
