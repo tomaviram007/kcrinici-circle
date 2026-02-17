@@ -8,6 +8,7 @@ import BirthdaysPreviewSection from "@/components/landing/BirthdaysPreviewSectio
 import QuoteSection from "@/components/landing/QuoteSection";
 import CTASection from "@/components/landing/CTASection";
 import PollPopup from "@/components/PollPopup";
+import ScrollReveal from "@/components/ScrollReveal";
 
 const Index = () => {
   const [isApproved, setIsApproved] = useState(false);
@@ -33,12 +34,33 @@ const Index = () => {
   return (
     <main className="min-h-screen bg-background">
       <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
-      <SalesPreviewSection isApproved={isApproved} />
-      <EventsPreviewSection isApproved={isApproved} />
-      <JobsPreviewSection isApproved={isApproved} />
-      <BirthdaysPreviewSection isApproved={isApproved} />
-      <QuoteSection />
-      {!isLoggedIn && <CTASection />}
+      
+      <ScrollReveal>
+        <SalesPreviewSection isApproved={isApproved} />
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.05}>
+        <EventsPreviewSection isApproved={isApproved} />
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.05}>
+        <JobsPreviewSection isApproved={isApproved} />
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.05}>
+        <BirthdaysPreviewSection isApproved={isApproved} />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <QuoteSection />
+      </ScrollReveal>
+
+      {!isLoggedIn && (
+        <ScrollReveal>
+          <CTASection />
+        </ScrollReveal>
+      )}
+
       <PollPopup />
 
       <footer className="border-t border-border py-8 sm:py-12 text-center px-4">

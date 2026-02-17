@@ -86,6 +86,9 @@ const Members = () => {
 
   const isOwnCard = (member: any) => currentUserId && member.user_id === currentUserId;
 
+  // Live preview of avatar from editMember
+  const liveAvatarUrl = editMember?.avatar_url || null;
+
   return (
     <>
     <PageHero image={heroImg} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
@@ -162,16 +165,53 @@ const Members = () => {
       {members.length === 0 && <p className="font-body text-muted-foreground">אין חברים מאושרים עדיין.</p>}
     </div>
 
-    {/* Edit Profile Dialog */}
+    {/* Edit Profile Dialog — 2-column layout */}
     <Dialog open={!!editMember} onOpenChange={(open) => !open && setEditMember(null)}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">עריכת <span className="text-gold">הכרטיסיה שלך</span></DialogTitle>
           <DialogDescription className="sr-only">עריכת פרטי הכרטיסיה שלך</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 mt-2">
-          {editMember && currentUserId && (
-            <div className="flex flex-col items-center gap-2">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          {/* Right column — Form */}
+          <div className="space-y-4 order-2 sm:order-1">
+            <div>
+              <Label className="font-body text-sm">שם מלא</Label>
+              <Input value={editForm.full_name} onChange={(e) => setEditForm(f => ({ ...f, full_name: e.target.value }))} autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-sm">מקצוע</Label>
+              <Input value={editForm.profession} onChange={(e) => setEditForm(f => ({ ...f, profession: e.target.value }))} autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-sm">מומחיות</Label>
+              <Input value={editForm.expertise} onChange={(e) => setEditForm(f => ({ ...f, expertise: e.target.value }))} autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-sm">ביוגרפיה קצרה</Label>
+              <Textarea value={editForm.bio} onChange={(e) => setEditForm(f => ({ ...f, bio: e.target.value }))} rows={3} autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-sm">טלפון</Label>
+              <Input value={editForm.phone} onChange={(e) => setEditForm(f => ({ ...f, phone: e.target.value }))} dir="ltr" autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-sm">כתובת</Label>
+              <Input value={editForm.address} onChange={(e) => setEditForm(f => ({ ...f, address: e.target.value }))} autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-sm">תאריך לידה</Label>
+              <Input type="date" value={editForm.birth_date} onChange={(e) => setEditForm(f => ({ ...f, birth_date: e.target.value }))} dir="ltr" autoComplete="off" />
+            </div>
+            <Button onClick={handleSave} disabled={saving} className="w-full gradient-gold text-primary-foreground font-body">
+              {saving ? "שומר..." : "עדכן כרטיסיה"}
+            </Button>
+          </div>
+
+          {/* Left column — Live preview card */}
+          <div className="order-1 sm:order-2 flex flex-col items-center gap-4">
+            {editMember && currentUserId && (
               <AvatarUpload
                 userId={currentUserId}
                 currentUrl={editMember.avatar_url}
@@ -181,40 +221,46 @@ const Members = () => {
                 }}
                 size="lg"
               />
-              <span className="text-xs text-muted-foreground font-body">לחץ על התמונה כדי לשנות</span>
+            )}
+            <span className="text-xs text-muted-foreground font-body">לחץ על התמונה כדי לשנות</span>
+
+            {/* Live preview card */}
+            <div className="w-full rounded-lg border border-gold/20 bg-card p-5 glow-gold">
+              <p className="font-body text-xs text-gold/70 mb-3 text-center">תצוגה מקדימה</p>
+              <div className="flex items-center gap-4 mb-3">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20 overflow-hidden">
+                  {liveAvatarUrl ? (
+                    <img src={liveAvatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
+                  ) : (
+                    <User className="h-7 w-7 text-gold" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-serif text-base font-bold text-foreground">{editForm.full_name || "שם מלא"}</h3>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <Briefcase className="h-3 w-3 text-gold" />
+                    <span className="font-body text-sm text-gold">{editForm.profession || "מקצוע"}</span>
+                  </div>
+                </div>
+              </div>
+              {editForm.expertise && (
+                <p className="font-body text-xs text-muted-foreground mb-2">
+                  <span className="text-gold">מומחיות:</span> {editForm.expertise}
+                </p>
+              )}
+              {editForm.bio && (
+                <p className="font-body text-xs text-muted-foreground italic leading-relaxed mb-3">"{editForm.bio}"</p>
+              )}
+              <div className="border-t border-border pt-3 space-y-1.5">
+                {editForm.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-3.5 w-3.5 text-gold" />
+                    <span className="font-body text-sm text-foreground" dir="ltr">{editForm.phone}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-          <div>
-            <Label className="font-body text-sm">שם מלא</Label>
-            <Input value={editForm.full_name} onChange={(e) => setEditForm(f => ({ ...f, full_name: e.target.value }))} autoComplete="off" />
           </div>
-          <div>
-            <Label className="font-body text-sm">מקצוע</Label>
-            <Input value={editForm.profession} onChange={(e) => setEditForm(f => ({ ...f, profession: e.target.value }))} autoComplete="off" />
-          </div>
-          <div>
-            <Label className="font-body text-sm">מומחיות</Label>
-            <Input value={editForm.expertise} onChange={(e) => setEditForm(f => ({ ...f, expertise: e.target.value }))} autoComplete="off" />
-          </div>
-          <div>
-            <Label className="font-body text-sm">ביוגרפיה קצרה</Label>
-            <Textarea value={editForm.bio} onChange={(e) => setEditForm(f => ({ ...f, bio: e.target.value }))} rows={3} autoComplete="off" />
-          </div>
-          <div>
-            <Label className="font-body text-sm">טלפון</Label>
-            <Input value={editForm.phone} onChange={(e) => setEditForm(f => ({ ...f, phone: e.target.value }))} dir="ltr" autoComplete="off" />
-          </div>
-          <div>
-            <Label className="font-body text-sm">כתובת</Label>
-            <Input value={editForm.address} onChange={(e) => setEditForm(f => ({ ...f, address: e.target.value }))} autoComplete="off" />
-          </div>
-          <div>
-            <Label className="font-body text-sm">תאריך לידה</Label>
-            <Input type="date" value={editForm.birth_date} onChange={(e) => setEditForm(f => ({ ...f, birth_date: e.target.value }))} dir="ltr" autoComplete="off" />
-          </div>
-          <Button onClick={handleSave} disabled={saving} className="w-full gradient-gold text-primary-foreground font-body">
-            {saving ? "שומר..." : "עדכן כרטיסיה"}
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
