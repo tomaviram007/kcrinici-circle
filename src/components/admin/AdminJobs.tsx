@@ -5,14 +5,25 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, Check, Clock, Plus, X, Power, Tag } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trash2, Check, Clock, Plus, X, Power, Tag, Building2, MapPin, Banknote } from "lucide-react";
+
+const JOB_TYPES = [
+  { value: "full-time", label: "משרה מלאה" },
+  { value: "part-time", label: "משרה חלקית" },
+  { value: "freelance", label: "פרילנס" },
+  { value: "temporary", label: "זמנית" },
+  { value: "service", label: "שירות / עבודה חד פעמית" },
+];
+
+const EMPTY_FORM = { title: "", description: "", contact: "", category: "", location: "", job_type: "", salary: "", requirements: "", company_name: "" };
 
 const AdminJobs = () => {
   const { toast } = useToast();
   const [jobs, setJobs] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", contact: "", category: "" });
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const fetchJobs = async () => {
     const { data } = await supabase.from("jobs").select("*").order("created_at", { ascending: false });
@@ -32,13 +43,18 @@ const AdminJobs = () => {
       description: form.description.trim(),
       contact: form.contact.trim() || null,
       category: form.category.trim() || null,
+      location: form.location.trim() || null,
+      job_type: form.job_type || null,
+      salary: form.salary.trim() || null,
+      requirements: form.requirements.trim() || null,
+      company_name: form.company_name.trim() || null,
       is_approved: true,
       is_active: true,
     });
     setSubmitting(false);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "פורסם!", description: "המשרה פורסמה בהצלחה." });
-    setForm({ title: "", description: "", contact: "", category: "" });
+    setForm(EMPTY_FORM);
     setShowForm(false);
     fetchJobs();
   };
@@ -64,7 +80,6 @@ const AdminJobs = () => {
   const pending = jobs.filter((j) => !j.is_approved);
   const approved = jobs.filter((j) => j.is_approved);
 
-  // Category counts
   const categoryCounts = approved.reduce((acc: Record<string, number>, j) => {
     const cat = j.category || "ללא קטגוריה";
     acc[cat] = (acc[cat] || 0) + 1;
@@ -76,6 +91,8 @@ const AdminJobs = () => {
     if (!job.is_active) return { text: "לא פעיל", color: "text-muted-foreground bg-muted" };
     return { text: "פעיל", color: "text-green-600 bg-green-500/10" };
   };
+
+  const jobTypeLabel = (type: string | null) => JOB_TYPES.find(t => t.value === type)?.label || type || "";
 
   return (
     <div className="space-y-8">
@@ -101,13 +118,25 @@ const AdminJobs = () => {
           <div className="rounded-lg border border-gold/30 bg-card p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-serif text-lg font-bold text-foreground">משרה חדשה</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}><X className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}><X className="h-4 w-4" /></Button>
             </div>
-            <Input placeholder="כותרת המשרה" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="font-body" dir="rtl" />
-            <Textarea placeholder="תיאור המשרה" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="font-body min-h-[100px]" dir="rtl" />
-            <div className="grid grid-cols-2 gap-3">
-              <Input placeholder="איש קשר / טלפון" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="font-body" dir="rtl" />
-              <Input placeholder="קטגוריה (לדוגמה: שיפוצים)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="font-body" dir="rtl" />
+            <Input placeholder="כותרת המשרה *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
+            <Input placeholder="שם החברה / מפרסם" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
+            <Textarea placeholder="תיאור המשרה *" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="font-body min-h-[100px]" dir="rtl" autoComplete="off" />
+            <Textarea placeholder="דרישות התפקיד (ניסיון, כישורים, השכלה...)" value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} className="font-body min-h-[80px]" dir="rtl" autoComplete="off" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Select value={form.job_type} onValueChange={(v) => setForm({ ...form, job_type: v })}>
+                <SelectTrigger className="font-body"><SelectValue placeholder="סוג משרה" /></SelectTrigger>
+                <SelectContent>
+                  {JOB_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Input placeholder="מיקום (עיר / אזור)" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Input placeholder="שכר / תמורה" value={form.salary} onChange={(e) => setForm({ ...form, salary: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
+              <Input placeholder="קטגוריה (לדוגמה: שיפוצים)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
+              <Input placeholder="איש קשר / טלפון" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="font-body" dir="rtl" autoComplete="off" />
             </div>
             <Button onClick={handleCreate} disabled={submitting} className="gradient-gold text-primary-foreground font-body">
               {submitting ? "מפרסם..." : "פרסם משרה"}
@@ -128,8 +157,9 @@ const AdminJobs = () => {
             {pending.map((job) => (
               <div key={job.id} className="rounded-lg border border-gold/20 bg-card p-4 space-y-2">
                 <div className="flex items-start justify-between">
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <h4 className="font-serif text-base font-bold text-foreground">{job.title}</h4>
+                    {job.company_name && <p className="font-body text-sm text-gold">{job.company_name}</p>}
                     <p className="font-body text-sm text-muted-foreground line-clamp-2">{job.description}</p>
                   </div>
                   <div className="flex gap-1 shrink-0 mr-3">
@@ -140,10 +170,14 @@ const AdminJobs = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
+                  {job.job_type && <span className="rounded bg-secondary px-2 py-0.5 font-body text-xs text-foreground">{jobTypeLabel(job.job_type)}</span>}
                   {job.category && <span className="rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold">{job.category}</span>}
+                  {job.location && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><MapPin className="h-3 w-3" />{job.location}</span>}
+                  {job.salary && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><Banknote className="h-3 w-3" />{job.salary}</span>}
                   {job.contact && <span className="font-body text-xs text-muted-foreground">קשר: {job.contact}</span>}
                   <span className="font-body text-xs text-muted-foreground">פורסם: {new Date(job.created_at).toLocaleDateString("he-IL")}</span>
                 </div>
+                {job.requirements && <p className="font-body text-xs text-muted-foreground">דרישות: {job.requirements}</p>}
               </div>
             ))}
           </div>
@@ -166,6 +200,7 @@ const AdminJobs = () => {
                       <h4 className="font-serif text-base font-bold text-foreground">{job.title}</h4>
                       <span className={`rounded-full px-2 py-0.5 font-body text-xs ${status.color}`}>{status.text}</span>
                     </div>
+                    {job.company_name && <p className="font-body text-sm text-gold">{job.company_name}</p>}
                     <p className="font-body text-sm text-muted-foreground line-clamp-2">{job.description}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 mr-3">
@@ -177,12 +212,12 @@ const AdminJobs = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
+                  {job.job_type && <span className="rounded bg-secondary px-2 py-0.5 font-body text-xs text-foreground">{jobTypeLabel(job.job_type)}</span>}
                   {job.category && <span className="rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold">{job.category}</span>}
+                  {job.location && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><MapPin className="h-3 w-3" />{job.location}</span>}
+                  {job.salary && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><Banknote className="h-3 w-3" />{job.salary}</span>}
                   {job.contact && <span className="font-body text-xs text-muted-foreground">קשר: {job.contact}</span>}
                   <span className="font-body text-xs text-muted-foreground">פורסם: {new Date(job.created_at).toLocaleDateString("he-IL")}</span>
-                  {job.updated_at !== job.created_at && (
-                    <span className="font-body text-xs text-muted-foreground">עודכן: {new Date(job.updated_at).toLocaleDateString("he-IL")}</span>
-                  )}
                 </div>
               </div>
             );
