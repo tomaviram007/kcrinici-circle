@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, Menu, X, Cake } from "lucide-react";
+import { LogOut, Shield, Menu, X, Cake, User } from "lucide-react";
 import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
 import { useSiteLogo } from "@/hooks/useSiteLogo";
 import {
@@ -119,10 +119,17 @@ const Header = () => {
           {/* Left section - CTA (10%) */}
           <div className="hidden md:flex items-center justify-center gap-2" style={{ width: '10%' }}>
             {loading ? null : canAccess ?
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground font-body text-sm gap-1">
-                <LogOut className="h-4 w-4" />
-                התנתקות
-              </Button> :
+            <div className="flex items-center gap-1">
+                <Link to="/profile">
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground font-body text-sm gap-1">
+                  <LogOut className="h-4 w-4" />
+                  התנתקות
+                </Button>
+              </div> :
             <>
                 <Link to="/login">
                   <Button variant="ghost" size="sm" className="text-muted-foreground font-body text-sm">כניסה</Button>
@@ -159,14 +166,21 @@ const Header = () => {
 
           <div className="px-6 pb-10 flex flex-col items-center gap-3">
             {canAccess ?
-          <Button
-            variant="ghost"
-            onClick={() => {handleLogout();setMenuOpen(false);}}
-            className="w-full max-w-xs text-muted-foreground font-body gap-2">
-
-                <LogOut className="h-4 w-4" />
-                התנתקות
-              </Button> :
+          <>
+                <Link to="/profile" onClick={() => setMenuOpen(false)} className="w-full max-w-xs">
+                  <Button variant="outline" className="w-full font-body gap-2">
+                    <User className="h-4 w-4" />
+                    הפרופיל שלי
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  onClick={() => {handleLogout();setMenuOpen(false);}}
+                  className="w-full max-w-xs text-muted-foreground font-body gap-2">
+                  <LogOut className="h-4 w-4" />
+                  התנתקות
+                </Button>
+              </> :
 
           <>
                 <Link to="/register" onClick={() => setMenuOpen(false)} className="w-full max-w-xs">
