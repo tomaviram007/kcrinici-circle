@@ -70,17 +70,17 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
     const check = async () => {
       try {
-        console.log("ProtectedRoute: checking session...");
+        
         const { data: { session } } = await supabase.auth.getSession();
         if (!alive) return;
 
         if (!session) {
-          console.log("ProtectedRoute: no session found");
+          
           setResolved("no-session");
           return;
         }
 
-        console.log("ProtectedRoute: session found, checking profile...");
+        
 
         if (requireApproval || requireAdmin) {
           const { data: profile, error: profileError } = await supabase
@@ -91,7 +91,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
           if (!alive) return;
 
-          console.log("ProtectedRoute: profile result:", { profile, profileError });
+          
 
           if (profileError) {
             console.error("ProtectedRoute: profile query error:", profileError);
@@ -113,7 +113,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
           if (!alive) return;
 
-          console.log("ProtectedRoute: roles result:", { roles, rolesError });
+          
 
           if (rolesError) {
             console.error("ProtectedRoute: roles query error:", rolesError);
@@ -128,7 +128,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
           }
         }
 
-        console.log("ProtectedRoute: access granted");
+        
         setResolved("ok");
       } catch (err) {
         console.error("ProtectedRoute: check failed:", err);

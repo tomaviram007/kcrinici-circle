@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Phone, MapPin, Briefcase } from "lucide-react";
+import { User, Phone, Briefcase } from "lucide-react";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
@@ -72,15 +72,9 @@ const Members = () => {
               {member.phone && (
                 <div className="flex items-center gap-2">
                   <Phone className="h-3.5 w-3.5 text-gold" />
-                  <a href={`tel:${member.phone}`} className="font-body text-sm text-foreground hover:text-gold transition-colors" dir="ltr">
+                  <a href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '').replace(/^0/, '972')}`} target="_blank" rel="noopener noreferrer" className="font-body text-sm text-foreground hover:text-gold transition-colors" dir="ltr">
                     {member.phone}
                   </a>
-                </div>
-              )}
-              {member.address && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-3.5 w-3.5 text-gold" />
-                  <span className="font-body text-sm text-muted-foreground">{member.address}</span>
                 </div>
               )}
             </div>
