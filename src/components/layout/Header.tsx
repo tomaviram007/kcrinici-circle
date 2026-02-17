@@ -86,7 +86,9 @@ const Header = () => {
   ];
 
   const handleNavClick = (e: React.MouseEvent, link: { to: string; protected: boolean }) => {
-    if (link.protected && !canAccess) {
+    // Only block navigation for non-logged-in users. Logged-in users can navigate freely —
+    // the ProtectedRoute component handles access control (approval check, etc.)
+    if (link.protected && !user) {
       e.preventDefault();
       setShowMemberDialog(true);
     }
