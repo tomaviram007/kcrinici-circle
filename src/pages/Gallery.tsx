@@ -43,6 +43,12 @@ const Gallery = () => {
   // Album info dialog
   const [showAlbumInfo, setShowAlbumInfo] = useState(false);
 
+  // Edit album dialog
+  const [showEditAlbum, setShowEditAlbum] = useState(false);
+  const [editAlbumTitle, setEditAlbumTitle] = useState("");
+  const [editAlbumDesc, setEditAlbumDesc] = useState("");
+  const [savingAlbum, setSavingAlbum] = useState(false);
+
   // Photo edit dialog
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [photoCaption, setPhotoCaption] = useState("");
@@ -283,6 +289,26 @@ const Gallery = () => {
   const canManagePhoto = (photo: Photo) => photo.uploaded_by === userId || isAdmin;
   const canManageAlbum = (album: Album) => album.created_by === userId || isAdmin;
 
+  const handleSaveAlbumEdit = async () => {
+    if (!selectedAlbum || !editAlbumTitle.trim()) return;
+    setSavingAlbum(true);
+    try {
+      const { error } = await supabase.from("gallery_albums").update({
+        title: editAlbumTitle.trim(),
+        description: editAlbumDesc.trim() || null,
+      }).eq("id", selectedAlbum.id);
+      if (error) throw error;
+      setSelectedAlbum({ ...selectedAlbum, title: editAlbumTitle.trim(), description: editAlbumDesc.trim() || null });
+      toast({ title: "פרטי האלבום עודכנו!" });
+      setShowEditAlbum(false);
+      await fetchAlbums();
+    } catch (err: any) {
+      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingAlbum(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -335,9 +361,24 @@ const Gallery = () => {
         <div className="rounded-xl border border-border bg-card p-5 sm:p-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex-1">
-              <h1 className="font-serif text-2xl font-bold text-foreground md:text-3xl mb-1">
-                {selectedAlbum.title}
-              </h1>
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="font-serif text-2xl font-bold text-foreground md:text-3xl">
+                  {selectedAlbum.title}
+                </h1>
+                {canManageAlbum(selectedAlbum) && (
+                  <button
+                    onClick={() => {
+                      setEditAlbumTitle(selectedAlbum.title);
+                      setEditAlbumDesc(selectedAlbum.description || "");
+                      setShowEditAlbum(true);
+                    }}
+                    className="text-muted-foreground hover:text-gold transition-colors"
+                    title="עריכת פרטי אלבום"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
               {selectedAlbum.description && (
                 <p className="font-body text-sm text-muted-foreground mb-3">{selectedAlbum.description}</p>
               )}
@@ -549,6 +590,29 @@ const Gallery = () => {
               </div>
               <Button onClick={handleSavePhotoEdit} disabled={savingPhoto} className="w-full gradient-gold text-primary-foreground font-body">
                 {savingPhoto ? "שומר..." : "שמור שינויים"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit album dialog */}
+        <Dialog open={showEditAlbum} onOpenChange={setShowEditAlbum}>
+          <DialogContent dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="font-serif text-xl">עריכת <span className="text-gold">אלבום</span></DialogTitle>
+              <DialogDescription className="sr-only">עריכת שם ותיאור האלבום</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-2">
+              <div>
+                <Label className="font-body text-sm">שם האלבום <span className="text-gold">*</span></Label>
+                <Input value={editAlbumTitle} onChange={(e) => setEditAlbumTitle(e.target.value)} className="bg-card border-border" autoComplete="off" />
+              </div>
+              <div>
+                <Label className="font-body text-sm">תיאור</Label>
+                <Textarea value={editAlbumDesc} onChange={(e) => setEditAlbumDesc(e.target.value)} className="bg-card border-border" placeholder="תיאור קצר של האלבום..." autoComplete="off" />
+              </div>
+              <Button onClick={handleSaveAlbumEdit} disabled={savingAlbum || !editAlbumTitle.trim()} className="w-full gradient-gold text-primary-foreground font-body py-5">
+                {savingAlbum ? "שומר..." : "שמור שינויים"}
               </Button>
             </div>
           </DialogContent>
