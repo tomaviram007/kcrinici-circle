@@ -11,6 +11,7 @@ import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import { fireConfetti } from "@/lib/confetti";
 import ClubAboutSection from "@/components/ClubAboutSection";
+import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-jobs.jpg";
 
 const JOB_TYPES = [
@@ -289,6 +290,7 @@ const Jobs = () => {
         </DialogContent>
       </Dialog>
     </div>
+    <QuoteSection page="jobs" />
     </>
   );
 };

@@ -10,6 +10,7 @@ import { Plus, Image, ArrowRight, Trash2, X, ChevronLeft, ChevronRight, Pencil, 
 import type { Tables } from "@/integrations/supabase/types";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
+import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-gallery.jpg";
 import { validateImageFile } from "@/lib/file-validation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -779,6 +780,7 @@ const Gallery = () => {
         </DialogContent>
       </Dialog>
     </div>
+    <QuoteSection page="gallery" />
     </>
   );
 };

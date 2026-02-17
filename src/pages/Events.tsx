@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
+import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-events.jpg";
 import {
   Dialog,
@@ -434,6 +435,7 @@ const Events = () => {
         })()}
       </DialogContent>
     </Dialog>
+    <QuoteSection page="events" />
     </>
   );
 };

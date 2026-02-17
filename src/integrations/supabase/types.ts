@@ -457,27 +457,39 @@ export type Database = {
         Row: {
           author: string
           author_title: string
+          background_image_url: string | null
           created_at: string
+          font_size: number | null
           id: string
           is_active: boolean
+          page_location: string | null
+          section_height: number | null
           text: string
           updated_at: string
         }
         Insert: {
           author: string
           author_title: string
+          background_image_url?: string | null
           created_at?: string
+          font_size?: number | null
           id?: string
           is_active?: boolean
+          page_location?: string | null
+          section_height?: number | null
           text: string
           updated_at?: string
         }
         Update: {
           author?: string
           author_title?: string
+          background_image_url?: string | null
           created_at?: string
+          font_size?: number | null
           id?: string
           is_active?: boolean
+          page_location?: string | null
+          section_height?: number | null
           text?: string
           updated_at?: string
         }
