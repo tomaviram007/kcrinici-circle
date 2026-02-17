@@ -11,18 +11,26 @@ const Dashboard = () => {
 
   useEffect(() => {
     const load = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      setUserId(session.user.id);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        setUserId(session.user.id);
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, avatar_url")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, avatar_url")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
 
-      setUserName(profile?.full_name || session.user.user_metadata?.full_name || "חבר");
-      setAvatarUrl(profile?.avatar_url ?? null);
+        setUserName(profile?.full_name || session.user.user_metadata?.full_name || "חבר");
+        setAvatarUrl(profile?.avatar_url ?? null);
+      } catch {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setUserId(session.user.id);
+          setUserName(session.user.user_metadata?.full_name || "חבר");
+        }
+      }
     };
     load();
   }, []);
