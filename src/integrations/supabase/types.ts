@@ -193,6 +193,7 @@ export type Database = {
           category: string | null
           company_name: string | null
           contact: string | null
+          contact_name: string | null
           created_at: string
           created_by: string | null
           description: string
@@ -210,6 +211,7 @@ export type Database = {
           category?: string | null
           company_name?: string | null
           contact?: string | null
+          contact_name?: string | null
           created_at?: string
           created_by?: string | null
           description: string
@@ -227,6 +229,7 @@ export type Database = {
           category?: string | null
           company_name?: string | null
           contact?: string | null
+          contact_name?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
