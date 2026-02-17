@@ -7,6 +7,9 @@ import { Link, useSearchParams } from "react-router-dom";
 import AdminJobs from "@/components/admin/AdminJobs";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminAnnouncements from "@/components/admin/AdminAnnouncements";
+import PageHero from "@/components/PageHero";
+import ClubAboutSection from "@/components/ClubAboutSection";
+import heroAdmin from "@/assets/hero-admin.jpg";
 
 const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,36 +23,39 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 min-h-[calc(100dvh-4rem)] overflow-x-hidden">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
-          שולחן <span className="text-gold">המנהל</span>
-        </h1>
-        <p className="mt-1 font-body text-sm text-muted-foreground">ניהול המועדון והחברים</p>
-      </div>
+    <>
+      <PageHero
+        image={heroAdmin}
+        title="שולחן"
+        highlight="המנהל"
+        subtitle="ניהול המועדון, אישור חברים ופרסום תוכן"
+      />
+      <ClubAboutSection />
 
-      <div className="mb-6 sm:mb-8 flex gap-1 sm:gap-2 overflow-x-auto border-b border-border pb-px -mx-4 px-4 sm:mx-0 sm:px-0">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setSearchParams({ tab: tab.id })}
-            className={`flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-t-md px-2.5 sm:px-4 py-2 sm:py-2.5 font-body text-xs sm:text-sm transition-colors ${
-              activeTab === tab.id
-                ? "border-b-2 border-gold text-gold bg-secondary/50"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 overflow-x-hidden">
+        <div className="mb-6 sm:mb-8 flex gap-1 sm:gap-2 overflow-x-auto border-b border-border pb-px -mx-4 px-4 sm:mx-0 sm:px-0">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setSearchParams({ tab: tab.id })}
+              className={`flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-t-md px-2.5 sm:px-4 py-2 sm:py-2.5 font-body text-xs sm:text-sm transition-colors ${
+                activeTab === tab.id
+                  ? "border-b-2 border-gold text-gold bg-secondary/50"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-      {activeTab === "members" && <MemberRequests />}
-      {activeTab === "announcements" && <AdminAnnouncements />}
-      {activeTab === "jobs" && <AdminJobs />}
-      {activeTab === "events" && <AdminEvents />}
-    </div>
+        {activeTab === "members" && <MemberRequests />}
+        {activeTab === "announcements" && <AdminAnnouncements />}
+        {activeTab === "jobs" && <AdminJobs />}
+        {activeTab === "events" && <AdminEvents />}
+      </div>
+    </>
   );
 };
 
@@ -67,7 +73,6 @@ const MemberRequests = () => {
   useEffect(() => {
     fetchProfiles();
 
-    // Realtime subscription for new/updated profiles
     const channel = supabase
       .channel('admin-profiles')
       .on(
@@ -83,7 +88,6 @@ const MemberRequests = () => {
   const handleApprove = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({ is_approved: true }).eq("user_id", userId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-    // Send notification
     supabase.functions.invoke("notify-member", { body: { userId, action: "approve" } });
     toast({ title: "אושר!", description: "החבר אושר בהצלחה והודעה נשלחה." });
     fetchProfiles();
@@ -92,7 +96,6 @@ const MemberRequests = () => {
   const handleReject = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({ is_approved: false }).eq("user_id", userId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-    // Send notification
     supabase.functions.invoke("notify-member", { body: { userId, action: "reject" } });
     toast({ title: "נדחה", description: "הבקשה נדחתה והודעה נשלחה." });
     fetchProfiles();
