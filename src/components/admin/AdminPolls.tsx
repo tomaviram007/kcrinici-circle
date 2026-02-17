@@ -5,10 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Trash2, X, Eye, EyeOff, Pause, Play, RefreshCw } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Plus, Trash2, X, Eye, EyeOff, Pause, Play, RefreshCw, BarChart3, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
-interface PollWithOptions {
+interface OptionVotes {
+  id: string;
+  option_text: string;
+  count: number;
+  percentage: number;
+}
+
+interface PollWithAnalytics {
   id: string;
   title: string;
   description: string | null;
@@ -17,13 +25,16 @@ interface PollWithOptions {
   max_displays: number;
   allow_multiple: boolean;
   created_at: string;
-  options: { id: string; option_text: string }[];
+  options: OptionVotes[];
   totalVotes: number;
+  uniqueVoters: number;
+  lastVoteAt: string | null;
+  popupViewsCount: number;
 }
 
 const AdminPolls = () => {
   const { toast } = useToast();
-  const [polls, setPolls] = useState<PollWithOptions[]>([]);
+  const [polls, setPolls] = useState<PollWithAnalytics[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -54,16 +65,36 @@ const AdminPolls = () => {
     if (!pollsData) { setPolls([]); return; }
 
     const pollIds = pollsData.map(p => p.id);
-    const [{ data: optionsData }, { data: votesData }] = await Promise.all([
+    const [{ data: optionsData }, { data: votesData }, { data: viewsData }] = await Promise.all([
       supabase.from("poll_options").select("*").in("poll_id", pollIds),
       supabase.from("poll_votes").select("*").in("poll_id", pollIds),
+      supabase.from("poll_popup_views").select("poll_id, user_id").in("poll_id", pollIds),
     ]);
 
-    setPolls(pollsData.map(poll => ({
-      ...poll,
-      options: (optionsData || []).filter(o => o.poll_id === poll.id),
-      totalVotes: (votesData || []).filter(v => v.poll_id === poll.id).length,
-    })));
+    setPolls(pollsData.map(poll => {
+      const pollVotes = (votesData || []).filter(v => v.poll_id === poll.id);
+      const totalVotes = pollVotes.length;
+      const uniqueVoters = new Set(pollVotes.map(v => v.user_id)).size;
+      const lastVoteAt = pollVotes.length > 0
+        ? pollVotes.reduce((latest, v) => v.created_at > latest ? v.created_at : latest, pollVotes[0].created_at)
+        : null;
+      const popupViewsCount = (viewsData || []).filter(v => v.poll_id === poll.id).length;
+
+      const options: OptionVotes[] = (optionsData || [])
+        .filter(o => o.poll_id === poll.id)
+        .map(o => {
+          const count = pollVotes.filter(v => v.option_id === o.id).length;
+          return {
+            id: o.id,
+            option_text: o.option_text,
+            count,
+            percentage: totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0,
+          };
+        })
+        .sort((a, b) => b.count - a.count);
+
+      return { ...poll, options, totalVotes, uniqueVoters, lastVoteAt, popupViewsCount };
+    }));
   };
 
   const handleCreatePoll = async () => {
@@ -128,6 +159,7 @@ const AdminPolls = () => {
   const resetViews = async (pollId: string) => {
     await supabase.from("poll_popup_views").delete().eq("poll_id", pollId);
     toast({ title: "סבב חדש הופעל", description: "הפופאפ יופיע שוב לכל המשתמשים" });
+    await fetchPolls();
   };
 
   const updateMaxDisplays = async (pollId: string, value: number) => {
@@ -151,18 +183,48 @@ const AdminPolls = () => {
       ) : (
         <div className="space-y-4">
           {polls.map(poll => (
-            <div key={poll.id} className="rounded-xl border border-border bg-card p-5 space-y-3">
+            <div key={poll.id} className="rounded-xl border border-border bg-card p-5 space-y-4">
               <div className="flex items-start justify-between">
                 <div>
                   <h4 className="font-serif text-lg font-bold text-foreground">{poll.title}</h4>
                   {poll.description && <p className="font-body text-sm text-muted-foreground">{poll.description}</p>}
-                  <p className="font-body text-xs text-muted-foreground mt-1">
-                    {poll.totalVotes} הצבעות · {poll.options.length} אפשרויות · {new Date(poll.created_at).toLocaleDateString("he-IL")}
-                  </p>
                 </div>
                 <button onClick={() => handleDelete(poll.id)} className="text-muted-foreground hover:text-destructive transition-colors p-1">
                   <Trash2 className="h-4 w-4" />
                 </button>
+              </div>
+
+              {/* Stats row */}
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5">
+                  <BarChart3 className="h-3.5 w-3.5 text-gold" />
+                  <span className="font-body text-xs text-foreground">{poll.totalVotes} הצבעות</span>
+                </div>
+                <div className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5">
+                  <Users className="h-3.5 w-3.5 text-gold" />
+                  <span className="font-body text-xs text-foreground">{poll.uniqueVoters} מצביעים</span>
+                </div>
+                <div className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5">
+                  <Eye className="h-3.5 w-3.5 text-gold" />
+                  <span className="font-body text-xs text-foreground">{poll.popupViewsCount} צפו בפופאפ</span>
+                </div>
+                <span className="font-body text-xs text-muted-foreground self-center">
+                  נוצר: {new Date(poll.created_at).toLocaleDateString("he-IL")}
+                  {poll.lastVoteAt && ` · הצבעה אחרונה: ${new Date(poll.lastVoteAt).toLocaleDateString("he-IL")}`}
+                </span>
+              </div>
+
+              {/* Vote breakdown per option */}
+              <div className="space-y-2">
+                {poll.options.map(opt => (
+                  <div key={opt.id} className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-body text-sm text-foreground">{opt.option_text}</span>
+                      <span className="font-body text-xs text-muted-foreground">{opt.count} ({opt.percentage}%)</span>
+                    </div>
+                    <Progress value={opt.percentage} className="h-2" />
+                  </div>
+                ))}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">

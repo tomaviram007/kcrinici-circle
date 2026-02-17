@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3 } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AdminJobs from "@/components/admin/AdminJobs";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminAnnouncements from "@/components/admin/AdminAnnouncements";
@@ -12,9 +12,37 @@ import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroAdmin from "@/assets/hero-admin.jpg";
 
+interface DashboardStats {
+  approvedMembers: number;
+  pendingMembers: number;
+  upcomingEvents: number;
+  activeJobs: number;
+  activePolls: number;
+}
+
 const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "members";
+  const [stats, setStats] = useState<DashboardStats>({ approvedMembers: 0, pendingMembers: 0, upcomingEvents: 0, activeJobs: 0, activePolls: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const [{ data: profiles }, { data: events }, { data: jobs }, { data: polls }] = await Promise.all([
+        supabase.from("profiles").select("is_approved"),
+        supabase.from("events").select("event_date").gte("event_date", new Date().toISOString()),
+        supabase.from("jobs").select("is_approved, is_active"),
+        supabase.from("polls").select("is_active"),
+      ]);
+      setStats({
+        approvedMembers: (profiles || []).filter(p => p.is_approved).length,
+        pendingMembers: (profiles || []).filter(p => !p.is_approved).length,
+        upcomingEvents: (events || []).length,
+        activeJobs: (jobs || []).filter(j => j.is_approved && j.is_active).length,
+        activePolls: (polls || []).filter(p => p.is_active).length,
+      });
+    };
+    fetchStats();
+  }, []);
 
   const tabs = [
     { id: "members", label: "בקשות הצטרפות", icon: Users },
@@ -24,17 +52,31 @@ const AdminDashboard = () => {
     { id: "polls", label: "סקרים", icon: BarChart3 },
   ];
 
+  const statCards = [
+    { label: "חברים מאושרים", value: stats.approvedMembers, icon: Users, accent: "text-green-500" },
+    { label: "ממתינים לאישור", value: stats.pendingMembers, icon: Clock, accent: "text-gold" },
+    { label: "אירועים קרובים", value: stats.upcomingEvents, icon: Calendar, accent: "text-blue-500" },
+    { label: "משרות פעילות", value: stats.activeJobs, icon: Briefcase, accent: "text-purple-500" },
+    { label: "סקרים פעילים", value: stats.activePolls, icon: BarChart3, accent: "text-gold" },
+  ];
+
   return (
     <>
-      <PageHero
-        image={heroAdmin}
-        title="שולחן"
-        highlight="המנהל"
-        subtitle="ניהול המועדון, אישור חברים ופרסום תוכן"
-      />
+      <PageHero image={heroAdmin} title="שולחן" highlight="המנהל" subtitle="ניהול המועדון, אישור חברים ופרסום תוכן" />
       <ClubAboutSection />
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 overflow-x-hidden">
+        {/* Stats row */}
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {statCards.map((s) => (
+            <div key={s.label} className="rounded-xl border border-border bg-card p-4 text-center space-y-1">
+              <s.icon className={`h-5 w-5 mx-auto ${s.accent}`} />
+              <p className="font-serif text-2xl font-bold text-foreground">{s.value}</p>
+              <p className="font-body text-xs text-muted-foreground">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
         <div className="mb-6 sm:mb-8 flex gap-1 sm:gap-2 overflow-x-auto border-b border-border pb-px -mx-4 px-4 sm:mx-0 sm:px-0">
           {tabs.map((tab) => (
             <button
@@ -75,16 +117,10 @@ const MemberRequests = () => {
 
   useEffect(() => {
     fetchProfiles();
-
     const channel = supabase
       .channel('admin-profiles')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'profiles' },
-        () => { fetchProfiles(); }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => { fetchProfiles(); })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, []);
 
@@ -111,7 +147,6 @@ const MemberRequests = () => {
 
   return (
     <div className="space-y-8">
-      {/* Pending */}
       <div>
         <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
           <Clock className="h-5 w-5 text-gold" /> ממתינים לאישור ({pending.length})
@@ -140,7 +175,6 @@ const MemberRequests = () => {
         )}
       </div>
 
-      {/* Approved */}
       <div>
         <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
           <Check className="h-5 w-5 text-green-500" /> חברים מאושרים ({approved.length})

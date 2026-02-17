@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Check, Clock, Plus, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Trash2, Check, Clock, Plus, X, Power, Tag } from "lucide-react";
 
 const AdminJobs = () => {
   const { toast } = useToast();
@@ -54,11 +55,42 @@ const AdminJobs = () => {
     fetchJobs();
   };
 
+  const toggleActive = async (id: string, current: boolean) => {
+    await supabase.from("jobs").update({ is_active: !current }).eq("id", id);
+    toast({ title: !current ? "המשרה הופעלה" : "המשרה הושבתה" });
+    fetchJobs();
+  };
+
   const pending = jobs.filter((j) => !j.is_approved);
   const approved = jobs.filter((j) => j.is_approved);
 
+  // Category counts
+  const categoryCounts = approved.reduce((acc: Record<string, number>, j) => {
+    const cat = j.category || "ללא קטגוריה";
+    acc[cat] = (acc[cat] || 0) + 1;
+    return acc;
+  }, {});
+
+  const getStatusLabel = (job: any) => {
+    if (!job.is_approved) return { text: "ממתין לאישור", color: "text-yellow-600 bg-yellow-500/10" };
+    if (!job.is_active) return { text: "לא פעיל", color: "text-muted-foreground bg-muted" };
+    return { text: "פעיל", color: "text-green-600 bg-green-500/10" };
+  };
+
   return (
     <div className="space-y-8">
+      {/* Category summary */}
+      {Object.keys(categoryCounts).length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(categoryCounts).map(([cat, count]: [string, number]) => (
+            <span key={cat} className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 font-body text-xs text-foreground">
+              <Tag className="h-3 w-3 text-gold" />
+              {cat}: {count}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Create button / form */}
       <div>
         {!showForm ? (
@@ -71,35 +103,11 @@ const AdminJobs = () => {
               <h3 className="font-serif text-lg font-bold text-foreground">משרה חדשה</h3>
               <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}><X className="h-4 w-4" /></Button>
             </div>
-            <Input
-              placeholder="כותרת המשרה"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="font-body"
-              dir="rtl"
-            />
-            <Textarea
-              placeholder="תיאור המשרה"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="font-body min-h-[100px]"
-              dir="rtl"
-            />
+            <Input placeholder="כותרת המשרה" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="font-body" dir="rtl" />
+            <Textarea placeholder="תיאור המשרה" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="font-body min-h-[100px]" dir="rtl" />
             <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="איש קשר / טלפון"
-                value={form.contact}
-                onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                className="font-body"
-                dir="rtl"
-              />
-              <Input
-                placeholder="קטגוריה (לדוגמה: שיפוצים)"
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="font-body"
-                dir="rtl"
-              />
+              <Input placeholder="איש קשר / טלפון" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="font-body" dir="rtl" />
+              <Input placeholder="קטגוריה (לדוגמה: שיפוצים)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="font-body" dir="rtl" />
             </div>
             <Button onClick={handleCreate} disabled={submitting} className="gradient-gold text-primary-foreground font-body">
               {submitting ? "מפרסם..." : "פרסם משרה"}
@@ -118,18 +126,23 @@ const AdminJobs = () => {
         ) : (
           <div className="space-y-3">
             {pending.map((job) => (
-              <div key={job.id} className="flex items-start justify-between rounded-lg border border-gold/20 bg-card p-4">
-                <div>
-                  <h4 className="font-serif text-base font-bold text-foreground">{job.title}</h4>
-                  <p className="font-body text-sm text-muted-foreground line-clamp-2">{job.description}</p>
-                  {job.category && <span className="mt-1 inline-block rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold">{job.category}</span>}
-                  {job.contact && <p className="mt-1 font-body text-xs text-muted-foreground">קשר: {job.contact}</p>}
+              <div key={job.id} className="rounded-lg border border-gold/20 bg-card p-4 space-y-2">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="font-serif text-base font-bold text-foreground">{job.title}</h4>
+                    <p className="font-body text-sm text-muted-foreground line-clamp-2">{job.description}</p>
+                  </div>
+                  <div className="flex gap-1 shrink-0 mr-3">
+                    <Button size="sm" onClick={() => handleApprove(job.id)} className="gradient-gold text-primary-foreground font-body">
+                      <Check className="h-3.5 w-3.5 ml-1" /> אשר
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(job.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </div>
                 </div>
-                <div className="flex gap-1 shrink-0 mr-3">
-                  <Button size="sm" onClick={() => handleApprove(job.id)} className="gradient-gold text-primary-foreground font-body">
-                    <Check className="h-3.5 w-3.5 ml-1" /> אשר
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(job.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {job.category && <span className="rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold">{job.category}</span>}
+                  {job.contact && <span className="font-body text-xs text-muted-foreground">קשר: {job.contact}</span>}
+                  <span className="font-body text-xs text-muted-foreground">פורסם: {new Date(job.created_at).toLocaleDateString("he-IL")}</span>
                 </div>
               </div>
             ))}
@@ -143,18 +156,37 @@ const AdminJobs = () => {
           <Check className="h-5 w-5 text-green-500" /> משרות מאושרות ({approved.length})
         </h3>
         <div className="space-y-3">
-          {approved.map((job) => (
-            <div key={job.id} className="flex items-start justify-between rounded-lg border border-border bg-card p-4">
-              <div>
-                <h4 className="font-serif text-base font-bold text-foreground">{job.title}</h4>
-                <p className="font-body text-sm text-muted-foreground line-clamp-2">{job.description}</p>
-                {job.category && <span className="mt-1 inline-block rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold">{job.category}</span>}
+          {approved.map((job) => {
+            const status = getStatusLabel(job);
+            return (
+              <div key={job.id} className="rounded-lg border border-border bg-card p-4 space-y-2">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-serif text-base font-bold text-foreground">{job.title}</h4>
+                      <span className={`rounded-full px-2 py-0.5 font-body text-xs ${status.color}`}>{status.text}</span>
+                    </div>
+                    <p className="font-body text-sm text-muted-foreground line-clamp-2">{job.description}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 mr-3">
+                    <div className="flex items-center gap-1.5">
+                      <Power className="h-3.5 w-3.5 text-muted-foreground" />
+                      <Switch checked={job.is_active} onCheckedChange={() => toggleActive(job.id, job.is_active)} />
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(job.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {job.category && <span className="rounded bg-secondary px-2 py-0.5 font-body text-xs text-gold">{job.category}</span>}
+                  {job.contact && <span className="font-body text-xs text-muted-foreground">קשר: {job.contact}</span>}
+                  <span className="font-body text-xs text-muted-foreground">פורסם: {new Date(job.created_at).toLocaleDateString("he-IL")}</span>
+                  {job.updated_at !== job.created_at && (
+                    <span className="font-body text-xs text-muted-foreground">עודכן: {new Date(job.updated_at).toLocaleDateString("he-IL")}</span>
+                  )}
+                </div>
               </div>
-              <div className="flex gap-1 shrink-0 mr-3">
-                <Button variant="ghost" size="sm" onClick={() => handleDelete(job.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
