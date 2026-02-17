@@ -18,6 +18,45 @@ const registerSchema = z.object({
   password: z.string().min(6, "סיסמה חייבת להכיל לפחות 6 תווים").max(72, "סיסמה ארוכה מדי"),
 });
 
+interface FieldProps {
+  name: string;
+  label: string;
+  required?: boolean;
+  textarea?: boolean;
+  form: Record<string, string>;
+  errors: Record<string, string>;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  [key: string]: any;
+}
+
+const Field = ({ name, label, required = false, textarea, form, errors, onChange, ...props }: FieldProps) => (
+  <div>
+    <label className="mb-1.5 block font-body text-sm text-muted-foreground">
+      {label} {required && <span className="text-gold">*</span>}
+    </label>
+    {textarea ? (
+      <Textarea
+        name={name}
+        value={form[name]}
+        onChange={onChange}
+        autoComplete="off"
+        className={`bg-card border-border ${errors[name] ? "border-destructive" : ""}`}
+        {...props}
+      />
+    ) : (
+      <Input
+        name={name}
+        value={form[name]}
+        onChange={onChange}
+        autoComplete="off"
+        className={`bg-card border-border ${errors[name] ? "border-destructive" : ""}`}
+        {...props}
+      />
+    )}
+    {errors[name] && <p className="mt-1 font-body text-xs text-destructive">{errors[name]}</p>}
+  </div>
+);
+
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -36,7 +75,7 @@ const Register = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => { const n = { ...prev }; delete n[name]; return n; });
     }
@@ -96,32 +135,7 @@ const Register = () => {
     }
   };
 
-  const Field = ({ name, label, required = false, ...props }: any) => (
-    <div>
-      <label className="mb-1.5 block font-body text-sm text-muted-foreground">
-        {label} {required && <span className="text-gold">*</span>}
-      </label>
-      {props.textarea ? (
-        <Textarea
-          name={name}
-          value={(form as any)[name]}
-          onChange={handleChange}
-          className={`bg-card border-border ${errors[name] ? "border-destructive" : ""}`}
-          {...props}
-          textarea={undefined}
-        />
-      ) : (
-        <Input
-          name={name}
-          value={(form as any)[name]}
-          onChange={handleChange}
-          className={`bg-card border-border ${errors[name] ? "border-destructive" : ""}`}
-          {...props}
-        />
-      )}
-      {errors[name] && <p className="mt-1 font-body text-xs text-destructive">{errors[name]}</p>}
-    </div>
-  );
+  const fieldProps = { form, errors, onChange: handleChange };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
@@ -136,24 +150,24 @@ const Register = () => {
           <div className="mt-3 mx-auto h-px w-12 gradient-gold opacity-40" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate autoComplete="off">
           <div className="grid gap-4 md:grid-cols-2">
-            <Field name="full_name" label="שם מלא" required />
-            <Field name="phone" label="מספר טלפון" required dir="ltr" />
+            <Field name="full_name" label="שם מלא" required {...fieldProps} />
+            <Field name="phone" label="מספר טלפון" required dir="ltr" {...fieldProps} />
           </div>
 
-          <Field name="address" label="כתובת מגורים (רחוב ומספר)" required />
+          <Field name="address" label="כתובת מגורים (רחוב ומספר)" required {...fieldProps} />
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Field name="profession" label="מקצוע" required />
-            <Field name="expertise" label="מומחיות" placeholder="למשל: מומחה ליין, טכנולוגיה..." />
+            <Field name="profession" label="מקצוע" required {...fieldProps} />
+            <Field name="expertise" label="מומחיות" placeholder="למשל: מומחה ליין, טכנולוגיה..." {...fieldProps} />
           </div>
 
-          <Field name="bio" label="משהו שהשכנים צריכים לדעת עליך" textarea placeholder="ביוגרפיה קצרה..." />
+          <Field name="bio" label="משהו שהשכנים צריכים לדעת עליך" textarea placeholder="ביוגרפיה קצרה..." {...fieldProps} />
 
           <div className="border-t border-border pt-5 space-y-4">
-            <Field name="email" label="אימייל" required type="email" dir="ltr" />
-            <Field name="password" label="סיסמה" required type="password" dir="ltr" />
+            <Field name="email" label="אימייל" required type="email" dir="ltr" {...fieldProps} />
+            <Field name="password" label="סיסמה" required type="password" dir="ltr" {...fieldProps} />
           </div>
 
           <Button type="submit" disabled={loading} className="w-full gradient-gold text-primary-foreground font-body py-6 text-base hover:opacity-90">
