@@ -8,6 +8,7 @@ import AvatarUpload from "@/components/AvatarUpload";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
+import MyPublications from "@/components/profile/MyPublications";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -232,6 +233,13 @@ const Profile = () => {
           {changingPassword ? "משנה סיסמה..." : "שנה סיסמה"}
         </Button>
       </div>
+
+      {/* My Publications Section */}
+      <Separator className="my-10" />
+      <h2 className="font-serif text-xl font-bold text-foreground mb-6">
+        הפרסומים <span className="text-gold">שלי</span>
+      </h2>
+      <MyPublications userId={userId} />
     </div>
   );
 };
