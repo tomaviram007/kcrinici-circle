@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -39,10 +39,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // מונע ריצה כפולה של fetchProfileAndRoles
+  const fetchingRef = useRef(false);
+  // שומר את ה-userId האחרון שעליו כבר טענו פרופיל
+  const lastFetchedUserRef = useRef<string | null>(null);
+
   useEffect(() => {
     let alive = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!alive) return;
 
       if (event === "SIGNED_OUT") {
@@ -50,50 +57,73 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsApproved(false);
         setIsAdmin(false);
         setLoading(false);
+        lastFetchedUserRef.current = null;
         return;
       }
 
-      if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+      if (
+        event === "INITIAL_SESSION" ||
+        event === "SIGNED_IN" ||
+        event === "TOKEN_REFRESHED" ||
+        event === "USER_UPDATED"
+      ) {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
 
-        if (currentUser) {
-          // Don't flash loading on background token refreshes
-          if (event !== "TOKEN_REFRESHED") setLoading(true);
-
-          const result = await fetchProfileAndRoles(currentUser.id);
-          if (alive) {
-            setIsApproved(result.isApproved);
-            setIsAdmin(result.isAdmin);
-            setLoading(false);
-          }
-        } else {
+        if (!currentUser) {
           setIsApproved(false);
           setIsAdmin(false);
           setLoading(false);
+          lastFetchedUserRef.current = null;
+          return;
         }
+
+        // TOKEN_REFRESHED על אותו משתמש — אין צורך לטעון שוב
+        if (event === "TOKEN_REFRESHED" && lastFetchedUserRef.current === currentUser.id) {
+          setLoading(false);
+          return;
+        }
+
+        // מניעת ריצה כפולה מקבילה
+        if (fetchingRef.current) return;
+        fetchingRef.current = true;
+
+        if (event !== "TOKEN_REFRESHED") setLoading(true);
+
+        const result = await fetchProfileAndRoles(currentUser.id);
+
+        if (alive) {
+          setIsApproved(result.isApproved);
+          setIsAdmin(result.isAdmin);
+          setLoading(false);
+          lastFetchedUserRef.current = currentUser.id;
+        }
+
+        fetchingRef.current = false;
       }
     });
 
-    // Safety timeout
     const safety = setTimeout(() => {
       if (alive) setLoading(false);
     }, 5000);
 
-    // Silent re-check when tab becomes visible
+    // visibilitychange — רק בודק אם המשתמש התנתק בטאב אחר, בלי לגרום לרנדור
     const handleVisibility = () => {
-      if (document.visibilityState === "visible" && alive) {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (!alive) return;
-          if (!session) {
-            setUser(null);
-            setIsApproved(false);
-            setIsAdmin(false);
-          }
-          // If session exists, TOKEN_REFRESHED will fire if needed
-        });
-      }
+      if (document.visibilityState !== "visible" || !alive) return;
+
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!alive) return;
+        // רק אם אין session כלל — מנקים state
+        // אם יש session, onAuthStateChange יטפל בכל השאר
+        if (!session) {
+          setUser(null);
+          setIsApproved(false);
+          setIsAdmin(false);
+          lastFetchedUserRef.current = null;
+        }
+      });
     };
+
     document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
@@ -104,9 +134,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, isApproved, isAdmin, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, isApproved, isAdmin, loading }}>{children}</AuthContext.Provider>;
 };
