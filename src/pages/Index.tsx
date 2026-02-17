@@ -1,14 +1,40 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import HeroSection from "@/components/landing/HeroSection";
 import BirthdaysSection from "@/components/landing/BirthdaysSection";
 import BulletinSection from "@/components/landing/BulletinSection";
+import EventsPreviewSection from "@/components/landing/EventsPreviewSection";
+import CTASection from "@/components/landing/CTASection";
 
 const Index = () => {
+  const [isApproved, setIsApproved] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const check = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      setIsLoggedIn(true);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_approved")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (profile?.is_approved) setIsApproved(true);
+    };
+    check();
+  }, []);
+
   return (
     <main className="min-h-screen bg-background">
       <HeroSection />
-      <BirthdaysSection />
-      <BulletinSection />
-      
+      <BirthdaysSection isApproved={isApproved} />
+      <BulletinSection isApproved={isApproved} />
+      <EventsPreviewSection isApproved={isApproved} />
+      {!isLoggedIn && <CTASection />}
+
       <footer className="border-t border-border py-12 text-center">
         <p className="font-body text-sm text-muted-foreground">
           © {new Date().getFullYear()} הגברים של ק. קריניצי — מועדון חברים אקסקלוסיבי

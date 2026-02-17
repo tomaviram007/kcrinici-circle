@@ -1,27 +1,33 @@
-import { useEffect, useRef } from "react";
-import { Briefcase, Users, Calendar } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Briefcase, Users, Calendar, Lock, Megaphone } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 import gsap from "gsap";
 
-const features = [
-  {
-    icon: Briefcase,
-    title: "הזדמנויות בשכונה",
-    description: "לוח דרושים אקסקלוסיבי – עסקאות, שותפויות ומשרות בין חברי המועדון.",
-  },
-  {
-    icon: Users,
-    title: "אינדקס החברים",
-    description: "גלריה של אנשי המקצוע בשכונה – תמיד תדע למי לפנות.",
-  },
-  {
-    icon: Calendar,
-    title: "אירועים ומפגשים",
-    description: "ערבי יין, הרצאות ומפגשי נטוורקינג בלעדיים לחברי המועדון.",
-  },
+interface Props {
+  isApproved?: boolean;
+}
+
+const staticFeatures = [
+  { icon: Briefcase, title: "הזדמנויות בשכונה", description: "לוח דרושים אקסקלוסיבי – עסקאות, שותפויות ומשרות בין חברי המועדון." },
+  { icon: Users, title: "אינדקס החברים", description: "גלריה של אנשי המקצוע בשכונה – תמיד תדע למי לפנות." },
+  { icon: Calendar, title: "אירועים ומפגשים", description: "ערבי יין, הרצאות ומפגשי נטוורקינג בלעדיים לחברי המועדון." },
 ];
 
-const BulletinSection = () => {
+const BulletinSection = ({ isApproved = false }: Props) => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isApproved) {
+      supabase
+        .from("announcements")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(3)
+        .then(({ data }) => setAnnouncements(data || []));
+    }
+  }, [isApproved]);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -30,20 +36,7 @@ const BulletinSection = () => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const cards = sectionRef.current?.querySelectorAll(".bulletin-card");
-            if (cards) {
-              gsap.fromTo(cards, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: "power3.out" });
-
-              // Float effect on hover
-              cards.forEach((card) => {
-                const el = card as HTMLElement;
-                el.addEventListener("mouseenter", () => {
-                  gsap.to(el, { y: -8, duration: 0.3, ease: "power2.out" });
-                });
-                el.addEventListener("mouseleave", () => {
-                  gsap.to(el, { y: 0, duration: 0.4, ease: "power2.out" });
-                });
-              });
-            }
+            if (cards) gsap.fromTo(cards, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: "power3.out" });
           }
         });
       },
@@ -51,7 +44,10 @@ const BulletinSection = () => {
     );
     observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [announcements]);
+
+  // Show real announcements for approved users, static features for guests
+  const showRealContent = isApproved && announcements.length > 0;
 
   return (
     <section className="py-24 px-6 bg-card/50" ref={sectionRef}>
@@ -64,18 +60,40 @@ const BulletinSection = () => {
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
-          {features.map((feature, i) => (
-            <div key={i} className="bulletin-card opacity-0">
-              <div className="rounded-lg border border-border bg-card p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)]">
-                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-secondary">
-                  <feature.icon className="h-7 w-7 text-gold" />
+        <div className="relative grid gap-8 md:grid-cols-3">
+          {showRealContent
+            ? announcements.map((item, i) => (
+                <div key={item.id} className="bulletin-card opacity-0">
+                  <div className="rounded-lg border border-border bg-card p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)]">
+                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-secondary">
+                      <Megaphone className="h-7 w-7 text-gold" />
+                    </div>
+                    <h3 className="mb-3 font-serif text-2xl font-bold text-foreground">{item.title}</h3>
+                    <p className="font-body text-base leading-relaxed text-muted-foreground line-clamp-3">{item.content}</p>
+                    <p className="mt-3 font-body text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString("he-IL")}</p>
+                  </div>
                 </div>
-                <h3 className="mb-3 font-serif text-2xl font-bold text-foreground">{feature.title}</h3>
-                <p className="font-body text-base leading-relaxed text-muted-foreground">{feature.description}</p>
-              </div>
+              ))
+            : staticFeatures.map((feature, i) => (
+                <div key={i} className="bulletin-card opacity-0">
+                  <div className={`rounded-lg border border-border bg-card p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)] ${!isApproved ? "select-none" : ""}`}>
+                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-secondary">
+                      <feature.icon className="h-7 w-7 text-gold" />
+                    </div>
+                    <h3 className={`mb-3 font-serif text-2xl font-bold text-foreground ${!isApproved ? "" : ""}`}>{feature.title}</h3>
+                    <p className={`font-body text-base leading-relaxed text-muted-foreground ${!isApproved ? "blur-[3px]" : ""}`}>{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+
+          {!isApproved && (
+            <div className="absolute inset-0 flex items-end justify-center pb-4 pointer-events-none">
+              <Link to="/register" className="pointer-events-auto flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur-sm px-6 py-3 font-body text-sm text-gold hover:bg-gold/10 transition-colors">
+                <Lock className="h-4 w-4" />
+                הצטרף כדי לראות
+              </Link>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </section>
