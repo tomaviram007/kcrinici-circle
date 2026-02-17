@@ -24,6 +24,7 @@ export type Database = {
           is_approved: boolean
           is_sold: boolean
           sale_data: Json | null
+          sale_gallery_urls: string[] | null
           sale_image_url: string | null
           sale_type: string | null
           title: string
@@ -38,6 +39,7 @@ export type Database = {
           is_approved?: boolean
           is_sold?: boolean
           sale_data?: Json | null
+          sale_gallery_urls?: string[] | null
           sale_image_url?: string | null
           sale_type?: string | null
           title: string
@@ -52,6 +54,7 @@ export type Database = {
           is_approved?: boolean
           is_sold?: boolean
           sale_data?: Json | null
+          sale_gallery_urls?: string[] | null
           sale_image_url?: string | null
           sale_type?: string | null
           title?: string
