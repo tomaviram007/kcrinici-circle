@@ -4,13 +4,16 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import gsap from "gsap";
 
-const HeroSection = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
+interface HeroSectionProps {
+  isLoggedIn?: boolean;
+  isApproved?: boolean;
+}
+
+const HeroSection = ({ isLoggedIn = false, isApproved = false }: HeroSectionProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Parallax
     const handleScroll = () => {
       if (bgRef.current) {
         bgRef.current.style.transform = `translateY(${window.scrollY * 0.4}px)`;
@@ -18,7 +21,6 @@ const HeroSection = () => {
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // GSAP entrance
     if (contentRef.current) {
       const els = contentRef.current.children;
       gsap.fromTo(els, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, stagger: 0.15, ease: "power3.out", delay: 0.3 });
@@ -28,7 +30,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative h-screen overflow-hidden" ref={heroRef}>
+    <section className="relative h-screen overflow-hidden">
       <div
         ref={bgRef}
         className="absolute inset-0 bg-cover bg-center scale-110"
@@ -52,16 +54,32 @@ const HeroSection = () => {
           ברוכים הבאים למועדון.
         </p>
         <div className="mt-10 flex gap-4">
-          <Link to="/register">
-            <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
-              הצטרף למועדון
-            </Button>
-          </Link>
-          <Link to="/login">
-            <Button variant="outline" size="lg" className="border-gold text-gold font-body text-base px-8 py-6 hover:bg-gold/10">
-              כניסת חברים
-            </Button>
-          </Link>
+          {isLoggedIn && isApproved ? (
+            <Link to="/dashboard">
+              <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
+                כניסה למועדון
+              </Button>
+            </Link>
+          ) : isLoggedIn ? (
+            <Link to="/pending">
+              <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
+                בדוק סטטוס בקשה
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/register">
+                <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
+                  הצטרף למועדון
+                </Button>
+              </Link>
+              <Link to="/login">
+                <Button variant="outline" size="lg" className="border-gold text-gold font-body text-base px-8 py-6 hover:bg-gold/10">
+                  כניסת חברים
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
