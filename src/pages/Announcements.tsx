@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, MessageCircle, Gift, Megaphone, ShoppingBag, Calendar, Share2, Car, Smartphone, Sofa, Shirt, Home, Package, Banknote } from "lucide-react";
+import { Plus, MessageCircle, Gift, Megaphone, ShoppingBag, Calendar, Share2, Car, Smartphone, Sofa, Shirt, Home, Package, Banknote, CheckCircle2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -101,6 +102,7 @@ interface BirthdayMember {
 const EMPTY_SALE_DATA: Record<string, string> = {};
 
 const Announcements = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -487,11 +489,18 @@ const Announcements = () => {
                 <div className="relative z-[1] flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-serif text-lg font-bold text-gray-800 leading-tight">{item.title}</h3>
-                    {item.category === "sale" && (
-                      <span className="shrink-0 inline-flex items-center gap-1 rounded bg-amber-200/60 px-1.5 py-0.5 text-[10px] font-body text-amber-800">
-                        <ShoppingBag className="h-3 w-3" /> {item.sale_type ? saleTypeLabel(item.sale_type) : "מכירה"}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {item.is_sold && (
+                        <span className="inline-flex items-center gap-0.5 rounded bg-red-500/90 px-2 py-0.5 text-[11px] font-bold font-body text-white tracking-wide">
+                          SOLD
+                        </span>
+                      )}
+                      {item.category === "sale" && !item.is_sold && (
+                        <span className="inline-flex items-center gap-1 rounded bg-amber-200/60 px-1.5 py-0.5 text-[10px] font-body text-amber-800">
+                          <ShoppingBag className="h-3 w-3" /> {item.sale_type ? saleTypeLabel(item.sale_type) : "מכירה"}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <p className="font-body text-sm text-gray-600 leading-relaxed whitespace-pre-line">{item.content}</p>
 
@@ -507,24 +516,39 @@ const Announcements = () => {
                     </div>
                   )}
                 </div>
-                <div className="relative z-[1] mt-3 flex items-center justify-between">
+                <div className="relative z-[1] mt-3 flex items-center justify-between gap-1 flex-wrap">
                   <span className="font-body text-[11px] text-gray-400">
                     {new Date(item.created_at).toLocaleDateString("he-IL")}
                     {item.created_by && creatorProfiles[item.created_by] && (
                       <> • {creatorProfiles[item.created_by].full_name}</>
                     )}
                   </span>
-                  {item.category === "sale" && (
-                    <a
-                      href={`https://api.whatsapp.com/send?text=${buildShareMessage(item)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded bg-green-100/80 px-1.5 py-0.5 text-[10px] font-body text-green-800 hover:bg-green-200/80 transition-colors"
-                      title="שתף בוואטסאפ"
-                    >
-                      <Share2 className="h-3 w-3" /> שתף
-                    </a>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {item.category === "sale" && user?.id === item.created_by && !item.is_sold && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from("announcements").update({ is_sold: true }).eq("id", item.id);
+                          toast({ title: "סומן כנמכר!" });
+                          fetchItems();
+                        }}
+                        className="inline-flex items-center gap-1 rounded bg-amber-100/80 px-1.5 py-0.5 text-[10px] font-body text-amber-900 hover:bg-amber-200/80 transition-colors"
+                        title="סמן כנמכר"
+                      >
+                        <CheckCircle2 className="h-3 w-3" /> נמכר
+                      </button>
+                    )}
+                    {item.category === "sale" && (
+                      <a
+                        href={`https://api.whatsapp.com/send?text=${buildShareMessage(item)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded bg-green-100/80 px-1.5 py-0.5 text-[10px] font-body text-green-800 hover:bg-green-200/80 transition-colors"
+                        title="שתף בוואטסאפ"
+                      >
+                        <Share2 className="h-3 w-3" /> שתף
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
