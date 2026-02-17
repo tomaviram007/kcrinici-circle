@@ -6,12 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Plus, Image, ArrowRight, Trash2, X, ChevronLeft, ChevronRight, Pencil, Link2, Upload, Star, Calendar, User } from "lucide-react";
+import { Plus, Image, ArrowRight, Trash2, X, ChevronLeft, ChevronRight, Pencil, Link2, Upload, Star, Calendar, User, Filter, AlertTriangle } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroImg from "@/assets/hero-gallery.jpg";
 import { validateImageFile } from "@/lib/file-validation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Album = Tables<"gallery_albums">;
 type Photo = Tables<"gallery_photos">;
@@ -60,6 +61,10 @@ const Gallery = () => {
   const [showAddByLink, setShowAddByLink] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [addingLink, setAddingLink] = useState(false);
+
+  // Filters
+  const [filterMonth, setFilterMonth] = useState("");
+  const [filterSearch, setFilterSearch] = useState("");
 
   // Lightbox
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -293,13 +298,22 @@ const Gallery = () => {
     if (!selectedAlbum || !editAlbumTitle.trim()) return;
     setSavingAlbum(true);
     try {
-      const { error } = await supabase.from("gallery_albums").update({
+      const updates: any = {
         title: editAlbumTitle.trim(),
         description: editAlbumDesc.trim() || null,
-      }).eq("id", selectedAlbum.id);
+      };
+      // Non-admin edits require re-approval
+      if (!isAdmin) {
+        updates.is_approved = false;
+      }
+      const { error } = await supabase.from("gallery_albums").update(updates).eq("id", selectedAlbum.id);
       if (error) throw error;
       setSelectedAlbum({ ...selectedAlbum, title: editAlbumTitle.trim(), description: editAlbumDesc.trim() || null });
-      toast({ title: "פרטי האלבום עודכנו!" });
+      if (!isAdmin) {
+        toast({ title: "השינויים נשלחו לאישור", description: "האלבום יוצג מחדש לאחר אישור מנהל המערכת." });
+      } else {
+        toast({ title: "פרטי האלבום עודכנו!" });
+      }
       setShowEditAlbum(false);
       await fetchAlbums();
     } catch (err: any) {
@@ -628,7 +642,7 @@ const Gallery = () => {
     <ClubAboutSection />
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="font-serif text-2xl font-bold text-foreground md:text-3xl">
           גלריית <span className="text-gold">תמונות</span>
         </h1>
@@ -638,56 +652,110 @@ const Gallery = () => {
         </Button>
       </div>
 
-      {albums.length === 0 ? (
-        <div className="text-center py-16">
-          <Image className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <p className="font-body text-lg text-muted-foreground">עדיין אין אלבומים</p>
-          <p className="font-body text-sm text-muted-foreground mt-1">צרו אלבום חדש ושתפו תמונות מהמועדון</p>
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <Filter className="h-4 w-4" />
+          <span className="font-body text-sm">סינון:</span>
         </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {albums.map((album) => {
-            const creator = albumCreators[album.created_by || ""];
-            return (
-              <div
-                key={album.id}
-                onClick={() => openAlbum(album)}
-                className="group relative overflow-hidden rounded-xl border border-border bg-card cursor-pointer transition-all hover:border-gold/30 hover:shadow-lg hover:shadow-gold/5"
-              >
-                <div className="aspect-[4/3] bg-muted flex items-center justify-center overflow-hidden">
-                  {album.cover_image_url ? (
-                    <img src={album.cover_image_url} alt={album.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                  ) : (
-                    <Image className="h-12 w-12 text-muted-foreground" />
+        <Input
+          placeholder="חיפוש לפי שם / נושא..."
+          value={filterSearch}
+          onChange={(e) => setFilterSearch(e.target.value)}
+          className="bg-card border-border w-48 sm:w-56"
+          autoComplete="off"
+        />
+        <Select value={filterMonth} onValueChange={setFilterMonth}>
+          <SelectTrigger className="w-40 font-body bg-card border-border">
+            <SelectValue placeholder="חודש" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">כל החודשים</SelectItem>
+            {Array.from({ length: 12 }, (_, i) => {
+              const d = new Date(2026, i);
+              return (
+                <SelectItem key={i} value={String(i)}>
+                  {d.toLocaleDateString("he-IL", { month: "long" })}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+        {(filterSearch || filterMonth) && (
+          <button onClick={() => { setFilterSearch(""); setFilterMonth(""); }} className="font-body text-xs text-gold hover:underline">
+            נקה פילטרים
+          </button>
+        )}
+      </div>
+
+      {(() => {
+        let filtered = albums;
+        if (filterSearch) {
+          const q = filterSearch.toLowerCase();
+          filtered = filtered.filter(a => a.title.toLowerCase().includes(q) || (a.description || "").toLowerCase().includes(q));
+        }
+        if (filterMonth && filterMonth !== "all") {
+          filtered = filtered.filter(a => new Date(a.created_at).getMonth() === Number(filterMonth));
+        }
+        return filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <Image className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <p className="font-body text-lg text-muted-foreground">
+              {albums.length === 0 ? "עדיין אין אלבומים" : "לא נמצאו אלבומים לפי הסינון"}
+            </p>
+            {albums.length === 0 && <p className="font-body text-sm text-muted-foreground mt-1">צרו אלבום חדש ושתפו תמונות מהמועדון</p>}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((album) => {
+              const creator = albumCreators[album.created_by || ""];
+              const isPending = !(album as any).is_approved && album.created_by === userId;
+              return (
+                <div
+                  key={album.id}
+                  onClick={() => openAlbum(album)}
+                  className={`group relative overflow-hidden rounded-xl border bg-card cursor-pointer transition-all hover:border-gold/30 hover:shadow-lg hover:shadow-gold/5 ${isPending ? "border-amber-500/40" : "border-border"}`}
+                >
+                  {isPending && (
+                    <div className="absolute top-2 right-2 z-10 flex items-center gap-1 rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-body text-white">
+                      <AlertTriangle className="h-3 w-3" /> ממתין לאישור
+                    </div>
                   )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-serif text-lg font-bold text-foreground">{album.title}</h3>
-                  {album.description && (
-                    <p className="font-body text-sm text-muted-foreground mt-1 line-clamp-2">{album.description}</p>
-                  )}
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="font-body text-xs text-muted-foreground">
-                      {new Date(album.created_at).toLocaleDateString("he-IL")}
-                    </p>
-                    {creator && (
-                      <p className="font-body text-xs text-gold">{creator.full_name}</p>
+                  <div className="aspect-[4/3] bg-muted flex items-center justify-center overflow-hidden">
+                    {album.cover_image_url ? (
+                      <img src={album.cover_image_url} alt={album.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                    ) : (
+                      <Image className="h-12 w-12 text-muted-foreground" />
                     )}
                   </div>
+                  <div className="p-4">
+                    <h3 className="font-serif text-lg font-bold text-foreground">{album.title}</h3>
+                    {album.description && (
+                      <p className="font-body text-sm text-muted-foreground mt-1 line-clamp-2">{album.description}</p>
+                    )}
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="font-body text-xs text-muted-foreground">
+                        {new Date(album.created_at).toLocaleDateString("he-IL")}
+                      </p>
+                      {creator && (
+                        <p className="font-body text-xs text-gold">{creator.full_name}</p>
+                      )}
+                    </div>
+                  </div>
+                  {canManageAlbum(album) && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteAlbum(album.id); }}
+                      className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/80 text-destructive-foreground rounded-full p-1.5"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
-                {canManageAlbum(album) && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleDeleteAlbum(album.id); }}
-                    className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/80 text-destructive-foreground rounded-full p-1.5"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        );
+      })()}
 
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent dir="rtl">
