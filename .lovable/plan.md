@@ -1,27 +1,60 @@
 
 
-## Fix: Album Cover Upload RLS Error
+## תיקון: סנכרון מצב התחברות בין Header ל-ProtectedRoute
 
-### Problem
-When changing an album cover image, the upload uses `upsert: true` to replace the existing file. The `gallery` storage bucket has an INSERT policy for approved members but **no UPDATE policy**, so replacing an existing file fails with "new row violates row-level security policy".
+### הבעיה
+ה-Header וה-ProtectedRoute מנהלים כל אחד מצב אימות (auth state) בנפרד. כשחוזרים מטאב אחר, ProtectedRoute עלול לקבוע "no-session" (ולהציג מסך נעילה) בעוד שה-Header עדיין מראה שהמשתמש מחובר. זה קורה כי יש שני מאזינים נפרדים שלא מסונכרנים ביניהם.
 
-### Solution
-Add an UPDATE policy on `storage.objects` for the `gallery` bucket, allowing users to update their own files (matching by folder name = user ID). This follows the same pattern already used for the `avatars` bucket.
+### הפתרון
+יצירת **AuthContext** משותף שמנהל את מצב ההתחברות במקום אחד. גם Header וגם ProtectedRoute יצרכו ממנו את אותו מצב -- מה שמבטיח שלעולם לא יהיה פער ביניהם.
 
-### Technical Details
+### שלבי ביצוע
 
-**Database Migration** - Add storage UPDATE policy:
+1. **יצירת קובץ `src/contexts/AuthContext.tsx`**
+   - Context שמחזיק: session, user, isApproved, isAdmin, loading
+   - מאזין אחד ל-`onAuthStateChange` (מקור אמת יחיד)
+   - בדיקת פרופיל ותפקידים פעם אחת כשיש session
+   - מאזין `visibilitychange` אחד (סנכרון שקט בחזרה מטאב)
 
-```sql
-CREATE POLICY "Users can update own gallery images"
-ON storage.objects
-FOR UPDATE
-TO authenticated
-USING (
-  bucket_id = 'gallery'
-  AND (auth.uid())::text = (storage.foldername(name))[1]
-);
+2. **עדכון `src/App.tsx`**
+   - עטיפת ה-`AppLayout` ב-`AuthProvider`
+
+3. **עדכון `src/components/layout/Header.tsx`**
+   - הסרת כל הלוגיקה העצמאית של auth state
+   - שימוש ב-`useAuth()` מה-context במקום
+
+4. **עדכון `src/components/auth/ProtectedRoute.tsx`**
+   - הסרת כל הלוגיקה העצמאית של auth state
+   - שימוש ב-`useAuth()` מה-context
+   - שמירת הלוגיקה של `requireApproval` ו-`requireAdmin` כבדיקות מקומיות מעל ה-context
+
+### פרטים טכניים
+
+**AuthContext** ינהל:
+- `onAuthStateChange` כמקור אמת יחיד
+- שאילתות profiles ו-user_roles רק כשיש session תקין
+- מאזין visibilitychange שרק בודק שה-session קיים (בלי לאפס state ל-loading)
+- timeout בטיחותי של 5 שניות
+
+**ProtectedRoute** יהפוך לקומפוננטה פשוטה:
+```text
+const { user, isApproved, isAdmin, loading } = useAuth();
+if (loading) -> spinner
+if (!user) -> teaser "no-session"
+if (requireApproval && !isApproved) -> teaser "not-approved"
+if (requireAdmin && !isAdmin) -> redirect to /dashboard
+else -> render children
 ```
 
-This single migration fixes the issue. No code changes needed -- the existing upload logic in `Gallery.tsx` is correct.
+**Header** ישתמש באותם ערכים:
+```text
+const { user, isApproved, isAdmin, loading } = useAuth();
+// canAccess = user && isApproved (same as before, but from shared state)
+```
+
+### יתרונות
+- מצב אימות אחד ומסונכרן לכל האפליקציה
+- אין יותר מצב שה-Header מראה "מחובר" אבל התוכן מראה "לא מחובר"
+- קוד פשוט ונקי יותר בשני הקומפוננטים
+- מאזין אחד במקום שניים -- פחות עומס על Supabase
 
