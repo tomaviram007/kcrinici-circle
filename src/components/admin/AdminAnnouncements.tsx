@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Check, Clock, Plus, X } from "lucide-react";
+import { fireConfetti } from "@/lib/confetti";
 
 const AdminAnnouncements = () => {
   const { toast } = useToast();
@@ -34,6 +35,7 @@ const AdminAnnouncements = () => {
     setSubmitting(false);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "פורסם!", description: "המודעה פורסמה בהצלחה." });
+    fireConfetti();
     setForm({ title: "", content: "" });
     setShowForm(false);
     fetchItems();
