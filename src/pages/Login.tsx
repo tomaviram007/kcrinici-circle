@@ -34,7 +34,13 @@ const Login = () => {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       if (data.session) {
-        navigate("/dashboard");
+        // Check if user is admin and redirect accordingly
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.session.user.id);
+        const isAdmin = roles?.some((r: any) => r.role === "admin");
+        navigate(isAdmin ? "/admin" : "/");
       }
     } catch (error: any) {
       const msg = error.message?.toLowerCase() || "";
