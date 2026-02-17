@@ -37,26 +37,26 @@ const Members = () => {
   }, [members]);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl font-bold text-foreground">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
           אינדקס <span className="text-gold">החברים</span>
         </h1>
         <p className="mt-1 font-body text-sm text-muted-foreground">אנשי המקצוע של השכונה</p>
         <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
       </div>
 
-      <div ref={gridRef} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div ref={gridRef} className="grid gap-3 grid-cols-2 sm:gap-5 lg:grid-cols-3">
         {members.map((member) => (
-          <div key={member.id} className="member-card rounded-lg border border-border bg-card p-6 text-center transition-shadow hover:border-gold/20 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)]">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary border border-gold/20">
+          <div key={member.id} className="member-card rounded-lg border border-border bg-card p-4 sm:p-6 text-center transition-shadow hover:border-gold/20 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)]">
+            <div className="mx-auto mb-3 sm:mb-4 flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-secondary border border-gold/20">
               {member.avatar_url ? (
                 <img src={member.avatar_url} alt={member.full_name} className="h-full w-full rounded-full object-cover" />
               ) : (
                 <User className="h-7 w-7 text-gold" />
               )}
             </div>
-            <h3 className="font-serif text-lg font-bold text-foreground">{member.full_name}</h3>
+            <h3 className="font-serif text-sm sm:text-lg font-bold text-foreground">{member.full_name}</h3>
             <p className="mt-1 font-body text-sm text-gold">{member.profession}</p>
             {member.expertise && <p className="mt-0.5 font-body text-xs text-muted-foreground">{member.expertise}</p>}
             {member.bio && <p className="mt-3 font-body text-xs text-muted-foreground italic leading-relaxed">"{member.bio}"</p>}

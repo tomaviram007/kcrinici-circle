@@ -50,21 +50,21 @@ const BulletinSection = ({ isApproved = false }: Props) => {
   const showRealContent = isApproved && announcements.length > 0;
 
   return (
-    <section className="py-24 px-6 bg-card/50" ref={sectionRef}>
+    <section className="py-12 px-4 sm:py-24 sm:px-6 bg-card/50" ref={sectionRef}>
       <div className="mx-auto max-w-5xl">
-        <div className="mb-16 text-center">
-          <p className="mb-2 font-body text-sm tracking-[0.3em] text-gold/70 uppercase">לוח המודעות</p>
-          <h2 className="font-serif text-4xl font-bold text-foreground md:text-5xl">
+        <div className="mb-8 sm:mb-16 text-center">
+          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">לוח המודעות</p>
+          <h2 className="font-serif text-2xl font-bold text-foreground sm:text-4xl md:text-5xl">
             מה חדש <span className="text-gold">במועדון</span>
           </h2>
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
 
-        <div className="relative grid gap-8 md:grid-cols-3">
+        <div className="relative grid gap-4 sm:gap-8 md:grid-cols-3">
           {showRealContent
             ? announcements.map((item, i) => (
                 <div key={item.id} className="bulletin-card opacity-0">
-                  <div className="rounded-lg border border-border bg-card p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)]">
+                  <div className="rounded-lg border border-border bg-card p-5 sm:p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)]">
                     <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-secondary">
                       <Megaphone className="h-7 w-7 text-gold" />
                     </div>
@@ -76,7 +76,7 @@ const BulletinSection = ({ isApproved = false }: Props) => {
               ))
             : staticFeatures.map((feature, i) => (
                 <div key={i} className="bulletin-card opacity-0">
-                  <div className={`rounded-lg border border-border bg-card p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)] ${!isApproved ? "select-none" : ""}`}>
+                  <div className={`rounded-lg border border-border bg-card p-5 sm:p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)] ${!isApproved ? "select-none" : ""}`}>
                     <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-secondary">
                       <feature.icon className="h-7 w-7 text-gold" />
                     </div>

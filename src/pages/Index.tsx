@@ -35,8 +35,8 @@ const Index = () => {
       <EventsPreviewSection isApproved={isApproved} />
       {!isLoggedIn && <CTASection />}
 
-      <footer className="border-t border-border py-12 text-center">
-        <p className="font-body text-sm text-muted-foreground">
+      <footer className="border-t border-border py-8 sm:py-12 text-center px-4">
+        <p className="font-body text-xs sm:text-sm text-muted-foreground">
           © {new Date().getFullYear()} הגברים של ק. קריניצי — מועדון חברים אקסקלוסיבי
         </p>
       </footer>

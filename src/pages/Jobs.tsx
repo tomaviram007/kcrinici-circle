@@ -70,10 +70,10 @@ const Jobs = () => {
   const canModify = (job: any) => job.created_by === userId;
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mb-6 sm:mb-8 flex items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-foreground">
+          <h1 className="font-serif text-xl font-bold text-foreground sm:text-3xl">
             הזדמנויות <span className="text-gold">בשכונה</span>
           </h1>
           <p className="mt-1 font-body text-sm text-muted-foreground">לוח דרושים אקסקלוסיבי לחברי המועדון</p>
@@ -88,7 +88,7 @@ const Jobs = () => {
         <form onSubmit={handleSubmit} className="mb-6 rounded-lg border border-border bg-card p-5 space-y-3">
           <Input placeholder="כותרת המשרה" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="bg-background" />
           <Textarea placeholder="תיאור המשרה" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required className="bg-background" />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input placeholder="איש קשר / טלפון" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className="bg-background" />
             <Input placeholder="קטגוריה" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="bg-background" />
           </div>
@@ -99,9 +99,9 @@ const Jobs = () => {
         </form>
       )}
 
-      <div ref={cardsRef} className="grid gap-5 md:grid-cols-2">
+      <div ref={cardsRef} className="grid gap-3 sm:gap-5 md:grid-cols-2">
         {jobs.map((job) => (
-          <div key={job.id} className="job-card rounded-lg border border-border bg-card p-6 transition-shadow hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)]">
+          <div key={job.id} className="job-card rounded-lg border border-border bg-card p-4 sm:p-6 transition-shadow hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)]">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary">
                 <Briefcase className="h-5 w-5 text-gold" />
