@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, Menu, X } from "lucide-react";
+import { LogOut, Shield, Menu, X, Cake } from "lucide-react";
+import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showMemberDialog, setShowMemberDialog] = useState(false);
+  const { birthdays } = useBirthdaysThisWeek();
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -71,14 +73,15 @@ const Header = () => {
   };
 
   const canAccess = user && isApproved;
+  const hasBirthdays = birthdays.length > 0;
 
   const navLinks = [
     { to: "/", label: "דף הבית", protected: false },
     { to: "/dashboard", label: "ראשי", protected: true },
-    { to: "/announcements", label: "מודעות", protected: true },
+    { to: "/announcements", label: "לוח מודעות", protected: true },
     { to: "/jobs", label: "דרושים", protected: true },
-    { to: "/members", label: "חברים", protected: true },
-    { to: "/events", label: "אירועים", protected: true },
+    { to: "/members", label: "חברי המועדון", protected: true },
+    { to: "/events", label: "לוח אירועים", protected: true },
     ...(isAdmin ? [{ to: "/admin", label: "שולחן המנהל", protected: true }] : []),
   ];
 
@@ -102,6 +105,18 @@ const Header = () => {
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
+
+          {/* Birthday badge - mobile left side */}
+          {hasBirthdays && (
+            <div className="md:hidden absolute left-4 top-1/2 -translate-y-1/2 z-10">
+              <Link to="/#birthdays" className="relative flex items-center justify-center">
+                <Cake className="h-5 w-5 text-gold" />
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-background">
+                  {birthdays.length}
+                </span>
+              </Link>
+            </div>
+          )}
 
           {/* Logo: centered on mobile, right-aligned on desktop */}
           <Link
@@ -127,6 +142,19 @@ const Header = () => {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Desktop birthday badge */}
+              {hasBirthdays && (
+                <Link
+                  to="/#birthdays"
+                  className="relative rounded-md px-3 py-1.5 font-body text-sm text-gold hover:bg-secondary transition-colors flex items-center gap-1.5"
+                >
+                  <Cake className="h-4 w-4" />
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[11px] font-bold text-background">
+                    {birthdays.length}
+                  </span>
+                </Link>
+              )}
             </nav>
           )}
 
@@ -150,54 +178,55 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Nav Overlay */}
-        {menuOpen && (
-          <div className="md:hidden fixed inset-0 top-[57px] z-40 bg-background/95 backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
-            <nav className="flex flex-col items-center justify-center gap-2 px-6 py-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  onClick={(e) => {
-                    handleNavClick(e, link);
-                    if (!link.protected || canAccess) setMenuOpen(false);
-                  }}
-                  className={`w-full max-w-xs text-center rounded-lg px-4 py-3 font-body text-base transition-colors ${
-                    isActive(link.to)
-                      ? "bg-secondary text-gold font-semibold"
-                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-                  }`}
-                >
-                  {link.to === "/admin" && <Shield className="inline h-4 w-4 ml-1" />}
-                  {link.label}
-                </Link>
-              ))}
-
-              <div className="mt-4 w-full max-w-xs h-px bg-border" />
-
-              {user ? (
-                <Button
-                  variant="ghost"
-                  onClick={() => { handleLogout(); setMenuOpen(false); }}
-                  className="mt-2 w-full max-w-xs text-muted-foreground font-body gap-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  יציאה
-                </Button>
-              ) : (
-                <div className="mt-2 flex flex-col gap-2 w-full max-w-xs">
-                  <Link to="/register" onClick={() => setMenuOpen(false)}>
-                    <Button className="w-full gradient-gold text-primary-foreground font-body">הצטרפות למועדון</Button>
-                  </Link>
-                  <Link to="/login" onClick={() => setMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full text-muted-foreground font-body">כניסה</Button>
-                  </Link>
-                </div>
-              )}
-            </nav>
-          </div>
-        )}
       </header>
+
+      {/* Mobile Nav Overlay - rendered outside header for proper z-index */}
+      {menuOpen && (
+        <div className="md:hidden fixed inset-0 top-[57px] z-[60] flex flex-col" style={{ background: 'hsl(var(--background))' }}>
+          <nav className="flex-1 flex flex-col items-center justify-center gap-1 px-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={(e) => {
+                  handleNavClick(e, link);
+                  if (!link.protected || canAccess) setMenuOpen(false);
+                }}
+                className={`w-full max-w-xs text-center py-3 font-body text-lg transition-colors ${
+                  isActive(link.to)
+                    ? "text-gold font-semibold"
+                    : "text-foreground/80 hover:text-gold"
+                }`}
+              >
+                {link.to === "/admin" && <Shield className="inline h-4 w-4 ml-1" />}
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="px-6 pb-10 flex flex-col items-center gap-3">
+            {user ? (
+              <Button
+                variant="ghost"
+                onClick={() => { handleLogout(); setMenuOpen(false); }}
+                className="w-full max-w-xs text-muted-foreground font-body gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                יציאה
+              </Button>
+            ) : (
+              <>
+                <Link to="/register" onClick={() => setMenuOpen(false)} className="w-full max-w-xs">
+                  <Button className="w-full gradient-gold text-primary-foreground font-body text-base py-6">הצטרפות</Button>
+                </Link>
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="w-full max-w-xs text-center">
+                  <span className="font-body text-sm text-muted-foreground hover:text-gold transition-colors">כניסה</span>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <Dialog open={showMemberDialog} onOpenChange={setShowMemberDialog}>
         <DialogContent className="text-center sm:text-right" dir="rtl">
