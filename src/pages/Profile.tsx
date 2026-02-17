@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import AvatarUpload from "@/components/AvatarUpload";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -22,6 +23,13 @@ const Profile = () => {
     expertise: "",
     bio: "",
   });
+
+  // Password change state
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -147,6 +155,83 @@ const Profile = () => {
           {saving ? "שומר..." : "שמור שינויים"}
         </Button>
       </form>
+
+      {/* Password Change Section */}
+      <Separator className="my-10" />
+      <h2 className="font-serif text-xl font-bold text-foreground mb-6">
+        שינוי <span className="text-gold">סיסמה</span>
+      </h2>
+      <div className="space-y-4">
+        <div>
+          <label className="mb-1.5 block font-body text-sm text-muted-foreground">סיסמה חדשה</label>
+          <div className="relative">
+            <Input
+              type={showNewPassword ? "text" : "password"}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="bg-card border-border pl-10"
+              dir="ltr"
+              placeholder="לפחות 6 תווים"
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPassword(!showNewPassword)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+        <div>
+          <label className="mb-1.5 block font-body text-sm text-muted-foreground">אימות סיסמה חדשה</label>
+          <div className="relative">
+            <Input
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="bg-card border-border pl-10"
+              dir="ltr"
+              placeholder="הזן שוב את הסיסמה"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+        <Button
+          type="button"
+          disabled={changingPassword}
+          onClick={async () => {
+            if (newPassword.length < 6) {
+              toast({ title: "שגיאה", description: "הסיסמה חייבת להכיל לפחות 6 תווים", variant: "destructive" });
+              return;
+            }
+            if (newPassword !== confirmPassword) {
+              toast({ title: "שגיאה", description: "הסיסמאות אינן תואמות", variant: "destructive" });
+              return;
+            }
+            setChangingPassword(true);
+            try {
+              const { error } = await supabase.auth.updateUser({ password: newPassword });
+              if (error) throw error;
+              toast({ title: "הסיסמה שונתה בהצלחה!" });
+              setNewPassword("");
+              setConfirmPassword("");
+            } catch (err: any) {
+              toast({ title: "שגיאה בשינוי סיסמה", description: err.message, variant: "destructive" });
+            } finally {
+              setChangingPassword(false);
+            }
+          }}
+          className="w-full gradient-gold text-primary-foreground font-body py-6 text-base hover:opacity-90"
+        >
+          {changingPassword ? "משנה סיסמה..." : "שנה סיסמה"}
+        </Button>
+      </div>
     </div>
   );
 };
