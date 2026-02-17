@@ -1,43 +1,43 @@
 
 
-# תיקון בעיית הכניסה לממשק - תקוע על "טוען..."
+# תיקון טופס הרישום + תצוגת טיזר לעמודים מוגנים
 
-## מה הבעיה?
+## בעיה 1: טופס הרישום - הקלדה מבטלת את עצמה
 
-זיהיתי את הבעיה המדויקת: יש **race condition** (מרוץ תזמונים) בין דף הכניסה לבין הקומפוננטה שמגינה על הדפים (`ProtectedRoute`).
+**הסיבה:** הקומפוננטה `Field` מוגדרת **בתוך** קומפוננטת `Register`. כל פעם שמקלידים אות, ה-state משתנה, React מייצר מחדש את `Field` כפונקציה חדשה, וזה גורם ל-unmount/remount של ה-input - מה שמוחק את הפוקוס ומפריע להקלדה.
 
-**מה קורה צעד אחר צעד:**
-1. המשתמש לוחץ "כניסה למועדון" - ההתחברות מצליחה (סטטוס 200)
-2. הדף מנווט ל-`/dashboard`
-3. `ProtectedRoute` נטען וקורא ל-`getSession()` - אבל ה-session עדיין לא מוכן לגמרי
-4. התוצאה: אין session -> מפנה חזרה ל-`/login`, או נתקע על "טוען..."
+**פתרון:** להוציא את `Field` מחוץ לקומפוננטת `Register` ולהעביר את ה-props הנדרשים (form, errors, handleChange) כפרמטרים. בנוסף, להוסיף `autoComplete="off"` לכל השדות כדי למנוע התערבות של הדפדפן.
 
-**שורש הבעיה:** ב-`ProtectedRoute`, המאזין ל-`onAuthStateChange` **מתעלם לגמרי** מאירוע `SIGNED_IN`. כלומר גם כש-Supabase מודיע "המשתמש התחבר!" - הקומפוננטה לא עושה כלום עם זה.
+## בעיה 2: עמודים מוגנים - תצוגת טיזר במקום הפניה
 
-## הפתרון
+כרגע `ProtectedRoute` מפנה ל-login. במקום זה, ליצור מצב חדש שמציג את התוכן מטושטש (blur) עם שכבת "הצטרף למועדון" מעליו.
 
-### קובץ 1: `src/components/auth/ProtectedRoute.tsx`
+**פתרון:** להוסיף ל-`ProtectedRoute` מצב `teaser` - כשאין session, במקום להפנות ל-login, להציג את ה-children עם:
+- אפקט blur על התוכן
+- שכבת overlay עם כפתור הצטרפות/כניסה
+- המשתמש רואה את העמוד אבל לא יכול לגשת לתוכן
 
-שינוי המאזין `onAuthStateChange` כך שגם אירוע `SIGNED_IN` ו-`TOKEN_REFRESHED` יפעילו מחדש את בדיקת ה-session:
+## בעיה 3: שגיאות Console (404)
 
-```text
-onAuthStateChange:
-  SIGNED_IN / TOKEN_REFRESHED -> הפעל מחדש את check()
-  SIGNED_OUT -> הפנה ל-login (כמו היום)
-```
+שגיאות ה-404 בתמונה הן WebSocket errors של סביבת הפיתוח (dev-server) - לא משפיעות על האתר בפרודקשן. אין צורך בתיקון קוד.
 
-שינויים ספציפיים:
-- כשמתקבל `SIGNED_IN` או `TOKEN_REFRESHED` - קריאה מחדש ל-`check()` שבודק session, approval, ו-admin
-- זה פותר גם את בעיית ה-"טוען..." וגם את ההפניה חזרה ל-login
-- ה-`resolvedOk` ref נשאר כדי למנוע ניתוקים מיותרים בזמן שגיאות רשת
+## בעיה 4: פונט עקבי
 
-### קובץ 2: `src/pages/Login.tsx`
+הפונט "Tel Aviv" כבר מוגדר נכון ב-CSS. נוודא שכל הכותרות והטקסטים משתמשים ב-classes הנכונים (`font-body`, `font-serif`) ולא ב-`font-serif` הגנרי של Tailwind.
 
-הוספת המתנה קצרה אחרי התחברות מוצלחת כדי לוודא שה-session נשמר ב-storage לפני הניווט:
+---
 
-- לאחר `signInWithPassword` מוצלח, בדיקה ש-`getSession()` מחזיר session תקין לפני הקריאה ל-`navigate("/dashboard")`
+## פירוט טכני
 
-## סיכום
+### קובץ 1: `src/pages/Register.tsx`
+- להוציא את קומפוננטת `Field` מחוץ ל-`Register` ולהפוך אותה לקומפוננטה נפרדת שמקבלת props: `form`, `errors`, `onChange`
+- להוסיף `autoComplete="off"` לטופס ולכל שדה
+- לתקן `font-serif` ל-`font-serif-display` בכותרת (שורה 131) כדי להבטיח שימוש בפונט Tel Aviv
 
-שני שינויים קטנים שפותרים את הבעיה מהשורש - ProtectedRoute יקשיב לאירוע SIGNED_IN ויפעיל בדיקה מחדש, ודף הכניסה יוודא שה-session מוכן לפני הניווט.
+### קובץ 2: `src/components/auth/ProtectedRoute.tsx`
+- להוסיף מצב `teaser` ל-state
+- כשאין session: במקום `Navigate to="/login"` - להציג את ה-children עטופים ב-div עם:
+  - `filter: blur(8px)` + `pointer-events: none`
+  - overlay מעליו עם כפתורי "הצטרף" / "כניסה"
+- כשאין approval: אותו דבר עם הודעה "ממתין לאישור"
 
