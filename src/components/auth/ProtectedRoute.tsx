@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
     const timeout = setTimeout(() => {
       if (mounted) setState("no-session");
-    }, 10000);
+    }, 5000);
 
     const check = async () => {
       try {
@@ -53,7 +53,14 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
     };
   }, [requireApproval, requireAdmin]);
 
-  if (state === "loading") return <div className="flex min-h-[60vh] items-center justify-center"><p className="font-body text-muted-foreground">טוען...</p></div>;
+  if (state === "loading") return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-gold" />
+        <p className="font-body text-sm text-muted-foreground">טוען...</p>
+      </div>
+    </div>
+  );
   if (state === "no-session") return <Navigate to="/login" replace />;
   if (state === "not-approved") return <Navigate to="/pending" replace />;
   if (state === "not-admin") return <Navigate to="/dashboard" replace />;

@@ -82,7 +82,7 @@ const Header = () => {
         </Link>
 
         {/* Desktop Nav */}
-        {user && !loading && (
+        {!loading && user && (
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -100,7 +100,7 @@ const Header = () => {
         )}
 
         <div className="flex items-center gap-3">
-          {user ? (
+          {loading ? null : user ? (
             <>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground font-body text-sm gap-1">
                 <LogOut className="h-4 w-4" />
