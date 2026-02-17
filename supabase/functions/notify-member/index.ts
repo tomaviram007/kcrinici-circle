@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+const VALID_ACTIONS = ['approve', 'reject', 'admin-reset-password'];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -54,11 +56,48 @@ serve(async (req) => {
       });
     }
 
-    // --- Process request ---
-    const { userId, action, newPassword } = await req.json();
+    // --- Parse and validate request body ---
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    // Admin password reset action
-    if (action === "admin-reset-password" && userId && newPassword) {
+    const { userId, action, newPassword } = body;
+
+    if (!userId || typeof userId !== 'string') {
+      return new Response(JSON.stringify({ error: 'Missing or invalid userId' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!action || !VALID_ACTIONS.includes(action)) {
+      return new Response(JSON.stringify({ error: `Invalid action. Must be one of: ${VALID_ACTIONS.join(', ')}` }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // --- Admin password reset action ---
+    if (action === "admin-reset-password") {
+      if (!newPassword || typeof newPassword !== 'string') {
+        return new Response(JSON.stringify({ error: 'newPassword is required for password reset' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (newPassword.length < 6) {
+        return new Response(JSON.stringify({ error: 'Password must be at least 6 characters' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
         password: newPassword,
       });
@@ -69,13 +108,7 @@ serve(async (req) => {
       );
     }
 
-    if (!userId || !action) {
-      return new Response(JSON.stringify({ error: "Missing userId or action" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
+    // --- Approve / Reject flow ---
     const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
@@ -142,14 +175,10 @@ serve(async (req) => {
         }),
       });
 
-      const resendData = await resendRes.json();
-      console.log("Resend response:", JSON.stringify(resendData));
-
       if (!resendRes.ok) {
+        const resendData = await resendRes.json();
         console.error("Resend error:", JSON.stringify(resendData));
       }
-    } else {
-      console.log("RESEND_API_KEY not configured, skipping email");
     }
 
     return new Response(
@@ -157,7 +186,6 @@ serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
