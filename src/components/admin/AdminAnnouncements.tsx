@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Check, Clock } from "lucide-react";
+import { Trash2, Check, Clock, Plus, X } from "lucide-react";
 
 const AdminAnnouncements = () => {
   const { toast } = useToast();
   const [items, setItems] = useState<any[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ title: "", content: "" });
 
   const fetchItems = async () => {
     const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
@@ -14,6 +19,25 @@ const AdminAnnouncements = () => {
   };
 
   useEffect(() => { fetchItems(); }, []);
+
+  const handleCreate = async () => {
+    if (!form.title.trim() || !form.content.trim()) {
+      toast({ title: "שגיאה", description: "יש למלא כותרת ותוכן", variant: "destructive" });
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("announcements").insert({
+      title: form.title.trim(),
+      content: form.content.trim(),
+      is_approved: true,
+    });
+    setSubmitting(false);
+    if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "פורסם!", description: "המודעה פורסמה בהצלחה." });
+    setForm({ title: "", content: "" });
+    setShowForm(false);
+    fetchItems();
+  };
 
   const handleApprove = async (id: string) => {
     await supabase.from("announcements").update({ is_approved: true }).eq("id", id);
@@ -32,6 +56,40 @@ const AdminAnnouncements = () => {
 
   return (
     <div className="space-y-8">
+      {/* Create button / form */}
+      <div>
+        {!showForm ? (
+          <Button onClick={() => setShowForm(true)} className="gradient-gold text-primary-foreground font-body">
+            <Plus className="h-4 w-4 ml-1" /> פרסם מודעה חדשה
+          </Button>
+        ) : (
+          <div className="rounded-lg border border-gold/30 bg-card p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-lg font-bold text-foreground">מודעה חדשה</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}><X className="h-4 w-4" /></Button>
+            </div>
+            <Input
+              placeholder="כותרת המודעה"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              className="font-body"
+              dir="rtl"
+            />
+            <Textarea
+              placeholder="תוכן המודעה"
+              value={form.content}
+              onChange={(e) => setForm({ ...form, content: e.target.value })}
+              className="font-body min-h-[100px]"
+              dir="rtl"
+            />
+            <Button onClick={handleCreate} disabled={submitting} className="gradient-gold text-primary-foreground font-body">
+              {submitting ? "מפרסם..." : "פרסם מודעה"}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Pending */}
       <div>
         <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
           <Clock className="h-5 w-5 text-gold" /> ממתינות לאישור ({pending.length})
@@ -59,6 +117,7 @@ const AdminAnnouncements = () => {
         )}
       </div>
 
+      {/* Approved */}
       <div>
         <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
           <Check className="h-5 w-5 text-green-500" /> מודעות מאושרות ({approved.length})
