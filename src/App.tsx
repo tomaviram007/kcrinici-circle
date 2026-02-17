@@ -35,7 +35,7 @@ const AppLayout = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/pending" element={<PendingApproval />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Index />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/announcements" element={<Announcements />} />

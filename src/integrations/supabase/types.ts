@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          is_approved: boolean
           title: string
           updated_at: string
         }
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          is_approved?: boolean
           title: string
           updated_at?: string
         }
@@ -36,6 +38,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          is_approved?: boolean
           title?: string
           updated_at?: string
         }
@@ -194,6 +197,7 @@ export type Database = {
           description: string
           id: string
           is_active: boolean
+          is_approved: boolean
           title: string
           updated_at: string
         }
@@ -205,6 +209,7 @@ export type Database = {
           description: string
           id?: string
           is_active?: boolean
+          is_approved?: boolean
           title: string
           updated_at?: string
         }
@@ -216,6 +221,7 @@ export type Database = {
           description?: string
           id?: string
           is_active?: boolean
+          is_approved?: boolean
           title?: string
           updated_at?: string
         }

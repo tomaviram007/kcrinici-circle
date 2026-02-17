@@ -250,12 +250,6 @@ const Gallery = () => {
     <PageHero image={heroImg} title="גלריית" highlight="תמונות" subtitle="רגעים מיוחדים מאירועי ומפגשי המועדון" />
     <ClubAboutSection />
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
-      <div className="mb-2">
-        <Link to="/dashboard" className="inline-flex items-center gap-1 font-body text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowRight className="h-4 w-4" />
-          חזרה לדשבורד
-        </Link>
-      </div>
 
       <div className="flex items-center justify-between mb-8">
         <h1 className="font-serif text-2xl font-bold text-foreground md:text-3xl">
