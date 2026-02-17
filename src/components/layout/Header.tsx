@@ -51,8 +51,8 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="max-w-6xl px-4 md:px-6 relative flex-row flex items-center justify-center mx-0 my-0 py-[41px]">
+       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 relative flex items-center justify-between py-[8vw] md:py-3">
           <button
             className="md:hidden text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 z-10"
             onClick={() => setMenuOpen(!menuOpen)}>
@@ -74,7 +74,7 @@ const Header = () => {
           <Link
             to={user ? "/dashboard" : "/"}
             className="flex items-center gap-2 md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0">
-            <img src={logoUrl} alt="לוגו" className="h-10 w-10 rounded-full object-contain" />
+            <img src={logoUrl} alt="לוגו" className="h-10 w-10 md:h-10 md:w-10 rounded-full object-contain" />
             <span className="font-serif text-lg font-bold text-foreground hidden md:inline">
               הגברים של <span className="text-gold">ק. קריניצי</span>
             </span>
