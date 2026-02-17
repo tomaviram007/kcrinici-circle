@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,62 +10,81 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false }: ProtectedRouteProps) => {
   const [state, setState] = useState<"loading" | "no-session" | "not-approved" | "not-admin" | "ok">("loading");
-  const hasResolved = useRef(false);
+  const resolvedOk = useRef(false);
+  const signedOutExplicitly = useRef(false);
 
-  useEffect(() => {
-    let mounted = true;
+  const check = useCallback(async (mounted: () => boolean) => {
+    // If user explicitly signed out, don't re-check
+    if (signedOutExplicitly.current) return;
 
-    const check = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          if (mounted) setState("no-session");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        // Only redirect if we never resolved successfully before
+        if (!resolvedOk.current && mounted()) setState("no-session");
+        return;
+      }
+
+      if (requireApproval || requireAdmin) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_approved")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (!profile?.is_approved) {
+          if (!resolvedOk.current && mounted()) setState("not-approved");
           return;
         }
-
-        if (requireApproval || requireAdmin) {
-          const { data: profile } = await supabase.from("profiles").select("is_approved").eq("user_id", session.user.id).maybeSingle();
-          if (!profile?.is_approved) { if (mounted) setState("not-approved"); return; }
-        }
-
-        if (requireAdmin) {
-          const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
-          const admin = roles?.some((r: any) => r.role === "admin");
-          if (!admin) { if (mounted) setState("not-admin"); return; }
-        }
-
-        if (mounted) {
-          setState("ok");
-          hasResolved.current = true;
-        }
-      } catch {
-        // Only redirect if we never successfully resolved
-        if (mounted && !hasResolved.current) setState("no-session");
       }
-    };
 
-    check();
+      if (requireAdmin) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
+        const admin = roles?.some((r: any) => r.role === "admin");
+        if (!admin) {
+          if (!resolvedOk.current && mounted()) setState("not-admin");
+          return;
+        }
+      }
+
+      if (mounted()) {
+        resolvedOk.current = true;
+        setState("ok");
+      }
+    } catch {
+      // Network error during check — only redirect if never resolved
+      if (!resolvedOk.current && mounted()) setState("no-session");
+    }
+  }, [requireApproval, requireAdmin]);
+
+  useEffect(() => {
+    let alive = true;
+    const isMounted = () => alive;
+
+    check(isMounted);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (!mounted) return;
-      
-      // Only redirect on explicit sign out
+      if (!alive) return;
+
+      // ONLY redirect on explicit user-initiated sign out
       if (event === "SIGNED_OUT") {
-        hasResolved.current = false;
+        signedOutExplicitly.current = true;
+        resolvedOk.current = false;
         setState("no-session");
       }
-      
-      // Re-check on new sign in (e.g. after token refresh or Google login)
-      if (event === "SIGNED_IN" && !hasResolved.current) {
-        check();
-      }
+
+      // Ignore ALL other events once resolved — token refreshes,
+      // SIGNED_IN re-fires, etc. should never kick the user out.
     });
 
     return () => {
-      mounted = false;
+      alive = false;
       subscription.unsubscribe();
     };
-  }, [requireApproval, requireAdmin]);
+  }, [check]);
 
   if (state === "loading") return (
     <div className="flex min-h-[60vh] items-center justify-center">
