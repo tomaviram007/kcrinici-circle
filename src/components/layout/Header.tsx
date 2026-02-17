@@ -51,12 +51,12 @@ const Header = () => {
 
   return (
     <>
-       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto max-w-6xl px-4 md:px-6 relative flex items-center justify-between py-[8vw] md:py-3">
+       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md w-full">
+        <div className="w-full px-4 md:px-6 relative flex items-center py-[8vw] md:py-3">
+          {/* Mobile: hamburger + centered logo */}
           <button
             className="md:hidden text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 z-10"
             onClick={() => setMenuOpen(!menuOpen)}>
-
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
 
@@ -71,16 +71,26 @@ const Header = () => {
             </div>
           }
 
+          {/* Mobile centered logo */}
           <Link
             to={user ? "/dashboard" : "/"}
-            className="flex items-center gap-2 md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0">
+            className="md:hidden absolute left-1/2 -translate-x-1/2">
             <img src={logoUrl} alt="לוגו" className="rounded-full object-contain" style={{ height: `${logoSize}px`, width: `${logoSize}px` }} />
-            {logoText && (
-              <span className="font-serif text-lg font-bold text-foreground hidden md:inline">{logoText}</span>
-            )}
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1 mr-auto">
+          {/* Desktop 3-column layout: Logo 10% | Nav 80% | CTA 10% */}
+          {/* Right section - Logo (10%) */}
+          <div className="hidden md:flex items-center justify-center" style={{ width: '10%' }}>
+            <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2">
+              <img src={logoUrl} alt="לוגו" className="rounded-full object-contain" style={{ height: `${logoSize}px`, width: `${logoSize}px` }} />
+              {logoText && (
+                <span className="font-serif text-lg font-bold text-foreground">{logoText}</span>
+              )}
+            </Link>
+          </div>
+
+          {/* Center section - Navigation (80%) */}
+          <nav className="hidden md:flex items-center justify-center gap-1" style={{ width: '80%' }}>
             {navLinks.map((link) =>
             <Link
               key={link.to}
@@ -89,7 +99,6 @@ const Header = () => {
               className={`rounded-md px-3 py-1.5 font-body text-sm transition-colors ${
               isActive(link.to) ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`
               }>
-
                 {link.to === "/admin" && <Shield className="inline h-3.5 w-3.5 ml-1" />}
                 {link.label}
               </Link>
@@ -99,7 +108,6 @@ const Header = () => {
             <Link
               to="/#birthdays"
               className="relative rounded-md px-3 py-1.5 font-body text-sm text-gold hover:bg-secondary transition-colors flex items-center gap-1.5">
-
                 <Cake className="h-4 w-4" />
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[11px] font-bold text-background">
                   {birthdays.length}
@@ -108,13 +116,13 @@ const Header = () => {
             }
           </nav>
 
-          <div className="hidden md:flex items-center gap-3 mr-3">
+          {/* Left section - CTA (10%) */}
+          <div className="hidden md:flex items-center justify-center gap-2" style={{ width: '10%' }}>
             {loading ? null : canAccess ?
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground font-body text-sm gap-1">
                 <LogOut className="h-4 w-4" />
                 התנתקות
               </Button> :
-
             <>
                 <Link to="/login">
                   <Button variant="ghost" size="sm" className="text-muted-foreground font-body text-sm">כניסה</Button>
