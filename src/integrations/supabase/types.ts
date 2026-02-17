@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       announcements: {
         Row: {
+          category: string
           content: string
           created_at: string
           created_by: string | null
@@ -25,6 +26,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category?: string
           content: string
           created_at?: string
           created_by?: string | null
@@ -34,6 +36,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category?: string
           content?: string
           created_at?: string
           created_by?: string | null

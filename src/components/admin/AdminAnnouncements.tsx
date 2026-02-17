@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Check, Clock, Plus, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fireConfetti } from "@/lib/confetti";
 
 const AdminAnnouncements = () => {
@@ -12,7 +13,7 @@ const AdminAnnouncements = () => {
   const [items, setItems] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ title: "", content: "" });
+  const [form, setForm] = useState({ title: "", content: "", category: "announcement" });
 
   const fetchItems = async () => {
     const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
@@ -30,13 +31,14 @@ const AdminAnnouncements = () => {
     const { error } = await supabase.from("announcements").insert({
       title: form.title.trim(),
       content: form.content.trim(),
+      category: form.category,
       is_approved: true,
     });
     setSubmitting(false);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "פורסם!", description: "המודעה פורסמה בהצלחה." });
     fireConfetti();
-    setForm({ title: "", content: "" });
+    setForm({ title: "", content: "", category: "announcement" });
     setShowForm(false);
     fetchItems();
   };
@@ -84,6 +86,15 @@ const AdminAnnouncements = () => {
               className="font-body min-h-[100px]"
               dir="rtl"
             />
+            <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+              <SelectTrigger className="font-body w-48">
+                <SelectValue placeholder="סוג מודעה" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="announcement">הודעה</SelectItem>
+                <SelectItem value="sale">מכירה</SelectItem>
+              </SelectContent>
+            </Select>
             <Button onClick={handleCreate} disabled={submitting} className="gradient-gold text-primary-foreground font-body">
               {submitting ? "מפרסם..." : "פרסם מודעה"}
             </Button>
