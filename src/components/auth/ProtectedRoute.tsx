@@ -13,25 +13,44 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
   useEffect(() => {
     let mounted = true;
+
+    const timeout = setTimeout(() => {
+      if (mounted) setState("no-session");
+    }, 10000);
+
     const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { if (mounted) setState("no-session"); return; }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { if (mounted) setState("no-session"); return; }
 
-      if (requireApproval || requireAdmin) {
-        const { data: profile } = await supabase.from("profiles").select("is_approved").eq("user_id", session.user.id).maybeSingle();
-        if (!profile?.is_approved) { if (mounted) setState("not-approved"); return; }
+        if (requireApproval || requireAdmin) {
+          const { data: profile } = await supabase.from("profiles").select("is_approved").eq("user_id", session.user.id).maybeSingle();
+          if (!profile?.is_approved) { if (mounted) setState("not-approved"); return; }
+        }
+
+        if (requireAdmin) {
+          const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+          const admin = roles?.some((r: any) => r.role === "admin");
+          if (!admin) { if (mounted) setState("not-admin"); return; }
+        }
+
+        if (mounted) setState("ok");
+      } catch {
+        if (mounted) setState("no-session");
       }
-
-      if (requireAdmin) {
-        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
-        const admin = roles?.some((r: any) => r.role === "admin");
-        if (!admin) { if (mounted) setState("not-admin"); return; }
-      }
-
-      if (mounted) setState("ok");
     };
+
     check();
-    return () => { mounted = false; };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session && mounted) setState("no-session");
+    });
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, [requireApproval, requireAdmin]);
 
   if (state === "loading") return <div className="flex min-h-[60vh] items-center justify-center"><p className="font-body text-muted-foreground">טוען...</p></div>;

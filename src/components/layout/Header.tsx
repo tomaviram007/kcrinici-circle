@@ -28,14 +28,7 @@ const Header = () => {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id).then(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
-    });
+    const loadingTimeout = setTimeout(() => setLoading(false), 5000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
@@ -46,7 +39,20 @@ const Header = () => {
         setIsAdmin(false);
       }
     });
-    return () => subscription.unsubscribe();
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    }).catch(() => setLoading(false));
+
+    return () => {
+      clearTimeout(loadingTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleLogout = async () => {
