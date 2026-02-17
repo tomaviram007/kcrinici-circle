@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Check, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -150,6 +150,7 @@ const PollPopup = () => {
             <BarChart3 className="h-5 w-5 text-gold" />
             {poll.title}
           </DialogTitle>
+          <DialogDescription className="sr-only">סקר פעיל</DialogDescription>
         </DialogHeader>
         {poll.description && (
           <p className="font-body text-sm text-muted-foreground">{poll.description}</p>

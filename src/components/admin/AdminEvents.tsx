@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
@@ -301,6 +301,7 @@ const AdminEvents = () => {
             <DialogTitle className="font-serif text-xl">
               מאשרי הגעה – {rsvpDialogEvent?.title}
             </DialogTitle>
+            <DialogDescription className="sr-only">רשימת מאשרי הגעה לאירוע</DialogDescription>
           </DialogHeader>
           {rsvpDialogEvent && (
             <div className="space-y-2 mt-2">
