@@ -30,20 +30,20 @@ const HeroSection = ({ isLoggedIn = false, isApproved = false }: HeroSectionProp
   }, []);
 
   return (
-    <section className="relative h-[48vw] min-h-[400px] max-h-screen overflow-hidden">
+    <section className="relative h-screen overflow-hidden">
       <div
         ref={bgRef}
         className="absolute inset-0 bg-cover bg-center scale-110"
-        style={{ backgroundImage: `url(${heroBg})` }}
-      />
+        style={{ backgroundImage: `url(${heroBg})` }} />
+
       <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
 
-      <div ref={contentRef} className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+      <div ref={contentRef} className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center py-0">
         <div className="mb-4 h-px w-24 gradient-gold opacity-60" />
         <p className="mb-4 font-body text-sm tracking-[0.3em] text-gold uppercase">
           מועדון חברים אקסקלוסיבי
         </p>
-        <h1 className="font-serif text-3xl font-bold leading-tight text-foreground sm:text-5xl md:text-7xl lg:text-8xl text-shadow-luxury">
+        <h1 className="font-serif font-bold leading-tight text-foreground sm:text-5xl md:text-7xl lg:text-8xl text-shadow-luxury text-center text-5xl">
           הגברים של
           <br />
           <span className="text-gold">ק. קריניצי</span>
@@ -54,20 +54,20 @@ const HeroSection = ({ isLoggedIn = false, isApproved = false }: HeroSectionProp
           ברוכים הבאים למועדון.
         </p>
         <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full px-8 sm:w-auto sm:px-0">
-          {isLoggedIn && isApproved ? (
-            <Link to="/announcements">
+          {isLoggedIn && isApproved ?
+          <Link to="/announcements">
               <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
                 לוח מודעות
               </Button>
-            </Link>
-          ) : isLoggedIn ? (
-            <Link to="/pending">
+            </Link> :
+          isLoggedIn ?
+          <Link to="/pending">
               <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
                 בדוק סטטוס בקשה
               </Button>
-            </Link>
-          ) : (
-            <>
+            </Link> :
+
+          <>
               <Link to="/register">
                 <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
                   הצטרף למועדון
@@ -79,15 +79,15 @@ const HeroSection = ({ isLoggedIn = false, isApproved = false }: HeroSectionProp
                 </Button>
               </Link>
             </>
-          )}
+          }
         </div>
       </div>
 
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <div className="h-8 w-px bg-gold/40" />
       </div>
-    </section>
-  );
+    </section>);
+
 };
 
 export default HeroSection;
