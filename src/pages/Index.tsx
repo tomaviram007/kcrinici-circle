@@ -29,7 +29,7 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background">
-      <HeroSection />
+      <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
       <BirthdaysSection isApproved={isApproved} />
       <BulletinSection isApproved={isApproved} />
       <EventsPreviewSection isApproved={isApproved} />

@@ -1,60 +1,31 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Briefcase, Users, Calendar, Megaphone } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [isApproved, setIsApproved] = useState<boolean | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-
-    const checkAuth = async () => {
+    const load = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate("/login"); return; }
-
+      if (!session) return;
       setUserId(session.user.id);
 
-      const { data: profile, error } = await supabase
+      const { data: profile } = await supabase
         .from("profiles")
-        .select("is_approved, full_name, avatar_url")
+        .select("full_name, avatar_url")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
-      if (!mounted) return;
-
-      if (error || !profile) {
-        navigate("/pending");
-        return;
-      }
-
-      setUserName(profile.full_name || session.user.user_metadata?.full_name || "חבר");
-      setAvatarUrl(profile.avatar_url);
-
-      if (!profile.is_approved) {
-        navigate("/pending");
-        return;
-      }
-
-      setIsApproved(true);
+      setUserName(profile?.full_name || session.user.user_metadata?.full_name || "חבר");
+      setAvatarUrl(profile?.avatar_url ?? null);
     };
-
-    checkAuth();
-    return () => { mounted = false; };
-  }, [navigate]);
-
-  if (isApproved !== true) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="font-body text-muted-foreground">טוען...</p>
-      </div>
-    );
-  }
+    load();
+  }, []);
 
   const cards = [
     { icon: Megaphone, title: "לוח מודעות", desc: "עדכונים ומודעות", to: "/announcements" },

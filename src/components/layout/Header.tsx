@@ -28,7 +28,6 @@ const Header = () => {
   };
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -38,7 +37,6 @@ const Header = () => {
       }
     });
 
-    // Listen for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -57,6 +55,7 @@ const Header = () => {
   };
 
   const navLinks = [
+    { to: "/", label: "דף הבית" },
     ...(isApproved ? [
       { to: "/dashboard", label: "ראשי" },
       { to: "/announcements", label: "מודעות" },
@@ -77,7 +76,7 @@ const Header = () => {
         </Link>
 
         {/* Desktop Nav */}
-        {user && !loading && navLinks.length > 0 && (
+        {user && !loading && (
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -97,14 +96,13 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground font-body text-sm gap-1">
                 <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">יציאה</span>
               </Button>
-              {navLinks.length > 0 && (
-                <button className="md:hidden text-muted-foreground" onClick={() => setMenuOpen(!menuOpen)}>
-                  {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </button>
-              )}
+              <button className="md:hidden text-muted-foreground" onClick={() => setMenuOpen(!menuOpen)}>
+                {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
             </>
           ) : (
             <div className="flex gap-2">
