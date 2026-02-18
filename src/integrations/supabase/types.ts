@@ -422,6 +422,7 @@ export type Database = {
           full_name: string
           id: string
           is_approved: boolean
+          is_removed: boolean
           phone: string
           profession: string
           updated_at: string
@@ -437,6 +438,7 @@ export type Database = {
           full_name: string
           id?: string
           is_approved?: boolean
+          is_removed?: boolean
           phone: string
           profession: string
           updated_at?: string
@@ -452,6 +454,7 @@ export type Database = {
           full_name?: string
           id?: string
           is_approved?: boolean
+          is_removed?: boolean
           phone?: string
           profession?: string
           updated_at?: string

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Check, X, Clock, Users, Search, Pencil, Trash2, KeyRound, Eye, EyeOff,
+  UserX, RotateCcw, Phone, MapPin, Briefcase, Calendar, User,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,7 @@ interface Profile {
   bio: string | null;
   avatar_url: string | null;
   is_approved: boolean;
+  is_removed: boolean;
   birth_date: string | null;
   created_at: string;
 }
@@ -52,12 +54,15 @@ const AdminMembers = () => {
   const [deleteUser, setDeleteUser] = useState<Profile | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Detail view dialog
+  const [viewProfile, setViewProfile] = useState<Profile | null>(null);
+
   const fetchProfiles = async () => {
     const { data } = await supabase
       .from("profiles")
       .select("*")
       .order("created_at", { ascending: false });
-    setProfiles(data || []);
+    setProfiles((data as Profile[]) || []);
     setLoading(false);
   };
 
@@ -71,7 +76,7 @@ const AdminMembers = () => {
   }, []);
 
   const handleApprove = async (userId: string) => {
-    const { error } = await supabase.from("profiles").update({ is_approved: true }).eq("user_id", userId);
+    const { error } = await supabase.from("profiles").update({ is_approved: true, is_removed: false }).eq("user_id", userId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     supabase.functions.invoke("notify-member", { body: { userId, action: "approve" } });
     toast({ title: "אושר!", description: "החבר אושר בהצלחה והודעה נשלחה." });
@@ -107,7 +112,7 @@ const AdminMembers = () => {
   const handleResetPassword = async () => {
     if (!resetUser || !newPassword) return;
     setResetting(true);
-    const { data, error } = await supabase.functions.invoke("notify-member", {
+    const { error } = await supabase.functions.invoke("notify-member", {
       body: { userId: resetUser.user_id, action: "admin-reset-password", newPassword },
     });
     setResetting(false);
@@ -117,16 +122,23 @@ const AdminMembers = () => {
     setNewPassword("");
   };
 
-  // Delete member
+  // Remove member (mark as removed)
   const handleDelete = async () => {
     if (!deleteUser) return;
     setDeleting(true);
-    // Delete profile (user auth record stays but profile removed = effectively removed from club)
-    const { error } = await supabase.from("profiles").update({ is_approved: false }).eq("user_id", deleteUser.user_id);
+    const { error } = await supabase.from("profiles").update({ is_approved: false, is_removed: true }).eq("user_id", deleteUser.user_id);
     setDeleting(false);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "הוסר", description: `${deleteUser.full_name} הוסר מהמועדון.` });
     setDeleteUser(null);
+    fetchProfiles();
+  };
+
+  // Restore removed member
+  const handleRestore = async (userId: string, name: string) => {
+    const { error } = await supabase.from("profiles").update({ is_approved: true, is_removed: false }).eq("user_id", userId);
+    if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "שוחזר!", description: `${name} שוחזר למועדון בהצלחה.` });
     fetchProfiles();
   };
 
@@ -135,8 +147,9 @@ const AdminMembers = () => {
     p.profession.toLowerCase().includes(search.toLowerCase()) ||
     p.phone.includes(search)
   );
-  const pending = filtered.filter((p) => !p.is_approved);
-  const approved = filtered.filter((p) => p.is_approved);
+  const pending = filtered.filter((p) => !p.is_approved && !p.is_removed);
+  const approved = filtered.filter((p) => p.is_approved && !p.is_removed);
+  const removed = filtered.filter((p) => p.is_removed);
 
   if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
 
@@ -177,10 +190,113 @@ const AdminMembers = () => {
         </h3>
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {approved.map((p) => (
-            <MemberCard key={p.id} profile={p} onApprove={handleApprove} onReject={handleReject} onEdit={openEdit} onResetPassword={setResetUser} onDelete={setDeleteUser} />
+            <MemberCard key={p.id} profile={p} onApprove={handleApprove} onReject={handleReject} onEdit={openEdit} onResetPassword={setResetUser} onDelete={setDeleteUser} onView={setViewProfile} />
           ))}
         </div>
       </div>
+
+      {/* Removed */}
+      <div>
+        <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
+          <UserX className="h-5 w-5 text-destructive" /> חברים שהוסרו ({removed.length})
+        </h3>
+        {removed.length === 0 ? (
+          <p className="font-body text-sm text-muted-foreground">אין חברים שהוסרו.</p>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {removed.map((p) => (
+              <div key={p.id} className="rounded-lg border border-border bg-card/50 p-4 space-y-3 opacity-70">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-full bg-secondary border border-border flex items-center justify-center overflow-hidden shrink-0">
+                    {p.avatar_url ? (
+                      <img src={p.avatar_url} alt="" className="h-full w-full object-cover rounded-full grayscale" />
+                    ) : (
+                      <Users className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-serif text-base font-bold text-foreground truncate line-through">{p.full_name}</h4>
+                    <p className="font-body text-xs text-muted-foreground truncate">{p.profession}</p>
+                    <p className="font-body text-xs text-muted-foreground">{p.phone}</p>
+                  </div>
+                </div>
+                <div className="flex gap-1.5">
+                  <Button size="sm" onClick={() => handleRestore(p.user_id, p.full_name)} className="gradient-gold text-primary-foreground font-body text-xs h-8">
+                    <RotateCcw className="h-3.5 w-3.5 ml-1" /> שחזר חבר
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setViewProfile(p)} className="font-body text-xs h-8 text-muted-foreground">
+                    <Eye className="h-3.5 w-3.5 ml-1" /> פרטים
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* View Profile Detail Dialog */}
+      <Dialog open={!!viewProfile} onOpenChange={(o) => !o && setViewProfile(null)}>
+        <DialogContent className="max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-gold">פרטי חבר</DialogTitle>
+            <DialogDescription className="sr-only">צפייה בפרטי החבר</DialogDescription>
+          </DialogHeader>
+          {viewProfile && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-full bg-secondary border border-gold/20 flex items-center justify-center overflow-hidden shrink-0">
+                  {viewProfile.avatar_url ? (
+                    <img src={viewProfile.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
+                  ) : (
+                    <User className="h-8 w-8 text-gold" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-foreground">{viewProfile.full_name}</h3>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <Briefcase className="h-3.5 w-3.5 text-gold" />
+                    <span className="font-body text-sm text-gold">{viewProfile.profession}</span>
+                  </div>
+                </div>
+              </div>
+
+              {viewProfile.expertise && (
+                <div className="font-body text-sm">
+                  <span className="text-gold font-medium">מומחיות:</span> <span className="text-foreground">{viewProfile.expertise}</span>
+                </div>
+              )}
+
+              {viewProfile.bio && (
+                <p className="font-body text-sm text-foreground/70 italic">"{viewProfile.bio}"</p>
+              )}
+
+              <div className="border-t border-border pt-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-gold" />
+                  <span className="font-body text-sm text-foreground" dir="ltr">{viewProfile.phone}</span>
+                </div>
+                {viewProfile.address && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-gold" />
+                    <span className="font-body text-sm text-foreground">{viewProfile.address}</span>
+                  </div>
+                )}
+                {viewProfile.birth_date && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gold" />
+                    <span className="font-body text-sm text-foreground" dir="ltr">{viewProfile.birth_date}</span>
+                  </div>
+                )}
+              </div>
+
+              <p className="font-body text-xs text-muted-foreground">
+                הצטרף: {new Date(viewProfile.created_at).toLocaleDateString("he-IL")}
+                {viewProfile.is_removed && <span className="text-destructive mr-2">· הוסר</span>}
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={!!editProfile} onOpenChange={(o) => !o && setEditProfile(null)}>
@@ -270,7 +386,7 @@ const AdminMembers = () => {
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif">הסרת חבר מהמועדון</AlertDialogTitle>
             <AlertDialogDescription className="font-body">
-              האם אתה בטוח שברצונך להסיר את <strong>{deleteUser?.full_name}</strong> מהמועדון? החבר יאבד את הגישה שלו.
+              האם אתה בטוח שברצונך להסיר את <strong>{deleteUser?.full_name}</strong> מהמועדון? ניתן יהיה לשחזר אותו בהמשך.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
@@ -294,6 +410,7 @@ const MemberCard = ({
   onEdit,
   onResetPassword,
   onDelete,
+  onView,
 }: {
   profile: Profile;
   isPending?: boolean;
@@ -302,8 +419,12 @@ const MemberCard = ({
   onEdit: (p: Profile) => void;
   onResetPassword: (p: Profile) => void;
   onDelete: (p: Profile) => void;
+  onView?: (p: Profile) => void;
 }) => (
-  <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+  <div
+    className={`rounded-lg border border-border bg-card p-4 space-y-3 ${onView && !isPending ? "cursor-pointer hover:border-gold/30 transition-colors" : ""}`}
+    onClick={() => onView && !isPending && onView(p)}
+  >
     <div className="flex items-start gap-3">
       <div className="h-10 w-10 rounded-full bg-secondary border border-gold/20 flex items-center justify-center overflow-hidden shrink-0">
         {p.avatar_url ? (
@@ -322,7 +443,7 @@ const MemberCard = ({
     </div>
     {p.bio && <p className="font-body text-sm text-foreground/70 italic line-clamp-2">"{p.bio}"</p>}
 
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-1.5" onClick={(e) => e.stopPropagation()}>
       {isPending && (
         <>
           <Button size="sm" onClick={() => onApprove(p.user_id)} className="gradient-gold text-primary-foreground font-body text-xs h-8">
