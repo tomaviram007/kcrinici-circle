@@ -11,6 +11,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import RegisterBackground from "@/components/register/RegisterBackground";
 
 const registerSchema = z.object({
   full_name: z.string().trim().min(2, "שם חייב להכיל לפחות 2 תווים").max(100, "שם ארוך מדי"),
@@ -146,16 +147,18 @@ const Register = () => {
   const fieldProps = { form, errors, onChange: handleChange };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-lg">
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
+      <RegisterBackground />
+
+      <div className="w-full max-w-lg rounded-2xl border border-border/50 bg-card/80 p-8 shadow-2xl backdrop-blur-md animate-fade-in">
         <div className="mb-10 text-center">
           <Link to="/" className="inline-block">
-            <h1 className="font-serif text-3xl font-bold text-foreground">
+            <h1 className="font-serif text-4xl font-bold text-foreground drop-shadow-md">
               הגברים של <span className="text-gold">ק. קריניצי</span>
             </h1>
           </Link>
-          <p className="mt-3 font-body text-muted-foreground">בקשת הצטרפות למועדון</p>
-          <div className="mt-3 mx-auto h-px w-12 gradient-gold opacity-40" />
+          <p className="mt-3 font-body text-lg text-muted-foreground">בקשת הצטרפות למועדון</p>
+          <div className="mt-4 mx-auto h-0.5 w-16 gradient-gold opacity-60 rounded-full" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5" noValidate autoComplete="off">
@@ -222,7 +225,7 @@ const Register = () => {
             <Field name="password" label="סיסמה" required type="password" dir="ltr" {...fieldProps} />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full gradient-gold text-primary-foreground font-body py-6 text-base hover:opacity-90">
+          <Button type="submit" disabled={loading} className="w-full gradient-gold text-primary-foreground font-body py-6 text-base hover:opacity-90 hover:scale-[1.02] transition-all duration-300 shadow-lg">
             {loading ? "שולח בקשה..." : "שלח בקשת הצטרפות"}
           </Button>
 
