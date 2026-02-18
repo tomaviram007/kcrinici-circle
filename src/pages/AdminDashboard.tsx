@@ -12,6 +12,7 @@ import AdminAnnouncements from "@/components/admin/AdminAnnouncements";
 import AdminPolls from "@/components/admin/AdminPolls";
 import AdminQuotes from "@/components/admin/AdminQuotes";
 import AdminLogo from "@/components/admin/AdminLogo";
+import AdminMembers from "@/components/admin/AdminMembers";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroAdmin from "@/assets/hero-admin.jpg";
@@ -102,7 +103,7 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {activeTab === "members" && <MemberRequests />}
+        {activeTab === "members" && <AdminMembers />}
         {activeTab === "announcements" && <AdminAnnouncements />}
         {activeTab === "jobs" && <AdminJobs />}
         {activeTab === "events" && <AdminEvents />}
@@ -113,94 +114,6 @@ const AdminDashboard = () => {
         {activeTab === "team" && <AdminTeam />}
       </div>
     </>
-  );
-};
-
-const MemberRequests = () => {
-  const { toast } = useToast();
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchProfiles = async () => {
-    const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
-    setProfiles(data || []);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchProfiles();
-    const channel = supabase
-      .channel('admin-profiles')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => { fetchProfiles(); })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, []);
-
-  const handleApprove = async (userId: string) => {
-    const { error } = await supabase.from("profiles").update({ is_approved: true }).eq("user_id", userId);
-    if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-    supabase.functions.invoke("notify-member", { body: { userId, action: "approve" } });
-    toast({ title: "אושר!", description: "החבר אושר בהצלחה והודעה נשלחה." });
-    fetchProfiles();
-  };
-
-  const handleReject = async (userId: string) => {
-    const { error } = await supabase.from("profiles").update({ is_approved: false }).eq("user_id", userId);
-    if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-    supabase.functions.invoke("notify-member", { body: { userId, action: "reject" } });
-    toast({ title: "נדחה", description: "הבקשה נדחתה והודעה נשלחה." });
-    fetchProfiles();
-  };
-
-  const pending = profiles.filter((p) => !p.is_approved);
-  const approved = profiles.filter((p) => p.is_approved);
-
-  if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
-
-  return (
-    <div className="space-y-8">
-      <div>
-        <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
-          <Clock className="h-5 w-5 text-gold" /> ממתינים לאישור ({pending.length})
-        </h3>
-        {pending.length === 0 ? (
-          <p className="font-body text-sm text-muted-foreground">אין בקשות ממתינות.</p>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {pending.map((p) => (
-              <div key={p.id} className="rounded-lg border border-border bg-card p-5">
-                <h4 className="font-serif text-lg font-bold text-foreground">{p.full_name}</h4>
-                <p className="font-body text-sm text-muted-foreground">{p.profession} {p.expertise && `· ${p.expertise}`}</p>
-                <p className="mt-1 font-body text-xs text-muted-foreground">{p.address} · {p.phone}</p>
-                {p.bio && <p className="mt-2 font-body text-sm text-foreground/80 italic">"{p.bio}"</p>}
-                <div className="mt-4 flex gap-2">
-                  <Button size="sm" onClick={() => handleApprove(p.user_id)} className="gradient-gold text-primary-foreground font-body">
-                    <Check className="h-4 w-4 ml-1" /> אשר
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleReject(p.user_id)} className="border-destructive text-destructive font-body">
-                    <X className="h-4 w-4 ml-1" /> דחה
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div>
-        <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
-          <Check className="h-5 w-5 text-green-500" /> חברים מאושרים ({approved.length})
-        </h3>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {approved.map((p) => (
-            <div key={p.id} className="rounded-lg border border-border bg-card p-4">
-              <h4 className="font-serif text-base font-bold text-foreground">{p.full_name}</h4>
-              <p className="font-body text-xs text-muted-foreground">{p.profession}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
   );
 };
 
