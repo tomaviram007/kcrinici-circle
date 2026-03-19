@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const EVENT_LABELS: Record<string, string> = {
-  new_member: "🆕 חבר חדש נרשם למועדון",
+  new_member: "🆕 בקשת הצטרפות חדשה למועדון",
   member_approved: "✅ חבר אושר למועדון",
   new_announcement: "📢 מודעה חדשה פורסמה",
   new_job: "💼 משרה חדשה פורסמה",
@@ -33,7 +33,7 @@ function formatMessage(eventType: string, data: Record<string, any>): string {
   };
 
   for (const [key, value] of Object.entries(data)) {
-    if (!value) continue;
+    if (!value || key === "user_id") continue;
     const label = fieldLabels[key] || key;
     let displayValue = String(value);
     if (key === "date") {
@@ -69,14 +69,29 @@ serve(async (req) => {
 
     const text = formatMessage(event_type, data);
 
+    // Build request payload
+    const payload: any = {
+      chat_id: chatId,
+      text,
+      parse_mode: "HTML",
+    };
+
+    // Add inline keyboard for new member registrations
+    if (event_type === "new_member" && data.user_id) {
+      payload.reply_markup = {
+        inline_keyboard: [
+          [
+            { text: "✅ אשר חבר", callback_data: `approve:${data.user_id}` },
+            { text: "❌ דחה בקשה", callback_data: `reject:${data.user_id}` },
+          ],
+        ],
+      };
+    }
+
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: "HTML",
-      }),
+      body: JSON.stringify(payload),
     });
 
     const result = await response.json();

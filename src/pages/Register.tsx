@@ -107,7 +107,7 @@ const Register = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
         options: {
@@ -132,6 +132,7 @@ const Register = () => {
         address: form.address,
         profession: form.profession,
         email: form.email,
+        user_id: signUpData.user?.id,
       });
 
       toast({
