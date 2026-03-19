@@ -80,6 +80,8 @@ const AdminMembers = () => {
     const { error } = await supabase.from("profiles").update({ is_approved: true, is_removed: false }).eq("user_id", userId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     supabase.functions.invoke("notify-member", { body: { userId, action: "approve" } });
+    const profile = profiles.find(p => p.user_id === userId);
+    sendTelegramNotification("member_approved", { name: profile?.full_name, phone: profile?.phone, profession: profile?.profession });
     toast({ title: "אושר!", description: "החבר אושר בהצלחה והודעה נשלחה." });
     fetchProfiles();
   };
