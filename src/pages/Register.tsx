@@ -126,6 +126,14 @@ const Register = () => {
 
       if (error) throw error;
 
+      sendTelegramNotification("new_member", {
+        name: form.full_name,
+        phone: form.phone,
+        address: form.address,
+        profession: form.profession,
+        email: form.email,
+      });
+
       toast({
         title: "בקשתך נשלחה",
         description: "אנא אשר את כתובת האימייל שלך. תקבל הודעה ברגע שהגישה תאושר.",

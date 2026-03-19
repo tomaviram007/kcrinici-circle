@@ -117,6 +117,7 @@ const AdminEvents = () => {
       }
       toast({ title: "נוסף!" });
       fireConfetti();
+      sendTelegramNotification("new_event", { title: form.title, description: form.description, date: form.event_date, location: form.location });
     }
     setForm(EMPTY_FORM);
     setShowForm(false);

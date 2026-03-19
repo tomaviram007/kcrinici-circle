@@ -58,6 +58,7 @@ const AdminJobs = () => {
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "פורסם!", description: "המשרה פורסמה בהצלחה." });
     fireConfetti();
+    sendTelegramNotification("new_job", { title: form.title, description: form.description, company: form.company_name, location: form.location });
     setForm(EMPTY_FORM);
     setShowForm(false);
     fetchJobs();

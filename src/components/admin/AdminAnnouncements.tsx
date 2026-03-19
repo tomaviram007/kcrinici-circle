@@ -39,6 +39,7 @@ const AdminAnnouncements = () => {
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "פורסם!", description: "המודעה פורסמה בהצלחה." });
     fireConfetti();
+    sendTelegramNotification("new_announcement", { title: form.title, content: form.content, category: form.category });
     setForm({ title: "", content: "", category: "announcement" });
     setShowForm(false);
     fetchItems();
