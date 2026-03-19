@@ -13,6 +13,7 @@ import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { fireConfetti } from "@/lib/confetti";
 import { validateImageFile } from "@/lib/file-validation";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 
 const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "" };
 
