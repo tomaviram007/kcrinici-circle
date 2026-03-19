@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Check, Clock, Plus, X, Power, Tag, Building2, MapPin, Banknote, User } from "lucide-react";
 import { fireConfetti } from "@/lib/confetti";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 
 const JOB_TYPES = [
   { value: "full-time", label: "משרה מלאה" },
@@ -57,6 +58,7 @@ const AdminJobs = () => {
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "פורסם!", description: "המשרה פורסמה בהצלחה." });
     fireConfetti();
+    sendTelegramNotification("new_job", { title: form.title, description: form.description, company: form.company_name, location: form.location });
     setForm(EMPTY_FORM);
     setShowForm(false);
     fetchJobs();

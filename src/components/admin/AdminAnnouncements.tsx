@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { Trash2, Check, Clock, Plus, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fireConfetti } from "@/lib/confetti";
@@ -38,6 +39,7 @@ const AdminAnnouncements = () => {
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "פורסם!", description: "המודעה פורסמה בהצלחה." });
     fireConfetti();
+    sendTelegramNotification("new_announcement", { title: form.title, content: form.content, category: form.category });
     setForm({ title: "", content: "", category: "announcement" });
     setShowForm(false);
     fetchItems();
