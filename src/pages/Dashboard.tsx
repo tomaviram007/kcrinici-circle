@@ -6,8 +6,10 @@ import AvatarUpload from "@/components/AvatarUpload";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroImg from "@/assets/hero-bg.jpg";
+import { usePageCover } from "@/hooks/usePageCover";
 
 const Dashboard = () => {
+  const coverImage = usePageCover("dashboard", heroImg);
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -48,7 +50,7 @@ const Dashboard = () => {
 
   return (
     <>
-    <PageHero image={heroImg} title="ברוך הבא" highlight="למועדון" subtitle="המרכז שלך לכל מה שקורה בקהילה" />
+    <PageHero image={coverImage} title="ברוך הבא" highlight="למועדון" subtitle="המרכז שלך לכל מה שקורה בקהילה" />
     <ClubAboutSection />
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
       <div className="mb-8 md:mb-12 flex items-center gap-5">

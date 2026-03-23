@@ -14,6 +14,7 @@ import ClubAboutSection from "@/components/ClubAboutSection";
 import QuoteSection from "@/components/landing/QuoteSection";
 import SaleImageUpload from "@/components/announcements/SaleImageUpload";
 import heroImg from "@/assets/hero-announcements.jpg";
+import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -106,6 +107,7 @@ const EMPTY_SALE_DATA: Record<string, string> = {};
 const Announcements = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const coverImage = usePageCover("announcements", heroImg);
   const [items, setItems] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [formCategory, setFormCategory] = useState("announcement");
@@ -461,7 +463,7 @@ const Announcements = () => {
 
   return (
     <>
-    <PageHero image={heroImg} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון" />
+    <PageHero image={coverImage} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון" />
     <ClubAboutSection />
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8 md:px-6 md:py-12">
 
