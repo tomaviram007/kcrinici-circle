@@ -127,7 +127,7 @@ const Recommendations = () => {
     },
   });
 
-  // GSAP stagger animation
+  // GSAP stagger animation + admin badge glow
   useEffect(() => {
     if (!cardsRef.current || isLoading) return;
     const cards = cardsRef.current.querySelectorAll(".rec-card");
@@ -137,6 +137,14 @@ const Recommendations = () => {
       { opacity: 0, y: 40 },
       { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" }
     );
+    // Admin badge glow animation
+    const badges = cardsRef.current.querySelectorAll(".admin-badge");
+    if (badges.length > 0) {
+      gsap.fromTo(badges, { boxShadow: "0 0 0px hsl(43 72% 52% / 0)" }, {
+        boxShadow: "0 0 12px hsl(43 72% 52% / 0.4)",
+        duration: 1.2, repeat: -1, yoyo: true, ease: "sine.inOut",
+      });
+    }
   }, [recommendations, isLoading, searchQuery, selectedCategory]);
 
   const filtered = recommendations.filter((r) => {
