@@ -37,6 +37,7 @@ const Header = () => {
   { to: "/members", label: "חברי המועדון", protected: false },
   { to: "/events", label: "לוח אירועים", protected: false },
   { to: "/gallery", label: "גלריה", protected: false },
+  { to: "/recommendations", label: "אנשי מקצוע", protected: false },
   ...(isAdmin ? [{ to: "/admin", label: "שולחן המנהל", protected: true }] : [])];
 
 

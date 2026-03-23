@@ -22,6 +22,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import Gallery from "./pages/Gallery";
+import Recommendations from "./pages/Recommendations";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,6 +58,7 @@ const AppLayout = () => {
         <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
         <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
         <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
+        <Route path="/recommendations" element={<Recommendations />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!hideHeader && <FloatingWhatsApp />}
