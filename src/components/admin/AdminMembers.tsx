@@ -346,6 +346,15 @@ const AdminMembers = () => {
               <Label className="font-body text-sm">תאריך לידה</Label>
               <Input type="date" value={editForm.birth_date || ""} onChange={(e) => setEditForm({ ...editForm, birth_date: e.target.value })} className="bg-background" dir="ltr" />
             </div>
+            <div className="border-t border-border pt-3 mt-1">
+              <p className="font-body text-xs text-muted-foreground mb-2">קישורים חברתיים</p>
+              <div className="space-y-2">
+                <Input value={(editForm as any).website_url || ""} onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value } as any)} className="bg-background" dir="ltr" placeholder="אתר אישי (https://...)" />
+                <Input value={(editForm as any).facebook_url || ""} onChange={(e) => setEditForm({ ...editForm, facebook_url: e.target.value } as any)} className="bg-background" dir="ltr" placeholder="פייסבוק (https://...)" />
+                <Input value={(editForm as any).instagram_url || ""} onChange={(e) => setEditForm({ ...editForm, instagram_url: e.target.value } as any)} className="bg-background" dir="ltr" placeholder="אינסטגרם (https://...)" />
+                <Input value={(editForm as any).linkedin_url || ""} onChange={(e) => setEditForm({ ...editForm, linkedin_url: e.target.value } as any)} className="bg-background" dir="ltr" placeholder="לינקדאין (https://...)" />
+              </div>
+            </div>
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setEditProfile(null)} className="font-body">ביטול</Button>
