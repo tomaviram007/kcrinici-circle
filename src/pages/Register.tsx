@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
+import { Globe, Facebook, Instagram, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -221,12 +222,28 @@ const Register = () => {
           <div className="border-t border-border pt-5 space-y-4">
             <p className="font-body text-sm text-muted-foreground">קישורים חברתיים (אופציונלי)</p>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field name="website_url" label="אתר אישי/עסקי" placeholder="https://..." dir="ltr" {...fieldProps} />
-              <Field name="facebook_url" label="פייסבוק" placeholder="https://facebook.com/..." dir="ltr" {...fieldProps} />
+              <div>
+                <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Globe className="h-3.5 w-3.5 text-gold" /> אתר אישי/עסקי</label>
+                <Input name="website_url" value={form.website_url} onChange={handleChange} className={`bg-card border-border ${errors.website_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://..." autoComplete="off" />
+                {errors.website_url && <p className="mt-1 font-body text-xs text-destructive">{errors.website_url}</p>}
+              </div>
+              <div>
+                <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Facebook className="h-3.5 w-3.5 text-[#1877F2]" /> פייסבוק</label>
+                <Input name="facebook_url" value={form.facebook_url} onChange={handleChange} className={`bg-card border-border ${errors.facebook_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://facebook.com/..." autoComplete="off" />
+                {errors.facebook_url && <p className="mt-1 font-body text-xs text-destructive">{errors.facebook_url}</p>}
+              </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field name="instagram_url" label="אינסטגרם" placeholder="https://instagram.com/..." dir="ltr" {...fieldProps} />
-              <Field name="linkedin_url" label="לינקדאין" placeholder="https://linkedin.com/in/..." dir="ltr" {...fieldProps} />
+              <div>
+                <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Instagram className="h-3.5 w-3.5 text-[#E4405F]" /> אינסטגרם</label>
+                <Input name="instagram_url" value={form.instagram_url} onChange={handleChange} className={`bg-card border-border ${errors.instagram_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://instagram.com/..." autoComplete="off" />
+                {errors.instagram_url && <p className="mt-1 font-body text-xs text-destructive">{errors.instagram_url}</p>}
+              </div>
+              <div>
+                <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Linkedin className="h-3.5 w-3.5 text-[#0A66C2]" /> לינקדאין</label>
+                <Input name="linkedin_url" value={form.linkedin_url} onChange={handleChange} className={`bg-card border-border ${errors.linkedin_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://linkedin.com/in/..." autoComplete="off" />
+                {errors.linkedin_url && <p className="mt-1 font-body text-xs text-destructive">{errors.linkedin_url}</p>}
+              </div>
             </div>
           </div>
 
