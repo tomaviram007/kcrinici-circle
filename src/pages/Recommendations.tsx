@@ -35,6 +35,8 @@ const CATEGORIES = [
 interface Recommendation {
   id: string;
   professional_name: string;
+  professional_first_name: string;
+  professional_last_name: string | null;
   category: string;
   description: string;
   phone: string;
@@ -75,7 +77,8 @@ const formatPhoneForWhatsApp = (phone: string): string => {
 const buildWhatsAppUrl = (rec: Recommendation): string => {
   const phone = formatPhoneForWhatsApp(rec.phone);
   const recommenderText = rec.is_admin_post ? "מנהל המערכת" : rec.recommender_name;
-  const message = `היי ${rec.professional_name}, קיבלתי המלצה עליך דרך ${recommenderText} מקהילת הגברים של קרניצי. מה שלומך?`;
+  const firstName = rec.professional_first_name || rec.professional_name.split(" ")[0];
+  const message = `היי ${firstName}, קיבלתי המלצה עליך דרך ${recommenderText} מקהילת הגברים של קרניצי. מה שלומך?`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 };
 
@@ -90,7 +93,8 @@ const Recommendations = () => {
   const prevFilteredRef = useRef<string[]>([]);
 
   const [formData, setFormData] = useState({
-    professional_name: "",
+    professional_first_name: "",
+    professional_last_name: "",
     category: "",
     description: "",
     phone: "",
@@ -127,8 +131,11 @@ const Recommendations = () => {
 
   const submitMutation = useMutation({
     mutationFn: async () => {
+      const fullName = [formData.professional_first_name, formData.professional_last_name].filter(Boolean).join(" ");
       const { error } = await (supabase as any).from("professional_recommendations").insert({
-        professional_name: formData.professional_name,
+        professional_name: fullName,
+        professional_first_name: formData.professional_first_name,
+        professional_last_name: formData.professional_last_name || null,
         category: formData.category,
         description: formData.description,
         phone: formData.phone,
@@ -141,7 +148,7 @@ const Recommendations = () => {
     onSuccess: () => {
       toast({ title: "ההמלצה נשלחה בהצלחה!", description: "ההמלצה תפורסם לאחר אישור מנהל." });
       setShowForm(false);
-      setFormData({ professional_name: "", category: "", description: "", phone: "", rating: 5 });
+      setFormData({ professional_first_name: "", professional_last_name: "", category: "", description: "", phone: "", rating: 5 });
       queryClient.invalidateQueries({ queryKey: ["recommendations"] });
     },
     onError: () => {
@@ -150,8 +157,9 @@ const Recommendations = () => {
   });
 
   const filtered = recommendations.filter((r) => {
+    const fullName = [r.professional_first_name, r.professional_last_name].filter(Boolean).join(" ") || r.professional_name;
     const matchesSearch =
-      r.professional_name.includes(searchQuery) ||
+      fullName.includes(searchQuery) ||
       r.description.includes(searchQuery) ||
       r.recommender_name.includes(searchQuery);
     const matchesCategory = selectedCategory === "all" || r.category === selectedCategory;
@@ -205,8 +213,8 @@ const Recommendations = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.professional_name || !formData.category || !formData.description || !formData.phone) {
-      toast({ title: "שגיאה", description: "נא למלא את כל השדות", variant: "destructive" });
+    if (!formData.professional_first_name || !formData.category || !formData.description || !formData.phone) {
+      toast({ title: "שגיאה", description: "נא למלא את כל השדות החובה", variant: "destructive" });
       return;
     }
     submitMutation.mutate();
@@ -296,14 +304,25 @@ const Recommendations = () => {
             <DialogTitle className="text-xl font-serif text-foreground">המלצה על בעל מקצוע</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-            <div>
-              <Label className="font-body text-sm">שם בעל המקצוע / העסק</Label>
-              <Input
-                value={formData.professional_name}
-                onChange={(e) => setFormData({ ...formData, professional_name: e.target.value })}
-                className="mt-1 bg-card border-border font-body"
-                placeholder="לדוגמה: יוסי שיפוצים"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="font-body text-sm">שם פרטי *</Label>
+                <Input
+                  value={formData.professional_first_name}
+                  onChange={(e) => setFormData({ ...formData, professional_first_name: e.target.value })}
+                  className="mt-1 bg-card border-border font-body"
+                  placeholder="לדוגמה: יוסי"
+                />
+              </div>
+              <div>
+                <Label className="font-body text-sm">שם משפחה</Label>
+                <Input
+                  value={formData.professional_last_name}
+                  onChange={(e) => setFormData({ ...formData, professional_last_name: e.target.value })}
+                  className="mt-1 bg-card border-border font-body"
+                  placeholder="אופציונלי"
+                />
+              </div>
             </div>
             <div>
               <Label className="font-body text-sm">תחום עיסוק</Label>
@@ -382,7 +401,9 @@ const RecommendationCard = ({ rec }: { rec: Recommendation }) => {
         <StarRating rating={rec.rating} />
       </div>
 
-      <h3 className="text-lg font-serif font-bold text-foreground">{rec.professional_name}</h3>
+      <h3 className="text-lg font-serif font-bold text-foreground">
+        {[rec.professional_first_name, rec.professional_last_name].filter(Boolean).join(" ") || rec.professional_name}
+      </h3>
       <p className="text-sm font-body text-muted-foreground leading-relaxed flex-1">{rec.description}</p>
 
       {/* Phone + WhatsApp */}
