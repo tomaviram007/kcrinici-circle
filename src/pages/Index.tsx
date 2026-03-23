@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import gsap from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+
+gsap.registerPlugin(ScrollToPlugin);
 import HeroSection from "@/components/landing/HeroSection";
 import SalesPreviewSection from "@/components/landing/SalesPreviewSection";
 import EventsPreviewSection from "@/components/landing/EventsPreviewSection";
@@ -14,6 +19,7 @@ import ClubAboutSection from "@/components/ClubAboutSection";
 const Index = () => {
   const [isApproved, setIsApproved] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const check = async () => {
@@ -31,6 +37,34 @@ const Index = () => {
     };
     check();
   }, []);
+
+  // Handle scroll-to-birthdays from navigation state
+  useEffect(() => {
+    if ((location.state as any)?.scrollToBirthdays) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById("birthdays-section");
+        if (el) {
+          gsap.to(window, {
+            scrollTo: { y: el, offsetY: 80 },
+            duration: 1.5,
+            ease: "power2.inOut",
+            onComplete: () => {
+              const cubes = el.querySelectorAll(".bday-cube");
+              if (cubes.length) {
+                gsap.fromTo(cubes,
+                  { boxShadow: "0 0 0px hsl(43 72% 52% / 0)" },
+                  { boxShadow: "0 0 25px hsl(43 72% 52% / 0.4)", duration: 0.6, stagger: 0.05, yoyo: true, repeat: 1, ease: "sine.inOut" }
+                );
+              }
+            },
+          });
+        }
+      }, 600);
+      // Clear state
+      window.history.replaceState({}, document.title);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   return (
     <main className="min-h-screen bg-background">
