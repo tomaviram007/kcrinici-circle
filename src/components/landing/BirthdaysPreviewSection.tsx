@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Gift, Lock, Send } from "lucide-react";
+import { Gift, Lock, Send, Cake } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -12,140 +12,198 @@ interface Props {
 
 const BirthdaysPreviewSection = ({ isApproved }: Props) => {
   const [birthdays, setBirthdays] = useState<any[]>([]);
-  const [sending, setSending] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isApproved) return;
-    const fetch = async () => {
+    const fetchBirthdays = async () => {
       const { data } = await supabase
         .from("profiles")
         .select("full_name, birth_date, profession, avatar_url, user_id")
         .eq("is_approved", true)
         .not("birth_date", "is", null);
       if (!data) return;
+
       const now = new Date();
       const currentMonth = now.getMonth();
-      const matched = data.filter((p) => {
-        if (!p.birth_date) return false;
-        const bd = new Date(p.birth_date + "T00:00:00");
-        return bd.getMonth() === currentMonth;
-      }).slice(0, 3);
+      const currentDate = now.getDate();
+
+      // Get birthdays this month, sorted by day
+      const matched = data
+        .filter((p) => {
+          if (!p.birth_date) return false;
+          const bd = new Date(p.birth_date + "T00:00:00");
+          return bd.getMonth() === currentMonth;
+        })
+        .sort((a, b) => {
+          const da = new Date(a.birth_date + "T00:00:00").getDate();
+          const db = new Date(b.birth_date + "T00:00:00").getDate();
+          return da - db;
+        })
+        .slice(0, 6);
+
       setBirthdays(matched);
     };
-    fetch();
+    fetchBirthdays();
   }, [isApproved]);
 
   useEffect(() => {
-    if (!sectionRef.current) return;
+    if (!sectionRef.current || birthdays.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          const cards = sectionRef.current?.querySelectorAll(".bday-preview-card");
-          if (cards) gsap.fromTo(cards, { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.15, ease: "back.out(1.3)" });
+          const cards = sectionRef.current?.querySelectorAll(".bday-cube");
+          if (cards) {
+            gsap.fromTo(
+              cards,
+              { opacity: 0, y: 30, scale: 0.9 },
+              { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }
+            );
+          }
           observer.disconnect();
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.15 }
     );
     observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, [birthdays]);
 
-  const handleSendGreeting = (name: string, userId: string) => {
-    setSending(true);
-    supabase.from("profiles").select("phone").eq("user_id", userId).maybeSingle().then(({ data }) => {
-      setSending(false);
-      if (!data?.phone) {
-        toast.error("לא נמצא מספר טלפון לחבר זה");
-        return;
-      }
-      const cleanPhone = data.phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
-      const msg = encodeURIComponent(`היי ${name}, המון מזל טוב ליום הולדתך 🎂`);
-      window.open(`https://wa.me/${cleanPhone}?text=${msg}`, "_blank");
-      toast.success("מועבר לוואטסאפ! 🎉");
-    });
+  const isBirthdayToday = (dateStr: string) => {
+    const now = new Date();
+    const bd = new Date(dateStr + "T00:00:00");
+    return bd.getMonth() === now.getMonth() && bd.getDate() === now.getDate();
   };
 
-  const formatHebrewDate = (dateStr: string) => {
+  const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + "T00:00:00");
     return date.toLocaleDateString("he-IL", { day: "numeric", month: "long" });
   };
 
+  const handleSendGreeting = (name: string, userId: string) => {
+    supabase
+      .from("profiles")
+      .select("phone")
+      .eq("user_id", userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data?.phone) {
+          toast.error("לא נמצא מספר טלפון לחבר זה");
+          return;
+        }
+        const cleanPhone = data.phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
+        const msg = encodeURIComponent(`היי ${name}, המון מזל טוב ליום הולדתך 🎂`);
+        window.open(`https://wa.me/${cleanPhone}?text=${msg}`, "_blank");
+        toast.success("מועבר לוואטסאפ! 🎉");
+      });
+  };
+
   const mockBirthdays = [
-    { full_name: "דוד כהן", birth_date: "1990-02-15", profession: "עורך דין", avatar_url: null, user_id: "m1" },
-    { full_name: "אבי לוי", birth_date: "1985-02-20", profession: "רואה חשבון", avatar_url: null, user_id: "m2" },
-    { full_name: "יוסי מזרחי", birth_date: "1992-02-25", profession: "מהנדס תוכנה", avatar_url: null, user_id: "m3" },
+    { full_name: "דוד כהן", birth_date: "1990-03-23", profession: "עורך דין", avatar_url: null, user_id: "m1" },
+    { full_name: "אבי לוי", birth_date: "1985-03-25", profession: "רואה חשבון", avatar_url: null, user_id: "m2" },
+    { full_name: "יוסי מזרחי", birth_date: "1992-03-27", profession: "מהנדס תוכנה", avatar_url: null, user_id: "m3" },
+    { full_name: "משה ישראלי", birth_date: "1988-03-28", profession: "אדריכל", avatar_url: null, user_id: "m4" },
   ];
 
-  const displayItems = isApproved && birthdays.length > 0 ? birthdays : (!isApproved ? mockBirthdays : birthdays);
+  const displayItems = isApproved && birthdays.length > 0 ? birthdays : !isApproved ? mockBirthdays : birthdays;
   const isEmpty = isApproved && birthdays.length === 0;
 
   return (
-    <>
-      <section className="py-12 px-4 sm:py-24 sm:px-6 bg-card/50" ref={sectionRef}>
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-8 sm:mb-16 text-center">
-            <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">חברי מועדון</p>
-            <h2 className="font-serif text-2xl font-bold text-foreground sm:text-4xl md:text-5xl">
-              ימי הולדת <span className="text-gold">החודש</span>
-            </h2>
-            <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
-          </div>
+    <section className="py-10 px-4 sm:py-16 sm:px-6" dir="rtl" ref={sectionRef}>
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6 sm:mb-10 text-center">
+          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">
+            חוגגים החודש
+          </p>
+          <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
+            ימי הולדת <span className="text-gold">במועדון</span>
+          </h2>
+          <div className="mt-3 mx-auto h-px w-12 gradient-gold opacity-40" />
+        </div>
 
-          {isEmpty ? (
-            <div className="text-center py-12">
-              <Gift className="mx-auto h-10 w-10 text-muted-foreground/30 mb-3" />
-              <p className="font-body text-sm text-muted-foreground">אין ימי הולדת החודש</p>
-            </div>
-          ) : (
-            <div className="relative grid gap-4 sm:gap-6 md:grid-cols-3">
-              {displayItems.map((person, i) => (
-                <div key={i} className="bday-preview-card opacity-0 rounded-lg border border-gold/20 bg-card p-5 sm:p-8 text-center glow-gold hover:border-gold/40 transition-colors">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 overflow-hidden">
-                    {person.avatar_url ? (
-                      <img src={person.avatar_url} alt={person.full_name} className="w-full h-full object-cover" />
-                    ) : (
-                      <Gift className="h-7 w-7 text-gold" />
+        {isEmpty ? (
+          <div className="text-center py-10">
+            <Gift className="mx-auto h-8 w-8 text-muted-foreground/30 mb-2" />
+            <p className="font-body text-sm text-muted-foreground">אין ימי הולדת החודש</p>
+          </div>
+        ) : (
+          <div className="relative">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+              {displayItems.map((person, i) => {
+                const isToday = isBirthdayToday(person.birth_date);
+                return (
+                  <div
+                    key={i}
+                    className={`bday-cube opacity-0 group relative rounded-xl p-4 text-center transition-all duration-300 cursor-pointer
+                      border backdrop-blur-md bg-card/40
+                      ${isToday
+                        ? "border-gold/50 shadow-[0_0_20px_hsl(var(--gold)/0.25)]"
+                        : "border-border/40 hover:border-gold/30"
+                      }
+                      hover:scale-105 hover:bg-card/60`}
+                    onClick={() => isApproved && handleSendGreeting(person.full_name, person.user_id)}
+                    title={isApproved ? `שלח ברכה ל${person.full_name}` : ""}
+                  >
+                    {isToday && (
+                      <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-gold text-background text-xs animate-pulse">
+                        🎂
+                      </div>
+                    )}
+
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gold/10 border border-gold/20 overflow-hidden">
+                      {person.avatar_url ? (
+                        <img src={person.avatar_url} alt={person.full_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Cake className="h-5 w-5 text-gold" />
+                      )}
+                    </div>
+
+                    <h3
+                      className={`font-serif text-sm font-bold text-foreground leading-tight ${!isApproved ? "blur-[3px]" : ""}`}
+                    >
+                      {person.full_name}
+                    </h3>
+
+                    <p className={`mt-1 font-body text-xs text-gold ${!isApproved ? "blur-[3px]" : ""}`}>
+                      {formatDate(person.birth_date)}
+                    </p>
+
+                    {isApproved && (
+                      <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <span className="inline-flex items-center gap-1 text-xs text-gold font-body">
+                          <Send className="h-3 w-3" />
+                          שלח ברכה
+                        </span>
+                      </div>
                     )}
                   </div>
-                  <h3 className={`font-serif text-xl font-bold text-foreground ${!isApproved ? "blur-[3px]" : ""}`}>{person.full_name}</h3>
-                  <p className={`mt-1 font-body text-sm text-gold ${!isApproved ? "blur-[4px]" : ""}`}>{formatHebrewDate(person.birth_date)}</p>
-                  <p className={`mt-2 font-body text-sm text-muted-foreground ${!isApproved ? "blur-[4px]" : ""}`}>{person.profession}</p>
-                  {isApproved && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-4 border-gold/30 text-gold hover:bg-gold/10 font-body gap-1.5"
-                      onClick={() => handleSendGreeting(person.full_name, person.user_id)}
-                    >
-                      <Send className="h-3.5 w-3.5" />
-                      שלח ברכה
-                    </Button>
-                  )}
-                </div>
-              ))}
-              {!isApproved && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <Link to="/register" className="pointer-events-auto flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur-sm px-6 py-3 font-body text-sm text-gold hover:bg-gold/10 transition-colors">
-                    <Lock className="h-4 w-4" />
-                    הצטרף כדי לראות
-                  </Link>
-                </div>
-              )}
+                );
+              })}
             </div>
-          )}
 
-          {isApproved && (
-            <div className="mt-8 text-center">
-              <Link to="/members" className="font-body text-sm text-gold hover:underline">
-                לכל החברים ←
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
-    </>
+            {!isApproved && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <Link
+                  to="/register"
+                  className="pointer-events-auto flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur-sm px-6 py-3 font-body text-sm text-gold hover:bg-gold/10 transition-colors"
+                >
+                  <Lock className="h-4 w-4" />
+                  הצטרף כדי לראות
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
+        {isApproved && !isEmpty && (
+          <div className="mt-6 text-center">
+            <Link to="/members" className="font-body text-sm text-gold hover:underline">
+              לכל החברים ←
+            </Link>
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 
