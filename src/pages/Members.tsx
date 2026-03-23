@@ -5,7 +5,7 @@ import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import ClubAboutSection from "@/components/ClubAboutSection";
+
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-members.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
@@ -98,7 +98,7 @@ const Members = () => {
   return (
     <>
     <PageHero image={coverImage} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
-    <ClubAboutSection />
+    
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">

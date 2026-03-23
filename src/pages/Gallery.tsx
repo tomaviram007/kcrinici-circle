@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Plus, Image, ArrowRight, Trash2, X, ChevronLeft, ChevronRight, Pencil, Link2, Upload, Star, Calendar, User, Filter, AlertTriangle } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import PageHero from "@/components/PageHero";
-import ClubAboutSection from "@/components/ClubAboutSection";
+
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-gallery.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
@@ -642,7 +642,7 @@ const Gallery = () => {
   return (
     <>
     <PageHero image={coverImage} title="גלריית" highlight="תמונות" subtitle="רגעים מיוחדים מאירועי ומפגשי המועדון" />
-    <ClubAboutSection />
+    
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

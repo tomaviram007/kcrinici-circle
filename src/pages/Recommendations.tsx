@@ -14,7 +14,7 @@ import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import recommendationsHero from "@/assets/recommendations-hero.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
-import ClubAboutSection from "@/components/ClubAboutSection";
+
 
 const CATEGORIES = [
   "שיפוצים",
@@ -223,7 +223,7 @@ const Recommendations = () => {
   return (
     <>
       <PageHero image={coverImage} title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים" />
-      <ClubAboutSection />
+      
 
       <div className="max-w-7xl mx-auto px-4 py-8" dir="rtl">
         {/* Action Bar */}
