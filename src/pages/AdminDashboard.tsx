@@ -16,6 +16,7 @@ import AdminRecommendations from "@/components/admin/AdminRecommendations";
 import AdminCovers from "@/components/admin/AdminCovers";
 import AdminMembers from "@/components/admin/AdminMembers";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminBirthdayWidget from "@/components/admin/AdminBirthdayWidget";
 import PageHero from "@/components/PageHero";
 
 import heroAdmin from "@/assets/hero-admin.jpg";
@@ -81,6 +82,8 @@ const AdminDashboard = () => {
             </div>
           ))}
         </div>
+
+        <AdminBirthdayWidget />
 
         {/* Sidebar + Content layout */}
         <div className="flex gap-6" dir="rtl">
