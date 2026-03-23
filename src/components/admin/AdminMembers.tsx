@@ -32,6 +32,10 @@ interface Profile {
   is_removed: boolean;
   birth_date: string | null;
   created_at: string;
+  website_url?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
+  linkedin_url?: string | null;
 }
 
 const AdminMembers = () => {
