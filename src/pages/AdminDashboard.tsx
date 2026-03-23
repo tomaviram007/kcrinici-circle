@@ -54,6 +54,14 @@ const AdminDashboard = () => {
     fetchStats();
   }, []);
 
+  const statCards = [
+    { label: "חברים מאושרים", value: stats.approvedMembers, icon: Users, accent: "text-green-500" },
+    { label: "ממתינים לאישור", value: stats.pendingMembers, icon: Clock, accent: "text-primary" },
+    { label: "אירועים קרובים", value: stats.upcomingEvents, icon: Calendar, accent: "text-blue-500" },
+    { label: "משרות פעילות", value: stats.activeJobs, icon: Briefcase, accent: "text-purple-500" },
+    { label: "סקרים פעילים", value: stats.activePolls, icon: BarChart3, accent: "text-primary" },
+  ];
+
   const handleTabChange = (tab: string) => {
     setSearchParams({ tab });
   };
