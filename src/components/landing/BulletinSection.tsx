@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Briefcase, Users, Calendar, Lock, Megaphone } from "lucide-react";
+import { Briefcase, Users, Calendar, Lock, Megaphone, Cake } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
+import { useBirthdaysToday } from "@/hooks/useBirthdaysToday";
 
 interface Props {
   isApproved?: boolean;
@@ -17,6 +18,7 @@ const staticFeatures = [
 const BulletinSection = ({ isApproved = false }: Props) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const { birthdays: todayBirthdays } = useBirthdaysToday();
 
   useEffect(() => {
     if (isApproved) {
@@ -44,10 +46,10 @@ const BulletinSection = ({ isApproved = false }: Props) => {
     );
     observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, [announcements]);
+  }, [announcements, todayBirthdays]);
 
-  // Show real announcements for approved users, static features for guests
   const showRealContent = isApproved && announcements.length > 0;
+  const hasBirthdaysToday = isApproved && todayBirthdays.length > 0;
 
   return (
     <section className="py-12 px-4 sm:py-24 sm:px-6 bg-card/50" ref={sectionRef}>
@@ -59,6 +61,25 @@ const BulletinSection = ({ isApproved = false }: Props) => {
           </h2>
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
+
+        {/* Birthday announcement banner */}
+        {hasBirthdaysToday && (
+          <div className="mb-6 sm:mb-8 bulletin-card opacity-0">
+            <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 sm:p-6 flex items-center gap-4 glow-gold">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gold/15 border border-gold/30">
+                <Cake className="h-6 w-6 text-gold" />
+              </div>
+              <div>
+                <h3 className="font-serif text-lg font-bold text-foreground">
+                  🎉 היום חוגגים יום הולדת!
+                </h3>
+                <p className="font-body text-sm text-muted-foreground mt-1">
+                  {todayBirthdays.map(b => b.full_name).join(", ")} – שלחו ברכה חמה! 🎂
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="relative grid gap-4 sm:gap-8 md:grid-cols-3">
           {showRealContent
@@ -80,7 +101,7 @@ const BulletinSection = ({ isApproved = false }: Props) => {
                     <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-secondary">
                       <feature.icon className="h-7 w-7 text-gold" />
                     </div>
-                    <h3 className={`mb-3 font-serif text-2xl font-bold text-foreground ${!isApproved ? "" : ""}`}>{feature.title}</h3>
+                    <h3 className={`mb-3 font-serif text-2xl font-bold text-foreground`}>{feature.title}</h3>
                     <p className={`font-body text-base leading-relaxed text-muted-foreground ${!isApproved ? "blur-[3px]" : ""}`}>{feature.description}</p>
                   </div>
                 </div>
