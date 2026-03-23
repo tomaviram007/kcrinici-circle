@@ -7,6 +7,7 @@ interface AuthContextValue {
   isApproved: boolean;
   isAdmin: boolean;
   loading: boolean;
+  sessionExpired: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextValue>({
   isApproved: false,
   isAdmin: false,
   loading: true,
+  sessionExpired: false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -38,26 +40,70 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isApproved, setIsApproved] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
-  // מונע ריצה כפולה של fetchProfileAndRoles
   const fetchingRef = useRef(false);
-  // שומר את ה-userId האחרון שעליו כבר טענו פרופיל
   const lastFetchedUserRef = useRef<string | null>(null);
+  const hadUserRef = useRef(false);
 
   useEffect(() => {
     let alive = true;
 
+    // Step 1: Check existing session FIRST before listening for changes
+    const initSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!alive) return;
+
+        if (session?.user) {
+          setUser(session.user);
+          hadUserRef.current = true;
+          const result = await fetchProfileAndRoles(session.user.id);
+          if (!alive) return;
+          setIsApproved(result.isApproved);
+          setIsAdmin(result.isAdmin);
+          lastFetchedUserRef.current = session.user.id;
+        }
+      } catch {
+        // Session retrieval failed, user stays null
+      } finally {
+        if (alive) setLoading(false);
+      }
+    };
+
+    initSession();
+
+    // Step 2: Listen for auth state changes AFTER initial check
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!alive) return;
 
       if (event === "SIGNED_OUT") {
+        const wasLoggedIn = hadUserRef.current;
         setUser(null);
         setIsApproved(false);
         setIsAdmin(false);
         setLoading(false);
         lastFetchedUserRef.current = null;
+        hadUserRef.current = false;
+        if (wasLoggedIn) {
+          setSessionExpired(true);
+        }
+        return;
+      }
+
+      if (event === "TOKEN_REFRESHED" && !session) {
+        // Token refresh failed — session expired
+        setUser(null);
+        setIsApproved(false);
+        setIsAdmin(false);
+        setLoading(false);
+        lastFetchedUserRef.current = null;
+        if (hadUserRef.current) {
+          setSessionExpired(true);
+          hadUserRef.current = false;
+        }
         return;
       }
 
@@ -69,6 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       ) {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
+        setSessionExpired(false);
 
         if (!currentUser) {
           setIsApproved(false);
@@ -78,20 +125,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        // אם כבר טענו פרופיל לאותו משתמש — דילוג (TOKEN_REFRESHED או SIGNED_IN כפול)
+        hadUserRef.current = true;
+
         if (lastFetchedUserRef.current === currentUser.id) {
           setLoading(false);
           return;
         }
 
-        // מניעת ריצה כפולה מקבילה — אם כבר רץ, דילוג בלי לחסום loading
-        if (fetchingRef.current) {
-          // לא עושים return בלי setLoading(false) — ה-fetch הראשון יטפל
-          return;
-        }
+        if (fetchingRef.current) return;
         fetchingRef.current = true;
-
-        setLoading(true);
 
         const result = await fetchProfileAndRoles(currentUser.id);
 
@@ -110,19 +152,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (alive) setLoading(false);
     }, 5000);
 
-    // visibilitychange — רק בודק אם המשתמש התנתק בטאב אחר, בלי לגרום לרנדור
     const handleVisibility = () => {
       if (document.visibilityState !== "visible" || !alive) return;
-
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (!alive) return;
-        // רק אם אין session כלל — מנקים state
-        // אם יש session, onAuthStateChange יטפל בכל השאר
-        if (!session) {
+        if (!session && hadUserRef.current) {
           setUser(null);
           setIsApproved(false);
           setIsAdmin(false);
           lastFetchedUserRef.current = null;
+          hadUserRef.current = false;
+          setSessionExpired(true);
         }
       });
     };
@@ -137,5 +177,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  return <AuthContext.Provider value={{ user, isApproved, isAdmin, loading }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, isApproved, isAdmin, loading, sessionExpired }}>{children}</AuthContext.Provider>;
 };
