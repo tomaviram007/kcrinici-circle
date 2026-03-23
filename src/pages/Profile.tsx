@@ -24,6 +24,10 @@ const Profile = () => {
     expertise: "",
     bio: "",
     hobbies: "",
+    website_url: "",
+    facebook_url: "",
+    instagram_url: "",
+    linkedin_url: "",
   });
 
   // Password change state
@@ -41,7 +45,7 @@ const Profile = () => {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, phone, address, profession, expertise, bio, avatar_url, hobbies")
+        .select("full_name, phone, address, profession, expertise, bio, avatar_url, hobbies, website_url, facebook_url, instagram_url, linkedin_url")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
@@ -54,6 +58,10 @@ const Profile = () => {
           expertise: profile.expertise || "",
           bio: profile.bio || "",
           hobbies: (profile as any).hobbies || "",
+          website_url: (profile as any).website_url || "",
+          facebook_url: (profile as any).facebook_url || "",
+          instagram_url: (profile as any).instagram_url || "",
+          linkedin_url: (profile as any).linkedin_url || "",
         });
         setAvatarUrl(profile.avatar_url);
       }
@@ -85,6 +93,10 @@ const Profile = () => {
           expertise: form.expertise.trim() || null,
           bio: form.bio.trim() || null,
           hobbies: form.hobbies.trim() || null,
+          website_url: form.website_url.trim() || null,
+          facebook_url: form.facebook_url.trim() || null,
+          instagram_url: form.instagram_url.trim() || null,
+          linkedin_url: form.linkedin_url.trim() || null,
         } as any)
         .eq("user_id", userId);
 
@@ -158,6 +170,29 @@ const Profile = () => {
         <div>
           <label className="mb-1.5 block font-body text-sm text-muted-foreground">תחביבים</label>
           <Input name="hobbies" value={form.hobbies} onChange={handleChange} className="bg-card border-border" placeholder="למשל: ספורט, בישול, טכנולוגיה..." />
+        </div>
+
+        <Separator className="my-4" />
+        <p className="font-body text-sm text-muted-foreground mb-2">קישורים חברתיים</p>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block font-body text-sm text-muted-foreground">אתר אישי/עסקי</label>
+            <Input name="website_url" value={form.website_url} onChange={handleChange} className="bg-card border-border" dir="ltr" placeholder="https://..." />
+          </div>
+          <div>
+            <label className="mb-1.5 block font-body text-sm text-muted-foreground">פייסבוק</label>
+            <Input name="facebook_url" value={form.facebook_url} onChange={handleChange} className="bg-card border-border" dir="ltr" placeholder="https://facebook.com/..." />
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block font-body text-sm text-muted-foreground">אינסטגרם</label>
+            <Input name="instagram_url" value={form.instagram_url} onChange={handleChange} className="bg-card border-border" dir="ltr" placeholder="https://instagram.com/..." />
+          </div>
+          <div>
+            <label className="mb-1.5 block font-body text-sm text-muted-foreground">לינקדאין</label>
+            <Input name="linkedin_url" value={form.linkedin_url} onChange={handleChange} className="bg-card border-border" dir="ltr" placeholder="https://linkedin.com/in/..." />
+          </div>
         </div>
 
         <Button type="submit" disabled={saving} className="w-full gradient-gold text-primary-foreground font-body py-6 text-base hover:opacity-90">
