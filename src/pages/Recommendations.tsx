@@ -81,6 +81,7 @@ const buildWhatsAppUrl = (rec: Recommendation): string => {
 const Recommendations = () => {
   const { user, isApproved } = useAuth();
   const queryClient = useQueryClient();
+  const coverImage = usePageCover("recommendations", recommendationsHero);
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
