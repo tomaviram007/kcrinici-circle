@@ -473,15 +473,19 @@ export type Database = {
           birth_date: string | null
           created_at: string
           expertise: string | null
+          facebook_url: string | null
           full_name: string
           hobbies: string | null
           id: string
+          instagram_url: string | null
           is_approved: boolean
           is_removed: boolean
+          linkedin_url: string | null
           phone: string
           profession: string
           updated_at: string
           user_id: string
+          website_url: string | null
         }
         Insert: {
           address: string
@@ -490,15 +494,19 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           expertise?: string | null
+          facebook_url?: string | null
           full_name: string
           hobbies?: string | null
           id?: string
+          instagram_url?: string | null
           is_approved?: boolean
           is_removed?: boolean
+          linkedin_url?: string | null
           phone: string
           profession: string
           updated_at?: string
           user_id: string
+          website_url?: string | null
         }
         Update: {
           address?: string
@@ -507,15 +515,19 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           expertise?: string | null
+          facebook_url?: string | null
           full_name?: string
           hobbies?: string | null
           id?: string
+          instagram_url?: string | null
           is_approved?: boolean
           is_removed?: boolean
+          linkedin_url?: string | null
           phone?: string
           profession?: string
           updated_at?: string
           user_id?: string
+          website_url?: string | null
         }
         Relationships: []
       }
