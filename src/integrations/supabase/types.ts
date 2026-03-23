@@ -474,6 +474,7 @@ export type Database = {
           created_at: string
           expertise: string | null
           full_name: string
+          hobbies: string | null
           id: string
           is_approved: boolean
           is_removed: boolean
@@ -490,6 +491,7 @@ export type Database = {
           created_at?: string
           expertise?: string | null
           full_name: string
+          hobbies?: string | null
           id?: string
           is_approved?: boolean
           is_removed?: boolean
@@ -506,6 +508,7 @@ export type Database = {
           created_at?: string
           expertise?: string | null
           full_name?: string
+          hobbies?: string | null
           id?: string
           is_approved?: boolean
           is_removed?: boolean

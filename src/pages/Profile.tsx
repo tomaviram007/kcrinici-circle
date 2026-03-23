@@ -23,6 +23,7 @@ const Profile = () => {
     profession: "",
     expertise: "",
     bio: "",
+    hobbies: "",
   });
 
   // Password change state
@@ -40,7 +41,7 @@ const Profile = () => {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, phone, address, profession, expertise, bio, avatar_url")
+        .select("full_name, phone, address, profession, expertise, bio, avatar_url, hobbies")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
@@ -52,6 +53,7 @@ const Profile = () => {
           profession: profile.profession || "",
           expertise: profile.expertise || "",
           bio: profile.bio || "",
+          hobbies: (profile as any).hobbies || "",
         });
         setAvatarUrl(profile.avatar_url);
       }
@@ -82,7 +84,8 @@ const Profile = () => {
           profession: form.profession.trim(),
           expertise: form.expertise.trim() || null,
           bio: form.bio.trim() || null,
-        })
+          hobbies: form.hobbies.trim() || null,
+        } as any)
         .eq("user_id", userId);
 
       if (error) throw error;
@@ -150,6 +153,11 @@ const Profile = () => {
         <div>
           <label className="mb-1.5 block font-body text-sm text-muted-foreground">ביוגרפיה</label>
           <Textarea name="bio" value={form.bio} onChange={handleChange} className="bg-card border-border min-h-[100px]" placeholder="ספר קצת על עצמך..." />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block font-body text-sm text-muted-foreground">תחביבים</label>
+          <Input name="hobbies" value={form.hobbies} onChange={handleChange} className="bg-card border-border" placeholder="למשל: ספורט, בישול, טכנולוגיה..." />
         </div>
 
         <Button type="submit" disabled={saving} className="w-full gradient-gold text-primary-foreground font-body py-6 text-base hover:opacity-90">

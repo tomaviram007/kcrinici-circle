@@ -21,6 +21,7 @@ const registerSchema = z.object({
   profession: z.string().trim().min(2, "מקצוע חייב להכיל לפחות 2 תווים").max(100, "מקצוע ארוך מדי"),
   expertise: z.string().max(200, "מומחיות ארוכה מדי").optional().or(z.literal("")),
   bio: z.string().max(500, "ביוגרפיה ארוכה מדי").optional().or(z.literal("")),
+  hobbies: z.string().max(300, "תחביבים ארוכים מדי").optional().or(z.literal("")),
   birth_date: z.string().min(1, "יש לבחור תאריך לידה"),
   email: z.string().trim().email("כתובת אימייל לא תקינה"),
   password: z.string().min(6, "סיסמה חייבת להכיל לפחות 6 תווים").max(72, "סיסמה ארוכה מדי"),
@@ -80,6 +81,7 @@ const Register = () => {
     expertise: "",
     bio: "",
     birth_date: "",
+    hobbies: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -120,6 +122,7 @@ const Register = () => {
             expertise: form.expertise,
             bio: form.bio,
             birth_date: form.birth_date,
+            hobbies: form.hobbies,
           },
         },
       });
@@ -229,6 +232,7 @@ const Register = () => {
           </div>
 
           <Field name="bio" label="משהו שהשכנים צריכים לדעת עליך" textarea placeholder="ביוגרפיה קצרה..." {...fieldProps} />
+          <Field name="hobbies" label="מה התחביבים שלך?" placeholder="למשל: ספורט, בישול, טכנולוגיה..." {...fieldProps} />
 
           <div className="border-t border-border pt-5 space-y-4">
             <Field name="email" label="אימייל" required type="email" dir="ltr" {...fieldProps} />
