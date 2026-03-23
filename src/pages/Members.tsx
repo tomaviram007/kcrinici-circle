@@ -5,6 +5,7 @@ import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import SocialLinks from "@/components/SocialLinks";
+import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import QuoteSection from "@/components/landing/QuoteSection";
@@ -419,7 +420,7 @@ const Members = () => {
             </div>
             <div>
               <Label className="font-body text-sm">תאריך לידה</Label>
-              <Input type="date" value={editForm.birth_date} onChange={(e) => setEditForm(f => ({ ...f, birth_date: e.target.value }))} dir="ltr" autoComplete="off" />
+              <HebrewDatePicker value={editForm.birth_date} onChange={(val) => setEditForm(f => ({ ...f, birth_date: val }))} />
             </div>
             <div className="border-t border-border pt-3 mt-2">
               <p className="font-body text-xs text-muted-foreground mb-2">קישורים חברתיים</p>

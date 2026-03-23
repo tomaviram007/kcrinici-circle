@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import HebrewDatePicker from "@/components/HebrewDatePicker";
 
 interface Profile {
   id: string;
@@ -348,7 +349,7 @@ const AdminMembers = () => {
             </div>
             <div>
               <Label className="font-body text-sm">תאריך לידה</Label>
-              <Input type="date" value={editForm.birth_date || ""} onChange={(e) => setEditForm({ ...editForm, birth_date: e.target.value })} className="bg-background" dir="ltr" />
+              <HebrewDatePicker value={editForm.birth_date || ""} onChange={(val) => setEditForm({ ...editForm, birth_date: val })} />
             </div>
             <div className="border-t border-border pt-3 mt-1">
               <p className="font-body text-xs text-muted-foreground mb-2">קישורים חברתיים</p>

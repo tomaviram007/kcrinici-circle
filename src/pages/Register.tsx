@@ -2,15 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
+import { Globe, Facebook, Instagram, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { cn } from "@/lib/utils";
 import RegisterBackground from "@/components/register/RegisterBackground";
 
@@ -22,6 +20,10 @@ const registerSchema = z.object({
   expertise: z.string().max(200, "מומחיות ארוכה מדי").optional().or(z.literal("")),
   bio: z.string().max(500, "ביוגרפיה ארוכה מדי").optional().or(z.literal("")),
   hobbies: z.string().max(300, "תחביבים ארוכים מדי").optional().or(z.literal("")),
+  website_url: z.string().url("כתובת URL לא תקינה").optional().or(z.literal("")),
+  facebook_url: z.string().url("כתובת URL לא תקינה").optional().or(z.literal("")),
+  instagram_url: z.string().url("כתובת URL לא תקינה").optional().or(z.literal("")),
+  linkedin_url: z.string().url("כתובת URL לא תקינה").optional().or(z.literal("")),
   birth_date: z.string().min(1, "יש לבחור תאריך לידה"),
   email: z.string().trim().email("כתובת אימייל לא תקינה"),
   password: z.string().min(6, "סיסמה חייבת להכיל לפחות 6 תווים").max(72, "סיסמה ארוכה מדי"),
@@ -200,42 +202,16 @@ const Register = () => {
             <label className="mb-1.5 block font-body text-sm text-muted-foreground">
               תאריך לידה <span className="text-gold">*</span>
             </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  type="button"
-                  className={cn(
-                    "w-full justify-start text-right font-normal bg-card border-border",
-                    !form.birth_date && "text-muted-foreground",
-                    errors.birth_date && "border-destructive"
-                  )}
-                >
-                  <CalendarIcon className="ml-2 h-4 w-4" />
-                  {form.birth_date ? format(new Date(form.birth_date), "dd/MM/yyyy") : "בחר תאריך"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={form.birth_date ? new Date(form.birth_date) : undefined}
-                  onSelect={(date) => {
-                    if (date) {
-                      setForm((prev) => ({ ...prev, birth_date: format(date, "yyyy-MM-dd") }));
-                      if (errors.birth_date) {
-                        setErrors((prev) => { const n = { ...prev }; delete n.birth_date; return n; });
-                      }
-                    }
-                  }}
-                  disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                  captionLayout="dropdown-buttons"
-                  fromYear={1920}
-                  toYear={new Date().getFullYear()}
-                />
-              </PopoverContent>
-            </Popover>
+            <HebrewDatePicker
+              value={form.birth_date}
+              onChange={(val) => {
+                setForm((prev) => ({ ...prev, birth_date: val }));
+                if (errors.birth_date) {
+                  setErrors((prev) => { const n = { ...prev }; delete n.birth_date; return n; });
+                }
+              }}
+              error={!!errors.birth_date}
+            />
             {errors.birth_date && <p className="mt-1 font-body text-xs text-destructive">{errors.birth_date}</p>}
           </div>
 
@@ -245,12 +221,28 @@ const Register = () => {
           <div className="border-t border-border pt-5 space-y-4">
             <p className="font-body text-sm text-muted-foreground">קישורים חברתיים (אופציונלי)</p>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field name="website_url" label="אתר אישי/עסקי" placeholder="https://..." dir="ltr" {...fieldProps} />
-              <Field name="facebook_url" label="פייסבוק" placeholder="https://facebook.com/..." dir="ltr" {...fieldProps} />
+              <div>
+                <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Globe className="h-3.5 w-3.5 text-gold" /> אתר אישי/עסקי</label>
+                <Input name="website_url" value={form.website_url} onChange={handleChange} className={`bg-card border-border ${errors.website_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://..." autoComplete="off" />
+                {errors.website_url && <p className="mt-1 font-body text-xs text-destructive">{errors.website_url}</p>}
+              </div>
+              <div>
+                <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Facebook className="h-3.5 w-3.5 text-[#1877F2]" /> פייסבוק</label>
+                <Input name="facebook_url" value={form.facebook_url} onChange={handleChange} className={`bg-card border-border ${errors.facebook_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://facebook.com/..." autoComplete="off" />
+                {errors.facebook_url && <p className="mt-1 font-body text-xs text-destructive">{errors.facebook_url}</p>}
+              </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field name="instagram_url" label="אינסטגרם" placeholder="https://instagram.com/..." dir="ltr" {...fieldProps} />
-              <Field name="linkedin_url" label="לינקדאין" placeholder="https://linkedin.com/in/..." dir="ltr" {...fieldProps} />
+              <div>
+                <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Instagram className="h-3.5 w-3.5 text-[#E4405F]" /> אינסטגרם</label>
+                <Input name="instagram_url" value={form.instagram_url} onChange={handleChange} className={`bg-card border-border ${errors.instagram_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://instagram.com/..." autoComplete="off" />
+                {errors.instagram_url && <p className="mt-1 font-body text-xs text-destructive">{errors.instagram_url}</p>}
+              </div>
+              <div>
+                <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Linkedin className="h-3.5 w-3.5 text-[#0A66C2]" /> לינקדאין</label>
+                <Input name="linkedin_url" value={form.linkedin_url} onChange={handleChange} className={`bg-card border-border ${errors.linkedin_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://linkedin.com/in/..." autoComplete="off" />
+                {errors.linkedin_url && <p className="mt-1 font-body text-xs text-destructive">{errors.linkedin_url}</p>}
+              </div>
             </div>
           </div>
 
