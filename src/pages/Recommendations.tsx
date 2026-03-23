@@ -76,7 +76,7 @@ const Recommendations = () => {
   const { data: recommendations = [], isLoading } = useQuery({
     queryKey: ["recommendations"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("professional_recommendations")
         .select("*")
         .order("created_at", { ascending: false });
@@ -101,7 +101,7 @@ const Recommendations = () => {
 
   const submitMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("professional_recommendations").insert({
+      const { error } = await (supabase as any).from("professional_recommendations").insert({
         professional_name: formData.professional_name,
         category: formData.category,
         description: formData.description,
