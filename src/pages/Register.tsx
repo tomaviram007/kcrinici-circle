@@ -8,9 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { cn } from "@/lib/utils";
 import RegisterBackground from "@/components/register/RegisterBackground";
 
@@ -200,42 +198,16 @@ const Register = () => {
             <label className="mb-1.5 block font-body text-sm text-muted-foreground">
               תאריך לידה <span className="text-gold">*</span>
             </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  type="button"
-                  className={cn(
-                    "w-full justify-start text-right font-normal bg-card border-border",
-                    !form.birth_date && "text-muted-foreground",
-                    errors.birth_date && "border-destructive"
-                  )}
-                >
-                  <CalendarIcon className="ml-2 h-4 w-4" />
-                  {form.birth_date ? format(new Date(form.birth_date), "dd/MM/yyyy") : "בחר תאריך"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={form.birth_date ? new Date(form.birth_date) : undefined}
-                  onSelect={(date) => {
-                    if (date) {
-                      setForm((prev) => ({ ...prev, birth_date: format(date, "yyyy-MM-dd") }));
-                      if (errors.birth_date) {
-                        setErrors((prev) => { const n = { ...prev }; delete n.birth_date; return n; });
-                      }
-                    }
-                  }}
-                  disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                  captionLayout="dropdown-buttons"
-                  fromYear={1920}
-                  toYear={new Date().getFullYear()}
-                />
-              </PopoverContent>
-            </Popover>
+            <HebrewDatePicker
+              value={form.birth_date}
+              onChange={(val) => {
+                setForm((prev) => ({ ...prev, birth_date: val }));
+                if (errors.birth_date) {
+                  setErrors((prev) => { const n = { ...prev }; delete n.birth_date; return n; });
+                }
+              }}
+              error={!!errors.birth_date}
+            />
             {errors.birth_date && <p className="mt-1 font-body text-xs text-destructive">{errors.birth_date}</p>}
           </div>
 
