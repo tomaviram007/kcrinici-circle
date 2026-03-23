@@ -32,6 +32,10 @@ interface Profile {
   is_removed: boolean;
   birth_date: string | null;
   created_at: string;
+  website_url?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
+  linkedin_url?: string | null;
 }
 
 const AdminMembers = () => {
@@ -97,7 +101,7 @@ const AdminMembers = () => {
   // Edit
   const openEdit = (p: Profile) => {
     setEditProfile(p);
-    setEditForm({ full_name: p.full_name, phone: p.phone, address: p.address, profession: p.profession, expertise: p.expertise, bio: p.bio, birth_date: p.birth_date });
+    setEditForm({ full_name: p.full_name, phone: p.phone, address: p.address, profession: p.profession, expertise: p.expertise, bio: p.bio, birth_date: p.birth_date, website_url: p.website_url, facebook_url: p.facebook_url, instagram_url: p.instagram_url, linkedin_url: p.linkedin_url });
   };
 
   const handleSaveEdit = async () => {
@@ -294,7 +298,7 @@ const AdminMembers = () => {
                 {viewProfile.birth_date && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-gold" />
-                    <span className="font-body text-sm text-foreground" dir="ltr">{viewProfile.birth_date}</span>
+                    <span className="font-body text-sm text-foreground">{new Date(viewProfile.birth_date + "T00:00:00").toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "numeric" })}</span>
                   </div>
                 )}
               </div>
@@ -345,6 +349,15 @@ const AdminMembers = () => {
             <div>
               <Label className="font-body text-sm">תאריך לידה</Label>
               <Input type="date" value={editForm.birth_date || ""} onChange={(e) => setEditForm({ ...editForm, birth_date: e.target.value })} className="bg-background" dir="ltr" />
+            </div>
+            <div className="border-t border-border pt-3 mt-1">
+              <p className="font-body text-xs text-muted-foreground mb-2">קישורים חברתיים</p>
+              <div className="space-y-2">
+                <Input value={editForm.website_url || ""} onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })} className="bg-background" dir="ltr" placeholder="אתר אישי (https://...)" />
+                <Input value={editForm.facebook_url || ""} onChange={(e) => setEditForm({ ...editForm, facebook_url: e.target.value })} className="bg-background" dir="ltr" placeholder="פייסבוק (https://...)" />
+                <Input value={editForm.instagram_url || ""} onChange={(e) => setEditForm({ ...editForm, instagram_url: e.target.value })} className="bg-background" dir="ltr" placeholder="אינסטגרם (https://...)" />
+                <Input value={editForm.linkedin_url || ""} onChange={(e) => setEditForm({ ...editForm, linkedin_url: e.target.value })} className="bg-background" dir="ltr" placeholder="לינקדאין (https://...)" />
+              </div>
             </div>
           </div>
           <DialogFooter className="gap-2">

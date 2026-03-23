@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Phone, Briefcase, MapPin, Pencil, Search, Cake, Send, Heart, MessageCircle, Calendar } from "lucide-react";
+import { User, Phone, Briefcase, MapPin, Pencil, Search, Cake, Send, Heart, MessageCircle, Calendar, Globe, Facebook, Instagram, Linkedin } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import SocialLinks from "@/components/SocialLinks";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import QuoteSection from "@/components/landing/QuoteSection";
@@ -42,7 +43,7 @@ const Members = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [editMember, setEditMember] = useState<any | null>(null);
   const [viewMember, setViewMember] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "", hobbies: "" });
+  const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "", hobbies: "", website_url: "", facebook_url: "", instagram_url: "", linkedin_url: "" });
   const [saving, setSaving] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [filterProfession, setFilterProfession] = useState("all");
@@ -89,6 +90,10 @@ const Members = () => {
       address: member.address || "",
       birth_date: member.birth_date || "",
       hobbies: member.hobbies || "",
+      website_url: member.website_url || "",
+      facebook_url: member.facebook_url || "",
+      instagram_url: member.instagram_url || "",
+      linkedin_url: member.linkedin_url || "",
     });
   };
 
@@ -112,6 +117,10 @@ const Members = () => {
       address: editForm.address,
       birth_date: editForm.birth_date || null,
       hobbies: editForm.hobbies || null,
+      website_url: editForm.website_url || null,
+      facebook_url: editForm.facebook_url || null,
+      instagram_url: editForm.instagram_url || null,
+      linkedin_url: editForm.linkedin_url || null,
     } as any).eq("id", editMember.id);
     setSaving(false);
 
@@ -262,6 +271,9 @@ const Members = () => {
                 </div>
               )}
 
+              {/* Social links */}
+              <SocialLinks website_url={member.website_url} facebook_url={member.facebook_url} instagram_url={member.instagram_url} linkedin_url={member.linkedin_url} />
+
               <div className="border-t border-border pt-3 space-y-1.5">
                 {member.phone && (
                   <div className="flex items-center gap-2">
@@ -335,6 +347,9 @@ const Members = () => {
                 ))}
               </div>
             )}
+
+            {/* Social links */}
+            <SocialLinks website_url={viewMember?.website_url} facebook_url={viewMember?.facebook_url} instagram_url={viewMember?.instagram_url} linkedin_url={viewMember?.linkedin_url} size="md" />
           </div>
 
           {/* Quick actions */}
@@ -405,6 +420,15 @@ const Members = () => {
             <div>
               <Label className="font-body text-sm">תאריך לידה</Label>
               <Input type="date" value={editForm.birth_date} onChange={(e) => setEditForm(f => ({ ...f, birth_date: e.target.value }))} dir="ltr" autoComplete="off" />
+            </div>
+            <div className="border-t border-border pt-3 mt-2">
+              <p className="font-body text-xs text-muted-foreground mb-2">קישורים חברתיים</p>
+              <div className="space-y-2">
+                <Input value={editForm.website_url} onChange={(e) => setEditForm(f => ({ ...f, website_url: e.target.value }))} placeholder="אתר אישי (https://...)" dir="ltr" autoComplete="off" />
+                <Input value={editForm.facebook_url} onChange={(e) => setEditForm(f => ({ ...f, facebook_url: e.target.value }))} placeholder="פייסבוק (https://...)" dir="ltr" autoComplete="off" />
+                <Input value={editForm.instagram_url} onChange={(e) => setEditForm(f => ({ ...f, instagram_url: e.target.value }))} placeholder="אינסטגרם (https://...)" dir="ltr" autoComplete="off" />
+                <Input value={editForm.linkedin_url} onChange={(e) => setEditForm(f => ({ ...f, linkedin_url: e.target.value }))} placeholder="לינקדאין (https://...)" dir="ltr" autoComplete="off" />
+              </div>
             </div>
             <Button onClick={handleSave} disabled={saving} className="w-full gradient-gold text-primary-foreground font-body">
               {saving ? "שומר..." : "עדכן כרטיסיה"}
