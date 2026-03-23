@@ -39,6 +39,8 @@ interface Recommendation {
   recommender_name: string;
   recommender_user_id: string | null;
   is_approved: boolean;
+  is_hidden: boolean;
+  is_admin_post: boolean;
   created_at: string;
 }
 
@@ -79,6 +81,8 @@ const Recommendations = () => {
       const { data, error } = await (supabase as any)
         .from("professional_recommendations")
         .select("*")
+        .eq("is_approved", true)
+        .eq("is_hidden", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Recommendation[];
@@ -321,7 +325,14 @@ const RecommendationCard = ({ rec }: { rec: Recommendation }) => {
       <div className="mt-2 pt-3 border-t border-border/50 flex items-center gap-2">
         <User className="h-3.5 w-3.5 text-primary" />
         <span className="text-xs font-body text-muted-foreground">
-          הומלץ על ידי: <strong className="text-foreground">{rec.recommender_name}</strong>
+          הומלץ על ידי:{" "}
+          {rec.is_admin_post ? (
+            <strong className="admin-badge inline-flex items-center gap-1 text-gold bg-gold/10 px-2 py-0.5 rounded-full border border-gold/30">
+              ⭐ מומלץ קרניצי
+            </strong>
+          ) : (
+            <strong className="text-foreground">{rec.recommender_name}</strong>
+          )}
         </span>
       </div>
     </div>
