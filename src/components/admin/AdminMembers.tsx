@@ -353,10 +353,10 @@ const AdminMembers = () => {
             <div className="border-t border-border pt-3 mt-1">
               <p className="font-body text-xs text-muted-foreground mb-2">קישורים חברתיים</p>
               <div className="space-y-2">
-                <Input value={(editForm as any).website_url || ""} onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value } as any)} className="bg-background" dir="ltr" placeholder="אתר אישי (https://...)" />
-                <Input value={(editForm as any).facebook_url || ""} onChange={(e) => setEditForm({ ...editForm, facebook_url: e.target.value } as any)} className="bg-background" dir="ltr" placeholder="פייסבוק (https://...)" />
-                <Input value={(editForm as any).instagram_url || ""} onChange={(e) => setEditForm({ ...editForm, instagram_url: e.target.value } as any)} className="bg-background" dir="ltr" placeholder="אינסטגרם (https://...)" />
-                <Input value={(editForm as any).linkedin_url || ""} onChange={(e) => setEditForm({ ...editForm, linkedin_url: e.target.value } as any)} className="bg-background" dir="ltr" placeholder="לינקדאין (https://...)" />
+                <Input value={editForm.website_url || ""} onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })} className="bg-background" dir="ltr" placeholder="אתר אישי (https://...)" />
+                <Input value={editForm.facebook_url || ""} onChange={(e) => setEditForm({ ...editForm, facebook_url: e.target.value })} className="bg-background" dir="ltr" placeholder="פייסבוק (https://...)" />
+                <Input value={editForm.instagram_url || ""} onChange={(e) => setEditForm({ ...editForm, instagram_url: e.target.value })} className="bg-background" dir="ltr" placeholder="אינסטגרם (https://...)" />
+                <Input value={editForm.linkedin_url || ""} onChange={(e) => setEditForm({ ...editForm, linkedin_url: e.target.value })} className="bg-background" dir="ltr" placeholder="לינקדאין (https://...)" />
               </div>
             </div>
           </div>
