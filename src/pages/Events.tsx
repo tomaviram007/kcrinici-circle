@@ -162,7 +162,7 @@ const Events = () => {
   return (
     <>
     <PageHero image={coverImage} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
-    <ClubAboutSection />
+    
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-10">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
