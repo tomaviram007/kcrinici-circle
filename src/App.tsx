@@ -22,6 +22,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import Gallery from "./pages/Gallery";
+import Recommendations from "./pages/Recommendations";
 
 const queryClient = new QueryClient({
   defaultOptions: {
