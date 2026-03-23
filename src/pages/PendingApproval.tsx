@@ -1,7 +1,34 @@
-import { Link } from "react-router-dom";
-import { Clock } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Clock, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 
 const PendingApproval = () => {
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  // If not logged in, redirect to login
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login", { replace: true });
+    }
+  }, [loading, user, navigate]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login", { replace: true });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-gold" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -21,12 +48,23 @@ const PendingApproval = () => {
         
         <div className="mt-6 mx-auto h-px w-16 gradient-gold opacity-30" />
         
-        <Link
-          to="/"
-          className="mt-8 inline-block font-body text-sm text-gold hover:underline"
-        >
-          חזרה לעמוד הראשי
-        </Link>
+        <div className="mt-8 flex flex-col items-center gap-3">
+          <Link
+            to="/"
+            className="font-body text-sm text-gold hover:underline"
+          >
+            חזרה לעמוד הראשי
+          </Link>
+          
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="gap-2 border-border text-muted-foreground hover:text-foreground font-body"
+          >
+            <LogOut className="h-4 w-4" />
+            התנתק והתחבר כמשתמש אחר
+          </Button>
+        </div>
       </div>
     </div>
   );
