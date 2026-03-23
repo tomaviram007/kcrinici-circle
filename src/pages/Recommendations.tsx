@@ -14,6 +14,7 @@ import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import recommendationsHero from "@/assets/recommendations-hero.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
+import ClubAboutSection from "@/components/ClubAboutSection";
 
 const CATEGORIES = [
   "שיפוצים",
