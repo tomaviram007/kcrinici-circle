@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -12,6 +12,7 @@ import AdminAnnouncements from "@/components/admin/AdminAnnouncements";
 import AdminPolls from "@/components/admin/AdminPolls";
 import AdminQuotes from "@/components/admin/AdminQuotes";
 import AdminLogo from "@/components/admin/AdminLogo";
+import AdminRecommendations from "@/components/admin/AdminRecommendations";
 import AdminMembers from "@/components/admin/AdminMembers";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
@@ -55,6 +56,7 @@ const AdminDashboard = () => {
     { id: "jobs", label: "דרושים", icon: Briefcase },
     { id: "events", label: "אירועים", icon: Calendar },
     { id: "polls", label: "סקרים", icon: BarChart3 },
+    { id: "recommendations", label: "המלצות", icon: Award },
     { id: "gallery", label: "גלריות", icon: Image },
     { id: "quotes", label: "ציטוטים", icon: Quote },
     { id: "logo", label: "לוגו", icon: ImageIcon },
@@ -108,6 +110,7 @@ const AdminDashboard = () => {
         {activeTab === "jobs" && <AdminJobs />}
         {activeTab === "events" && <AdminEvents />}
         {activeTab === "polls" && <AdminPolls />}
+        {activeTab === "recommendations" && <AdminRecommendations />}
         {activeTab === "gallery" && <AdminGalleryApproval />}
         {activeTab === "quotes" && <AdminQuotes />}
         {activeTab === "logo" && <AdminLogo />}

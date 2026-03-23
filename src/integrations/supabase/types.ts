@@ -417,7 +417,9 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          is_admin_post: boolean
           is_approved: boolean
+          is_hidden: boolean
           phone: string
           professional_name: string
           rating: number
@@ -430,7 +432,9 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          is_admin_post?: boolean
           is_approved?: boolean
+          is_hidden?: boolean
           phone: string
           professional_name: string
           rating?: number
@@ -443,7 +447,9 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_admin_post?: boolean
           is_approved?: boolean
+          is_hidden?: boolean
           phone?: string
           professional_name?: string
           rating?: number
