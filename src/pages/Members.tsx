@@ -4,6 +4,7 @@ import { User, Phone, Briefcase, MapPin, Pencil, Search, Cake, Send, Heart, Mess
 import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import SocialLinks from "@/components/SocialLinks";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import QuoteSection from "@/components/landing/QuoteSection";
@@ -269,6 +270,9 @@ const Members = () => {
                   ))}
                 </div>
               )}
+
+              {/* Social links */}
+              <SocialLinks website_url={member.website_url} facebook_url={member.facebook_url} instagram_url={member.instagram_url} linkedin_url={member.linkedin_url} />
 
               <div className="border-t border-border pt-3 space-y-1.5">
                 {member.phone && (
