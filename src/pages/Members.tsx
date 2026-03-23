@@ -5,6 +5,7 @@ import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import SocialLinks from "@/components/SocialLinks";
+import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import QuoteSection from "@/components/landing/QuoteSection";
