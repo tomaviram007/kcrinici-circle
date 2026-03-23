@@ -347,6 +347,9 @@ const Members = () => {
                 ))}
               </div>
             )}
+
+            {/* Social links */}
+            <SocialLinks website_url={viewMember?.website_url} facebook_url={viewMember?.facebook_url} instagram_url={viewMember?.instagram_url} linkedin_url={viewMember?.linkedin_url} size="md" />
           </div>
 
           {/* Quick actions */}
