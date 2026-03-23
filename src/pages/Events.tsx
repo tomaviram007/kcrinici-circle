@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
-import ClubAboutSection from "@/components/ClubAboutSection";
+
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-events.jpg";
 import { usePageCover } from "@/hooks/usePageCover";

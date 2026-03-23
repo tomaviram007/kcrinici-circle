@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import { fireConfetti } from "@/lib/confetti";
-import ClubAboutSection from "@/components/ClubAboutSection";
+
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-jobs.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
@@ -85,7 +85,7 @@ const Jobs = () => {
   return (
     <>
     <PageHero image={coverImage} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה" />
-    <ClubAboutSection />
+    
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex flex-col gap-4">
         <div className="flex items-start sm:items-center justify-between gap-3">

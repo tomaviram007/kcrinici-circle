@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Briefcase, Users, Calendar, Megaphone, UserCircle } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import PageHero from "@/components/PageHero";
-import ClubAboutSection from "@/components/ClubAboutSection";
+
 import heroImg from "@/assets/hero-bg.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 
@@ -51,7 +51,7 @@ const Dashboard = () => {
   return (
     <>
     <PageHero image={coverImage} title="ברוך הבא" highlight="למועדון" subtitle="המרכז שלך לכל מה שקורה בקהילה" />
-    <ClubAboutSection />
+    
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
       <div className="mb-8 md:mb-12 flex items-center gap-5">
         <AvatarUpload userId={userId} currentUrl={avatarUrl} onUpload={setAvatarUrl} size="lg" />

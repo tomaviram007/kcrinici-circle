@@ -16,7 +16,7 @@ import AdminRecommendations from "@/components/admin/AdminRecommendations";
 import AdminCovers from "@/components/admin/AdminCovers";
 import AdminMembers from "@/components/admin/AdminMembers";
 import PageHero from "@/components/PageHero";
-import ClubAboutSection from "@/components/ClubAboutSection";
+
 import heroAdmin from "@/assets/hero-admin.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
   return (
     <>
       <PageHero image={coverImage} title="שולחן" highlight="המנהל" subtitle="ניהול המועדון, אישור חברים ופרסום תוכן" />
-      <ClubAboutSection />
+      
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 overflow-x-hidden">
         {/* Stats row */}

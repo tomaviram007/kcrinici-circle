@@ -9,6 +9,7 @@ import QuoteSection from "@/components/landing/QuoteSection";
 import CTASection from "@/components/landing/CTASection";
 import PollPopup from "@/components/PollPopup";
 import ScrollReveal from "@/components/ScrollReveal";
+import ClubAboutSection from "@/components/ClubAboutSection";
 
 const Index = () => {
   const [isApproved, setIsApproved] = useState(false);
@@ -34,6 +35,10 @@ const Index = () => {
   return (
     <main className="min-h-screen bg-background">
       <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
+
+      <ScrollReveal>
+        <ClubAboutSection />
+      </ScrollReveal>
       
       <ScrollReveal>
         <SalesPreviewSection isApproved={isApproved} />

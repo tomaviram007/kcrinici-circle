@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import PageHero from "@/components/PageHero";
 import { fireConfetti } from "@/lib/confetti";
-import ClubAboutSection from "@/components/ClubAboutSection";
+
 import QuoteSection from "@/components/landing/QuoteSection";
 import SaleImageUpload from "@/components/announcements/SaleImageUpload";
 import heroImg from "@/assets/hero-announcements.jpg";
@@ -464,7 +464,7 @@ const Announcements = () => {
   return (
     <>
     <PageHero image={coverImage} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון" />
-    <ClubAboutSection />
+    
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8 md:px-6 md:py-12">
 
       {/* Tuesday Banner */}
