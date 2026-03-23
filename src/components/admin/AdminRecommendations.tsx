@@ -231,7 +231,7 @@ const AdminRecommendations = () => {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground font-body">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground font-body">
                   אין המלצות להצגה
                 </TableCell>
               </TableRow>
@@ -247,6 +247,7 @@ const AdminRecommendations = () => {
                     </div>
                   </TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.professional_last_name || "—"}</TableCell>
+                  <TableCell className="font-body text-sm text-muted-foreground">{rec.category}</TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.recommender_name}</TableCell>
                   <TableCell>
                     <div className="flex gap-0.5" dir="ltr">
