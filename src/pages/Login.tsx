@@ -28,10 +28,10 @@ const Login = () => {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Redirect authenticated users away from login
+  // Redirect only approved authenticated users away from login
   useEffect(() => {
-    if (!authLoading && user) {
-      navigate(isApproved ? "/" : "/pending", { replace: true });
+    if (!authLoading && user && isApproved) {
+      navigate("/", { replace: true });
     }
   }, [authLoading, user, isApproved, navigate]);
 
