@@ -421,6 +421,8 @@ export type Database = {
           is_approved: boolean
           is_hidden: boolean
           phone: string
+          professional_first_name: string
+          professional_last_name: string | null
           professional_name: string
           rating: number
           recommender_name: string
@@ -436,6 +438,8 @@ export type Database = {
           is_approved?: boolean
           is_hidden?: boolean
           phone: string
+          professional_first_name?: string
+          professional_last_name?: string | null
           professional_name: string
           rating?: number
           recommender_name: string
@@ -451,6 +455,8 @@ export type Database = {
           is_approved?: boolean
           is_hidden?: boolean
           phone?: string
+          professional_first_name?: string
+          professional_last_name?: string | null
           professional_name?: string
           rating?: number
           recommender_name?: string
