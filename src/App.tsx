@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Header from "@/components/layout/Header";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import BirthdayPopup from "@/components/BirthdayPopup";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -62,6 +63,7 @@ const AppLayout = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!hideHeader && <FloatingWhatsApp />}
+      {!hideHeader && <BirthdayPopup />}
     </>
   );
 };
