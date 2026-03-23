@@ -39,6 +39,10 @@ const Index = () => {
       <ScrollReveal>
         <ClubAboutSection />
       </ScrollReveal>
+
+      <ScrollReveal>
+        <BirthdaysPreviewSection isApproved={isApproved} />
+      </ScrollReveal>
       
       <ScrollReveal>
         <SalesPreviewSection isApproved={isApproved} />
@@ -48,13 +52,8 @@ const Index = () => {
         <EventsPreviewSection isApproved={isApproved} />
       </ScrollReveal>
 
-
       <ScrollReveal delay={0.05}>
         <JobsPreviewSection isApproved={isApproved} />
-      </ScrollReveal>
-
-      <ScrollReveal delay={0.05}>
-        <BirthdaysPreviewSection isApproved={isApproved} />
       </ScrollReveal>
 
       {!isLoggedIn && (
