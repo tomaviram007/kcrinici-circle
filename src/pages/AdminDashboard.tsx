@@ -32,6 +32,7 @@ const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "members";
   const [stats, setStats] = useState<DashboardStats>({ approvedMembers: 0, pendingMembers: 0, upcomingEvents: 0, activeJobs: 0, activePolls: 0 });
+  const coverImage = usePageCover("admin", heroAdmin);
 
   useEffect(() => {
     const fetchStats = async () => {
