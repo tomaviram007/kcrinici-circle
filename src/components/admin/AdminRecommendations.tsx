@@ -239,13 +239,13 @@ const AdminRecommendations = () => {
                 <TableRow key={rec.id} className={rec.is_hidden ? "opacity-50" : ""}>
                   <TableCell className="font-serif font-bold text-foreground">
                     <div className="flex items-center gap-2">
-                      {rec.professional_name}
+                      {rec.professional_first_name}
                       {rec.is_admin_post && (
-                        <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px]">מנהל</Badge>
+                        <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">מנהל</Badge>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="font-body text-sm text-muted-foreground">{rec.category}</TableCell>
+                  <TableCell className="font-body text-sm text-muted-foreground">{rec.professional_last_name || "—"}</TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.recommender_name}</TableCell>
                   <TableCell>
                     <div className="flex gap-0.5" dir="ltr">
@@ -295,9 +295,15 @@ const AdminRecommendations = () => {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-            <div>
-              <Label className="font-body text-sm">שם בעל המקצוע / העסק</Label>
-              <Input value={formData.professional_name} onChange={(e) => setFormData({ ...formData, professional_name: e.target.value })} className="mt-1 bg-card border-border font-body" />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="font-body text-sm">שם פרטי *</Label>
+                <Input value={formData.professional_first_name} onChange={(e) => setFormData({ ...formData, professional_first_name: e.target.value })} className="mt-1 bg-card border-border font-body" />
+              </div>
+              <div>
+                <Label className="font-body text-sm">שם משפחה</Label>
+                <Input value={formData.professional_last_name} onChange={(e) => setFormData({ ...formData, professional_last_name: e.target.value })} className="mt-1 bg-card border-border font-body" placeholder="אופציונלי" />
+              </div>
             </div>
             <div>
               <Label className="font-body text-sm">תחום עיסוק</Label>
