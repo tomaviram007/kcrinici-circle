@@ -82,6 +82,10 @@ const Register = () => {
     bio: "",
     birth_date: "",
     hobbies: "",
+    website_url: "",
+    facebook_url: "",
+    instagram_url: "",
+    linkedin_url: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -123,6 +127,10 @@ const Register = () => {
             bio: form.bio,
             birth_date: form.birth_date,
             hobbies: form.hobbies,
+            website_url: form.website_url,
+            facebook_url: form.facebook_url,
+            instagram_url: form.instagram_url,
+            linkedin_url: form.linkedin_url,
           },
         },
       });
@@ -233,6 +241,18 @@ const Register = () => {
 
           <Field name="bio" label="משהו שהשכנים צריכים לדעת עליך" textarea placeholder="ביוגרפיה קצרה..." {...fieldProps} />
           <Field name="hobbies" label="מה התחביבים שלך?" placeholder="למשל: ספורט, בישול, טכנולוגיה..." {...fieldProps} />
+
+          <div className="border-t border-border pt-5 space-y-4">
+            <p className="font-body text-sm text-muted-foreground">קישורים חברתיים (אופציונלי)</p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field name="website_url" label="אתר אישי/עסקי" placeholder="https://..." dir="ltr" {...fieldProps} />
+              <Field name="facebook_url" label="פייסבוק" placeholder="https://facebook.com/..." dir="ltr" {...fieldProps} />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field name="instagram_url" label="אינסטגרם" placeholder="https://instagram.com/..." dir="ltr" {...fieldProps} />
+              <Field name="linkedin_url" label="לינקדאין" placeholder="https://linkedin.com/in/..." dir="ltr" {...fieldProps} />
+            </div>
+          </div>
 
           <div className="border-t border-border pt-5 space-y-4">
             <Field name="email" label="אימייל" required type="email" dir="ltr" {...fieldProps} />
