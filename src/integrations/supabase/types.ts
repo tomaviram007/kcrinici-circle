@@ -411,6 +411,48 @@ export type Database = {
         }
         Relationships: []
       }
+      professional_recommendations: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          is_approved: boolean
+          phone: string
+          professional_name: string
+          rating: number
+          recommender_name: string
+          recommender_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          is_approved?: boolean
+          phone: string
+          professional_name: string
+          rating?: number
+          recommender_name: string
+          recommender_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_approved?: boolean
+          phone?: string
+          professional_name?: string
+          rating?: number
+          recommender_name?: string
+          recommender_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string
