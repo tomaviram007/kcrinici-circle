@@ -54,34 +54,15 @@ const AdminDashboard = () => {
     fetchStats();
   }, []);
 
-  const tabs = [
-    { id: "members", label: "בקשות הצטרפות", icon: Users },
-    { id: "announcements", label: "מודעות", icon: Megaphone },
-    { id: "jobs", label: "דרושים", icon: Briefcase },
-    { id: "events", label: "אירועים", icon: Calendar },
-    { id: "polls", label: "סקרים", icon: BarChart3 },
-    { id: "recommendations", label: "המלצות", icon: Award },
-    { id: "gallery", label: "גלריות", icon: Image },
-    { id: "quotes", label: "ציטוטים", icon: Quote },
-    { id: "logo", label: "לוגו", icon: ImageIcon },
-    { id: "covers", label: "קאברים", icon: Image },
-    { id: "team", label: "צוות", icon: Shield },
-  ];
-
-  const statCards = [
-    { label: "חברים מאושרים", value: stats.approvedMembers, icon: Users, accent: "text-green-500" },
-    { label: "ממתינים לאישור", value: stats.pendingMembers, icon: Clock, accent: "text-gold" },
-    { label: "אירועים קרובים", value: stats.upcomingEvents, icon: Calendar, accent: "text-blue-500" },
-    { label: "משרות פעילות", value: stats.activeJobs, icon: Briefcase, accent: "text-purple-500" },
-    { label: "סקרים פעילים", value: stats.activePolls, icon: BarChart3, accent: "text-gold" },
-  ];
+  const handleTabChange = (tab: string) => {
+    setSearchParams({ tab });
+  };
 
   return (
     <>
       <PageHero image={coverImage} title="שולחן" highlight="המנהל" subtitle="ניהול המועדון, אישור חברים ופרסום תוכן" />
-      
 
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 overflow-x-hidden">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 overflow-x-hidden">
         {/* Stats row */}
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {statCards.map((s) => (
@@ -93,34 +74,24 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        <div className="mb-6 sm:mb-8 flex gap-1 sm:gap-2 overflow-x-auto border-b border-border pb-px -mx-4 px-4 sm:mx-0 sm:px-0">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setSearchParams({ tab: tab.id })}
-              className={`flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-t-md px-2.5 sm:px-4 py-2 sm:py-2.5 font-body text-xs sm:text-sm transition-colors ${
-                activeTab === tab.id
-                  ? "border-b-2 border-gold text-gold bg-secondary/50"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* Sidebar + Content layout */}
+        <div className="flex gap-6" dir="rtl">
+          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
-        {activeTab === "members" && <AdminMembers />}
-        {activeTab === "announcements" && <AdminAnnouncements />}
-        {activeTab === "jobs" && <AdminJobs />}
-        {activeTab === "events" && <AdminEvents />}
-        {activeTab === "polls" && <AdminPolls />}
-        {activeTab === "recommendations" && <AdminRecommendations />}
-        {activeTab === "gallery" && <AdminGalleryApproval />}
-        {activeTab === "quotes" && <AdminQuotes />}
-        {activeTab === "logo" && <AdminLogo />}
-        {activeTab === "covers" && <AdminCovers />}
-        {activeTab === "team" && <AdminTeam />}
+          <div className="flex-1 min-w-0">
+            {activeTab === "members" && <AdminMembers />}
+            {activeTab === "announcements" && <AdminAnnouncements />}
+            {activeTab === "jobs" && <AdminJobs />}
+            {activeTab === "events" && <AdminEvents />}
+            {activeTab === "polls" && <AdminPolls />}
+            {activeTab === "recommendations" && <AdminRecommendations />}
+            {activeTab === "gallery" && <AdminGalleryApproval />}
+            {activeTab === "quotes" && <AdminQuotes />}
+            {activeTab === "logo" && <AdminLogo />}
+            {activeTab === "covers" && <AdminCovers />}
+            {activeTab === "team" && <AdminTeam />}
+          </div>
+        </div>
       </div>
     </>
   );
