@@ -221,6 +221,7 @@ const AdminRecommendations = () => {
             <TableRow className="bg-secondary/50">
               <TableHead className="text-right font-body">שם פרטי</TableHead>
               <TableHead className="text-right font-body">שם משפחה</TableHead>
+              <TableHead className="text-right font-body">קטגוריה</TableHead>
               <TableHead className="text-right font-body">ממליץ</TableHead>
               <TableHead className="text-right font-body">דירוג</TableHead>
               <TableHead className="text-right font-body">סטטוס</TableHead>
