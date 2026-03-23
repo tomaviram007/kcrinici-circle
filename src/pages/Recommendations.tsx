@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Search, Plus, Star, Phone, User, Briefcase } from "lucide-react";
+import { Search, Plus, Star, Phone, User, Briefcase, MessageCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
@@ -58,6 +58,24 @@ const StarRating = ({ rating, onRate, interactive = false }: { rating: number; o
   </div>
 );
 
+const formatPhoneForWhatsApp = (phone: string): string => {
+  let cleaned = phone.replace(/[\s\-()]/g, "");
+  if (cleaned.startsWith("0")) {
+    cleaned = "972" + cleaned.slice(1);
+  }
+  if (!cleaned.startsWith("+") && !cleaned.startsWith("972")) {
+    cleaned = "972" + cleaned;
+  }
+  return cleaned.replace("+", "");
+};
+
+const buildWhatsAppUrl = (rec: Recommendation): string => {
+  const phone = formatPhoneForWhatsApp(rec.phone);
+  const recommenderText = rec.is_admin_post ? "מנהל המערכת" : rec.recommender_name;
+  const message = `היי ${rec.professional_name}, קיבלתי המלצה עליך דרך ${recommenderText} מקהילת הגברים של קרניצי. מה שלומך?`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+};
+
 const Recommendations = () => {
   const { user, isApproved } = useAuth();
   const queryClient = useQueryClient();
@@ -65,8 +83,8 @@ const Recommendations = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const cardsRef = useRef<HTMLDivElement>(null);
+  const prevFilteredRef = useRef<string[]>([]);
 
-  // Form state
   const [formData, setFormData] = useState({
     professional_name: "",
     category: "",
@@ -127,26 +145,6 @@ const Recommendations = () => {
     },
   });
 
-  // GSAP stagger animation + admin badge glow
-  useEffect(() => {
-    if (!cardsRef.current || isLoading) return;
-    const cards = cardsRef.current.querySelectorAll(".rec-card");
-    if (cards.length === 0) return;
-    gsap.fromTo(
-      cards,
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" }
-    );
-    // Admin badge glow animation
-    const badges = cardsRef.current.querySelectorAll(".admin-badge");
-    if (badges.length > 0) {
-      gsap.fromTo(badges, { boxShadow: "0 0 0px hsl(43 72% 52% / 0)" }, {
-        boxShadow: "0 0 12px hsl(43 72% 52% / 0.4)",
-        duration: 1.2, repeat: -1, yoyo: true, ease: "sine.inOut",
-      });
-    }
-  }, [recommendations, isLoading, searchQuery, selectedCategory]);
-
   const filtered = recommendations.filter((r) => {
     const matchesSearch =
       r.professional_name.includes(searchQuery) ||
@@ -155,6 +153,51 @@ const Recommendations = () => {
     const matchesCategory = selectedCategory === "all" || r.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // GSAP stagger animation with filter transitions
+  const animateCards = useCallback(() => {
+    if (!cardsRef.current || isLoading) return;
+    const cards = cardsRef.current.querySelectorAll(".rec-card");
+    if (cards.length === 0) return;
+
+    const currentIds = filtered.map((r) => r.id);
+    const prevIds = prevFilteredRef.current;
+    const isFilterChange = JSON.stringify(currentIds) !== JSON.stringify(prevIds);
+
+    if (isFilterChange && prevIds.length > 0) {
+      // Animate in with stagger for filter changes
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 30, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.06, ease: "power2.out" }
+      );
+    } else if (prevIds.length === 0) {
+      // Initial load animation
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" }
+      );
+    }
+
+    prevFilteredRef.current = currentIds;
+
+    // Admin badge glow
+    const badges = cardsRef.current.querySelectorAll(".admin-badge");
+    if (badges.length > 0) {
+      gsap.fromTo(badges, { boxShadow: "0 0 0px hsl(43 72% 52% / 0)" }, {
+        boxShadow: "0 0 12px hsl(43 72% 52% / 0.4)",
+        duration: 1.2, repeat: -1, yoyo: true, ease: "sine.inOut",
+      });
+    }
+  }, [filtered, isLoading]);
+
+  useEffect(() => {
+    animateCards();
+  }, [animateCards]);
+
+  // Get unique categories that exist in the data
+  const activeCategories = [...new Set(recommendations.map((r) => r.category))];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,37 +213,53 @@ const Recommendations = () => {
       <PageHero image="" title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים" />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Action + Filters Bar */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8 items-start md:items-center">
+        {/* Action Bar */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6 items-start md:items-center">
           {user && isApproved && (
             <Button onClick={() => setShowForm(true)} className="gradient-gold text-primary-foreground font-body gap-2 shrink-0">
               <Plus className="h-4 w-4" />
               הוסף המלצה על בעל מקצוע
             </Button>
           )}
-
-          <div className="flex flex-1 flex-col sm:flex-row gap-3 w-full">
-            <div className="relative flex-1">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="חיפוש לפי שם, תיאור או ממליץ..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-10 bg-card border-border font-body"
-              />
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full sm:w-48 bg-card border-border font-body">
-                <SelectValue placeholder="כל הקטגוריות" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">כל הקטגוריות</SelectItem>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="relative flex-1 w-full">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="חיפוש לפי שם, תיאור או ממליץ..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-10 bg-card/70 backdrop-blur-sm border-border/50 font-body"
+            />
           </div>
+        </div>
+
+        {/* Category Tabs */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          <button
+            onClick={() => setSelectedCategory("all")}
+            className={`px-4 py-2 rounded-full text-sm font-body transition-all border backdrop-blur-md ${
+              selectedCategory === "all"
+                ? "bg-primary text-primary-foreground border-primary shadow-[0_0_15px_hsl(43_72%_52%/0.3)]"
+                : "bg-card/50 text-muted-foreground border-border/50 hover:bg-card hover:text-foreground hover:border-border"
+            }`}
+          >
+            הכל ({recommendations.length})
+          </button>
+          {CATEGORIES.filter((cat) => activeCategories.includes(cat)).map((cat) => {
+            const count = recommendations.filter((r) => r.category === cat).length;
+            return (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-full text-sm font-body transition-all border backdrop-blur-md ${
+                  selectedCategory === cat
+                    ? "bg-primary text-primary-foreground border-primary shadow-[0_0_15px_hsl(43_72%_52%/0.3)]"
+                    : "bg-card/50 text-muted-foreground border-border/50 hover:bg-card hover:text-foreground hover:border-border"
+                }`}
+              >
+                {cat} ({count})
+              </button>
+            );
+          })}
         </div>
 
         {/* Cards Grid */}
@@ -321,21 +380,33 @@ const RecommendationCard = ({ rec }: { rec: Recommendation }) => {
       <h3 className="text-lg font-serif font-bold text-foreground">{rec.professional_name}</h3>
       <p className="text-sm font-body text-muted-foreground leading-relaxed flex-1">{rec.description}</p>
 
-      <a
-        href={`tel:${rec.phone}`}
-        className="flex items-center gap-2 text-sm font-body text-primary hover:underline w-fit"
-        dir="ltr"
-      >
-        <Phone className="h-4 w-4" />
-        {rec.phone}
-      </a>
+      {/* Phone + WhatsApp */}
+      <div className="flex items-center gap-3">
+        <a
+          href={`tel:${rec.phone}`}
+          className="flex items-center gap-2 text-sm font-body text-primary hover:underline"
+          dir="ltr"
+        >
+          <Phone className="h-4 w-4" />
+          {rec.phone}
+        </a>
+        <a
+          href={buildWhatsAppUrl(rec)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-600 hover:bg-green-700 text-white text-xs font-body transition-colors"
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          וואטסאפ
+        </a>
+      </div>
 
       <div className="mt-2 pt-3 border-t border-border/50 flex items-center gap-2">
         <User className="h-3.5 w-3.5 text-primary" />
         <span className="text-xs font-body text-muted-foreground">
           הומלץ על ידי:{" "}
           {rec.is_admin_post ? (
-            <strong className="admin-badge inline-flex items-center gap-1 text-gold bg-gold/10 px-2 py-0.5 rounded-full border border-gold/30">
+            <strong className="admin-badge inline-flex items-center gap-1 text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/30">
               ⭐ מומלץ קרניצי
             </strong>
           ) : (
