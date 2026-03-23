@@ -13,6 +13,7 @@ import { fireConfetti } from "@/lib/confetti";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-jobs.jpg";
+import { usePageCover } from "@/hooks/usePageCover";
 
 const JOB_TYPES = [
   { value: "full-time", label: "משרה מלאה" },
@@ -29,6 +30,7 @@ type ViewMode = "grid" | "list";
 const Jobs = () => {
   const { toast } = useToast();
   const [jobs, setJobs] = useState<any[]>([]);
+  const coverImage = usePageCover("jobs", heroImg);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -82,7 +84,7 @@ const Jobs = () => {
 
   return (
     <>
-    <PageHero image={heroImg} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה" />
+    <PageHero image={coverImage} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה" />
     <ClubAboutSection />
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex flex-col gap-4">

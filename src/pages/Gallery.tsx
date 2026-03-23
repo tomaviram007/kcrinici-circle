@@ -12,6 +12,7 @@ import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-gallery.jpg";
+import { usePageCover } from "@/hooks/usePageCover";
 import { validateImageFile } from "@/lib/file-validation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -20,6 +21,7 @@ type Photo = Tables<"gallery_photos">;
 
 const Gallery = () => {
   const { toast } = useToast();
+  const coverImage = usePageCover("gallery", heroImg);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [albumCreators, setAlbumCreators] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -639,7 +641,7 @@ const Gallery = () => {
   // Albums list
   return (
     <>
-    <PageHero image={heroImg} title="גלריית" highlight="תמונות" subtitle="רגעים מיוחדים מאירועי ומפגשי המועדון" />
+    <PageHero image={coverImage} title="גלריית" highlight="תמונות" subtitle="רגעים מיוחדים מאירועי ומפגשי המועדון" />
     <ClubAboutSection />
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
 

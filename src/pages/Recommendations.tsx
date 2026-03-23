@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import recommendationsHero from "@/assets/recommendations-hero.jpg";
+import { usePageCover } from "@/hooks/usePageCover";
 
 const CATEGORIES = [
   "שיפוצים",

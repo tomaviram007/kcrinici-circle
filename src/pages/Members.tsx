@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ClubAboutSection from "@/components/ClubAboutSection";
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-members.jpg";
+import { usePageCover } from "@/hooks/usePageCover";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import { toast } from "@/hooks/use-toast";
 
 const Members = () => {
   const [members, setMembers] = useState<any[]>([]);
+  const coverImage = usePageCover("members", heroImg);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [editMember, setEditMember] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "" });
@@ -95,7 +97,7 @@ const Members = () => {
 
   return (
     <>
-    <PageHero image={heroImg} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
+    <PageHero image={coverImage} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
     <ClubAboutSection />
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8">

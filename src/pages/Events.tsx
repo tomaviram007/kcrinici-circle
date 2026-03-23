@@ -10,6 +10,7 @@ import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-events.jpg";
+import { usePageCover } from "@/hooks/usePageCover";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ function cn(...classes: (string | boolean | undefined)[]) {
 
 const Events = () => {
   const [events, setEvents] = useState<any[]>([]);
+  const coverImage = usePageCover("events", heroImg);
   const [rsvps, setRsvps] = useState<Record<string, string>>({});
   const [rsvpCounts, setRsvpCounts] = useState<Record<string, number>>({});
   const [userId, setUserId] = useState<string | null>(null);
@@ -159,7 +161,7 @@ const Events = () => {
 
   return (
     <>
-    <PageHero image={heroImg} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
+    <PageHero image={coverImage} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
     <ClubAboutSection />
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-10">
