@@ -13,10 +13,12 @@ import AdminPolls from "@/components/admin/AdminPolls";
 import AdminQuotes from "@/components/admin/AdminQuotes";
 import AdminLogo from "@/components/admin/AdminLogo";
 import AdminRecommendations from "@/components/admin/AdminRecommendations";
+import AdminCovers from "@/components/admin/AdminCovers";
 import AdminMembers from "@/components/admin/AdminMembers";
 import PageHero from "@/components/PageHero";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import heroAdmin from "@/assets/hero-admin.jpg";
+import { usePageCover } from "@/hooks/usePageCover";
 
 interface DashboardStats {
   approvedMembers: number;
@@ -60,6 +62,7 @@ const AdminDashboard = () => {
     { id: "gallery", label: "גלריות", icon: Image },
     { id: "quotes", label: "ציטוטים", icon: Quote },
     { id: "logo", label: "לוגו", icon: ImageIcon },
+    { id: "covers", label: "קאברים", icon: Image },
     { id: "team", label: "צוות", icon: Shield },
   ];
 
@@ -73,7 +76,7 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <PageHero image={heroAdmin} title="שולחן" highlight="המנהל" subtitle="ניהול המועדון, אישור חברים ופרסום תוכן" />
+      <PageHero image={usePageCover("admin", heroAdmin)} title="שולחן" highlight="המנהל" subtitle="ניהול המועדון, אישור חברים ופרסום תוכן" />
       <ClubAboutSection />
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 overflow-x-hidden">
@@ -114,6 +117,7 @@ const AdminDashboard = () => {
         {activeTab === "gallery" && <AdminGalleryApproval />}
         {activeTab === "quotes" && <AdminQuotes />}
         {activeTab === "logo" && <AdminLogo />}
+        {activeTab === "covers" && <AdminCovers />}
         {activeTab === "team" && <AdminTeam />}
       </div>
     </>
