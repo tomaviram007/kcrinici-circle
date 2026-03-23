@@ -12,6 +12,7 @@ import { Search, Plus, Star, Phone, User, Briefcase, MessageCircle } from "lucid
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import recommendationsHero from "@/assets/recommendations-hero.jpg";
 
 const CATEGORIES = [
   "שיפוצים",
@@ -210,7 +211,7 @@ const Recommendations = () => {
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      <PageHero image="" title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים" />
+      <PageHero image={recommendationsHero} title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים" />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Action Bar */}
