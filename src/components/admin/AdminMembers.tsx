@@ -294,7 +294,7 @@ const AdminMembers = () => {
                 {viewProfile.birth_date && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-gold" />
-                    <span className="font-body text-sm text-foreground" dir="ltr">{viewProfile.birth_date}</span>
+                    <span className="font-body text-sm text-foreground">{new Date(viewProfile.birth_date + "T00:00:00").toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "numeric" })}</span>
                   </div>
                 )}
               </div>

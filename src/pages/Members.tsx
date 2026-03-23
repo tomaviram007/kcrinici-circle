@@ -421,6 +421,15 @@ const Members = () => {
               <Label className="font-body text-sm">תאריך לידה</Label>
               <Input type="date" value={editForm.birth_date} onChange={(e) => setEditForm(f => ({ ...f, birth_date: e.target.value }))} dir="ltr" autoComplete="off" />
             </div>
+            <div className="border-t border-border pt-3 mt-2">
+              <p className="font-body text-xs text-muted-foreground mb-2">קישורים חברתיים</p>
+              <div className="space-y-2">
+                <Input value={editForm.website_url} onChange={(e) => setEditForm(f => ({ ...f, website_url: e.target.value }))} placeholder="אתר אישי (https://...)" dir="ltr" autoComplete="off" />
+                <Input value={editForm.facebook_url} onChange={(e) => setEditForm(f => ({ ...f, facebook_url: e.target.value }))} placeholder="פייסבוק (https://...)" dir="ltr" autoComplete="off" />
+                <Input value={editForm.instagram_url} onChange={(e) => setEditForm(f => ({ ...f, instagram_url: e.target.value }))} placeholder="אינסטגרם (https://...)" dir="ltr" autoComplete="off" />
+                <Input value={editForm.linkedin_url} onChange={(e) => setEditForm(f => ({ ...f, linkedin_url: e.target.value }))} placeholder="לינקדאין (https://...)" dir="ltr" autoComplete="off" />
+              </div>
+            </div>
             <Button onClick={handleSave} disabled={saving} className="w-full gradient-gold text-primary-foreground font-body">
               {saving ? "שומר..." : "עדכן כרטיסיה"}
             </Button>
