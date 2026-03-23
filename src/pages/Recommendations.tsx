@@ -350,7 +350,7 @@ const Recommendations = () => {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
