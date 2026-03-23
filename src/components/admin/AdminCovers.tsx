@@ -43,7 +43,7 @@ const AdminCovers = () => {
   const handleUpload = async (pageKey: string, file: File) => {
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      toast({ title: "שגיאה", description: validation.error, variant: "destructive" });
+      toast({ title: validation.error?.title || "שגיאה", description: validation.error?.description || "שגיאה בהעלאה", variant: "destructive" });
       return;
     }
 
