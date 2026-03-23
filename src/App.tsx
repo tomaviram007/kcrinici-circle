@@ -58,6 +58,7 @@ const AppLayout = () => {
         <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
         <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
         <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
+        <Route path="/recommendations" element={<Recommendations />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!hideHeader && <FloatingWhatsApp />}

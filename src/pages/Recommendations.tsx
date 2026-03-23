@@ -155,7 +155,7 @@ const Recommendations = () => {
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      <PageHero title="נבחרת אנשי המקצוע של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים" />
+      <PageHero image="" title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים" />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Action + Filters Bar */}
