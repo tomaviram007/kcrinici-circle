@@ -15,6 +15,7 @@ import AdminLogo from "@/components/admin/AdminLogo";
 import AdminRecommendations from "@/components/admin/AdminRecommendations";
 import AdminCovers from "@/components/admin/AdminCovers";
 import AdminMembers from "@/components/admin/AdminMembers";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 import PageHero from "@/components/PageHero";
 
 import heroAdmin from "@/assets/hero-admin.jpg";
