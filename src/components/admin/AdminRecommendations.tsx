@@ -22,6 +22,8 @@ const CATEGORIES = [
 interface Recommendation {
   id: string;
   professional_name: string;
+  professional_first_name: string;
+  professional_last_name: string | null;
   category: string;
   description: string;
   phone: string;
@@ -35,7 +37,8 @@ interface Recommendation {
 }
 
 const emptyForm = {
-  professional_name: "",
+  professional_first_name: "",
+  professional_last_name: "",
   category: "",
   description: "",
   phone: "",
@@ -104,7 +107,8 @@ const AdminRecommendations = () => {
   const openEdit = (rec: Recommendation) => {
     setEditingId(rec.id);
     setFormData({
-      professional_name: rec.professional_name,
+      professional_first_name: rec.professional_first_name || rec.professional_name.split(" ")[0],
+      professional_last_name: rec.professional_last_name || rec.professional_name.split(" ").slice(1).join(" "),
       category: rec.category,
       description: rec.description,
       phone: rec.phone,
@@ -121,14 +125,18 @@ const AdminRecommendations = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.professional_name || !formData.category || !formData.description || !formData.phone) {
-      toast({ title: "שגיאה", description: "נא למלא את כל השדות", variant: "destructive" });
+    if (!formData.professional_first_name || !formData.category || !formData.description || !formData.phone) {
+      toast({ title: "שגיאה", description: "נא למלא את כל השדות החובה", variant: "destructive" });
       return;
     }
 
+    const fullName = [formData.professional_first_name, formData.professional_last_name].filter(Boolean).join(" ");
+
     if (editingId) {
       const { error } = await (supabase as any).from("professional_recommendations").update({
-        professional_name: formData.professional_name,
+        professional_name: fullName,
+        professional_first_name: formData.professional_first_name,
+        professional_last_name: formData.professional_last_name || null,
         category: formData.category,
         description: formData.description,
         phone: formData.phone,
@@ -138,7 +146,9 @@ const AdminRecommendations = () => {
       toast({ title: "ההמלצה עודכנה בהצלחה!" });
     } else {
       const { error } = await (supabase as any).from("professional_recommendations").insert({
-        professional_name: formData.professional_name,
+        professional_name: fullName,
+        professional_first_name: formData.professional_first_name,
+        professional_last_name: formData.professional_last_name || null,
         category: formData.category,
         description: formData.description,
         phone: formData.phone,
@@ -158,7 +168,7 @@ const AdminRecommendations = () => {
   };
 
   const filtered = recommendations.filter((r) => {
-    const matchesSearch = r.professional_name.includes(searchQuery) || r.recommender_name.includes(searchQuery);
+    const matchesSearch = (r.professional_first_name + " " + (r.professional_last_name || "")).includes(searchQuery) || r.professional_name.includes(searchQuery) || r.recommender_name.includes(searchQuery);
     const matchesStatus =
       statusFilter === "all" ||
       (statusFilter === "approved" && r.is_approved && !r.is_hidden) ||
@@ -209,8 +219,8 @@ const AdminRecommendations = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-secondary/50">
-              <TableHead className="text-right font-body">בעל מקצוע</TableHead>
-              <TableHead className="text-right font-body">קטגוריה</TableHead>
+              <TableHead className="text-right font-body">שם פרטי</TableHead>
+              <TableHead className="text-right font-body">שם משפחה</TableHead>
               <TableHead className="text-right font-body">ממליץ</TableHead>
               <TableHead className="text-right font-body">דירוג</TableHead>
               <TableHead className="text-right font-body">סטטוס</TableHead>
