@@ -176,21 +176,21 @@ const Profile = () => {
         <p className="font-body text-sm text-muted-foreground mb-2">קישורים חברתיים</p>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1.5 block font-body text-sm text-muted-foreground">אתר אישי/עסקי</label>
+            <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Globe className="h-3.5 w-3.5 text-gold" /> אתר אישי/עסקי</label>
             <Input name="website_url" value={form.website_url} onChange={handleChange} className="bg-card border-border" dir="ltr" placeholder="https://..." />
           </div>
           <div>
-            <label className="mb-1.5 block font-body text-sm text-muted-foreground">פייסבוק</label>
+            <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Facebook className="h-3.5 w-3.5 text-[#1877F2]" /> פייסבוק</label>
             <Input name="facebook_url" value={form.facebook_url} onChange={handleChange} className="bg-card border-border" dir="ltr" placeholder="https://facebook.com/..." />
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1.5 block font-body text-sm text-muted-foreground">אינסטגרם</label>
+            <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Instagram className="h-3.5 w-3.5 text-[#E4405F]" /> אינסטגרם</label>
             <Input name="instagram_url" value={form.instagram_url} onChange={handleChange} className="bg-card border-border" dir="ltr" placeholder="https://instagram.com/..." />
           </div>
           <div>
-            <label className="mb-1.5 block font-body text-sm text-muted-foreground">לינקדאין</label>
+            <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Linkedin className="h-3.5 w-3.5 text-[#0A66C2]" /> לינקדאין</label>
             <Input name="linkedin_url" value={form.linkedin_url} onChange={handleChange} className="bg-card border-border" dir="ltr" placeholder="https://linkedin.com/in/..." />
           </div>
         </div>
