@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Phone, Briefcase, MapPin, Pencil, Search, Cake, Send, Heart, MessageCircle, Calendar } from "lucide-react";
+import { User, Phone, Briefcase, MapPin, Pencil, Search, Cake, Send, Heart, MessageCircle, Calendar, Globe, Facebook, Instagram, Linkedin } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
@@ -42,7 +42,7 @@ const Members = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [editMember, setEditMember] = useState<any | null>(null);
   const [viewMember, setViewMember] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "", hobbies: "" });
+  const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "", hobbies: "", website_url: "", facebook_url: "", instagram_url: "", linkedin_url: "" });
   const [saving, setSaving] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [filterProfession, setFilterProfession] = useState("all");
@@ -89,6 +89,10 @@ const Members = () => {
       address: member.address || "",
       birth_date: member.birth_date || "",
       hobbies: member.hobbies || "",
+      website_url: member.website_url || "",
+      facebook_url: member.facebook_url || "",
+      instagram_url: member.instagram_url || "",
+      linkedin_url: member.linkedin_url || "",
     });
   };
 
@@ -112,6 +116,10 @@ const Members = () => {
       address: editForm.address,
       birth_date: editForm.birth_date || null,
       hobbies: editForm.hobbies || null,
+      website_url: editForm.website_url || null,
+      facebook_url: editForm.facebook_url || null,
+      instagram_url: editForm.instagram_url || null,
+      linkedin_url: editForm.linkedin_url || null,
     } as any).eq("id", editMember.id);
     setSaving(false);
 
