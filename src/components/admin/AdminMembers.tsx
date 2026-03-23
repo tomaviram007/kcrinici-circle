@@ -97,7 +97,7 @@ const AdminMembers = () => {
   // Edit
   const openEdit = (p: Profile) => {
     setEditProfile(p);
-    setEditForm({ full_name: p.full_name, phone: p.phone, address: p.address, profession: p.profession, expertise: p.expertise, bio: p.bio, birth_date: p.birth_date });
+    setEditForm({ full_name: p.full_name, phone: p.phone, address: p.address, profession: p.profession, expertise: p.expertise, bio: p.bio, birth_date: p.birth_date, website_url: (p as any).website_url, facebook_url: (p as any).facebook_url, instagram_url: (p as any).instagram_url, linkedin_url: (p as any).linkedin_url });
   };
 
   const handleSaveEdit = async () => {
