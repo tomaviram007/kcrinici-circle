@@ -122,12 +122,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
           <div className="mt-3 mx-auto h-px w-12 gradient-gold opacity-40" />
         </div>
 
-        {isEmpty ? (
-          <div className="text-center py-10">
-            <Gift className="mx-auto h-8 w-8 text-muted-foreground/30 mb-2" />
-            <p className="font-body text-sm text-muted-foreground">אין ימי הולדת החודש</p>
-          </div>
-        ) : (
+        {(
           <div className="relative">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
               {displayItems.map((person, i) => {
@@ -196,7 +191,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
           </div>
         )}
 
-        {isApproved && !isEmpty && (
+        {isApproved && (
           <div className="mt-6 text-center">
             <Link to="/members" className="font-body text-sm text-gold hover:underline">
               לכל החברים ←
