@@ -81,6 +81,7 @@ const Header = () => {
     { to: "/events", label: "לוח אירועים", protected: false },
     { to: "/gallery", label: "גלריה", protected: false },
     { to: "/recommendations", label: "אנשי מקצוע", protected: false },
+    { to: "/deals", label: "הטבות", protected: false },
     ...(isAdmin ? [{ to: "/admin", label: "שולחן המנהל", protected: true }] : []),
   ];
 

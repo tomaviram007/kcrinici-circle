@@ -26,6 +26,7 @@ const groups = [
       { id: "jobs", label: "דרושים", icon: Briefcase },
       { id: "events", label: "אירועים", icon: Calendar },
       { id: "recommendations", label: "המלצות", icon: Award },
+      { id: "deals", label: "הטבות", icon: Briefcase },
     ],
   },
   {
