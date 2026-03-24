@@ -7,13 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Tag, Store } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon } from "lucide-react";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
@@ -26,6 +20,7 @@ interface Deal {
   business_name: string;
   business_logo_url: string | null;
   business_phone: string | null;
+  website_url: string | null;
   category: string;
   is_active: boolean;
   expires_at: string | null;
@@ -40,6 +35,7 @@ const emptyForm = {
   business_name: "",
   business_logo_url: "",
   business_phone: "",
+  website_url: "",
   category: "כללי",
   is_active: true,
   expires_at: "",
@@ -79,6 +75,7 @@ const AdminDeals = () => {
       business_name: form.business_name,
       business_logo_url: form.business_logo_url || null,
       business_phone: form.business_phone || null,
+      website_url: form.website_url || null,
       category: form.category,
       is_active: form.is_active,
       expires_at: form.expires_at || null,
@@ -112,6 +109,7 @@ const AdminDeals = () => {
       business_name: deal.business_name,
       business_logo_url: deal.business_logo_url || "",
       business_phone: deal.business_phone || "",
+      website_url: deal.website_url || "",
       category: deal.category,
       is_active: deal.is_active,
       expires_at: deal.expires_at ? deal.expires_at.split("T")[0] : "",
@@ -145,16 +143,108 @@ const AdminDeals = () => {
         </h3>
         <Button
           onClick={() => {
-            setForm(emptyForm);
-            setEditingId(null);
-            setShowForm(true);
+            if (showForm && !editingId) {
+              setShowForm(false);
+            } else {
+              setForm(emptyForm);
+              setEditingId(null);
+              setShowForm(true);
+            }
           }}
           className="gradient-gold text-primary-foreground font-body"
           size="sm"
         >
-          <Plus className="h-4 w-4 ml-1" /> הטבה חדשה
+          {showForm && !editingId ? (
+            <><X className="h-4 w-4 ml-1" /> סגור</>
+          ) : (
+            <><Plus className="h-4 w-4 ml-1" /> הטבה חדשה</>
+          )}
         </Button>
       </div>
+
+      {/* Inline form - full width, no scroll */}
+      {showForm && (
+        <div className="rounded-xl border border-primary/30 bg-card p-5 space-y-4" dir="rtl">
+          <div className="flex items-center justify-between">
+            <p className="font-serif text-lg font-bold text-foreground">
+              {editingId ? "עריכת הטבה" : "הטבה חדשה"}
+            </p>
+            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setShowForm(false); setEditingId(null); }}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Row 1: business name + title */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label className="font-body text-xs">שם העסק *</Label>
+              <Input value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} className="bg-background" autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-xs">כותרת ההטבה *</Label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" autoComplete="off" />
+            </div>
+          </div>
+
+          {/* Row 2: description */}
+          <div>
+            <Label className="font-body text-xs">תיאור *</Label>
+            <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-background" rows={2} />
+          </div>
+
+          {/* Row 3: discount + coupon + phone + category */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <Label className="font-body text-xs">תגית הנחה (למשל: 20%)</Label>
+              <Input value={form.discount_label} onChange={(e) => setForm({ ...form, discount_label: e.target.value })} className="bg-background" autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-xs">קוד קופון</Label>
+              <Input value={form.coupon_code} onChange={(e) => setForm({ ...form, coupon_code: e.target.value })} className="bg-background" autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-xs">טלפון העסק (לוואטסאפ)</Label>
+              <Input value={form.business_phone} onChange={(e) => setForm({ ...form, business_phone: e.target.value })} className="bg-background" placeholder="972501234567" autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-xs">קטגוריה</Label>
+              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Row 4: logo URL + website URL + expiry + active */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <Label className="font-body text-xs">URL לוגו העסק</Label>
+              <Input value={form.business_logo_url} onChange={(e) => setForm({ ...form, business_logo_url: e.target.value })} className="bg-background" placeholder="https://..." autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-xs flex items-center gap-1"><LinkIcon className="h-3 w-3" /> לינק לאתר ההטבה</Label>
+              <Input value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} className="bg-background" placeholder="https://..." autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-xs">תאריך תפוגה (אופציונלי)</Label>
+              <Input type="date" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })} className="bg-background" />
+            </div>
+            <div className="flex items-end pb-1 gap-2">
+              <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
+              <Label className="font-body text-xs">הטבה פעילה</Label>
+            </div>
+          </div>
+
+          {/* Save button */}
+          <Button onClick={handleSave} disabled={saving} className="gradient-gold text-primary-foreground font-body">
+            {saving ? "שומר..." : editingId ? "עדכן הטבה" : "הוסף הטבה"}
+          </Button>
+        </div>
+      )}
 
       {/* Deals list */}
       <div className="grid gap-3 md:grid-cols-2">
@@ -201,74 +291,6 @@ const AdminDeals = () => {
           </div>
         ))}
       </div>
-
-      {/* Form dialog */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto" dir="rtl">
-          <DialogTitle className="font-serif text-lg">
-            {editingId ? "עריכת הטבה" : "הטבה חדשה"}
-          </DialogTitle>
-          <DialogDescription className="text-sm font-body text-muted-foreground">
-            מלא את הפרטים להוספת הטבה חדשה לחברי המועדון
-          </DialogDescription>
-          <div className="space-y-3 mt-2">
-            <div>
-              <Label className="font-body text-xs">שם העסק *</Label>
-              <Input value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} className="bg-background" />
-            </div>
-            <div>
-              <Label className="font-body text-xs">כותרת ההטבה *</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" />
-            </div>
-            <div>
-              <Label className="font-body text-xs">תיאור *</Label>
-              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-background" rows={3} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="font-body text-xs">תגית הנחה (למשל: 20%)</Label>
-                <Input value={form.discount_label} onChange={(e) => setForm({ ...form, discount_label: e.target.value })} className="bg-background" />
-              </div>
-              <div>
-                <Label className="font-body text-xs">קוד קופון</Label>
-                <Input value={form.coupon_code} onChange={(e) => setForm({ ...form, coupon_code: e.target.value })} className="bg-background" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="font-body text-xs">טלפון העסק (לוואטסאפ)</Label>
-                <Input value={form.business_phone} onChange={(e) => setForm({ ...form, business_phone: e.target.value })} className="bg-background" placeholder="972501234567" />
-              </div>
-              <div>
-                <Label className="font-body text-xs">קטגוריה</Label>
-                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                  <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label className="font-body text-xs">URL לוגו העסק</Label>
-              <Input value={form.business_logo_url} onChange={(e) => setForm({ ...form, business_logo_url: e.target.value })} className="bg-background" placeholder="https://..." />
-            </div>
-            <div>
-              <Label className="font-body text-xs">תאריך תפוגה (אופציונלי)</Label>
-              <Input type="date" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })} className="bg-background" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
-              <Label className="font-body text-xs">הטבה פעילה</Label>
-            </div>
-            <Button onClick={handleSave} disabled={saving} className="w-full gradient-gold text-primary-foreground font-body">
-              {saving ? "שומר..." : editingId ? "עדכן הטבה" : "הוסף הטבה"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
