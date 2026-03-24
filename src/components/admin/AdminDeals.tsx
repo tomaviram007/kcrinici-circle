@@ -263,7 +263,7 @@ const AdminDeals = () => {
       )}
 
       {/* Deals list */}
-      <div className="grid gap-3 md:grid-cols-2">
+      <div ref={cardsRef} className="grid gap-3 md:grid-cols-2">
         {deals.map((deal) => (
           <div
             key={deal.id}
