@@ -86,9 +86,16 @@ const AdminDashboard = () => {
 
         <AdminBirthdayWidget />
 
+        {/* Mobile: tab selector dropdown */}
+        <div className="block lg:hidden mb-4" dir="rtl">
+          <AdminMobileNav activeTab={activeTab} onTabChange={handleTabChange} />
+        </div>
+
         {/* Sidebar + Content layout */}
         <div className="flex gap-6" dir="rtl">
-          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+          <div className="hidden lg:block">
+            <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+          </div>
 
           <div className="flex-1 min-w-0">
             {activeTab === "members" && <AdminMembers />}
