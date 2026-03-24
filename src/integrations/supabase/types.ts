@@ -68,6 +68,7 @@ export type Database = {
           business_name: string
           business_phone: string | null
           category: string
+          claim_count: number
           coupon_code: string | null
           created_at: string
           created_by: string | null
@@ -78,6 +79,7 @@ export type Database = {
           is_active: boolean
           title: string
           updated_at: string
+          website_click_count: number
           website_url: string | null
         }
         Insert: {
@@ -85,6 +87,7 @@ export type Database = {
           business_name: string
           business_phone?: string | null
           category?: string
+          claim_count?: number
           coupon_code?: string | null
           created_at?: string
           created_by?: string | null
@@ -95,6 +98,7 @@ export type Database = {
           is_active?: boolean
           title: string
           updated_at?: string
+          website_click_count?: number
           website_url?: string | null
         }
         Update: {
@@ -102,6 +106,7 @@ export type Database = {
           business_name?: string
           business_phone?: string | null
           category?: string
+          claim_count?: number
           coupon_code?: string | null
           created_at?: string
           created_by?: string | null
@@ -112,6 +117,7 @@ export type Database = {
           is_active?: boolean
           title?: string
           updated_at?: string
+          website_click_count?: number
           website_url?: string | null
         }
         Relationships: []
@@ -695,6 +701,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_deal_counter: {
+        Args: { counter_name: string; deal_id: string }
+        Returns: undefined
       }
       is_approved_user: { Args: { _user_id: string }; Returns: boolean }
     }
