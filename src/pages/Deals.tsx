@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Tag, Search, Copy, MessageCircle, Clock, Store } from "lucide-react";
+import { Tag, Search, Copy, MessageCircle, Clock, Store, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ interface Deal {
   business_name: string;
   business_logo_url: string | null;
   business_phone: string | null;
+  website_url: string | null;
   category: string;
   is_active: boolean;
   expires_at: string | null;
@@ -289,6 +290,17 @@ const Deals = () => {
                   >
                     <MessageCircle className="h-4 w-4 ml-2" />
                     שלח הודעה בוואטסאפ
+                  </Button>
+                )}
+
+                {user && isApproved && selectedDeal.website_url && (
+                  <Button
+                    variant="outline"
+                    className="w-full font-body border-primary/30 text-primary hover:bg-primary/10"
+                    onClick={() => window.open(selectedDeal.website_url!, "_blank")}
+                  >
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                    עבור לאתר ההטבה
                   </Button>
                 )}
 

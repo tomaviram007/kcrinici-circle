@@ -1,0 +1,1 @@
+ALTER TABLE public.deals ADD COLUMN website_url TEXT;
