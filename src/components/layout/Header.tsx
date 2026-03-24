@@ -20,7 +20,7 @@ gsap.registerPlugin(ScrollToPlugin);
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isApproved, isAdmin } = useAuth();
+  const { user, isApproved, isAdmin, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMemberDialog, setShowMemberDialog] = useState(false);
   const { birthdays } = useBirthdaysThisWeek();
@@ -157,7 +157,7 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center justify-center gap-2" style={{ width: "10%" }}>
-            {canAccess ? (
+            {loading ? null : canAccess ? (
               <div className="flex items-center gap-1">
                 <Link to="/profile">
                   <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
