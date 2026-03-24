@@ -62,6 +62,57 @@ export type Database = {
         }
         Relationships: []
       }
+      deals: {
+        Row: {
+          business_logo_url: string | null
+          business_name: string
+          business_phone: string | null
+          category: string
+          coupon_code: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          discount_label: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_logo_url?: string | null
+          business_name: string
+          business_phone?: string | null
+          category?: string
+          coupon_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          discount_label?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_logo_url?: string | null
+          business_name?: string
+          business_phone?: string | null
+          category?: string
+          coupon_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          discount_label?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_rsvps: {
         Row: {
           created_at: string

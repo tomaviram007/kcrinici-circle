@@ -14,6 +14,7 @@ import AdminQuotes from "@/components/admin/AdminQuotes";
 import AdminLogo from "@/components/admin/AdminLogo";
 import AdminRecommendations from "@/components/admin/AdminRecommendations";
 import AdminCovers from "@/components/admin/AdminCovers";
+import AdminDeals from "@/components/admin/AdminDeals";
 import AdminMembers from "@/components/admin/AdminMembers";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminBirthdayWidget from "@/components/admin/AdminBirthdayWidget";
@@ -100,6 +101,7 @@ const AdminDashboard = () => {
             {activeTab === "quotes" && <AdminQuotes />}
             {activeTab === "logo" && <AdminLogo />}
             {activeTab === "covers" && <AdminCovers />}
+            {activeTab === "deals" && <AdminDeals />}
             {activeTab === "team" && <AdminTeam />}
           </div>
         </div>
