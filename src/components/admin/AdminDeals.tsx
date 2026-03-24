@@ -51,7 +51,7 @@ const AdminDeals = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
-  const { toast } = useToast();
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   const fetchDeals = async () => {
     const { data } = await supabase
