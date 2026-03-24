@@ -267,7 +267,7 @@ const AdminDeals = () => {
         {deals.map((deal) => (
           <div
             key={deal.id}
-            className={`rounded-xl border p-4 transition-all ${
+            className={`deal-card rounded-xl border p-4 transition-all ${
               deal.is_active ? "border-border bg-card" : "border-border/30 bg-card/50 opacity-60"
             }`}
           >
