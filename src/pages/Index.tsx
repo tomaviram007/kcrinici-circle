@@ -74,6 +74,12 @@ const Index = () => {
         <ClubAboutSection />
       </ScrollReveal>
 
+      {!isApproved && (
+        <ScrollReveal>
+          <CTASection isLoggedIn={isLoggedIn} />
+        </ScrollReveal>
+      )}
+
       <ScrollReveal>
         <BirthdaysPreviewSection isApproved={isApproved} />
       </ScrollReveal>
@@ -89,12 +95,6 @@ const Index = () => {
       <ScrollReveal delay={0.05}>
         <JobsPreviewSection isApproved={isApproved} />
       </ScrollReveal>
-
-      {!isApproved && (
-        <ScrollReveal>
-          <CTASection isLoggedIn={isLoggedIn} />
-        </ScrollReveal>
-      )}
 
       <PollPopup />
 
