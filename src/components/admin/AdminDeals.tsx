@@ -278,9 +278,52 @@ const AdminDeals = () => {
         </div>
       )}
 
-      {/* Deals list */}
+      {/* Pending deals */}
+      {pendingDeals.length > 0 && (
+        <>
+          <h4 className="font-serif text-sm font-bold text-destructive flex items-center gap-2 mt-2">
+            <Clock className="h-4 w-4" /> ממתינות לאישור ({pendingDeals.length})
+          </h4>
+          <div className="grid gap-3 md:grid-cols-2">
+            {pendingDeals.map((deal) => (
+              <div key={deal.id} className="deal-card rounded-xl border-2 border-amber-500/40 bg-amber-500/5 p-4 transition-all">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="h-9 w-9 rounded-lg border border-border/40 bg-background/60 flex items-center justify-center shrink-0 overflow-hidden">
+                      {deal.business_logo_url ? (
+                        <img src={deal.business_logo_url} alt="" className="h-full w-full object-contain p-0.5" />
+                      ) : (
+                        <Store className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-serif text-sm font-bold text-foreground truncate">{deal.title}</p>
+                      <p className="font-body text-xs text-muted-foreground">{deal.business_name} · {deal.category}</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] font-body border-amber-500/50 text-amber-600">ממתינה</Badge>
+                </div>
+                <p className="font-body text-xs text-muted-foreground mt-2 line-clamp-2">{deal.description}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <Button size="sm" className="gradient-gold text-primary-foreground font-body" onClick={() => handleApprove(deal)}>
+                    <CheckCircle className="h-3.5 w-3.5 ml-1" /> אשר
+                  </Button>
+                  <Button size="sm" variant="ghost" className="font-body" onClick={() => handleEdit(deal)}>
+                    <Pencil className="h-3.5 w-3.5 ml-1" /> ערוך
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleDelete(deal.id)}>
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Approved deals */}
       <div ref={cardsRef} className="grid gap-3 md:grid-cols-2">
-        {deals.map((deal) => (
+        {approvedDeals.map((deal) => (
           <div
             key={deal.id}
             className={`deal-card rounded-xl border p-4 transition-all ${
@@ -318,7 +361,6 @@ const AdminDeals = () => {
                 </Button>
               </div>
 
-              {/* Click counters */}
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1 font-body text-xs text-muted-foreground" title="לחיצות על קבל הטבה">
                   <MousePointerClick className="h-3 w-3" /> {deal.claim_count || 0}
