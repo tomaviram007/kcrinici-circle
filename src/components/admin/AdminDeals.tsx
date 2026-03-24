@@ -165,7 +165,10 @@ const AdminDeals = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-serif text-xl font-bold text-foreground flex items-center gap-2">
-          <Tag className="h-5 w-5 text-gold" /> ניהול הטבות ({deals.length})
+         <Tag className="h-5 w-5 text-gold" /> ניהול הטבות ({deals.length})
+          {pendingDeals.length > 0 && (
+            <Badge variant="destructive" className="font-body text-xs">{pendingDeals.length} ממתינות</Badge>
+          )}
         </h3>
         <Button
           onClick={() => {
