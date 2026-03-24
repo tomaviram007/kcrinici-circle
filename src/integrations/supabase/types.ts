@@ -77,6 +77,7 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean
+          is_approved: boolean
           title: string
           updated_at: string
           website_click_count: number
@@ -96,6 +97,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          is_approved?: boolean
           title: string
           updated_at?: string
           website_click_count?: number
@@ -115,6 +117,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          is_approved?: boolean
           title?: string
           updated_at?: string
           website_click_count?: number
