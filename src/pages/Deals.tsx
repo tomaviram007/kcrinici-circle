@@ -16,6 +16,7 @@ import PageHero from "@/components/PageHero";
 import QuoteSection from "@/components/landing/QuoteSection";
 import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
+import DealSubmitForm from "@/components/deals/DealSubmitForm";
 
 import heroEvents from "@/assets/hero-events.jpg";
 
@@ -137,6 +138,9 @@ const Deals = () => {
       />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6" dir="rtl">
+        {/* Member submit form */}
+        {user && isApproved && <DealSubmitForm />}
+
         {/* Filter bar */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="relative flex-1 max-w-md">

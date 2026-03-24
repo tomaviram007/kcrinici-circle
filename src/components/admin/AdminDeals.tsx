@@ -24,10 +24,12 @@ interface Deal {
   website_url: string | null;
   category: string;
   is_active: boolean;
+  is_approved: boolean;
   expires_at: string | null;
   created_at: string;
   claim_count: number;
   website_click_count: number;
+  created_by: string | null;
 }
 
 const emptyForm = {
