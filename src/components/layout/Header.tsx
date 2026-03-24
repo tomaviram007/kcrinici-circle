@@ -157,7 +157,7 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center justify-center gap-2" style={{ width: "10%" }}>
-            {loading ? null : canAccess ? (
+            {canAccess ? (
               <div className="flex items-center gap-1">
                 <Link to="/profile">
                   <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
