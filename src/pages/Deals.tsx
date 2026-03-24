@@ -55,7 +55,6 @@ const Deals = () => {
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false });
-      // Filter expired client-side
       const now = new Date();
       setDeals(
         (data || []).filter(
@@ -101,6 +100,23 @@ const Deals = () => {
     setCopied(true);
     toast({ title: "הקוד הועתק!" });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const trackClick = async (dealId: string, counterName: string) => {
+    await supabase.rpc("increment_deal_counter", {
+      deal_id: dealId,
+      counter_name: counterName,
+    });
+  };
+
+  const handleClaimClick = (deal: Deal) => {
+    setSelectedDeal(deal);
+    trackClick(deal.id, "claim_count");
+  };
+
+  const handleWebsiteClick = (deal: Deal) => {
+    trackClick(deal.id, "website_click_count");
+    window.open(deal.website_url!, "_blank");
   };
 
   const handleWhatsApp = (deal: Deal) => {
@@ -164,7 +180,7 @@ const Deals = () => {
               <div
                 key={deal.id}
                 className="deal-card group relative rounded-2xl border border-border/40 p-5 backdrop-blur-md bg-card/60 cursor-pointer transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--primary)/0.12)] hover:-translate-y-1"
-                onClick={() => setSelectedDeal(deal)}
+                onClick={() => handleClaimClick(deal)}
               >
                 {/* Discount badge */}
                 {deal.discount_label && (
@@ -223,7 +239,7 @@ const Deals = () => {
                   className="mt-4 w-full gradient-gold text-primary-foreground font-body"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedDeal(deal);
+                    handleClaimClick(deal);
                   }}
                 >
                   <Tag className="h-4 w-4 ml-1" />
@@ -245,6 +261,19 @@ const Deals = () => {
         <DialogContent className="sm:max-w-md" dir="rtl">
           {selectedDeal && (
             <>
+              {/* Business logo */}
+              {selectedDeal.business_logo_url && (
+                <div className="flex justify-center -mt-2 mb-2">
+                  <div className="h-16 w-16 rounded-2xl border border-border/40 bg-background/80 flex items-center justify-center overflow-hidden shadow-md">
+                    <img
+                      src={selectedDeal.business_logo_url}
+                      alt={selectedDeal.business_name}
+                      className="h-full w-full object-contain p-2"
+                    />
+                  </div>
+                </div>
+              )}
+
               <DialogTitle className="font-serif text-xl text-center">
                 {selectedDeal.title}
               </DialogTitle>
@@ -297,7 +326,7 @@ const Deals = () => {
                   <Button
                     variant="outline"
                     className="w-full font-body border-primary/30 text-primary hover:bg-primary/10"
-                    onClick={() => window.open(selectedDeal.website_url!, "_blank")}
+                    onClick={() => handleWebsiteClick(selectedDeal)}
                   >
                     <ExternalLink className="h-4 w-4 ml-2" />
                     עבור לאתר ההטבה

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon, MousePointerClick, ExternalLink } from "lucide-react";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
@@ -25,6 +25,8 @@ interface Deal {
   is_active: boolean;
   expires_at: string | null;
   created_at: string;
+  claim_count: number;
+  website_click_count: number;
 }
 
 const emptyForm = {
@@ -219,8 +221,8 @@ const AdminDeals = () => {
             </div>
           </div>
 
-          {/* Row 4: logo URL + website URL + expiry + active */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* Row 4: logo URL + website URL + expiry */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <Label className="font-body text-xs">URL לוגו העסק</Label>
               <Input value={form.business_logo_url} onChange={(e) => setForm({ ...form, business_logo_url: e.target.value })} className="bg-background" placeholder="https://..." autoComplete="off" />
@@ -233,10 +235,12 @@ const AdminDeals = () => {
               <Label className="font-body text-xs">תאריך תפוגה (אופציונלי)</Label>
               <Input type="date" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })} className="bg-background" />
             </div>
-            <div className="flex items-end pb-1 gap-2">
-              <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
-              <Label className="font-body text-xs">הטבה פעילה</Label>
-            </div>
+          </div>
+
+          {/* Row 5: active switch - separate row */}
+          <div className="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-background/50">
+            <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} className="shrink-0" />
+            <Label className="font-body text-sm">הטבה פעילה</Label>
           </div>
 
           {/* Save button */}
@@ -276,9 +280,20 @@ const AdminDeals = () => {
               )}
             </div>
 
-            <div className="mt-3 flex items-center gap-2">
-              <Switch checked={deal.is_active} onCheckedChange={() => handleToggleActive(deal)} />
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
+              <Switch checked={deal.is_active} onCheckedChange={() => handleToggleActive(deal)} className="shrink-0" />
               <span className="font-body text-xs text-muted-foreground">{deal.is_active ? "פעיל" : "מושהה"}</span>
+
+              {/* Click counters */}
+              <div className="flex items-center gap-3 mr-2">
+                <span className="flex items-center gap-1 font-body text-xs text-muted-foreground" title="לחיצות על קבל הטבה">
+                  <MousePointerClick className="h-3 w-3" /> {deal.claim_count || 0}
+                </span>
+                <span className="flex items-center gap-1 font-body text-xs text-muted-foreground" title="לחיצות על עבור לאתר">
+                  <ExternalLink className="h-3 w-3" /> {deal.website_click_count || 0}
+                </span>
+              </div>
+
               <div className="mr-auto flex gap-1">
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleEdit(deal)}>
                   <Pencil className="h-3.5 w-3.5" />
