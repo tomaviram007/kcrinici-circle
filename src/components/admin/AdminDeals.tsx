@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon, MousePointerClick, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon, MousePointerClick, ExternalLink, CheckCircle, Clock } from "lucide-react";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
@@ -94,6 +94,7 @@ const AdminDeals = () => {
       website_url: form.website_url || null,
       category: form.category,
       is_active: form.is_active,
+      is_approved: true,
       expires_at: form.expires_at || null,
     };
 
