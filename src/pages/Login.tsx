@@ -14,7 +14,7 @@ const Login = () => {
 
   useEffect(() => {
     if (!authLoading && user) {
-      navigate(isApproved ? "/" : "/pending-approval", { replace: true });
+      navigate(isApproved ? "/" : "/pending", { replace: true });
     }
   }, [authLoading, user, isApproved, navigate]);
 
