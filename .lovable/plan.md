@@ -1,40 +1,35 @@
 
 
-## תיקון UI בטופס ההטבות + מעקב קליקים + לוגו במודאל
+## הסתרת אזורים ריקים בדף הבית + אזור הצטרפות
 
-### הבעיות שזוהו
-- כפתור "הטבה פעילה" (Switch) בשורה 4 של הטופס יוצא מהשוליים כי ה-grid cell קטן מדי
-- בכרטיסי ההטבות ברשימה, ה-Switch של "פעיל" לא מיושר נכון
-- אין מעקב על כמה פעמים לחצו על הטבה / עברו לאתר
-- הלוגו לא מופיע במודאל ההטבה
+### הבעיה הנוכחית
+כשמשתמש מאושר מחובר ואין תוכן באזור מסוים (למשל אין מכירות, אין אירועים), האזור עדיין מוצג עם הודעת "אין תוכן" ואייקון ריק. זה יוצר חלל מיותר בדף.
 
-### שינויים מתוכננים
+### הפתרון
 
-**1. תיקון Layout של השורה האחרונה בטופס (AdminDeals.tsx)**
-- שורה 4 תהפוך ל-grid של 2 עמודות בנייד ו-3 עמודות בדסקטופ (בלי ה-Switch)
-- ה-Switch של "הטבה פעילה" יעבור לשורה נפרדת מתחת, עם `flex` ו-`items-center` כדי שלא ייחתך
+**1. הסתרת אזורים ריקים (4 קבצים)**
+בכל אחד מהסקשנים הבאים, כשהמשתמש מאושר ואין נתונים — הרכיב יחזיר `null` במקום להציג empty state:
+- `BirthdaysPreviewSection` — אם `isApproved && birthdays.length === 0` → return null
+- `SalesPreviewSection` — אם `isApproved && sales.length === 0` → return null
+- `EventsPreviewSection` — אם `isApproved && events.length === 0` → return null
+- `JobsPreviewSection` — אם `isApproved && jobs.length === 0` → return null
 
-**2. תיקון Switch ברשימת ההטבות (AdminDeals.tsx)**
-- הוספת `shrink-0` ל-Switch ו-`overflow-hidden` למיכל כדי למנוע חריגה
+למשתמשים לא מאושרים, ה-mock data ימשיך להופיע כרגיל עם ה-blur.
 
-**3. מעקב קליקים - מיגרציית DB**
-- הוספת 2 עמודות לטבלת `deals`:
-  - `claim_count INTEGER DEFAULT 0` — מספר לחיצות על "קבל הטבה"
-  - `website_click_count INTEGER DEFAULT 0` — מספר לחיצות על "עבור לאתר"
-- יצירת DB function `increment_deal_counter(deal_id, counter_name)` כ-RPC שמעדכן את המונה
+**2. אזור הצטרפות למועדון (CTA)**
+כבר קיים רכיב `CTASection` שמוצג לגולשים לא מחוברים. אני מציע לשדרג אותו:
+- להציג אותו גם למשתמשים שנרשמו אך עדיין לא אושרו, עם הודעה מותאמת: "הבקשה שלך בטיפול"
+- להוסיף אנימציית GSAP (fade-in + scale) לאזור
+- למקם אותו בתחתית הדף, לפני ה-footer, כפי שהוא היום
 
-**4. מעקב קליקים - קוד (Deals.tsx)**
-- בלחיצה על "קבל הטבה" / פתיחת מודאל → קריאת RPC להגדלת `claim_count`
-- בלחיצה על "עבור לאתר" → קריאת RPC להגדלת `website_click_count`
+### שינויים טכניים
 
-**5. תצוגת מונים באדמין (AdminDeals.tsx)**
-- הצגת `claim_count` ו-`website_click_count` בכל כרטיס הטבה ברשימת האדמין עם אייקונים קטנים
-
-**6. לוגו במודאל ההטבה (Deals.tsx)**
-- הוספת בלוק לוגו מעל הכותרת במודאל: אם יש `business_logo_url`, מציגים תמונה בעיגול/מרובע מעוצב מעל שם ההטבה
-
-### קבצים שישתנו
-- `src/components/admin/AdminDeals.tsx` — תיקון layout + תצוגת מונים
-- `src/pages/Deals.tsx` — לוגו במודאל + קריאות RPC למעקב
-- מיגרציית SQL חדשה — עמודות מונים + פונקציית increment
+| קובץ | שינוי |
+|---|---|
+| `BirthdaysPreviewSection.tsx` | הוספת `if (isApproved && birthdays.length === 0) return null` אחרי ה-fetch |
+| `SalesPreviewSection.tsx` | הוספת `if (isApproved && sales.length === 0) return null` אחרי ה-fetch |
+| `EventsPreviewSection.tsx` | הוספת בדיקת empty + return null |
+| `JobsPreviewSection.tsx` | הוספת `if (isApproved && jobs.length === 0) return null` אחרי ה-fetch |
+| `Index.tsx` | עדכון תנאי ה-CTA: `!isLoggedIn || (isLoggedIn && !isApproved)` |
+| `CTASection.tsx` | הוספת prop `isLoggedIn` עם הודעה מותאמת למשתמש שממתין לאישור |
 
