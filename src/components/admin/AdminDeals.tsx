@@ -3,12 +3,13 @@ import gsap from "gsap";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon, MousePointerClick, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon, MousePointerClick, ExternalLink, CheckCircle, Clock } from "lucide-react";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
@@ -24,10 +25,12 @@ interface Deal {
   website_url: string | null;
   category: string;
   is_active: boolean;
+  is_approved: boolean;
   expires_at: string | null;
   created_at: string;
   claim_count: number;
   website_click_count: number;
+  created_by: string | null;
 }
 
 const emptyForm = {
@@ -92,6 +95,7 @@ const AdminDeals = () => {
       website_url: form.website_url || null,
       category: form.category,
       is_active: form.is_active,
+      is_approved: true,
       expires_at: form.expires_at || null,
     };
 
@@ -147,13 +151,25 @@ const AdminDeals = () => {
     fetchDeals();
   };
 
+  const handleApprove = async (deal: Deal) => {
+    await supabase.from("deals").update({ is_approved: true }).eq("id", deal.id);
+    toast({ title: "ההטבה אושרה!" });
+    fetchDeals();
+  };
+
+  const pendingDeals = deals.filter((d) => !d.is_approved);
+  const approvedDeals = deals.filter((d) => d.is_approved);
+
   if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-serif text-xl font-bold text-foreground flex items-center gap-2">
-          <Tag className="h-5 w-5 text-gold" /> ניהול הטבות ({deals.length})
+         <Tag className="h-5 w-5 text-gold" /> ניהול הטבות ({deals.length})
+          {pendingDeals.length > 0 && (
+            <Badge variant="destructive" className="font-body text-xs">{pendingDeals.length} ממתינות</Badge>
+          )}
         </h3>
         <Button
           onClick={() => {
@@ -262,9 +278,52 @@ const AdminDeals = () => {
         </div>
       )}
 
-      {/* Deals list */}
+      {/* Pending deals */}
+      {pendingDeals.length > 0 && (
+        <>
+          <h4 className="font-serif text-sm font-bold text-destructive flex items-center gap-2 mt-2">
+            <Clock className="h-4 w-4" /> ממתינות לאישור ({pendingDeals.length})
+          </h4>
+          <div className="grid gap-3 md:grid-cols-2">
+            {pendingDeals.map((deal) => (
+              <div key={deal.id} className="deal-card rounded-xl border-2 border-amber-500/40 bg-amber-500/5 p-4 transition-all">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="h-9 w-9 rounded-lg border border-border/40 bg-background/60 flex items-center justify-center shrink-0 overflow-hidden">
+                      {deal.business_logo_url ? (
+                        <img src={deal.business_logo_url} alt="" className="h-full w-full object-contain p-0.5" />
+                      ) : (
+                        <Store className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-serif text-sm font-bold text-foreground truncate">{deal.title}</p>
+                      <p className="font-body text-xs text-muted-foreground">{deal.business_name} · {deal.category}</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] font-body border-amber-500/50 text-amber-600">ממתינה</Badge>
+                </div>
+                <p className="font-body text-xs text-muted-foreground mt-2 line-clamp-2">{deal.description}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <Button size="sm" className="gradient-gold text-primary-foreground font-body" onClick={() => handleApprove(deal)}>
+                    <CheckCircle className="h-3.5 w-3.5 ml-1" /> אשר
+                  </Button>
+                  <Button size="sm" variant="ghost" className="font-body" onClick={() => handleEdit(deal)}>
+                    <Pencil className="h-3.5 w-3.5 ml-1" /> ערוך
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleDelete(deal.id)}>
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Approved deals */}
       <div ref={cardsRef} className="grid gap-3 md:grid-cols-2">
-        {deals.map((deal) => (
+        {approvedDeals.map((deal) => (
           <div
             key={deal.id}
             className={`deal-card rounded-xl border p-4 transition-all ${
@@ -302,7 +361,6 @@ const AdminDeals = () => {
                 </Button>
               </div>
 
-              {/* Click counters */}
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1 font-body text-xs text-muted-foreground" title="לחיצות על קבל הטבה">
                   <MousePointerClick className="h-3 w-3" /> {deal.claim_count || 0}
