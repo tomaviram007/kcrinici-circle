@@ -105,7 +105,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
     { full_name: "משה ישראלי", birth_date: "1988-03-28", profession: "אדריכל", avatar_url: null, user_id: "m4" },
   ];
 
-  const displayItems = isApproved && birthdays.length > 0 ? birthdays : !isApproved ? mockBirthdays : birthdays;
+  const displayItems = isApproved && birthdays.length > 0 ? birthdays : !isApproved ? mockBirthdays : [];
 
   if (isApproved && birthdays.length === 0) return null;
 
