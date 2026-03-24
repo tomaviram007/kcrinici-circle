@@ -68,12 +68,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
 
-        {isEmpty ? (
-          <div className="text-center py-12">
-            <Briefcase className="mx-auto h-10 w-10 text-muted-foreground/30 mb-3" />
-            <p className="font-body text-sm text-muted-foreground">אין משרות פעילות כרגע</p>
-          </div>
-        ) : (
+        {(
           <div className="relative grid gap-4 sm:gap-6 md:grid-cols-3">
             {displayItems.map((job, i) => (
               <div
