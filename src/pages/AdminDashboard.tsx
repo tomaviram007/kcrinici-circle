@@ -121,6 +121,94 @@ const AdminDashboard = () => {
 
 export default AdminDashboard;
 
+// Mobile navigation for admin dashboard
+const mobileNavGroups = [
+  {
+    label: "ניהול חברים",
+    items: [
+      { id: "members", label: "בקשות הצטרפות", icon: Users },
+      { id: "team", label: "צוות", icon: Shield },
+    ],
+  },
+  {
+    label: "תוכן קהילתי",
+    items: [
+      { id: "announcements", label: "מודעות", icon: Megaphone },
+      { id: "jobs", label: "דרושים", icon: Briefcase },
+      { id: "events", label: "אירועים", icon: Calendar },
+      { id: "recommendations", label: "המלצות", icon: Award },
+      { id: "deals", label: "הטבות", icon: Briefcase },
+    ],
+  },
+  {
+    label: "מדיה ועיצוב",
+    items: [
+      { id: "gallery", label: "גלריות", icon: Image },
+      { id: "logo", label: "לוגו", icon: ImageIcon },
+      { id: "covers", label: "קאברים", icon: Image },
+    ],
+  },
+  {
+    label: "הגדרות",
+    items: [
+      { id: "polls", label: "סקרים", icon: BarChart3 },
+      { id: "quotes", label: "ציטוטים", icon: Quote },
+    ],
+  },
+];
+
+const allMobileItems = mobileNavGroups.flatMap((g) => g.items);
+
+const AdminMobileNav = ({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) => {
+  const [open, setOpen] = useState(false);
+  const activeItem = allMobileItems.find((i) => i.id === activeTab);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" className="w-full justify-between font-body text-sm border-border/50 bg-card/60 backdrop-blur-xl">
+          <span className="flex items-center gap-2">
+            {activeItem && <activeItem.icon className="h-4 w-4 text-primary" />}
+            {activeItem?.label || "בחר עמוד"}
+          </span>
+          <Menu className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-72 p-4" dir="rtl">
+        <p className="font-serif text-lg font-bold text-foreground mb-4">ניווט מהיר</p>
+        <nav className="space-y-3">
+          {mobileNavGroups.map((group) => (
+            <div key={group.label}>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 px-2 mb-1">{group.label}</p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => { onTabChange(item.id); setOpen(false); }}
+                      className={cn(
+                        "flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                        isActive
+                          ? "bg-primary/15 text-primary"
+                          : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                      )}
+                    >
+                      <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                      <span>{item.label}</span>
+                      {isActive && <span className="mr-auto h-1.5 w-1.5 rounded-full bg-primary" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
+};
+
 // Gallery Approval Component
 const AdminGalleryApproval = () => {
   const { toast } = useToast();
