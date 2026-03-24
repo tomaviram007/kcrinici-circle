@@ -30,6 +30,7 @@ interface Deal {
   business_name: string;
   business_logo_url: string | null;
   business_phone: string | null;
+  website_url: string | null;
   category: string;
   is_active: boolean;
   expires_at: string | null;
