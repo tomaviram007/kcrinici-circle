@@ -54,7 +54,8 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
   ];
 
   const displayItems = isApproved && jobs.length > 0 ? jobs : mockJobs;
-  const isEmpty = isApproved && jobs.length === 0;
+
+  if (isApproved && jobs.length === 0) return null;
 
   return (
     <section className="py-12 px-4 sm:py-24 sm:px-6" ref={sectionRef}>

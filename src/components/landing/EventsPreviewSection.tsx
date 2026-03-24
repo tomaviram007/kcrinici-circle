@@ -112,6 +112,8 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
 
   const displayEvents = isApproved && events.length > 0 ? events : mockEvents;
 
+  if (isApproved && events.length === 0) return null;
+
   return (
     <section className="py-12 px-4 sm:py-24 sm:px-6" ref={sectionRef}>
       <div className="mx-auto max-w-5xl">

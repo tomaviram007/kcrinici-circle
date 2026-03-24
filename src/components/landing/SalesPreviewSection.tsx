@@ -84,7 +84,8 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
   ];
 
   const displayItems = isApproved && sales.length > 0 ? sales : mockSales;
-  const isEmpty = isApproved && sales.length === 0;
+
+  if (isApproved && sales.length === 0) return null;
 
   return (
     <section className="py-12 px-4 sm:py-24 sm:px-6 bg-card/50" ref={sectionRef}>

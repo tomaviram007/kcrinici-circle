@@ -106,7 +106,8 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
   ];
 
   const displayItems = isApproved && birthdays.length > 0 ? birthdays : !isApproved ? mockBirthdays : birthdays;
-  const isEmpty = isApproved && birthdays.length === 0;
+
+  if (isApproved && birthdays.length === 0) return null;
 
   return (
     <section id="birthdays-section" className="py-10 px-4 sm:py-16 sm:px-6" dir="rtl" ref={sectionRef}>
