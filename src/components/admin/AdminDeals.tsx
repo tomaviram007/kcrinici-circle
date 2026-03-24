@@ -65,6 +65,16 @@ const AdminDeals = () => {
 
   useEffect(() => { fetchDeals(); }, []);
 
+  // GSAP staggered card entrance
+  useEffect(() => {
+    if (!cardsRef.current || deals.length === 0) return;
+    const cards = cardsRef.current.querySelectorAll(".deal-card");
+    gsap.fromTo(cards, 
+      { opacity: 0, y: 20, scale: 0.97 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.07, ease: "power3.out" }
+    );
+  }, [deals]);
+
   const handleSave = async () => {
     if (!form.title.trim() || !form.business_name.trim() || !form.description.trim()) {
       toast({ title: "נא למלא שם עסק, כותרת ותיאור", variant: "destructive" });
