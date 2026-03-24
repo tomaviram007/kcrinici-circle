@@ -150,6 +150,15 @@ const AdminDeals = () => {
     fetchDeals();
   };
 
+  const handleApprove = async (deal: Deal) => {
+    await supabase.from("deals").update({ is_approved: true }).eq("id", deal.id);
+    toast({ title: "ההטבה אושרה!" });
+    fetchDeals();
+  };
+
+  const pendingDeals = deals.filter((d) => !d.is_approved);
+  const approvedDeals = deals.filter((d) => d.is_approved);
+
   if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
 
   return (
