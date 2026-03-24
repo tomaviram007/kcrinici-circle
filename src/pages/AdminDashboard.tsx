@@ -20,6 +20,7 @@ import AdminDeals from "@/components/admin/AdminDeals";
 import AdminMembers from "@/components/admin/AdminMembers";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminBirthdayWidget from "@/components/admin/AdminBirthdayWidget";
+import AdminNotificationCenter from "@/components/admin/AdminNotificationCenter";
 import PageHero from "@/components/PageHero";
 
 import heroAdmin from "@/assets/hero-admin.jpg";
@@ -75,7 +76,12 @@ const AdminDashboard = () => {
       <PageHero image={coverImage} title="שולחן" highlight="המנהל" subtitle="ניהול המועדון, אישור חברים ופרסום תוכן" />
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 overflow-x-hidden">
-        {/* Stats row */}
+        {/* Notification center + Stats row */}
+        <div className="flex items-center justify-between mb-4" dir="rtl">
+          <h2 className="font-serif text-lg font-bold text-foreground">סקירה כללית</h2>
+          <AdminNotificationCenter onNavigate={handleTabChange} />
+        </div>
+
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {statCards.map((s) => (
             <div key={s.label} className="rounded-xl border border-border bg-card p-4 text-center space-y-1">
