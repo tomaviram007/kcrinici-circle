@@ -238,9 +238,9 @@ const AdminDeals = () => {
           </div>
 
           {/* Row 5: active switch - separate row */}
-          <div className="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-background/50">
-            <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} className="shrink-0" />
-            <Label className="font-body text-sm">הטבה פעילה</Label>
+          <div className="flex items-center justify-end gap-3 p-3 rounded-lg border border-border/50 bg-background/50">
+            <Label className="font-body text-sm cursor-pointer" htmlFor="deal-active-switch">הטבה פעילה</Label>
+            <Switch id="deal-active-switch" checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} className="shrink-0" />
           </div>
 
           {/* Save button */}
@@ -280,12 +280,18 @@ const AdminDeals = () => {
               )}
             </div>
 
-            <div className="mt-3 flex items-center gap-2 flex-wrap">
-              <Switch checked={deal.is_active} onCheckedChange={() => handleToggleActive(deal)} className="shrink-0" />
-              <span className="font-body text-xs text-muted-foreground">{deal.is_active ? "פעיל" : "מושהה"}</span>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Button size="icon" variant="ghost" className="h-8 w-8 border border-border/50" onClick={() => handleDelete(deal.id)}>
+                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8 border border-primary/30" onClick={() => handleEdit(deal)}>
+                  <Pencil className="h-3.5 w-3.5 text-primary" />
+                </Button>
+              </div>
 
               {/* Click counters */}
-              <div className="flex items-center gap-3 mr-2">
+              <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1 font-body text-xs text-muted-foreground" title="לחיצות על קבל הטבה">
                   <MousePointerClick className="h-3 w-3" /> {deal.claim_count || 0}
                 </span>
@@ -294,13 +300,9 @@ const AdminDeals = () => {
                 </span>
               </div>
 
-              <div className="mr-auto flex gap-1">
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleEdit(deal)}>
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => handleDelete(deal.id)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+              <div className="flex items-center gap-2">
+                <span className="font-body text-xs text-muted-foreground">{deal.is_active ? "פעיל" : "מושהה"}</span>
+                <Switch checked={deal.is_active} onCheckedChange={() => handleToggleActive(deal)} className="shrink-0" />
               </div>
             </div>
           </div>
