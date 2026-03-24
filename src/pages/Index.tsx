@@ -90,9 +90,9 @@ const Index = () => {
         <JobsPreviewSection isApproved={isApproved} />
       </ScrollReveal>
 
-      {!isLoggedIn && (
+      {!isApproved && (
         <ScrollReveal>
-          <CTASection />
+          <CTASection isLoggedIn={isLoggedIn} />
         </ScrollReveal>
       )}
 
