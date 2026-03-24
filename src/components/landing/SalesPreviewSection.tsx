@@ -84,7 +84,8 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
   ];
 
   const displayItems = isApproved && sales.length > 0 ? sales : mockSales;
-  const isEmpty = isApproved && sales.length === 0;
+
+  if (isApproved && sales.length === 0) return null;
 
   return (
     <section className="py-12 px-4 sm:py-24 sm:px-6 bg-card/50" ref={sectionRef}>
@@ -97,12 +98,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
 
-        {isEmpty ? (
-          <div className="text-center py-12">
-            <ShoppingBag className="mx-auto h-10 w-10 text-muted-foreground/30 mb-3" />
-            <p className="font-body text-sm text-muted-foreground">אין מכירות פעילות כרגע</p>
-          </div>
-        ) : (
+        {(
           <div className="relative grid gap-4 sm:gap-6 md:grid-cols-3">
             {displayItems.map((item, i) => (
               <div
