@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
-import { Globe, Facebook, Instagram, Linkedin } from "lucide-react";
+import { Globe, Facebook, Instagram, Linkedin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -170,29 +170,38 @@ const Register = () => {
   const fieldProps = { form, errors, onChange: handleChange };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
+    <div className="relative flex min-h-screen items-center justify-center px-3 py-6 sm:px-4 sm:py-12">
       <RegisterBackground />
 
-      <div className="w-full max-w-lg rounded-2xl border border-border/50 bg-card/80 p-8 shadow-2xl backdrop-blur-md animate-fade-in">
-        <div className="mb-10 text-center">
+      {/* Back to home button */}
+      <Link
+        to="/"
+        className="fixed top-4 right-4 z-50 flex items-center gap-1.5 rounded-xl border border-border/50 bg-card/80 backdrop-blur-md px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-all shadow-lg"
+      >
+        <ArrowRight className="h-4 w-4" />
+        <span className="hidden sm:inline">חזרה לדף הבית</span>
+      </Link>
+
+      <div className="w-full max-w-lg rounded-2xl border border-border/50 bg-card/80 p-5 sm:p-8 shadow-2xl backdrop-blur-md animate-fade-in">
+        <div className="mb-6 sm:mb-10 text-center">
           <Link to="/" className="inline-block">
-            <h1 className="font-serif text-4xl font-bold text-foreground drop-shadow-md">
+            <h1 className="font-serif text-2xl sm:text-4xl font-bold text-foreground drop-shadow-md">
               הגברים של <span className="text-gold">ק. קריניצי</span>
             </h1>
           </Link>
-          <p className="mt-3 font-body text-lg text-muted-foreground">בקשת הצטרפות למועדון</p>
-          <div className="mt-4 mx-auto h-0.5 w-16 gradient-gold opacity-60 rounded-full" />
+          <p className="mt-2 sm:mt-3 font-body text-base sm:text-lg text-muted-foreground">בקשת הצטרפות למועדון</p>
+          <div className="mt-3 sm:mt-4 mx-auto h-0.5 w-16 gradient-gold opacity-60 rounded-full" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5" noValidate autoComplete="off">
-          <div className="grid gap-4 md:grid-cols-2">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5" noValidate autoComplete="off">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
             <Field name="full_name" label="שם מלא" required {...fieldProps} />
             <Field name="phone" label="מספר טלפון" required dir="ltr" {...fieldProps} />
           </div>
 
           <Field name="address" label="כתובת מגורים (רחוב ומספר)" required {...fieldProps} />
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
             <Field name="profession" label="מקצוע" required {...fieldProps} />
             <Field name="expertise" label="מומחיות" placeholder="למשל: מומחה ליין, טכנולוגיה..." {...fieldProps} />
           </div>
@@ -218,9 +227,9 @@ const Register = () => {
           <Field name="bio" label="משהו שהשכנים צריכים לדעת עליך" textarea placeholder="ביוגרפיה קצרה..." {...fieldProps} />
           <Field name="hobbies" label="מה התחביבים שלך?" placeholder="למשל: ספורט, בישול, טכנולוגיה..." {...fieldProps} />
 
-          <div className="border-t border-border pt-5 space-y-4">
+          <div className="border-t border-border pt-4 sm:pt-5 space-y-3 sm:space-y-4">
             <p className="font-body text-sm text-muted-foreground">קישורים חברתיים (אופציונלי)</p>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Globe className="h-3.5 w-3.5 text-gold" /> אתר אישי/עסקי</label>
                 <Input name="website_url" value={form.website_url} onChange={handleChange} className={`bg-card border-border ${errors.website_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://..." autoComplete="off" />
@@ -232,7 +241,7 @@ const Register = () => {
                 {errors.facebook_url && <p className="mt-1 font-body text-xs text-destructive">{errors.facebook_url}</p>}
               </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 flex items-center gap-1.5 font-body text-sm text-muted-foreground"><Instagram className="h-3.5 w-3.5 text-[#E4405F]" /> אינסטגרם</label>
                 <Input name="instagram_url" value={form.instagram_url} onChange={handleChange} className={`bg-card border-border ${errors.instagram_url ? "border-destructive" : ""}`} dir="ltr" placeholder="https://instagram.com/..." autoComplete="off" />
@@ -246,12 +255,12 @@ const Register = () => {
             </div>
           </div>
 
-          <div className="border-t border-border pt-5 space-y-4">
+          <div className="border-t border-border pt-4 sm:pt-5 space-y-3 sm:space-y-4">
             <Field name="email" label="אימייל" required type="email" dir="ltr" {...fieldProps} />
             <Field name="password" label="סיסמה" required type="password" dir="ltr" {...fieldProps} />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full gradient-gold text-primary-foreground font-body py-6 text-base hover:opacity-90 hover:scale-[1.02] transition-all duration-300 shadow-lg">
+          <Button type="submit" disabled={loading} className="w-full gradient-gold text-primary-foreground font-body py-5 sm:py-6 text-base hover:opacity-90 hover:scale-[1.02] transition-all duration-300 shadow-lg">
             {loading ? "שולח בקשה..." : "שלח בקשת הצטרפות"}
           </Button>
 
