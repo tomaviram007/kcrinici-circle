@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ const AdminDeals = () => {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   const fetchDeals = async () => {
     const { data } = await supabase
@@ -62,6 +64,16 @@ const AdminDeals = () => {
   };
 
   useEffect(() => { fetchDeals(); }, []);
+
+  // GSAP staggered card entrance
+  useEffect(() => {
+    if (!cardsRef.current || deals.length === 0) return;
+    const cards = cardsRef.current.querySelectorAll(".deal-card");
+    gsap.fromTo(cards, 
+      { opacity: 0, y: 20, scale: 0.97 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.07, ease: "power3.out" }
+    );
+  }, [deals]);
 
   const handleSave = async () => {
     if (!form.title.trim() || !form.business_name.trim() || !form.description.trim()) {
@@ -251,11 +263,11 @@ const AdminDeals = () => {
       )}
 
       {/* Deals list */}
-      <div className="grid gap-3 md:grid-cols-2">
+      <div ref={cardsRef} className="grid gap-3 md:grid-cols-2">
         {deals.map((deal) => (
           <div
             key={deal.id}
-            className={`rounded-xl border p-4 transition-all ${
+            className={`deal-card rounded-xl border p-4 transition-all ${
               deal.is_active ? "border-border bg-card" : "border-border/30 bg-card/50 opacity-60"
             }`}
           >
