@@ -84,7 +84,7 @@ const AdminDashboard = () => {
 
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {statCards.map((s) => (
-            <div key={s.label} className="rounded-xl border border-border bg-card p-4 text-center space-y-1">
+            <div key={s.label} className="rounded-xl border border-border bg-card p-4 text-center space-y-1 cursor-pointer transition-all hover:border-gold/30 hover:shadow-[0_0_20px_hsl(43_72%_52%/0.08)]" onClick={() => handleTabChange(s.tab)}>
               <s.icon className={`h-5 w-5 mx-auto ${s.accent}`} />
               <p className="font-serif text-2xl font-bold text-foreground">{s.value}</p>
               <p className="font-body text-xs text-muted-foreground">{s.label}</p>
