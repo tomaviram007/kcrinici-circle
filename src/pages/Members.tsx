@@ -9,7 +9,7 @@ import SocialLinks from "@/components/SocialLinks";
 import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import heroImg from "@/assets/hero-members.jpg";
+import QuoteSection from "@/components/landing/QuoteSection";
 import { usePageCover } from "@/hooks/usePageCover";
 import {
   Dialog,
