@@ -10,6 +10,7 @@ import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import QuoteSection from "@/components/landing/QuoteSection";
+import heroImg from "@/assets/hero-members.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import {
   Dialog,
