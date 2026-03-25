@@ -300,7 +300,7 @@ const Members = () => {
         {filtered.map((member) => (
           <div
             key={member.id}
-            className={`flex items-center gap-3 rounded-lg border bg-card px-4 py-2.5 cursor-pointer transition-all hover:border-gold/20 hover:bg-card/80 ${isOwnCard(member) ? "ring-1 ring-gold/30" : "border-border"}`}
+            className={`flex items-center gap-2 sm:gap-3 rounded-lg border bg-card px-3 sm:px-4 py-2.5 cursor-pointer transition-all hover:border-gold/20 hover:bg-card/80 ${isOwnCard(member) ? "ring-1 ring-gold/30" : "border-border"}`}
             onClick={() => handleCardClick(member)}
           >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20 overflow-hidden">
@@ -311,9 +311,9 @@ const Members = () => {
               )}
             </div>
             <span className="font-serif text-sm font-bold text-foreground flex-1 min-w-0 truncate">{member.full_name}</span>
-            <span className="font-body text-xs text-gold hidden sm:block">{member.profession}</span>
+            <span className="font-body text-xs text-gold hidden sm:block truncate max-w-[120px]">{member.profession}</span>
             {member.phone && (
-              <a href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '').replace(/^0/, '972')}`} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-muted-foreground hover:text-gold transition-colors" dir="ltr" onClick={(e) => e.stopPropagation()}>
+              <a href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '').replace(/^0/, '972')}`} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-muted-foreground hover:text-gold transition-colors hidden sm:block" dir="ltr" onClick={(e) => e.stopPropagation()}>
                 {member.phone}
               </a>
             )}
