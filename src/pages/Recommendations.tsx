@@ -291,7 +291,7 @@ const Recommendations = () => {
         ) : (
           <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((rec) => (
-              <RecommendationCard key={rec.id} rec={rec} />
+              <RecommendationCard key={rec.id} rec={rec} isLoggedIn={!!user} />
             ))}
           </div>
         )}
@@ -374,7 +374,7 @@ const Recommendations = () => {
   );
 };
 
-const RecommendationCard = ({ rec }: { rec: Recommendation }) => {
+const RecommendationCard = ({ rec, isLoggedIn = true }: { rec: Recommendation; isLoggedIn?: boolean }) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleMouseEnter = () => {
@@ -407,25 +407,35 @@ const RecommendationCard = ({ rec }: { rec: Recommendation }) => {
       <p className="text-sm font-body text-muted-foreground leading-relaxed flex-1">{rec.description}</p>
 
       {/* Phone + WhatsApp */}
-      <div className="flex items-center gap-3">
+      {isLoggedIn ? (
+        <div className="flex items-center gap-3">
+          <a
+            href={`tel:${rec.phone}`}
+            className="flex items-center gap-2 text-sm font-body text-primary hover:underline"
+            dir="ltr"
+          >
+            <Phone className="h-4 w-4" />
+            {rec.phone}
+          </a>
+          <a
+            href={buildWhatsAppUrl(rec)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-600 hover:bg-green-700 text-white text-xs font-body transition-colors"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            וואטסאפ
+          </a>
+        </div>
+      ) : (
         <a
-          href={`tel:${rec.phone}`}
+          href="/login"
           className="flex items-center gap-2 text-sm font-body text-primary hover:underline"
-          dir="ltr"
         >
           <Phone className="h-4 w-4" />
-          {rec.phone}
+          התחבר לצפייה בטלפון
         </a>
-        <a
-          href={buildWhatsAppUrl(rec)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-600 hover:bg-green-700 text-white text-xs font-body transition-colors"
-        >
-          <MessageCircle className="h-3.5 w-3.5" />
-          וואטסאפ
-        </a>
-      </div>
+      )}
 
       <div className="mt-2 pt-3 border-t border-border/50 flex items-center gap-2">
         <User className="h-3.5 w-3.5 text-primary" />
