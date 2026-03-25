@@ -3,6 +3,7 @@ import { Users, Megaphone, Briefcase, Calendar, BarChart3, Image, Shield, Quote,
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { usePendingCount } from "@/hooks/usePendingCount";
 import gsap from "gsap";
 
 interface AdminSidebarProps {
@@ -15,7 +16,7 @@ const groups = [
   {
     label: "ניהול חברים",
     items: [
-      { id: "members", label: "בקשות הצטרפות", icon: Users },
+      { id: "members", label: "בקשות הצטרפות", icon: Users, showBadge: true },
       { id: "team", label: "צוות", icon: Shield },
     ],
   },
@@ -46,8 +47,6 @@ const groups = [
   },
 ];
 
-const allItems = groups.flatMap((g) => g.items);
-
 const AdminSidebar = ({ activeTab, onTabChange, collapsed = false }: AdminSidebarProps) => {
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
@@ -58,6 +57,7 @@ const AdminSidebar = ({ activeTab, onTabChange, collapsed = false }: AdminSideba
     return initial;
   });
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const pendingCount = usePendingCount();
 
   useEffect(() => {
     if (sidebarRef.current) {
@@ -131,26 +131,39 @@ const AdminSidebar = ({ activeTab, onTabChange, collapsed = false }: AdminSideba
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const isActive = activeTab === item.id;
+                    const hasBadge = 'showBadge' in item && item.showBadge && pendingCount > 0;
                     const button = (
                       <button
                         key={item.id}
                         onClick={() => onTabChange(item.id)}
                         className={cn(
-                          "group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-200",
+                          "group relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-200",
                           collapsed && "justify-center px-0",
                           isActive
                             ? "bg-primary/15 text-primary shadow-[inset_0_0_12px_hsl(var(--primary)/0.1)]"
                             : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
                         )}
                       >
-                        <item.icon
-                          className={cn(
-                            "h-4 w-4 shrink-0 transition-colors",
-                            isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                        <div className="relative">
+                          <item.icon
+                            className={cn(
+                              "h-4 w-4 shrink-0 transition-colors",
+                              isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                            )}
+                          />
+                          {hasBadge && collapsed && (
+                            <span className="absolute -top-1.5 -left-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                              {pendingCount}
+                            </span>
                           )}
-                        />
+                        </div>
                         {!collapsed && <span>{item.label}</span>}
-                        {isActive && !collapsed && (
+                        {hasBadge && !collapsed && (
+                          <span className="mr-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                            {pendingCount}
+                          </span>
+                        )}
+                        {isActive && !collapsed && !hasBadge && (
                           <span className="mr-auto h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
                         )}
                       </button>
@@ -162,6 +175,7 @@ const AdminSidebar = ({ activeTab, onTabChange, collapsed = false }: AdminSideba
                           <TooltipTrigger asChild>{button}</TooltipTrigger>
                           <TooltipContent side="left" className="font-body text-xs">
                             {item.label}
+                            {hasBadge && ` (${pendingCount})`}
                           </TooltipContent>
                         </Tooltip>
                       );
