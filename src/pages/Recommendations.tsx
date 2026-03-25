@@ -291,7 +291,7 @@ const Recommendations = () => {
         ) : (
           <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((rec) => (
-              <RecommendationCard key={rec.id} rec={rec} />
+              <RecommendationCard key={rec.id} rec={rec} isLoggedIn={!!user} />
             ))}
           </div>
         )}
