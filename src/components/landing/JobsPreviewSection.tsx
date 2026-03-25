@@ -53,9 +53,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
     { id: "m3", title: "יועץ פיננסי", company_name: "משרד רואי חשבון", location: "ק. קריניצי", job_type: "part-time", description: "ייעוץ פיננסי לעסקים קטנים" },
   ];
 
-  const displayItems = isApproved && jobs.length > 0 ? jobs : mockJobs;
-
-  if (isApproved && jobs.length === 0) return null;
+  const displayItems = isApproved ? (jobs.length > 0 ? jobs : []) : mockJobs;
 
   return (
     <section className="py-12 px-4 sm:py-24 sm:px-6" ref={sectionRef}>

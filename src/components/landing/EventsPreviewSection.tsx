@@ -110,9 +110,7 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
 
-  const displayEvents = isApproved && events.length > 0 ? events : mockEvents;
-
-  if (isApproved && events.length === 0) return null;
+  const displayEvents = isApproved ? (events.length > 0 ? events : []) : mockEvents;
 
   return (
     <section className="py-12 px-4 sm:py-24 sm:px-6" ref={sectionRef}>
