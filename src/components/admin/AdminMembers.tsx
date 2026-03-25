@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,11 +13,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Check, X, Clock, Users, Search, Pencil, Trash2, KeyRound, Eye, EyeOff,
-  UserX, RotateCcw, Phone, MapPin, Briefcase, Calendar, User,
+  UserX, RotateCcw, Phone, MapPin, Briefcase, Calendar, User, Globe, Facebook, Instagram, Linkedin, Sparkles,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import HebrewDatePicker from "@/components/HebrewDatePicker";
+import { cn } from "@/lib/utils";
+import gsap from "gsap";
 
 interface Profile {
   id: string;
@@ -33,17 +36,24 @@ interface Profile {
   is_removed: boolean;
   birth_date: string | null;
   created_at: string;
+  hobbies?: string | null;
   website_url?: string | null;
   facebook_url?: string | null;
   instagram_url?: string | null;
   linkedin_url?: string | null;
 }
 
+const PROTECTED_ADMIN_ID = "6227d1da-8f99-4b82-bd30-a3dc2e3a3885";
+
 const AdminMembers = () => {
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+
+  // Selection for bulk actions
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkProcessing, setBulkProcessing] = useState(false);
 
   // Edit dialog
   const [editProfile, setEditProfile] = useState<Profile | null>(null);
@@ -60,8 +70,10 @@ const AdminMembers = () => {
   const [deleteUser, setDeleteUser] = useState<Profile | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Detail view dialog
+  // Detail view dialog (Glassmorphism modal)
   const [viewProfile, setViewProfile] = useState<Profile | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const bulkBarRef = useRef<HTMLDivElement>(null);
 
   const fetchProfiles = async () => {
     const { data } = await supabase
@@ -81,6 +93,22 @@ const AdminMembers = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  // Animate bulk bar
+  useEffect(() => {
+    if (bulkBarRef.current) {
+      if (selected.size > 0) {
+        gsap.fromTo(bulkBarRef.current, { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "back.out(1.5)" });
+      }
+    }
+  }, [selected.size > 0]);
+
+  // Animate modal
+  useEffect(() => {
+    if (viewProfile && modalRef.current) {
+      gsap.fromTo(modalRef.current, { scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "power3.out" });
+    }
+  }, [viewProfile]);
+
   const handleApprove = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({ is_approved: true, is_removed: false }).eq("user_id", userId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
@@ -97,6 +125,52 @@ const AdminMembers = () => {
     supabase.functions.invoke("notify-member", { body: { userId, action: "reject" } });
     toast({ title: "נדחה", description: "הבקשה נדחתה והודעה נשלחה." });
     fetchProfiles();
+  };
+
+  // Bulk actions
+  const handleBulkApprove = async () => {
+    setBulkProcessing(true);
+    const ids = Array.from(selected);
+    for (const userId of ids) {
+      await supabase.from("profiles").update({ is_approved: true, is_removed: false }).eq("user_id", userId);
+      supabase.functions.invoke("notify-member", { body: { userId, action: "approve" } });
+      const profile = profiles.find(p => p.user_id === userId);
+      if (profile) sendTelegramNotification("member_approved", { name: profile.full_name, phone: profile.phone, profession: profile.profession });
+    }
+    toast({ title: "אושרו!", description: `${ids.length} חברים אושרו בהצלחה.` });
+    setSelected(new Set());
+    setBulkProcessing(false);
+    fetchProfiles();
+  };
+
+  const handleBulkReject = async () => {
+    setBulkProcessing(true);
+    const ids = Array.from(selected);
+    for (const userId of ids) {
+      await supabase.from("profiles").update({ is_approved: false }).eq("user_id", userId);
+      supabase.functions.invoke("notify-member", { body: { userId, action: "reject" } });
+    }
+    toast({ title: "נדחו", description: `${ids.length} בקשות נדחו.` });
+    setSelected(new Set());
+    setBulkProcessing(false);
+    fetchProfiles();
+  };
+
+  const toggleSelect = (userId: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = (pendingList: Profile[]) => {
+    if (pendingList.every(p => selected.has(p.user_id))) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(pendingList.map(p => p.user_id)));
+    }
   };
 
   // Edit
@@ -129,8 +203,6 @@ const AdminMembers = () => {
     setResetUser(null);
     setNewPassword("");
   };
-
-  const PROTECTED_ADMIN_ID = "6227d1da-8f99-4b82-bd30-a3dc2e3a3885";
 
   // Remove member (mark as removed)
   const handleDelete = async () => {
@@ -182,17 +254,59 @@ const AdminMembers = () => {
         />
       </div>
 
+      {/* Bulk action bar */}
+      {selected.size > 0 && (
+        <div
+          ref={bulkBarRef}
+          className="sticky top-16 z-30 flex items-center justify-between gap-3 rounded-xl border border-border bg-card/90 backdrop-blur-xl p-3 shadow-lg"
+          dir="rtl"
+        >
+          <span className="font-body text-sm text-foreground">
+            <strong>{selected.size}</strong> נבחרו
+          </span>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleBulkApprove} disabled={bulkProcessing} className="gradient-gold text-primary-foreground font-body text-xs h-8 gap-1">
+              <Check className="h-3.5 w-3.5" /> אשר נבחרים
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleBulkReject} disabled={bulkProcessing} className="border-destructive text-destructive font-body text-xs h-8 gap-1">
+              <X className="h-3.5 w-3.5" /> דחה נבחרים
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} className="font-body text-xs h-8 text-muted-foreground">
+              ביטול
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Pending */}
       <div>
-        <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
-          <Clock className="h-5 w-5 text-gold" /> ממתינים לאישור ({pending.length})
-        </h3>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-serif text-xl font-bold text-foreground flex items-center gap-2">
+            <Clock className="h-5 w-5 text-gold" /> ממתינים לאישור ({pending.length})
+          </h3>
+          {pending.length > 0 && (
+            <Button size="sm" variant="ghost" onClick={() => toggleSelectAll(pending)} className="font-body text-xs text-muted-foreground">
+              {pending.every(p => selected.has(p.user_id)) ? "בטל הכל" : "בחר הכל"}
+            </Button>
+          )}
+        </div>
         {pending.length === 0 ? (
           <p className="font-body text-sm text-muted-foreground">אין בקשות ממתינות.</p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {pending.map((p) => (
-              <MemberCard key={p.id} profile={p} onApprove={handleApprove} onReject={handleReject} onEdit={openEdit} onResetPassword={setResetUser} onDelete={setDeleteUser} isPending />
+              <PendingMemberCard
+                key={p.id}
+                profile={p}
+                isSelected={selected.has(p.user_id)}
+                onToggleSelect={() => toggleSelect(p.user_id)}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                onView={setViewProfile}
+                onEdit={openEdit}
+                onResetPassword={setResetUser}
+                onDelete={setDeleteUser}
+              />
             ))}
           </div>
         )}
@@ -249,67 +363,117 @@ const AdminMembers = () => {
         )}
       </div>
 
-      {/* View Profile Detail Dialog */}
+      {/* Glassmorphism Detail Modal */}
       <Dialog open={!!viewProfile} onOpenChange={(o) => !o && setViewProfile(null)}>
-        <DialogContent className="max-w-md" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-gold">פרטי חבר</DialogTitle>
-            <DialogDescription className="sr-only">צפייה בפרטי החבר</DialogDescription>
-          </DialogHeader>
-          {viewProfile && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-full bg-secondary border border-gold/20 flex items-center justify-center overflow-hidden shrink-0">
-                  {viewProfile.avatar_url ? (
-                    <img src={viewProfile.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
-                  ) : (
-                    <User className="h-8 w-8 text-gold" />
+        <DialogContent className="max-w-lg border-border/50 bg-card/80 backdrop-blur-2xl shadow-2xl" dir="rtl">
+          <div ref={modalRef}>
+            <DialogHeader>
+              <DialogTitle className="font-serif text-gold flex items-center gap-2">
+                <Sparkles className="h-4 w-4" /> פרטי חבר
+              </DialogTitle>
+              <DialogDescription className="sr-only">צפייה בפרטי החבר</DialogDescription>
+            </DialogHeader>
+            {viewProfile && (
+              <div className="space-y-5 mt-2">
+                {/* Header */}
+                <div className="flex items-center gap-4">
+                  <div className="h-20 w-20 rounded-full bg-secondary border-2 border-gold/30 flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
+                    {viewProfile.avatar_url ? (
+                      <img src={viewProfile.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
+                    ) : (
+                      <User className="h-10 w-10 text-gold" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-serif text-xl font-bold text-foreground">{viewProfile.full_name}</h3>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <Briefcase className="h-3.5 w-3.5 text-gold" />
+                      <span className="font-body text-sm text-gold">{viewProfile.profession}</span>
+                    </div>
+                    {viewProfile.expertise && (
+                      <p className="font-body text-xs text-muted-foreground mt-0.5">מומחיות: {viewProfile.expertise}</p>
+                    )}
+                  </div>
+                </div>
+
+                {viewProfile.bio && (
+                  <p className="font-body text-sm text-foreground/70 italic bg-secondary/40 rounded-lg p-3">"{viewProfile.bio}"</p>
+                )}
+
+                {/* Contact info */}
+                <div className="rounded-lg border border-border/50 bg-background/40 p-4 space-y-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <Phone className="h-4 w-4 text-gold" />
+                    <span className="font-body text-sm text-foreground" dir="ltr">{viewProfile.phone}</span>
+                  </div>
+                  {viewProfile.address && (
+                    <div className="flex items-center gap-2.5">
+                      <MapPin className="h-4 w-4 text-gold" />
+                      <span className="font-body text-sm text-foreground">{viewProfile.address}</span>
+                    </div>
+                  )}
+                  {viewProfile.birth_date && (
+                    <div className="flex items-center gap-2.5">
+                      <Calendar className="h-4 w-4 text-gold" />
+                      <span className="font-body text-sm text-foreground">
+                        {new Date(viewProfile.birth_date + "T00:00:00").toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "numeric" })}
+                      </span>
+                    </div>
+                  )}
+                  {viewProfile.hobbies && (
+                    <div className="flex items-start gap-2.5">
+                      <Sparkles className="h-4 w-4 text-gold mt-0.5" />
+                      <span className="font-body text-sm text-foreground">{viewProfile.hobbies}</span>
+                    </div>
                   )}
                 </div>
-                <div>
-                  <h3 className="font-serif text-lg font-bold text-foreground">{viewProfile.full_name}</h3>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Briefcase className="h-3.5 w-3.5 text-gold" />
-                    <span className="font-body text-sm text-gold">{viewProfile.profession}</span>
-                  </div>
-                </div>
-              </div>
 
-              {viewProfile.expertise && (
-                <div className="font-body text-sm">
-                  <span className="text-gold font-medium">מומחיות:</span> <span className="text-foreground">{viewProfile.expertise}</span>
-                </div>
-              )}
-
-              {viewProfile.bio && (
-                <p className="font-body text-sm text-foreground/70 italic">"{viewProfile.bio}"</p>
-              )}
-
-              <div className="border-t border-border pt-3 space-y-2">
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-gold" />
-                  <span className="font-body text-sm text-foreground" dir="ltr">{viewProfile.phone}</span>
-                </div>
-                {viewProfile.address && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-gold" />
-                    <span className="font-body text-sm text-foreground">{viewProfile.address}</span>
+                {/* Social links */}
+                {(viewProfile.website_url || viewProfile.facebook_url || viewProfile.instagram_url || viewProfile.linkedin_url) && (
+                  <div className="flex gap-2">
+                    {viewProfile.website_url && (
+                      <a href={viewProfile.website_url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-border/50 p-2 text-muted-foreground hover:text-gold hover:border-gold/30 transition-colors">
+                        <Globe className="h-4 w-4" />
+                      </a>
+                    )}
+                    {viewProfile.facebook_url && (
+                      <a href={viewProfile.facebook_url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-border/50 p-2 text-muted-foreground hover:text-gold hover:border-gold/30 transition-colors">
+                        <Facebook className="h-4 w-4" />
+                      </a>
+                    )}
+                    {viewProfile.instagram_url && (
+                      <a href={viewProfile.instagram_url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-border/50 p-2 text-muted-foreground hover:text-gold hover:border-gold/30 transition-colors">
+                        <Instagram className="h-4 w-4" />
+                      </a>
+                    )}
+                    {viewProfile.linkedin_url && (
+                      <a href={viewProfile.linkedin_url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-border/50 p-2 text-muted-foreground hover:text-gold hover:border-gold/30 transition-colors">
+                        <Linkedin className="h-4 w-4" />
+                      </a>
+                    )}
                   </div>
                 )}
-                {viewProfile.birth_date && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gold" />
-                    <span className="font-body text-sm text-foreground">{new Date(viewProfile.birth_date + "T00:00:00").toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "numeric" })}</span>
+
+                <p className="font-body text-xs text-muted-foreground">
+                  הצטרף: {new Date(viewProfile.created_at).toLocaleDateString("he-IL")}
+                  {viewProfile.is_removed && <span className="text-destructive mr-2">· הוסר</span>}
+                  {!viewProfile.is_approved && !viewProfile.is_removed && <span className="text-primary mr-2">· ממתין לאישור</span>}
+                </p>
+
+                {/* Quick actions in modal */}
+                {!viewProfile.is_approved && !viewProfile.is_removed && (
+                  <div className="flex gap-2 pt-2 border-t border-border/50">
+                    <Button size="sm" onClick={() => { handleApprove(viewProfile.user_id); setViewProfile(null); }} className="gradient-gold text-primary-foreground font-body flex-1 gap-1">
+                      <Check className="h-4 w-4" /> אשר חבר
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => { handleReject(viewProfile.user_id); setViewProfile(null); }} className="border-destructive text-destructive font-body flex-1 gap-1">
+                      <X className="h-4 w-4" /> דחה
+                    </Button>
                   </div>
                 )}
               </div>
-
-              <p className="font-body text-xs text-muted-foreground">
-                הצטרף: {new Date(viewProfile.created_at).toLocaleDateString("he-IL")}
-                {viewProfile.is_removed && <span className="text-destructive mr-2">· הוסר</span>}
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -425,7 +589,79 @@ const AdminMembers = () => {
   );
 };
 
-// Reusable member card
+// Pending member card with checkbox
+const PendingMemberCard = ({
+  profile: p,
+  isSelected,
+  onToggleSelect,
+  onApprove,
+  onReject,
+  onView,
+  onEdit,
+  onResetPassword,
+  onDelete,
+}: {
+  profile: Profile;
+  isSelected: boolean;
+  onToggleSelect: () => void;
+  onApprove: (id: string) => void;
+  onReject: (id: string) => void;
+  onView: (p: Profile) => void;
+  onEdit: (p: Profile) => void;
+  onResetPassword: (p: Profile) => void;
+  onDelete: (p: Profile) => void;
+}) => (
+  <div className={cn(
+    "rounded-lg border bg-card p-4 space-y-3 transition-all duration-200",
+    isSelected ? "border-primary/50 bg-primary/5 shadow-[0_0_15px_hsl(var(--primary)/0.08)]" : "border-border hover:border-gold/30"
+  )}>
+    <div className="flex items-start gap-3">
+      <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
+        <Checkbox checked={isSelected} onCheckedChange={onToggleSelect} />
+      </div>
+      <div
+        className="h-10 w-10 rounded-full bg-secondary border border-gold/20 flex items-center justify-center overflow-hidden shrink-0 cursor-pointer"
+        onClick={() => onView(p)}
+      >
+        {p.avatar_url ? (
+          <img src={p.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
+        ) : (
+          <Users className="h-5 w-5 text-gold" />
+        )}
+      </div>
+      <div className="min-w-0 flex-1 cursor-pointer" onClick={() => onView(p)}>
+        <h4 className="font-serif text-base font-bold text-foreground truncate">{p.full_name}</h4>
+        <p className="font-body text-xs text-muted-foreground truncate">
+          {p.profession}{p.expertise ? ` · ${p.expertise}` : ""}
+        </p>
+        <p className="font-body text-xs text-muted-foreground">{p.phone} · {p.address}</p>
+      </div>
+    </div>
+    {p.bio && <p className="font-body text-sm text-foreground/70 italic line-clamp-2">"{p.bio}"</p>}
+
+    <div className="flex flex-wrap gap-1.5">
+      <Button size="sm" onClick={() => onApprove(p.user_id)} className="gradient-gold text-primary-foreground font-body text-xs h-8">
+        <Check className="h-3.5 w-3.5 ml-1" /> אשר
+      </Button>
+      <Button size="sm" variant="outline" onClick={() => onReject(p.user_id)} className="border-destructive text-destructive font-body text-xs h-8">
+        <X className="h-3.5 w-3.5 ml-1" /> דחה
+      </Button>
+      <Button size="sm" variant="ghost" onClick={() => onEdit(p)} className="font-body text-xs h-8 text-muted-foreground hover:text-foreground">
+        <Pencil className="h-3.5 w-3.5 ml-1" /> ערוך
+      </Button>
+      <Button size="sm" variant="ghost" onClick={() => onResetPassword(p)} className="font-body text-xs h-8 text-muted-foreground hover:text-foreground">
+        <KeyRound className="h-3.5 w-3.5 ml-1" /> סיסמה
+      </Button>
+      {p.user_id !== PROTECTED_ADMIN_ID && (
+        <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
+          <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
+        </Button>
+      )}
+    </div>
+  </div>
+);
+
+// Reusable member card for approved members
 const MemberCard = ({
   profile: p,
   isPending,
@@ -484,7 +720,7 @@ const MemberCard = ({
       <Button size="sm" variant="ghost" onClick={() => onResetPassword(p)} className="font-body text-xs h-8 text-muted-foreground hover:text-foreground">
         <KeyRound className="h-3.5 w-3.5 ml-1" /> סיסמה
       </Button>
-      {p.user_id !== "6227d1da-8f99-4b82-bd30-a3dc2e3a3885" && (
+      {p.user_id !== PROTECTED_ADMIN_ID && (
         <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
           <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
         </Button>

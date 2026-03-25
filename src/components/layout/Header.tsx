@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, Shield, Menu, X, Cake, User } from "lucide-react";
 import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
+import { usePendingCount } from "@/hooks/usePendingCount";
 import { useSiteLogo } from "@/hooks/useSiteLogo";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
@@ -25,6 +26,7 @@ const Header = () => {
   const [showMemberDialog, setShowMemberDialog] = useState(false);
   const { birthdays } = useBirthdaysThisWeek();
   const { logoUrl, logoSize, logoText, logoPosition } = useSiteLogo();
+  const pendingCount = usePendingCount();
 
   const handleLogout = async () => {
     const { supabase } = await import("@/integrations/supabase/client");
@@ -137,7 +139,16 @@ const Header = () => {
                   isActive(link.to) ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {link.to === "/admin" && <Shield className="inline h-3.5 w-3.5 ml-1" />}
+                {link.to === "/admin" && (
+                  <span className="relative inline-flex">
+                    <Shield className="inline h-3.5 w-3.5 ml-1" />
+                    {pendingCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-0.5 text-[9px] font-bold text-destructive-foreground">
+                        {pendingCount}
+                      </span>
+                    )}
+                  </span>
+                )}
                 {link.label}
               </Link>
             ))}
@@ -198,7 +209,16 @@ const Header = () => {
                   isActive(link.to) ? "text-gold font-semibold" : "text-foreground/80 hover:text-gold"
                 }`}
               >
-                {link.to === "/admin" && <Shield className="inline h-4 w-4 ml-1" />}
+                {link.to === "/admin" && (
+                  <span className="relative inline-flex">
+                    <Shield className="inline h-4 w-4 ml-1" />
+                    {pendingCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-0.5 text-[9px] font-bold text-destructive-foreground">
+                        {pendingCount}
+                      </span>
+                    )}
+                  </span>
+                )}
                 {link.label}
               </Link>
             ))}
