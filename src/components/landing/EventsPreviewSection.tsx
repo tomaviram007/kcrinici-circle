@@ -123,6 +123,7 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
 
+        {displayEvents.length > 0 ? (
         <div className="relative grid gap-4 sm:gap-6 md:grid-cols-3">
           {displayEvents.map((event, i) => (
             <div key={event.id || i} className="event-card opacity-0">
@@ -158,6 +159,13 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
             </div>
           )}
         </div>
+        ) : (
+          <div className="text-center py-8 rounded-lg border border-border bg-card">
+            <Calendar className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+            <p className="font-body text-sm text-muted-foreground">אין אירועים קרובים כרגע</p>
+            <Link to="/events" className="font-body text-xs text-gold hover:underline mt-1 inline-block">לכל האירועים ←</Link>
+          </div>
+        )}
 
         {isApproved && (
           <div className="mt-8 text-center">

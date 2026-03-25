@@ -96,7 +96,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
 
-        {(
+        {displayItems.length > 0 ? (
           <div className="relative grid gap-4 sm:gap-6 md:grid-cols-3">
             {displayItems.map((item, i) => (
               <div
@@ -141,6 +141,12 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
                 </Link>
               </div>
             )}
+          </div>
+        ) : (
+          <div className="text-center py-8 rounded-lg border border-border bg-card">
+            <ShoppingBag className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+            <p className="font-body text-sm text-muted-foreground">אין מכירות פעילות כרגע</p>
+            <Link to="/announcements" className="font-body text-xs text-gold hover:underline mt-1 inline-block">פרסם מכירה ←</Link>
           </div>
         )}
 
