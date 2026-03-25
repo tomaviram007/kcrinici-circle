@@ -201,10 +201,21 @@ const Members = () => {
             </SelectContent>
           </Select>
         )}
+        <div className="mr-auto">
+          <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as "grid" | "list")} className="bg-secondary rounded-md border border-border">
+            <ToggleGroupItem value="grid" aria-label="תצוגת גריד" className="data-[state=on]:bg-gold/20 data-[state=on]:text-gold px-2.5 h-9">
+              <LayoutGrid className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="list" aria-label="תצוגת רשימה" className="data-[state=on]:bg-gold/20 data-[state=on]:text-gold px-2.5 h-9">
+              <List className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
 
-      {/* Grid */}
-      <div ref={gridRef} className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+      {/* Grid / List */}
+      {viewMode === "grid" ? (
+      <div ref={gridRef} className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 sm:gap-4">
         {filtered.map((member) => {
           const birthdayToday = isBirthdayToday(member.birth_date);
           return (
