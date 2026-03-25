@@ -139,7 +139,16 @@ const Header = () => {
                   isActive(link.to) ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {link.to === "/admin" && <Shield className="inline h-3.5 w-3.5 ml-1" />}
+                {link.to === "/admin" && (
+                  <span className="relative inline-flex">
+                    <Shield className="inline h-3.5 w-3.5 ml-1" />
+                    {pendingCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-0.5 text-[9px] font-bold text-destructive-foreground">
+                        {pendingCount}
+                      </span>
+                    )}
+                  </span>
+                )}
                 {link.label}
               </Link>
             ))}
