@@ -74,13 +74,6 @@ const Members = () => {
     }
   }, [members]);
 
-  // Animate view modal
-  useEffect(() => {
-    if (viewMember && viewModalRef.current) {
-      gsap.fromTo(viewModalRef.current, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" });
-    }
-  }, [viewMember]);
-
   const openEdit = (member: any) => {
     setEditMember(member);
     setEditForm({
@@ -103,7 +96,7 @@ const Members = () => {
     if (isOwnCard(member)) {
       openEdit(member);
     } else {
-      setViewMember(member);
+      navigate(`/members/${member.id}`);
     }
   };
 
