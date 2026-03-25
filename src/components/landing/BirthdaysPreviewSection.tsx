@@ -112,11 +112,11 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
   return (
     <section id="birthdays-section" className="py-10 px-4 sm:py-16 sm:px-6" dir="rtl" ref={sectionRef}>
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 sm:mb-10 text-center">
+        <div className="mb-8 sm:mb-16 text-center">
           <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">
             חוגגים החודש
           </p>
-          <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
+          <h2 className="font-serif text-2xl font-bold text-foreground sm:text-4xl md:text-5xl">
             ימי הולדת <span className="text-gold">במועדון</span>
           </h2>
           <div className="mt-3 mx-auto h-px w-12 gradient-gold opacity-40" />
