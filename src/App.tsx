@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Announcements from "./pages/Announcements";
 import Jobs from "./pages/Jobs";
 import Members from "./pages/Members";
+import MemberProfile from "./pages/MemberProfile";
 import Events from "./pages/Events";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
