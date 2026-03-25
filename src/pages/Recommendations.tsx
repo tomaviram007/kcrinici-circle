@@ -246,7 +246,7 @@ const Recommendations = () => {
         </div>
 
         {/* Category Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 mb-8 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible">
           <button
             onClick={() => setSelectedCategory("all")}
             className={`px-4 py-2 rounded-full text-sm font-body transition-all border backdrop-blur-md ${

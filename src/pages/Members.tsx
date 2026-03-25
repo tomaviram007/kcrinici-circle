@@ -179,30 +179,30 @@ const Members = () => {
       </div>
 
       {/* Filters */}
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        <Input placeholder="חיפוש לפי שם, מקצוע, תחביב..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-48 sm:w-64 h-9 font-body text-sm" autoComplete="off" />
-        <Select value={filterProfession} onValueChange={setFilterProfession}>
-          <SelectTrigger className="bg-background font-body w-36 h-9 text-sm"><SelectValue placeholder="מקצוע" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">כל המקצועות</SelectItem>
-            {[...new Set(members.map(m => m.profession).filter(Boolean))].sort().map(p => (
-              <SelectItem key={p} value={p}>{p}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {allHobbies.length > 0 && (
-          <Select value={filterHobby} onValueChange={setFilterHobby}>
-            <SelectTrigger className="bg-background font-body w-36 h-9 text-sm"><SelectValue placeholder="תחביב" /></SelectTrigger>
+      <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <Input placeholder="חיפוש לפי שם, מקצוע, תחביב..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-full sm:w-64 h-9 font-body text-sm" autoComplete="off" />
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Select value={filterProfession} onValueChange={setFilterProfession}>
+            <SelectTrigger className="bg-background font-body flex-1 sm:w-36 h-9 text-sm"><SelectValue placeholder="מקצוע" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">כל התחביבים</SelectItem>
-              {allHobbies.map(h => (
-                <SelectItem key={h} value={h}>{h}</SelectItem>
+              <SelectItem value="all">כל המקצועות</SelectItem>
+              {[...new Set(members.map(m => m.profession).filter(Boolean))].sort().map(p => (
+                <SelectItem key={p} value={p}>{p}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-        )}
-        <div className="mr-auto">
-          <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as "grid" | "list")} className="bg-secondary rounded-md border border-border">
+          {allHobbies.length > 0 && (
+            <Select value={filterHobby} onValueChange={setFilterHobby}>
+              <SelectTrigger className="bg-background font-body flex-1 sm:w-36 h-9 text-sm"><SelectValue placeholder="תחביב" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">כל התחביבים</SelectItem>
+                {allHobbies.map(h => (
+                  <SelectItem key={h} value={h}>{h}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as "grid" | "list")} className="bg-secondary rounded-md border border-border shrink-0">
             <ToggleGroupItem value="grid" aria-label="תצוגת גריד" className="data-[state=on]:bg-gold/20 data-[state=on]:text-gold px-2.5 h-9">
               <LayoutGrid className="h-4 w-4" />
             </ToggleGroupItem>
@@ -300,7 +300,7 @@ const Members = () => {
         {filtered.map((member) => (
           <div
             key={member.id}
-            className={`flex items-center gap-3 rounded-lg border bg-card px-4 py-2.5 cursor-pointer transition-all hover:border-gold/20 hover:bg-card/80 ${isOwnCard(member) ? "ring-1 ring-gold/30" : "border-border"}`}
+            className={`flex items-center gap-2 sm:gap-3 rounded-lg border bg-card px-3 sm:px-4 py-2.5 cursor-pointer transition-all hover:border-gold/20 hover:bg-card/80 ${isOwnCard(member) ? "ring-1 ring-gold/30" : "border-border"}`}
             onClick={() => handleCardClick(member)}
           >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20 overflow-hidden">
@@ -311,9 +311,9 @@ const Members = () => {
               )}
             </div>
             <span className="font-serif text-sm font-bold text-foreground flex-1 min-w-0 truncate">{member.full_name}</span>
-            <span className="font-body text-xs text-gold hidden sm:block">{member.profession}</span>
+            <span className="font-body text-xs text-gold hidden sm:block truncate max-w-[120px]">{member.profession}</span>
             {member.phone && (
-              <a href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '').replace(/^0/, '972')}`} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-muted-foreground hover:text-gold transition-colors" dir="ltr" onClick={(e) => e.stopPropagation()}>
+              <a href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '').replace(/^0/, '972')}`} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-muted-foreground hover:text-gold transition-colors hidden sm:block" dir="ltr" onClick={(e) => e.stopPropagation()}>
                 {member.phone}
               </a>
             )}
