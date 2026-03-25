@@ -7,19 +7,11 @@ const ClubAboutSection = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const { count: members } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("is_approved", true);
-      setMemberCount(members ?? 0);
-
-      const now = new Date();
-      const yearStart = new Date(now.getFullYear(), 0, 1).toISOString();
-      const { count: events } = await supabase
-        .from("events")
-        .select("*", { count: "exact", head: true })
-        .gte("event_date", yearStart);
-      setEventCount(events ?? 0);
+      const { data, error } = await supabase.rpc("get_public_stats");
+      if (!error && data) {
+        setMemberCount((data as any).member_count ?? 0);
+        setEventCount((data as any).event_count ?? 0);
+      }
     };
     fetchStats();
   }, []);
