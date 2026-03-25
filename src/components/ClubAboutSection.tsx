@@ -39,10 +39,6 @@ const ClubAboutSection = () => {
           </p>
           <p className="font-body text-xs text-muted-foreground mt-1">אירועים בשנה</p>
         </div>
-        <div>
-          <p className="font-serif text-2xl font-bold text-gold sm:text-3xl">∞</p>
-          <p className="font-body text-xs text-muted-foreground mt-1">קשרים עסקיים</p>
-        </div>
       </div>
     </section>
   );
