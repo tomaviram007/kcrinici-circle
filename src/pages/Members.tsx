@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Phone, Briefcase, MapPin, Pencil, Search, Cake, Send, Heart, MessageCircle, Calendar, Globe, Facebook, Instagram, Linkedin } from "lucide-react";
+import { User, Phone, Briefcase, MapPin, Pencil, Search, Cake, Send, Heart, MessageCircle, Calendar, Globe, Facebook, Instagram, Linkedin, LayoutGrid, List } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import SocialLinks from "@/components/SocialLinks";
 import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-members.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
@@ -40,17 +41,17 @@ const HOBBY_OPTIONS = ["ספורט", "בישול", "טכנולוגיה", "מוז
 
 const Members = () => {
   const [members, setMembers] = useState<any[]>([]);
+  const navigate = useNavigate();
   const coverImage = usePageCover("members", heroImg);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [editMember, setEditMember] = useState<any | null>(null);
-  const [viewMember, setViewMember] = useState<any | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "", hobbies: "", website_url: "", facebook_url: "", instagram_url: "", linkedin_url: "" });
   const [saving, setSaving] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [filterProfession, setFilterProfession] = useState("all");
   const [filterHobby, setFilterHobby] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
-  const viewModalRef = useRef<HTMLDivElement>(null);
 
   const fetchMembers = async () => {
     const { data } = await supabase.from("profiles").select("*").eq("is_approved", true).order("full_name");
@@ -72,13 +73,6 @@ const Members = () => {
       gsap.fromTo(cards, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, stagger: 0.06, ease: "back.out(1.4)" });
     }
   }, [members]);
-
-  // Animate view modal
-  useEffect(() => {
-    if (viewMember && viewModalRef.current) {
-      gsap.fromTo(viewModalRef.current, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" });
-    }
-  }, [viewMember]);
 
   const openEdit = (member: any) => {
     setEditMember(member);
@@ -102,7 +96,7 @@ const Members = () => {
     if (isOwnCard(member)) {
       openEdit(member);
     } else {
-      setViewMember(member);
+      navigate(`/members/${member.id}`);
     }
   };
 
@@ -175,7 +169,7 @@ const Members = () => {
     <>
     <PageHero image={coverImage} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
     
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
           אינדקס <span className="text-gold">החברים</span>
@@ -207,10 +201,21 @@ const Members = () => {
             </SelectContent>
           </Select>
         )}
+        <div className="mr-auto">
+          <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as "grid" | "list")} className="bg-secondary rounded-md border border-border">
+            <ToggleGroupItem value="grid" aria-label="תצוגת גריד" className="data-[state=on]:bg-gold/20 data-[state=on]:text-gold px-2.5 h-9">
+              <LayoutGrid className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="list" aria-label="תצוגת רשימה" className="data-[state=on]:bg-gold/20 data-[state=on]:text-gold px-2.5 h-9">
+              <List className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
 
-      {/* Grid */}
-      <div ref={gridRef} className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+      {/* Grid / List */}
+      {viewMode === "grid" ? (
+      <div ref={gridRef} className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 sm:gap-4">
         {filtered.map((member) => {
           const birthdayToday = isBirthdayToday(member.birth_date);
           return (
@@ -289,97 +294,39 @@ const Members = () => {
           );
         })}
       </div>
+      ) : (
+      /* List View */
+      <div className="space-y-1">
+        {filtered.map((member) => (
+          <div
+            key={member.id}
+            className={`flex items-center gap-3 rounded-lg border bg-card px-4 py-2.5 cursor-pointer transition-all hover:border-gold/20 hover:bg-card/80 ${isOwnCard(member) ? "ring-1 ring-gold/30" : "border-border"}`}
+            onClick={() => handleCardClick(member)}
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20 overflow-hidden">
+              {member.avatar_url ? (
+                <img src={member.avatar_url} alt={member.full_name} className="h-full w-full rounded-full object-cover" />
+              ) : (
+                <User className="h-4 w-4 text-gold" />
+              )}
+            </div>
+            <span className="font-serif text-sm font-bold text-foreground flex-1 min-w-0 truncate">{member.full_name}</span>
+            <span className="font-body text-xs text-gold hidden sm:block">{member.profession}</span>
+            {member.phone && (
+              <a href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '').replace(/^0/, '972')}`} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-muted-foreground hover:text-gold transition-colors" dir="ltr" onClick={(e) => e.stopPropagation()}>
+                {member.phone}
+              </a>
+            )}
+            {isOwnCard(member) && <Pencil className="h-3 w-3 text-gold flex-shrink-0" />}
+          </div>
+        ))}
+      </div>
+      )}
       {members.length === 0 && <p className="font-body text-muted-foreground">אין חברים מאושרים עדיין.</p>}
     </div>
 
-    {/* View Member Modal (non-own cards) */}
-    <Dialog open={!!viewMember} onOpenChange={(open) => !open && setViewMember(null)}>
-      <DialogContent className="sm:max-w-md backdrop-blur-xl bg-card/95 border-gold/20" dir="rtl">
-        <div ref={viewModalRef}>
-          <DialogHeader className="sr-only">
-            <DialogTitle>{viewMember?.full_name}</DialogTitle>
-            <DialogDescription>פרטי חבר מועדון</DialogDescription>
-          </DialogHeader>
 
-          <div className="text-center mb-5">
-            <div className="mx-auto mb-4 h-20 w-20 rounded-full bg-secondary border-2 border-gold/30 overflow-hidden flex items-center justify-center">
-              {viewMember?.avatar_url ? (
-                <img src={viewMember.avatar_url} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <User className="h-10 w-10 text-gold" />
-              )}
-            </div>
-            <h2 className="font-serif text-2xl font-bold text-foreground">{viewMember?.full_name}</h2>
-            <div className="flex items-center justify-center gap-1.5 mt-1">
-              <Briefcase className="h-3.5 w-3.5 text-gold" />
-              <span className="font-body text-sm text-gold">{viewMember?.profession}</span>
-            </div>
-            {viewMember?.birth_date && isBirthdayToday(viewMember.birth_date) && (
-              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gold/15 border border-gold/30 px-3 py-1 text-xs font-body text-gold">
-                <Cake className="h-3.5 w-3.5" />
-                🎂 חוגג/ת יום הולדת היום!
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-3">
-            {viewMember?.expertise && (
-              <div className="flex items-start gap-2">
-                <Briefcase className="h-4 w-4 text-gold mt-0.5 flex-shrink-0" />
-                <p className="font-body text-sm text-muted-foreground"><span className="text-gold">מומחיות:</span> {viewMember.expertise}</p>
-              </div>
-            )}
-            {viewMember?.bio && (
-              <p className="font-body text-sm text-muted-foreground italic">"{viewMember.bio}"</p>
-            )}
-            {viewMember?.birth_date && (
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-gold flex-shrink-0" />
-                <span className="font-body text-sm text-muted-foreground">{formatHebrewDate(viewMember.birth_date)}</span>
-              </div>
-            )}
-            {viewMember?.hobbies && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {viewMember.hobbies.split(/[,،]/).filter(Boolean).map((h: string, i: number) => (
-                  <span key={i} className="inline-flex items-center gap-1 rounded-full bg-secondary border border-border px-2.5 py-1 font-body text-xs text-muted-foreground">
-                    <Heart className="h-3 w-3 text-gold" />
-                    {h.trim()}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Social links */}
-            <SocialLinks website_url={viewMember?.website_url} facebook_url={viewMember?.facebook_url} instagram_url={viewMember?.instagram_url} linkedin_url={viewMember?.linkedin_url} size="md" />
-          </div>
-
-          {/* Quick actions */}
-          <div className="mt-6 flex gap-2">
-            {viewMember?.phone && (
-              <Button
-                onClick={() => handleWhatsApp(viewMember)}
-                className="flex-1 gradient-gold text-primary-foreground font-body gap-1.5"
-              >
-                <MessageCircle className="h-4 w-4" />
-                וואטסאפ
-              </Button>
-            )}
-            {viewMember?.phone && (
-              <Button
-                variant="outline"
-                onClick={() => window.open(`tel:${viewMember.phone}`, "_self")}
-                className="border-gold/30 text-gold hover:bg-gold/10 font-body gap-1.5"
-              >
-                <Phone className="h-4 w-4" />
-                חייג
-              </Button>
-            )}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-
-    {/* Edit Profile Dialog — 2-column layout */}
     <Dialog open={!!editMember} onOpenChange={(open) => !open && setEditMember(null)}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
