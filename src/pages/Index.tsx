@@ -102,6 +102,9 @@ const Index = () => {
         <p className="font-body text-xs sm:text-sm text-muted-foreground">
           © {new Date().getFullYear()} הגברים של ק. קריניצי — מועדון חברים אקסקלוסיבי
         </p>
+        <p className="font-body text-xs text-muted-foreground/60 mt-1">
+          עוצב ופותח על ידי תום אבירם
+        </p>
       </footer>
     </main>
   );
