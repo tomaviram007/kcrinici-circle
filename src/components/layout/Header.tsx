@@ -26,6 +26,7 @@ const Header = () => {
   const [showMemberDialog, setShowMemberDialog] = useState(false);
   const { birthdays } = useBirthdaysThisWeek();
   const { logoUrl, logoSize, logoText, logoPosition } = useSiteLogo();
+  const pendingCount = usePendingCount();
 
   const handleLogout = async () => {
     const { supabase } = await import("@/integrations/supabase/client");
