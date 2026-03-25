@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 const TeaserOverlay = ({ type }: { type: "no-session" | "not-approved" }) => (
-  <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
     <div className="mx-4 max-w-md rounded-2xl border border-gold/20 bg-card p-8 text-center shadow-2xl">
       <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-gold/30 bg-background">
         <Lock className="h-7 w-7 text-gold" />
@@ -75,7 +75,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
 
   if (requireApproval && !isApproved) {
     return (
-      <div className="relative min-h-[60vh]">
+      <div className="relative min-h-screen">
         <div className="pointer-events-none select-none" style={{ filter: "blur(8px)" }}>{children}</div>
         <TeaserOverlay type="not-approved" />
       </div>
