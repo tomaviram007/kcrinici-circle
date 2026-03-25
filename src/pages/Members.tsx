@@ -41,17 +41,17 @@ const HOBBY_OPTIONS = ["ספורט", "בישול", "טכנולוגיה", "מוז
 
 const Members = () => {
   const [members, setMembers] = useState<any[]>([]);
+  const navigate = useNavigate();
   const coverImage = usePageCover("members", heroImg);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [editMember, setEditMember] = useState<any | null>(null);
-  const [viewMember, setViewMember] = useState<any | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "", hobbies: "", website_url: "", facebook_url: "", instagram_url: "", linkedin_url: "" });
   const [saving, setSaving] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [filterProfession, setFilterProfession] = useState("all");
   const [filterHobby, setFilterHobby] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
-  const viewModalRef = useRef<HTMLDivElement>(null);
 
   const fetchMembers = async () => {
     const { data } = await supabase.from("profiles").select("*").eq("is_approved", true).order("full_name");
