@@ -60,11 +60,11 @@ const AdminDashboard = () => {
   }, []);
 
   const statCards = [
-    { label: "חברים מאושרים", value: stats.approvedMembers, icon: Users, accent: "text-green-500" },
-    { label: "ממתינים לאישור", value: stats.pendingMembers, icon: Clock, accent: "text-primary" },
-    { label: "אירועים קרובים", value: stats.upcomingEvents, icon: Calendar, accent: "text-blue-500" },
-    { label: "משרות פעילות", value: stats.activeJobs, icon: Briefcase, accent: "text-purple-500" },
-    { label: "סקרים פעילים", value: stats.activePolls, icon: BarChart3, accent: "text-primary" },
+    { label: "חברים מאושרים", value: stats.approvedMembers, icon: Users, accent: "text-green-500", tab: "members" },
+    { label: "ממתינים לאישור", value: stats.pendingMembers, icon: Clock, accent: "text-primary", tab: "members" },
+    { label: "אירועים קרובים", value: stats.upcomingEvents, icon: Calendar, accent: "text-blue-500", tab: "events" },
+    { label: "משרות פעילות", value: stats.activeJobs, icon: Briefcase, accent: "text-purple-500", tab: "jobs" },
+    { label: "סקרים פעילים", value: stats.activePolls, icon: BarChart3, accent: "text-primary", tab: "polls" },
   ];
 
   const handleTabChange = (tab: string) => {
