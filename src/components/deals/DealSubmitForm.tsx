@@ -67,6 +67,13 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "ההטבה נשלחה לאישור!", description: "ההטבה תפורסם לאחר אישור מנהל המועדון." });
+      sendTelegramNotification("new_deal", {
+        title: form.title,
+        business_name: form.business_name,
+        description: form.description,
+        category: form.category,
+        discount_label: buildDiscountLabel(form.benefit_type, form.benefit_value),
+      });
       setForm(emptyForm);
       setShowForm(false);
       onSubmitted?.();
