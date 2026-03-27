@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, X, Send } from "lucide-react";
 import BenefitFields from "./BenefitFields";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
