@@ -20,6 +20,16 @@ const DealBadge = ({ benefitType, benefitValue, discountLabel, className = "" }:
   const isPercent = benefitType === "percent";
   const isConsultation = benefitType === "consultation";
 
+  // GSAP pop-in animation
+  useEffect(() => {
+    if (!ref.current) return;
+    gsap.fromTo(
+      ref.current,
+      { scale: 0, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2)", delay: 0.2 }
+    );
+  }, []);
+
   // Fallback to legacy discount_label
   if (!hasStructured && !discountLabel) return null;
 
