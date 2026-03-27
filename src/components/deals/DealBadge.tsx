@@ -69,15 +69,6 @@ const DealBadge = ({ benefitType, benefitValue, discountLabel, className = "" }:
     );
   };
 
-  // GSAP pop-in animation
-  useEffect(() => {
-    if (!ref.current) return;
-    gsap.fromTo(
-      ref.current,
-      { scale: 0, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2)", delay: 0.2 }
-    );
-  }, []);
 
   return (
     <div
