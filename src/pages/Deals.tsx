@@ -56,6 +56,7 @@ const Deals = () => {
         .from("deals")
         .select("*")
         .eq("is_active", true)
+        .eq("is_approved", true)
         .order("created_at", { ascending: false });
       const now = new Date();
       setDeals(

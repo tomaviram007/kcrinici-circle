@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, X, Send } from "lucide-react";
 import BenefitFields from "./BenefitFields";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
@@ -66,6 +67,13 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "ההטבה נשלחה לאישור!", description: "ההטבה תפורסם לאחר אישור מנהל המועדון." });
+      sendTelegramNotification("new_deal", {
+        title: form.title,
+        business_name: form.business_name,
+        description: form.description,
+        category: form.category,
+        discount_label: buildDiscountLabel(form.benefit_type, form.benefit_value),
+      });
       setForm(emptyForm);
       setShowForm(false);
       onSubmitted?.();
