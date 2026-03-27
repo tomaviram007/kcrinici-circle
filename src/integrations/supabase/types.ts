@@ -64,6 +64,8 @@ export type Database = {
       }
       deals: {
         Row: {
+          benefit_type: string | null
+          benefit_value: number | null
           business_logo_url: string | null
           business_name: string
           business_phone: string | null
@@ -84,6 +86,8 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          benefit_type?: string | null
+          benefit_value?: number | null
           business_logo_url?: string | null
           business_name: string
           business_phone?: string | null
@@ -104,6 +108,8 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          benefit_type?: string | null
+          benefit_value?: number | null
           business_logo_url?: string | null
           business_name?: string
           business_phone?: string | null
