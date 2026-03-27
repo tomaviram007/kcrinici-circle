@@ -37,7 +37,8 @@ interface Deal {
 const emptyForm = {
   title: "",
   description: "",
-  discount_label: "",
+  benefit_type: "percent",
+  benefit_value: "",
   coupon_code: "",
   business_name: "",
   business_logo_url: "",
@@ -46,6 +47,13 @@ const emptyForm = {
   category: "כללי",
   is_active: true,
   expires_at: "",
+};
+
+const buildDiscountLabel = (type: string, value: string) => {
+  if (!value && type === "percent") return null;
+  if (type === "percent") return `${value}% הנחה`;
+  if (type === "consultation") return "שעת ייעוץ";
+  return null;
 };
 
 const AdminDeals = () => {
@@ -88,7 +96,9 @@ const AdminDeals = () => {
     const payload: any = {
       title: form.title,
       description: form.description,
-      discount_label: form.discount_label || null,
+      discount_label: buildDiscountLabel(form.benefit_type, form.benefit_value),
+      benefit_type: form.benefit_type,
+      benefit_value: form.benefit_value ? parseInt(form.benefit_value) : null,
       coupon_code: form.coupon_code || null,
       business_name: form.business_name,
       business_logo_url: form.business_logo_url || null,
