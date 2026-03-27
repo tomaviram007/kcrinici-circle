@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon, MousePointerClick, ExternalLink, CheckCircle, Clock } from "lucide-react";
+import BenefitFields from "@/components/deals/BenefitFields";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
