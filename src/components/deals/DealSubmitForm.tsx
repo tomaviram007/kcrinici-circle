@@ -8,19 +8,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, X, Send } from "lucide-react";
+import BenefitFields from "./BenefitFields";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
 const emptyForm = {
   title: "",
   description: "",
-  discount_label: "",
+  benefit_type: "percent",
+  benefit_value: "",
   coupon_code: "",
   business_name: "",
   business_phone: "",
   website_url: "",
   category: "כללי",
   expires_at: "",
+};
+
+const buildDiscountLabel = (type: string, value: string) => {
+  if (!value) return null;
+  if (type === "percent") return `${value}% הנחה`;
+  if (type === "consultation") return "שעת ייעוץ";
+  return null;
 };
 
 const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
@@ -39,7 +48,9 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
     const { error } = await supabase.from("deals").insert({
       title: form.title,
       description: form.description,
-      discount_label: form.discount_label || null,
+      discount_label: buildDiscountLabel(form.benefit_type, form.benefit_value),
+      benefit_type: form.benefit_type,
+      benefit_value: form.benefit_value ? parseInt(form.benefit_value) : null,
       coupon_code: form.coupon_code || null,
       business_name: form.business_name,
       business_phone: form.business_phone || null,
@@ -49,7 +60,7 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
       is_active: true,
       is_approved: false,
       created_by: user?.id,
-    });
+    } as any);
 
     if (error) {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
@@ -110,17 +121,15 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div>
-          <Label className="font-body text-xs">תגית הנחה</Label>
-          <Input value={form.discount_label} onChange={(e) => setForm({ ...form, discount_label: e.target.value })} className="bg-background" placeholder="למשל: 20%" />
-        </div>
+        <BenefitFields
+          benefitType={form.benefit_type}
+          benefitValue={form.benefit_value}
+          onTypeChange={(v) => setForm({ ...form, benefit_type: v })}
+          onValueChange={(v) => setForm({ ...form, benefit_value: v })}
+        />
         <div>
           <Label className="font-body text-xs">קוד קופון</Label>
           <Input value={form.coupon_code} onChange={(e) => setForm({ ...form, coupon_code: e.target.value })} className="bg-background" />
-        </div>
-        <div>
-          <Label className="font-body text-xs">טלפון העסק</Label>
-          <Input value={form.business_phone} onChange={(e) => setForm({ ...form, business_phone: e.target.value })} className="bg-background" placeholder="972501234567" />
         </div>
         <div>
           <Label className="font-body text-xs">קטגוריה</Label>
@@ -133,7 +142,11 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <Label className="font-body text-xs">טלפון העסק</Label>
+          <Input value={form.business_phone} onChange={(e) => setForm({ ...form, business_phone: e.target.value })} className="bg-background" placeholder="972501234567" />
+        </div>
         <div>
           <Label className="font-body text-xs">לינק לאתר ההטבה</Label>
           <Input value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} className="bg-background" placeholder="https://..." />

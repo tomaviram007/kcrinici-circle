@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon, MousePointerClick, ExternalLink, CheckCircle, Clock } from "lucide-react";
+import BenefitFields from "@/components/deals/BenefitFields";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
@@ -36,7 +37,8 @@ interface Deal {
 const emptyForm = {
   title: "",
   description: "",
-  discount_label: "",
+  benefit_type: "percent",
+  benefit_value: "",
   coupon_code: "",
   business_name: "",
   business_logo_url: "",
@@ -45,6 +47,13 @@ const emptyForm = {
   category: "כללי",
   is_active: true,
   expires_at: "",
+};
+
+const buildDiscountLabel = (type: string, value: string) => {
+  if (!value && type === "percent") return null;
+  if (type === "percent") return `${value}% הנחה`;
+  if (type === "consultation") return "שעת ייעוץ";
+  return null;
 };
 
 const AdminDeals = () => {
@@ -87,7 +96,9 @@ const AdminDeals = () => {
     const payload: any = {
       title: form.title,
       description: form.description,
-      discount_label: form.discount_label || null,
+      discount_label: buildDiscountLabel(form.benefit_type, form.benefit_value),
+      benefit_type: form.benefit_type,
+      benefit_value: form.benefit_value ? parseInt(form.benefit_value) : null,
       coupon_code: form.coupon_code || null,
       business_name: form.business_name,
       business_logo_url: form.business_logo_url || null,
@@ -122,7 +133,8 @@ const AdminDeals = () => {
     setForm({
       title: deal.title,
       description: deal.description,
-      discount_label: deal.discount_label || "",
+      benefit_type: (deal as any).benefit_type || "percent",
+      benefit_value: (deal as any).benefit_value?.toString() || "",
       coupon_code: deal.coupon_code || "",
       business_name: deal.business_name,
       business_logo_url: deal.business_logo_url || "",
@@ -222,12 +234,14 @@ const AdminDeals = () => {
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-background" rows={2} />
           </div>
 
-          {/* Row 3: discount + coupon + phone + category */}
+          {/* Row 3: benefit type + value + coupon + category */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div>
-              <Label className="font-body text-xs">תגית הנחה (למשל: 20%)</Label>
-              <Input value={form.discount_label} onChange={(e) => setForm({ ...form, discount_label: e.target.value })} className="bg-background" autoComplete="off" />
-            </div>
+            <BenefitFields
+              benefitType={form.benefit_type}
+              benefitValue={form.benefit_value}
+              onTypeChange={(v) => setForm({ ...form, benefit_type: v })}
+              onValueChange={(v) => setForm({ ...form, benefit_value: v })}
+            />
             <div>
               <Label className="font-body text-xs">קוד קופון</Label>
               <Input value={form.coupon_code} onChange={(e) => setForm({ ...form, coupon_code: e.target.value })} className="bg-background" autoComplete="off" />
