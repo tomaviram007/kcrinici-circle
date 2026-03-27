@@ -17,6 +17,7 @@ import QuoteSection from "@/components/landing/QuoteSection";
 import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
 import DealSubmitForm from "@/components/deals/DealSubmitForm";
+import DealBadge from "@/components/deals/DealBadge";
 
 import heroEvents from "@/assets/hero-events.jpg";
 
@@ -187,13 +188,11 @@ const Deals = () => {
                 onClick={() => handleClaimClick(deal)}
               >
                 {/* Discount badge */}
-                {deal.discount_label && (
-                  <div className="absolute -top-3 -left-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg">
-                    <span className="font-serif text-xs font-bold text-primary-foreground leading-tight text-center">
-                      {deal.discount_label}
-                    </span>
-                  </div>
-                )}
+                <DealBadge
+                  benefitType={(deal as any).benefit_type}
+                  benefitValue={(deal as any).benefit_value}
+                  discountLabel={deal.discount_label}
+                />
 
                 {/* Logo */}
                 <div className="mb-4 flex items-center gap-3">
