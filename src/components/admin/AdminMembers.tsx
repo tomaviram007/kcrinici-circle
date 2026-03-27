@@ -682,7 +682,7 @@ const MemberCard = ({
   onView?: (p: Profile) => void;
 }) => (
   <div
-    className={`rounded-lg border border-border bg-card p-4 space-y-3 ${onView && !isPending ? "cursor-pointer hover:border-gold/30 transition-colors" : ""}`}
+    className={`rounded-lg border border-border bg-card p-4 space-y-3 overflow-hidden ${onView && !isPending ? "cursor-pointer hover:border-gold/30 transition-colors" : ""}`}
     onClick={() => onView && !isPending && onView(p)}
   >
     <div className="flex items-start gap-3">
@@ -698,10 +698,10 @@ const MemberCard = ({
         <p className="font-body text-xs text-muted-foreground truncate">
           {p.profession}{p.expertise ? ` · ${p.expertise}` : ""}
         </p>
-        <p className="font-body text-xs text-muted-foreground">{p.phone} · {p.address}</p>
+        <p className="font-body text-xs text-muted-foreground truncate">{p.phone} · {p.address}</p>
       </div>
     </div>
-    {p.bio && <p className="font-body text-sm text-foreground/70 italic line-clamp-2">"{p.bio}"</p>}
+    {p.bio && <p className="font-body text-sm text-foreground/70 italic line-clamp-2 break-words">"{p.bio}"</p>}
 
     <div className="flex flex-wrap gap-1.5" onClick={(e) => e.stopPropagation()}>
       {isPending && (
