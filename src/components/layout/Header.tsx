@@ -29,7 +29,7 @@ const Header = () => {
   const { birthdays } = useBirthdaysThisWeek();
   const { logoUrl, logoSize, logoText, logoPosition } = useSiteLogo();
   const pendingCount = usePendingCount();
-  const { count: unreadCount } = useUnreadAnnouncements(user?.id ?? null);
+  
   const { newContent, markSeen } = useNewContent();
 
   // Mark page as seen when navigating
