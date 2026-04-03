@@ -91,13 +91,21 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
-      if (error) throw error;
+
+      if (result.error) throw result.error;
+
+      if (result.redirected) {
+        // Browser is redirecting to Google — just return
+        return;
+      }
+
+      // Tokens received and session set — navigate based on role
+      // (the useEffect above will handle routing once AuthContext updates)
     } catch (error: any) {
       toast({ title: "שגיאה בחיבור עם Google", description: error.message, variant: "destructive" });
-    } finally {
       setGoogleLoading(false);
     }
   };
