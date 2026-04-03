@@ -36,6 +36,8 @@ interface Recommendation {
   created_at: string;
 }
 
+type RecommenderMode = "self" | "member" | "system";
+
 const emptyForm = {
   professional_first_name: "",
   professional_last_name: "",
@@ -43,6 +45,8 @@ const emptyForm = {
   description: "",
   phone: "",
   rating: 5,
+  recommenderMode: "self" as RecommenderMode,
+  selectedMemberId: "",
 };
 
 const AdminRecommendations = () => {
