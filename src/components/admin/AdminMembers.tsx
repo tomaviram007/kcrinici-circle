@@ -50,6 +50,7 @@ const AdminMembers = () => {
   const { toast } = useToast();
   const { fireMemberApproved } = useConfetti();
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [memberEmails, setMemberEmails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -82,8 +83,20 @@ const AdminMembers = () => {
       .from("profiles")
       .select("*")
       .order("created_at", { ascending: false });
-    setProfiles((data as Profile[]) || []);
+    const allProfiles = (data as Profile[]) || [];
+    setProfiles(allProfiles);
     setLoading(false);
+
+    // Fetch emails for removed members via RPC
+    const removedIds = allProfiles.filter(p => p.is_removed).map(p => p.user_id);
+    if (removedIds.length > 0) {
+      const { data: emailData } = await supabase.rpc("get_user_emails", { user_ids: removedIds });
+      if (emailData) {
+        const emailMap: Record<string, string> = {};
+        (emailData as { uid: string; email: string }[]).forEach(row => { emailMap[row.uid] = row.email; });
+        setMemberEmails(emailMap);
+      }
+    }
   };
 
   useEffect(() => {
@@ -350,6 +363,9 @@ const AdminMembers = () => {
                     <h4 className="font-serif text-base font-bold text-foreground truncate line-through">{p.full_name}</h4>
                     <p className="font-body text-xs text-muted-foreground truncate">{p.profession}</p>
                     <p className="font-body text-xs text-muted-foreground">{p.phone}</p>
+                    {memberEmails[p.user_id] && (
+                      <p className="font-body text-xs text-gold/70 truncate" dir="ltr">{memberEmails[p.user_id]}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-1.5">
