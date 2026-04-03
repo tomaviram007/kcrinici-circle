@@ -119,6 +119,19 @@ const AdminRecommendations = () => {
 
   const openEdit = (rec: Recommendation) => {
     setEditingId(rec.id);
+    // Detect current recommender mode
+    let mode: RecommenderMode = "system";
+    let memberId = "";
+    if (rec.recommender_name === "המלצת מערכת") {
+      mode = "system";
+    } else if (rec.recommender_user_id === user?.id) {
+      mode = "self";
+    } else if (rec.recommender_user_id) {
+      mode = "member";
+      memberId = rec.recommender_user_id;
+    } else {
+      mode = "self";
+    }
     setFormData({
       professional_first_name: rec.professional_first_name || rec.professional_name.split(" ")[0],
       professional_last_name: rec.professional_last_name || rec.professional_name.split(" ").slice(1).join(" "),
@@ -126,8 +139,8 @@ const AdminRecommendations = () => {
       description: rec.description,
       phone: rec.phone,
       rating: rec.rating,
-      recommenderMode: "self",
-      selectedMemberId: "",
+      recommenderMode: mode,
+      selectedMemberId: memberId,
     });
     setShowForm(true);
   };
