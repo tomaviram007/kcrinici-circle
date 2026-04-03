@@ -43,14 +43,14 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       const [{ data: profiles }, { data: events }, { data: jobs }, { data: polls }] = await Promise.all([
-        supabase.from("profiles").select("is_approved"),
+        supabase.from("profiles").select("is_approved, is_removed"),
         supabase.from("events").select("event_date").gte("event_date", new Date().toISOString()),
         supabase.from("jobs").select("is_approved, is_active"),
         supabase.from("polls").select("is_active"),
       ]);
       setStats({
-        approvedMembers: (profiles || []).filter(p => p.is_approved).length,
-        pendingMembers: (profiles || []).filter(p => !p.is_approved).length,
+        approvedMembers: (profiles || []).filter(p => p.is_approved && !p.is_removed).length,
+        pendingMembers: (profiles || []).filter(p => !p.is_approved && !p.is_removed).length,
         upcomingEvents: (events || []).length,
         activeJobs: (jobs || []).filter(j => j.is_approved && j.is_active).length,
         activePolls: (polls || []).filter(p => p.is_active).length,
