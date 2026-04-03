@@ -378,8 +378,7 @@ const AdminRecommendations = () => {
                 ))}
               </div>
             </div>
-            {(
-              <div className="space-y-3">
+            <div className="space-y-3">
                 <Label className="font-body text-sm font-semibold">שיוך הממליץ</Label>
                 <RadioGroup value={formData.recommenderMode} onValueChange={(v) => setFormData({ ...formData, recommenderMode: v as RecommenderMode, selectedMemberId: "" })} className="gap-2">
                   <div className="flex items-center gap-2">
@@ -404,7 +403,6 @@ const AdminRecommendations = () => {
                   </Select>
                 )}
               </div>
-            )}
             <Button type="submit" className="w-full gradient-gold text-primary-foreground font-body">
               {editingId ? "עדכן" : "פרסם המלצה"}
             </Button>
