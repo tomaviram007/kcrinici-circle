@@ -30,7 +30,15 @@ const Header = () => {
   const { logoUrl, logoSize, logoText, logoPosition } = useSiteLogo();
   const pendingCount = usePendingCount();
   const { count: unreadCount } = useUnreadAnnouncements(user?.id ?? null);
+  const { newContent, markSeen } = useNewContent();
 
+  // Mark page as seen when navigating
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === "/deals" || path === "/jobs" || path === "/announcements") {
+      markSeen(path);
+    }
+  }, [location.pathname, markSeen]);
   const handleLogout = async () => {
     const { supabase } = await import("@/integrations/supabase/client");
     await supabase.auth.signOut();
