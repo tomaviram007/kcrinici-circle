@@ -126,6 +126,8 @@ const AdminRecommendations = () => {
       description: rec.description,
       phone: rec.phone,
       rating: rec.rating,
+      recommenderMode: "self",
+      selectedMemberId: "",
     });
     setShowForm(true);
   };
