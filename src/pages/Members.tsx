@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import MemberProfilePopup from "@/components/MemberProfilePopup";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Phone, Briefcase, MapPin, Pencil, Search, Cake, Send, Heart, MessageCircle, Calendar, Globe, Facebook, Instagram, Linkedin, LayoutGrid, List } from "lucide-react";
+import { User, Phone, Briefcase, Pencil, Cake, Heart, LayoutGrid, List } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
@@ -223,73 +223,41 @@ const Members = () => {
           return (
             <div
               key={member.id}
-              className={`member-card cursor-pointer rounded-lg border bg-card p-4 sm:p-6 transition-all hover:border-gold/20 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)] ${isOwnCard(member) ? "ring-1 ring-gold/30" : "border-border"} ${birthdayToday ? "border-gold/40 shadow-[0_0_20px_hsl(43_72%_52%/0.12)]" : ""}`}
+              className={`member-card group cursor-pointer rounded-lg border bg-card p-4 transition-all hover:border-gold/20 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)] ${isOwnCard(member) ? "ring-1 ring-gold/30" : "border-border"} ${birthdayToday ? "border-gold/40 shadow-[0_0_20px_hsl(43_72%_52%/0.12)]" : ""}`}
               onClick={() => handleCardClick(member)}
             >
-              {isOwnCard(member) && (
-                <div className="flex justify-start mb-2">
-                  <span className="inline-flex items-center gap-1 text-xs text-gold font-body">
+              <div className="flex flex-col items-center text-center gap-3">
+                {isOwnCard(member) && (
+                  <span className="self-start inline-flex items-center gap-1 text-xs text-gold font-body">
                     <Pencil className="h-3 w-3" /> לחץ לעריכה
                   </span>
-                </div>
-              )}
-              <div className="flex items-center gap-4 mb-3">
-                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20">
+                )}
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20 overflow-hidden">
                   {member.avatar_url ? (
                     <img src={member.avatar_url} alt={member.full_name} className="h-full w-full rounded-full object-cover" />
                   ) : (
                     <User className="h-7 w-7 text-gold" />
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-serif text-base sm:text-lg font-bold text-foreground truncate">{member.full_name}</h3>
-                  <div className="flex items-center gap-1 mt-0.5">
+                <div className="min-w-0 w-full">
+                  <h3 className="font-serif text-base font-bold text-foreground truncate">{member.full_name}</h3>
+                  <div className="flex items-center justify-center gap-1 mt-0.5">
                     <Briefcase className="h-3 w-3 text-gold" />
-                    <span className="font-body text-sm text-gold">{member.profession}</span>
+                    <span className="font-body text-sm text-gold truncate">{member.profession}</span>
                   </div>
                 </div>
-              </div>
 
-              {/* Birthday badge */}
-              {member.birth_date && (
-                <div className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-body mb-2 ${birthdayToday ? "bg-gold/15 text-gold border border-gold/30 animate-pulse" : "bg-secondary text-muted-foreground"}`}>
-                  <Cake className={`h-3 w-3 ${birthdayToday ? "text-gold" : ""}`} />
-                  {birthdayToday ? "🎂 חוגג היום!" : formatHebrewDate(member.birth_date)}
-                </div>
-              )}
-
-              {member.expertise && (
-                <p className="font-body text-xs text-muted-foreground mb-2">
-                  <span className="text-gold">מומחיות:</span> {member.expertise}
-                </p>
-              )}
-
-              {member.bio && (
-                <p className="font-body text-xs text-muted-foreground italic leading-relaxed mb-3 line-clamp-2">"{member.bio}"</p>
-              )}
-
-              {member.hobbies && (
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {member.hobbies.split(/[,،]/).filter(Boolean).slice(0, 3).map((h: string, i: number) => (
-                    <span key={i} className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 font-body text-[10px] text-muted-foreground">
-                      <Heart className="h-2.5 w-2.5 text-gold" />
-                      {h.trim()}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Social links */}
-              <SocialLinks website_url={member.website_url} facebook_url={member.facebook_url} instagram_url={member.instagram_url} linkedin_url={member.linkedin_url} />
-
-              <div className="border-t border-border pt-3 space-y-1.5">
-                {member.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-3.5 w-3.5 text-gold" />
-                    <a href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '').replace(/^0/, '972')}`} target="_blank" rel="noopener noreferrer" className="font-body text-sm text-foreground hover:text-gold transition-colors" dir="ltr" onClick={(e) => e.stopPropagation()}>
-                      {member.phone}
-                    </a>
+                {member.birth_date && (
+                  <div className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-body ${birthdayToday ? "bg-gold/15 text-gold border border-gold/30 animate-pulse" : "bg-secondary text-muted-foreground"}`}>
+                    <Cake className={`h-3 w-3 ${birthdayToday ? "text-gold" : ""}`} />
+                    {birthdayToday ? "🎂 חוגג היום!" : formatHebrewDate(member.birth_date)}
                   </div>
+                )}
+
+                {!isOwnCard(member) && (
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 inline-flex items-center gap-1 text-xs text-gold/70 font-body">
+                    לחץ לפרטים ←
+                  </span>
                 )}
               </div>
             </div>

@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Gift, Lock, Send, Cake } from "lucide-react";
+import { Lock, Cake } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import gsap from "gsap";
+import MemberProfilePopup from "@/components/MemberProfilePopup";
 
 interface Props {
   isApproved: boolean;
@@ -12,7 +12,14 @@ interface Props {
 
 const BirthdaysPreviewSection = ({ isApproved }: Props) => {
   const [birthdays, setBirthdays] = useState<any[]>([]);
+  const [viewMember, setViewMember] = useState<any | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  const handleOpenProfile = async (userId: string) => {
+    const { data } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
+    if (data) setViewMember(data);
+    else toast.error("לא נמצאו פרטי חבר");
+  };
 
   useEffect(() => {
     if (!isApproved) return;
@@ -80,24 +87,6 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
     return date.toLocaleDateString("he-IL", { day: "numeric", month: "long" });
   };
 
-  const handleSendGreeting = (name: string, userId: string) => {
-    supabase
-      .from("profiles")
-      .select("phone")
-      .eq("user_id", userId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!data?.phone) {
-          toast.error("לא נמצא מספר טלפון לחבר זה");
-          return;
-        }
-        const cleanPhone = data.phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
-        const msg = encodeURIComponent(`היי ${name}, המון מזל טוב ליום הולדתך 🎂`);
-        window.open(`https://wa.me/${cleanPhone}?text=${msg}`, "_blank");
-        toast.success("מועבר לוואטסאפ! 🎉");
-      });
-  };
-
   const mockBirthdays = [
     { full_name: "דוד כהן", birth_date: "1990-03-23", profession: "עורך דין", avatar_url: null, user_id: "m1" },
     { full_name: "אבי לוי", birth_date: "1985-03-25", profession: "רואה חשבון", avatar_url: null, user_id: "m2" },
@@ -110,6 +99,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
   if (isApproved && birthdays.length === 0) return null;
 
   return (
+    <>
     <section id="birthdays-section" className="py-10 px-4 sm:py-16 sm:px-6" dir="rtl" ref={sectionRef}>
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 sm:mb-16 text-center">
@@ -137,8 +127,8 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
                         : "border-border/40 hover:border-gold/30"
                       }
                       hover:scale-105 hover:bg-card/60`}
-                    onClick={() => isApproved && handleSendGreeting(person.full_name, person.user_id)}
-                    title={isApproved ? `שלח ברכה ל${person.full_name}` : ""}
+                    onClick={() => isApproved && handleOpenProfile(person.user_id)}
+                    title={isApproved ? `פרופיל של ${person.full_name}` : ""}
                   >
                     {isToday && (
                       <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-gold text-background text-xs animate-pulse">
@@ -167,8 +157,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
                     {isApproved && (
                       <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <span className="inline-flex items-center gap-1 text-xs text-gold font-body">
-                          <Send className="h-3 w-3" />
-                          שלח ברכה
+                          לחץ לפרטים ←
                         </span>
                       </div>
                     )}
@@ -200,6 +189,8 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
         )}
       </div>
     </section>
+    <MemberProfilePopup member={viewMember} open={!!viewMember} onOpenChange={(o) => !o && setViewMember(null)} />
+    </>
   );
 };
 
