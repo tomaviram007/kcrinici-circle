@@ -134,6 +134,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (fetchingRef.current) return;
         fetchingRef.current = true;
+        setLoading(true);
 
         const result = await fetchProfileAndRoles(currentUser.id);
 

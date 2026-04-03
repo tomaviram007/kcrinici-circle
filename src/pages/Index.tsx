@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import { useAuth } from "@/contexts/AuthContext";
 
 gsap.registerPlugin(ScrollToPlugin);
 import HeroSection from "@/components/landing/HeroSection";
@@ -17,26 +17,9 @@ import ScrollReveal from "@/components/ScrollReveal";
 import ClubAboutSection from "@/components/ClubAboutSection";
 
 const Index = () => {
-  const [isApproved, setIsApproved] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, isApproved } = useAuth();
   const location = useLocation();
-
-  useEffect(() => {
-    const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      setIsLoggedIn(true);
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_approved")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-
-      if (profile?.is_approved) setIsApproved(true);
-    };
-    check();
-  }, []);
+  const isLoggedIn = Boolean(user);
 
   // Handle scroll-to-birthdays from navigation state
   useEffect(() => {

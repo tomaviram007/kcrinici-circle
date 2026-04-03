@@ -30,6 +30,11 @@ const Login = () => {
 
   // Redirect authenticated users away from login
   useEffect(() => {
+    if (!authLoading && user && !isApproved) {
+      navigate("/pending", { replace: true });
+      return;
+    }
+
     if (!authLoading && user && isApproved) {
       navigate(isAdmin ? "/admin" : "/", { replace: true });
     }
@@ -53,7 +58,6 @@ const Login = () => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      navigate("/");
     } catch (error: any) {
       const msg = error.message?.toLowerCase() || "";
       let description = error.message;
