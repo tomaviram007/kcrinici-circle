@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Shield, Menu, X, Cake, User } from "lucide-react";
 import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
 import { usePendingCount } from "@/hooks/usePendingCount";
-import { useUnreadAnnouncements } from "@/hooks/useUnreadAnnouncements";
+
 import { useNewContent } from "@/hooks/useNewContent";
 import { useSiteLogo } from "@/hooks/useSiteLogo";
 import gsap from "gsap";
