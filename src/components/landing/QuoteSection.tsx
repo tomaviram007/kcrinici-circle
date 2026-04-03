@@ -100,7 +100,7 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
       >
         <blockquote
           className="font-serif font-bold text-white leading-snug opacity-0 drop-shadow-lg"
-          style={{ fontSize: `clamp(20px, 4vw, ${fontSize}px)` }}
+          style={{ fontSize: `clamp(18px, 3vw, ${Math.min(fontSize, 48)}px)` }}
         >
           {quote.text}
         </blockquote>
