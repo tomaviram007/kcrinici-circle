@@ -99,8 +99,8 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
         className="relative z-10 flex flex-col items-center justify-center px-6 sm:px-12 text-center max-w-4xl mx-auto"
       >
         <blockquote
-          className="font-serif font-bold text-white leading-snug opacity-0 drop-shadow-lg text-lg sm:text-2xl md:text-3xl lg:text-4xl"
-          style={{ fontSize: undefined }}
+          className="font-serif font-bold text-white leading-snug opacity-0 drop-shadow-lg"
+          style={{ fontSize: `clamp(18px, 3vw, ${Math.min(fontSize, 48)}px)` }}
         >
           {quote.text}
         </blockquote>
