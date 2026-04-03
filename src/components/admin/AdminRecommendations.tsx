@@ -81,6 +81,14 @@ const AdminRecommendations = () => {
     enabled: !!user,
   });
 
+  const { data: members = [] } = useQuery({
+    queryKey: ["all-members-for-recommender"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("user_id, full_name").eq("is_approved", true).eq("is_removed", false).order("full_name");
+      return data || [];
+    },
+  });
+
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-recommendations"] });
     queryClient.invalidateQueries({ queryKey: ["recommendations"] });
