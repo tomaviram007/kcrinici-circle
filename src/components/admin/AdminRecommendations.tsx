@@ -269,6 +269,7 @@ const AdminRecommendations = () => {
               <TableHead className="text-right font-body">שם משפחה</TableHead>
               <TableHead className="text-right font-body">קטגוריה</TableHead>
               <TableHead className="text-right font-body">ממליץ</TableHead>
+              <TableHead className="text-right font-body">סוג</TableHead>
               <TableHead className="text-right font-body">דירוג</TableHead>
               <TableHead className="text-right font-body">סטטוס</TableHead>
               <TableHead className="text-right font-body">פעולות</TableHead>
