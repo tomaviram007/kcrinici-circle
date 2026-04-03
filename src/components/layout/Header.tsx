@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Shield, Menu, X, Cake, User } from "lucide-react";
 import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
 import { usePendingCount } from "@/hooks/usePendingCount";
+import { useUnreadAnnouncements } from "@/hooks/useUnreadAnnouncements";
 import { useSiteLogo } from "@/hooks/useSiteLogo";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
@@ -27,6 +28,7 @@ const Header = () => {
   const { birthdays } = useBirthdaysThisWeek();
   const { logoUrl, logoSize, logoText, logoPosition } = useSiteLogo();
   const pendingCount = usePendingCount();
+  const { count: unreadCount } = useUnreadAnnouncements(user?.id ?? null);
 
   const handleLogout = async () => {
     const { supabase } = await import("@/integrations/supabase/client");
@@ -135,7 +137,7 @@ const Header = () => {
                 key={link.to}
                 to={link.to}
                 onClick={(e) => handleNavClick(e, link)}
-                className={`rounded-md px-3 py-1.5 font-body text-sm transition-colors ${
+                className={`relative rounded-md px-3 py-1.5 font-body text-sm transition-colors ${
                   isActive(link.to) ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -150,6 +152,9 @@ const Header = () => {
                   </span>
                 )}
                 {link.label}
+                {link.to === "/announcements" && unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" />
+                )}
               </Link>
             ))}
 
@@ -205,7 +210,7 @@ const Header = () => {
                   handleNavClick(e, link);
                   if (!link.protected || canAccess) setMenuOpen(false);
                 }}
-                className={`w-full max-w-xs text-center py-3 font-body text-lg transition-colors ${
+                className={`relative w-full max-w-xs text-center py-3 font-body text-lg transition-colors ${
                   isActive(link.to) ? "text-gold font-semibold" : "text-foreground/80 hover:text-gold"
                 }`}
               >
@@ -220,6 +225,9 @@ const Header = () => {
                   </span>
                 )}
                 {link.label}
+                {link.to === "/announcements" && unreadCount > 0 && (
+                  <span className="inline-block mr-1.5 h-2 w-2 rounded-full bg-red-500 align-middle" />
+                )}
               </Link>
             ))}
           </nav>

@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import AvatarUpload from "@/components/AvatarUpload";
-import { ArrowRight, Eye, EyeOff, Globe, Facebook, Instagram, Linkedin } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Globe, Facebook, Instagram, Linkedin, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import MyPublications from "@/components/profile/MyPublications";
+import { useUnreadAnnouncements } from "@/hooks/useUnreadAnnouncements";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -108,6 +109,8 @@ const Profile = () => {
       setSaving(false);
     }
   };
+
+  const { count: unreadCount, items: unreadItems } = useUnreadAnnouncements(userId || null);
 
   if (loading) {
     return (
@@ -276,6 +279,36 @@ const Profile = () => {
           {changingPassword ? "משנה סיסמה..." : "שנה סיסמה"}
         </Button>
       </div>
+
+      {/* Unread Announcements Section */}
+      {unreadCount > 0 && (
+        <>
+          <Separator className="my-10" />
+          <div className="mb-6 flex items-center gap-2">
+            <Bell className="h-5 w-5 text-red-500" />
+            <h2 className="font-serif text-xl font-bold text-foreground">
+              מודעות <span className="text-red-500">חדשות</span>
+            </h2>
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
+              {unreadCount}
+            </span>
+          </div>
+          <div className="space-y-2">
+            {unreadItems.map((item) => (
+              <Link
+                key={item.id}
+                to="/announcements"
+                className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 hover:border-gold/30 hover:bg-card/80 transition-all"
+              >
+                <span className="font-body text-sm font-medium text-foreground line-clamp-1">{item.title}</span>
+                <span className="font-body text-xs text-muted-foreground shrink-0 mr-3">
+                  {new Date(item.created_at).toLocaleDateString("he-IL", { day: "numeric", month: "long" })}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* My Publications Section */}
       <Separator className="my-10" />

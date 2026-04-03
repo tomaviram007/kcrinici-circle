@@ -176,6 +176,14 @@ const Announcements = () => {
 
   useEffect(() => { fetchItems(); fetchUpcomingBirthdays(); }, []);
 
+  // Mark announcements as seen when user visits this page
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from("profiles")
+      .update({ last_seen_announcements: new Date().toISOString() } as any)
+      .eq("user_id", user.id);
+  }, [user?.id]);
+
   useEffect(() => {
     if (birthdayToastShown || upcomingBirthdays.length === 0) return;
     const now = new Date();
