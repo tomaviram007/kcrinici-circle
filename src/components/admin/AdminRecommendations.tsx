@@ -286,12 +286,7 @@ const AdminRecommendations = () => {
               filtered.map((rec) => (
                 <TableRow key={rec.id} className={rec.is_hidden ? "opacity-50" : ""}>
                   <TableCell className="font-serif font-bold text-foreground">
-                    <div className="flex items-center gap-2">
-                      {rec.professional_first_name}
-                      {rec.is_admin_post && (
-                        <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">מנהל</Badge>
-                      )}
-                    </div>
+                    {rec.professional_first_name}
                   </TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.professional_last_name || "—"}</TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.category}</TableCell>
