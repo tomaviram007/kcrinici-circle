@@ -119,6 +119,19 @@ const AdminRecommendations = () => {
 
   const openEdit = (rec: Recommendation) => {
     setEditingId(rec.id);
+    // Detect current recommender mode
+    let mode: RecommenderMode = "system";
+    let memberId = "";
+    if (rec.recommender_name === "המלצת מערכת") {
+      mode = "system";
+    } else if (rec.recommender_user_id === user?.id) {
+      mode = "self";
+    } else if (rec.recommender_user_id) {
+      mode = "member";
+      memberId = rec.recommender_user_id;
+    } else {
+      mode = "self";
+    }
     setFormData({
       professional_first_name: rec.professional_first_name || rec.professional_name.split(" ")[0],
       professional_last_name: rec.professional_last_name || rec.professional_name.split(" ").slice(1).join(" "),
@@ -126,8 +139,8 @@ const AdminRecommendations = () => {
       description: rec.description,
       phone: rec.phone,
       rating: rec.rating,
-      recommenderMode: "self",
-      selectedMemberId: "",
+      recommenderMode: mode,
+      selectedMemberId: memberId,
     });
     setShowForm(true);
   };
@@ -147,6 +160,21 @@ const AdminRecommendations = () => {
 
     const fullName = [formData.professional_first_name, formData.professional_last_name].filter(Boolean).join(" ");
 
+    // Resolve recommender info for both create and edit
+    let recommenderName = "המלצת מערכת";
+    let recommenderUserId: string | null = null;
+    let isAdminPost = true;
+
+    if (formData.recommenderMode === "self") {
+      recommenderName = profile?.full_name || "מנהל מערכת";
+      recommenderUserId = user?.id || null;
+    } else if (formData.recommenderMode === "member") {
+      const selected = members.find((m) => m.user_id === formData.selectedMemberId);
+      recommenderName = selected?.full_name || "חבר מועדון";
+      recommenderUserId = formData.selectedMemberId || null;
+      isAdminPost = false;
+    }
+
     if (editingId) {
       const { error } = await (supabase as any).from("professional_recommendations").update({
         professional_name: fullName,
@@ -156,24 +184,13 @@ const AdminRecommendations = () => {
         description: formData.description,
         phone: formData.phone,
         rating: formData.rating,
+        recommender_name: recommenderName,
+        recommender_user_id: recommenderUserId,
+        is_admin_post: isAdminPost,
       }).eq("id", editingId);
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
       toast({ title: "ההמלצה עודכנה בהצלחה!" });
     } else {
-      let recommenderName = "המלצת מערכת";
-      let recommenderUserId: string | null = null;
-      let isAdminPost = true;
-
-      if (formData.recommenderMode === "self") {
-        recommenderName = profile?.full_name || "מנהל מערכת";
-        recommenderUserId = user?.id || null;
-      } else if (formData.recommenderMode === "member") {
-        const selected = members.find((m) => m.user_id === formData.selectedMemberId);
-        recommenderName = selected?.full_name || "חבר מועדון";
-        recommenderUserId = formData.selectedMemberId || null;
-        isAdminPost = false;
-      }
-
       const { error } = await (supabase as any).from("professional_recommendations").insert({
         professional_name: fullName,
         professional_first_name: formData.professional_first_name,
@@ -361,8 +378,7 @@ const AdminRecommendations = () => {
                 ))}
               </div>
             </div>
-            {!editingId && (
-              <div className="space-y-3">
+            <div className="space-y-3">
                 <Label className="font-body text-sm font-semibold">שיוך הממליץ</Label>
                 <RadioGroup value={formData.recommenderMode} onValueChange={(v) => setFormData({ ...formData, recommenderMode: v as RecommenderMode, selectedMemberId: "" })} className="gap-2">
                   <div className="flex items-center gap-2">
@@ -387,7 +403,6 @@ const AdminRecommendations = () => {
                   </Select>
                 )}
               </div>
-            )}
             <Button type="submit" className="w-full gradient-gold text-primary-foreground font-body">
               {editingId ? "עדכן" : "פרסם המלצה"}
             </Button>
