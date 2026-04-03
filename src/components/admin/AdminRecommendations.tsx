@@ -378,7 +378,7 @@ const AdminRecommendations = () => {
                 ))}
               </div>
             </div>
-            {!editingId && (
+            {(
               <div className="space-y-3">
                 <Label className="font-body text-sm font-semibold">שיוך הממליץ</Label>
                 <RadioGroup value={formData.recommenderMode} onValueChange={(v) => setFormData({ ...formData, recommenderMode: v as RecommenderMode, selectedMemberId: "" })} className="gap-2">
