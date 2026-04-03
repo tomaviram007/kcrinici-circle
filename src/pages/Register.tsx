@@ -14,7 +14,7 @@ import RegisterBackground from "@/components/register/RegisterBackground";
 
 const registerSchema = z.object({
   full_name: z.string().trim().min(2, "שם חייב להכיל לפחות 2 תווים").max(100, "שם ארוך מדי"),
-  phone: z.string().trim().min(9, "מספר טלפון לא תקין").max(15, "מספר טלפון לא תקין").regex(/^[\d\-+() ]+$/, "מספר טלפון לא תקין"),
+  phone: z.string().trim().min(9, "מספר טלפון לא תקין").max(15, "מספר טלפון לא תקין").regex(/^0(5[0-9]|7[0-9]|[2-4]|[8-9])\d{7}$/, "יש להזין מספר טלפון ישראלי תקין (לדוגמה: 0501234567)"),
   address: z.string().trim().min(3, "כתובת חייבת להכיל לפחות 3 תווים").max(200, "כתובת ארוכה מדי"),
   profession: z.string().trim().min(2, "מקצוע חייב להכיל לפחות 2 תווים").max(100, "מקצוע ארוך מדי"),
   expertise: z.string().max(200, "מומחיות ארוכה מדי").optional().or(z.literal("")),

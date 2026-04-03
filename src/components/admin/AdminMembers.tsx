@@ -130,7 +130,7 @@ const AdminMembers = () => {
     toast({ title: "אושר!", description: "החבר אושר בהצלחה." });
     fetchProfiles();
     if (profile?.phone) {
-      openWhatsApp(profile.phone, `היי ${profile.full_name}! 🎉 שמחים לבשר לך שבקשת ההצטרפות שלך למועדון קרניצי אושרה. ברוך הבא! 🥂`);
+      openWhatsApp(profile.phone, `היי ${profile.full_name}! 🎉 שמחים לבשר לך שבקשת ההצטרפות שלך למועדון קרניצי אושרה. ברוך הבא! 🥂\n\nמעכשיו יש לך גישה מלאה לכל התכנים, ההטבות והקהילה שלנו.\nמחכים לראות אותך בפנים: ${window.location.origin}`);
     }
   };
 
