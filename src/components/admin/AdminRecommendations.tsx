@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, X, Eye, EyeOff, Edit, Trash2, Plus, Star, Search, Award } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const CATEGORIES = [
   "שיפוצים", "חשמל ואינסטלציה", "פיננסיים", "רכב", "אירועים",
@@ -36,6 +37,8 @@ interface Recommendation {
   created_at: string;
 }
 
+type RecommenderMode = "self" | "member" | "system";
+
 const emptyForm = {
   professional_first_name: "",
   professional_last_name: "",
@@ -43,6 +46,8 @@ const emptyForm = {
   description: "",
   phone: "",
   rating: 5,
+  recommenderMode: "self" as RecommenderMode,
+  selectedMemberId: "",
 };
 
 const AdminRecommendations = () => {
@@ -75,6 +80,14 @@ const AdminRecommendations = () => {
       return data;
     },
     enabled: !!user,
+  });
+
+  const { data: members = [] } = useQuery({
+    queryKey: ["all-members-for-recommender"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("user_id, full_name").eq("is_approved", true).eq("is_removed", false).order("full_name");
+      return data || [];
+    },
   });
 
   const invalidate = () => {
@@ -113,6 +126,8 @@ const AdminRecommendations = () => {
       description: rec.description,
       phone: rec.phone,
       rating: rec.rating,
+      recommenderMode: "self",
+      selectedMemberId: "",
     });
     setShowForm(true);
   };
@@ -145,6 +160,20 @@ const AdminRecommendations = () => {
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
       toast({ title: "ההמלצה עודכנה בהצלחה!" });
     } else {
+      let recommenderName = "המלצת מערכת";
+      let recommenderUserId: string | null = null;
+      let isAdminPost = true;
+
+      if (formData.recommenderMode === "self") {
+        recommenderName = profile?.full_name || "מנהל מערכת";
+        recommenderUserId = user?.id || null;
+      } else if (formData.recommenderMode === "member") {
+        const selected = members.find((m) => m.user_id === formData.selectedMemberId);
+        recommenderName = selected?.full_name || "חבר מועדון";
+        recommenderUserId = formData.selectedMemberId || null;
+        isAdminPost = false;
+      }
+
       const { error } = await (supabase as any).from("professional_recommendations").insert({
         professional_name: fullName,
         professional_first_name: formData.professional_first_name,
@@ -153,10 +182,10 @@ const AdminRecommendations = () => {
         description: formData.description,
         phone: formData.phone,
         rating: formData.rating,
-        recommender_user_id: user?.id || null,
-        recommender_name: profile?.full_name || "מנהל מערכת",
+        recommender_user_id: recommenderUserId,
+        recommender_name: recommenderName,
         is_approved: true,
-        is_admin_post: true,
+        is_admin_post: isAdminPost,
       });
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
       toast({ title: "ההמלצה פורסמה בהצלחה!" });
@@ -333,9 +362,30 @@ const AdminRecommendations = () => {
               </div>
             </div>
             {!editingId && (
-              <div className="bg-gold/10 border border-gold/20 rounded-lg p-3 flex items-center gap-2">
-                <Award className="h-4 w-4 text-gold" />
-                <span className="font-body text-sm text-muted-foreground">יפורסם כ: <strong className="text-gold">מומלץ קרניצי</strong></span>
+              <div className="space-y-3">
+                <Label className="font-body text-sm font-semibold">שיוך הממליץ</Label>
+                <RadioGroup value={formData.recommenderMode} onValueChange={(v) => setFormData({ ...formData, recommenderMode: v as RecommenderMode, selectedMemberId: "" })} className="gap-2">
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="self" id="rec-self" />
+                    <Label htmlFor="rec-self" className="font-body text-sm cursor-pointer">בשמי ({profile?.full_name || "מנהל"})</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="member" id="rec-member" />
+                    <Label htmlFor="rec-member" className="font-body text-sm cursor-pointer">שייך לגולש אחר</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="system" id="rec-system" />
+                    <Label htmlFor="rec-system" className="font-body text-sm cursor-pointer">המלצת מערכת</Label>
+                  </div>
+                </RadioGroup>
+                {formData.recommenderMode === "member" && (
+                  <Select value={formData.selectedMemberId} onValueChange={(v) => setFormData({ ...formData, selectedMemberId: v })}>
+                    <SelectTrigger className="bg-card border-border font-body"><SelectValue placeholder="בחר גולש..." /></SelectTrigger>
+                    <SelectContent>
+                      {members.map((m) => (<SelectItem key={m.user_id} value={m.user_id}>{m.full_name}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             )}
             <Button type="submit" className="w-full gradient-gold text-primary-foreground font-body">
