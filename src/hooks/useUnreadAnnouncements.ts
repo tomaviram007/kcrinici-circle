@@ -1,12 +1,22 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-interface UnreadAnnouncement {
+const LS_KEY = "last_seen_announcements";
+
+export interface UnreadAnnouncement {
   id: string;
   title: string;
   created_at: string;
   category: string;
 }
+
+const getLastSeen = (): string =>
+  localStorage.getItem(LS_KEY) ??
+  new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+export const markAnnouncementsAsSeen = () => {
+  localStorage.setItem(LS_KEY, new Date().toISOString());
+};
 
 export const useUnreadAnnouncements = (userId: string | null) => {
   const [count, setCount] = useState(0);
@@ -15,22 +25,16 @@ export const useUnreadAnnouncements = (userId: string | null) => {
   const fetchUnread = async () => {
     if (!userId) { setCount(0); setItems([]); return; }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("last_seen_announcements")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const lastSeen = getLastSeen();
 
-    // If user has never visited announcements, show last 30 days as unread
-    const lastSeen = (profile as any)?.last_seen_announcements
-      ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("announcements")
       .select("id, title, created_at, category")
       .eq("is_approved", true)
       .gt("created_at", lastSeen)
       .order("created_at", { ascending: false });
+
+    if (error) { setCount(0); setItems([]); return; }
 
     setCount(data?.length ?? 0);
     setItems((data as UnreadAnnouncement[]) ?? []);
@@ -45,6 +49,13 @@ export const useUnreadAnnouncements = (userId: string | null) => {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
+  }, [userId]);
+
+  // Re-check when localStorage changes (e.g. user visits announcements in same session)
+  useEffect(() => {
+    const onStorage = () => fetchUnread();
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, [userId]);
 
   return { count, items, refetch: fetchUnread };

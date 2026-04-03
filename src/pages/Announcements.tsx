@@ -179,9 +179,9 @@ const Announcements = () => {
   // Mark announcements as seen when user visits this page
   useEffect(() => {
     if (!user?.id) return;
-    supabase.from("profiles")
-      .update({ last_seen_announcements: new Date().toISOString() } as any)
-      .eq("user_id", user.id);
+    import("@/hooks/useUnreadAnnouncements").then(({ markAnnouncementsAsSeen }) => {
+      markAnnouncementsAsSeen();
+    });
   }, [user?.id]);
 
   useEffect(() => {

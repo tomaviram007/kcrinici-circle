@@ -153,7 +153,7 @@ const Header = () => {
                 )}
                 {link.label}
                 {link.to === "/announcements" && unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" />
+                  <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
                 )}
               </Link>
             ))}
@@ -226,7 +226,7 @@ const Header = () => {
                 )}
                 {link.label}
                 {link.to === "/announcements" && unreadCount > 0 && (
-                  <span className="inline-block mr-1.5 h-2 w-2 rounded-full bg-red-500 align-middle" />
+                  <span className="inline-block mr-2 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse align-middle" />
                 )}
               </Link>
             ))}
