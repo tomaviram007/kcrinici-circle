@@ -18,7 +18,7 @@ import {
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isApproved, loading: authLoading } = useAuth();
+  const { user, isApproved, isAdmin, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
