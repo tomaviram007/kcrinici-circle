@@ -244,8 +244,8 @@ const Header = () => {
                   </span>
                 )}
                 {link.label}
-                {link.to === "/announcements" && unreadCount > 0 && (
-                  <span className="inline-block mr-2 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse align-middle" />
+                {hasNewDot(link.to) && (
+                  <span className="inline-block mr-2 h-2 w-2 rounded-full bg-destructive animate-pulse shadow-[0_0_6px_hsl(var(--destructive)/0.6)] align-middle" />
                 )}
               </Link>
             ))}
