@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -95,32 +94,16 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin,
+        },
       });
-
-      if (result.error) throw result.error;
-
-      if (result.redirected) {
-        // Browser is redirecting to Google — just return
-        return;
-      }
-
-      // Tokens received and session set — navigate based on role
-      // (the useEffect above will handle routing once AuthContext updates)
+      if (error) throw error;
+      // Browser will redirect to Google — no need to reset loading
     } catch (error: any) {
-      const isIframe = window.self !== window.top;
-      const msg = error.message?.toLowerCase() || "";
-      const isPopupBlocked = msg.includes("popup") || msg.includes("blocked") || msg.includes("cross-origin") || msg.includes("refused");
-      
-      let description = error.message;
-      if (isIframe || isPopupBlocked) {
-        description = "התחברות עם Google לא זמינה בתוך iframe. נסה לפתוח את האתר בטאב חדש (לחץ על האייקון בפינה הימנית העליונה של התצוגה המקדימה)";
-      } else if (msg.includes("network") || msg.includes("fetch")) {
-        description = "בעיית תקשורת. בדוק את החיבור לאינטרנט ונסה שוב";
-      }
-      
-      toast({ title: "שגיאה בחיבור עם Google", description, variant: "destructive" });
+      toast({ title: "שגיאה בחיבור עם Google", description: error.message, variant: "destructive" });
       setGoogleLoading(false);
     }
   };
