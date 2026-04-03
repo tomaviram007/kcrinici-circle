@@ -98,7 +98,7 @@ const Members = () => {
     if (isOwnCard(member)) {
       openEdit(member);
     } else {
-      navigate(`/members/${member.id}`);
+      setViewMember(member);
     }
   };
 
