@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { LogOut, Shield, Menu, X, Cake, User } from "lucide-react";
 import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
 import { usePendingCount } from "@/hooks/usePendingCount";
 import { useUnreadAnnouncements } from "@/hooks/useUnreadAnnouncements";
+import { useNewContent } from "@/hooks/useNewContent";
 import { useSiteLogo } from "@/hooks/useSiteLogo";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
