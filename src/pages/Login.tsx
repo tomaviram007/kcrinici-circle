@@ -18,7 +18,7 @@ import {
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isApproved, loading: authLoading } = useAuth();
+  const { user, isApproved, isAdmin, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,12 +28,12 @@ const Login = () => {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Redirect only approved authenticated users away from login
+  // Redirect authenticated users away from login
   useEffect(() => {
     if (!authLoading && user && isApproved) {
-      navigate("/", { replace: true });
+      navigate(isAdmin ? "/admin" : "/", { replace: true });
     }
-  }, [authLoading, user, isApproved, navigate]);
+  }, [authLoading, user, isApproved, isAdmin, navigate]);
 
   if (authLoading) {
     return (
@@ -91,13 +91,21 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
-      if (error) throw error;
+
+      if (result.error) throw result.error;
+
+      if (result.redirected) {
+        // Browser is redirecting to Google — just return
+        return;
+      }
+
+      // Tokens received and session set — navigate based on role
+      // (the useEffect above will handle routing once AuthContext updates)
     } catch (error: any) {
       toast({ title: "שגיאה בחיבור עם Google", description: error.message, variant: "destructive" });
-    } finally {
       setGoogleLoading(false);
     }
   };
