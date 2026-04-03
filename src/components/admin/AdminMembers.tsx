@@ -115,6 +115,11 @@ const AdminMembers = () => {
     }
   }, [viewProfile]);
 
+  const openWhatsApp = (phone: string, message: string) => {
+    const clean = phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
+    window.open(`https://wa.me/${clean}?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
   const handleApprove = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({ is_approved: true, is_removed: false }).eq("user_id", userId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
@@ -122,16 +127,23 @@ const AdminMembers = () => {
     const profile = profiles.find(p => p.user_id === userId);
     sendTelegramNotification("member_approved", { name: profile?.full_name, phone: profile?.phone, profession: profile?.profession });
     fireMemberApproved();
-    toast({ title: "אושר!", description: "החבר אושר בהצלחה והודעה נשלחה." });
+    toast({ title: "אושר!", description: "החבר אושר בהצלחה." });
     fetchProfiles();
+    if (profile?.phone) {
+      openWhatsApp(profile.phone, `היי ${profile.full_name}! 🎉 שמחים לבשר לך שבקשת ההצטרפות שלך למועדון קרניצי אושרה. ברוך הבא! 🥂`);
+    }
   };
 
   const handleReject = async (userId: string) => {
-    const { error } = await supabase.from("profiles").update({ is_approved: false }).eq("user_id", userId);
+    const { error } = await supabase.from("profiles").update({ is_approved: false, is_removed: true }).eq("user_id", userId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     supabase.functions.invoke("notify-member", { body: { userId, action: "reject" } });
-    toast({ title: "נדחה", description: "הבקשה נדחתה והודעה נשלחה." });
+    const profile = profiles.find(p => p.user_id === userId);
+    toast({ title: "נדחה", description: "הבקשה נדחתה." });
     fetchProfiles();
+    if (profile?.phone) {
+      openWhatsApp(profile.phone, `היי ${profile.full_name}, לאחר בחינת בקשתך, לצערנו לא נוכל לאשר את הצטרפותך למועדון קרניצי בשלב זה. תודה על ההבנה.`);
+    }
   };
 
   // Bulk actions
