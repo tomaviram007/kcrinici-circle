@@ -43,7 +43,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       const [{ data: profiles }, { data: events }, { data: jobs }, { data: polls }] = await Promise.all([
-        supabase.from("profiles").select("is_approved"),
+        supabase.from("profiles").select("is_approved, is_removed"),
         supabase.from("events").select("event_date").gte("event_date", new Date().toISOString()),
         supabase.from("jobs").select("is_approved, is_active"),
         supabase.from("polls").select("is_active"),
