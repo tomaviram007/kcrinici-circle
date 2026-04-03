@@ -109,7 +109,18 @@ const Login = () => {
       // Tokens received and session set — navigate based on role
       // (the useEffect above will handle routing once AuthContext updates)
     } catch (error: any) {
-      toast({ title: "שגיאה בחיבור עם Google", description: error.message, variant: "destructive" });
+      const isIframe = window.self !== window.top;
+      const msg = error.message?.toLowerCase() || "";
+      const isPopupBlocked = msg.includes("popup") || msg.includes("blocked") || msg.includes("cross-origin") || msg.includes("refused");
+      
+      let description = error.message;
+      if (isIframe || isPopupBlocked) {
+        description = "התחברות עם Google לא זמינה בתוך iframe. נסה לפתוח את האתר בטאב חדש (לחץ על האייקון בפינה הימנית העליונה של התצוגה המקדימה)";
+      } else if (msg.includes("network") || msg.includes("fetch")) {
+        description = "בעיית תקשורת. בדוק את החיבור לאינטרנט ונסה שוב";
+      }
+      
+      toast({ title: "שגיאה בחיבור עם Google", description, variant: "destructive" });
       setGoogleLoading(false);
     }
   };
