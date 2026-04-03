@@ -1,11 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, Shield, Menu, X, Cake, User } from "lucide-react";
 import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
 import { usePendingCount } from "@/hooks/usePendingCount";
-import { useUnreadAnnouncements } from "@/hooks/useUnreadAnnouncements";
+
+import { useNewContent } from "@/hooks/useNewContent";
 import { useSiteLogo } from "@/hooks/useSiteLogo";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
@@ -28,8 +29,16 @@ const Header = () => {
   const { birthdays } = useBirthdaysThisWeek();
   const { logoUrl, logoSize, logoText, logoPosition } = useSiteLogo();
   const pendingCount = usePendingCount();
-  const { count: unreadCount } = useUnreadAnnouncements(user?.id ?? null);
+  
+  const { newContent, markSeen } = useNewContent();
 
+  // Mark page as seen when navigating
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === "/deals" || path === "/jobs" || path === "/announcements") {
+      markSeen(path);
+    }
+  }, [location.pathname, markSeen]);
   const handleLogout = async () => {
     const { supabase } = await import("@/integrations/supabase/client");
     await supabase.auth.signOut();
@@ -98,6 +107,18 @@ const Header = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const hasNewDot = (path: string): boolean => {
+    if (!user) return false;
+    if (path === "/deals") return newContent.deals;
+    if (path === "/jobs") return newContent.jobs;
+    if (path === "/announcements") return newContent.announcements;
+    return false;
+  };
+
+  const NewDot = () => (
+    <span className="absolute -top-0.5 -left-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse shadow-[0_0_6px_hsl(var(--destructive)/0.6)]" />
+  );
+
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md w-full">
@@ -152,9 +173,7 @@ const Header = () => {
                   </span>
                 )}
                 {link.label}
-                {link.to === "/announcements" && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
-                )}
+                {hasNewDot(link.to) && <NewDot />}
               </Link>
             ))}
 
@@ -225,8 +244,8 @@ const Header = () => {
                   </span>
                 )}
                 {link.label}
-                {link.to === "/announcements" && unreadCount > 0 && (
-                  <span className="inline-block mr-2 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse align-middle" />
+                {hasNewDot(link.to) && (
+                  <span className="inline-block mr-2 h-2 w-2 rounded-full bg-destructive animate-pulse shadow-[0_0_6px_hsl(var(--destructive)/0.6)] align-middle" />
                 )}
               </Link>
             ))}
