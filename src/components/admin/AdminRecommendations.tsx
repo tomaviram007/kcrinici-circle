@@ -269,6 +269,7 @@ const AdminRecommendations = () => {
               <TableHead className="text-right font-body">שם משפחה</TableHead>
               <TableHead className="text-right font-body">קטגוריה</TableHead>
               <TableHead className="text-right font-body">ממליץ</TableHead>
+              <TableHead className="text-right font-body">סוג</TableHead>
               <TableHead className="text-right font-body">דירוג</TableHead>
               <TableHead className="text-right font-body">סטטוס</TableHead>
               <TableHead className="text-right font-body">פעולות</TableHead>
@@ -277,7 +278,7 @@ const AdminRecommendations = () => {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground font-body">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground font-body">
                   אין המלצות להצגה
                 </TableCell>
               </TableRow>
@@ -285,16 +286,20 @@ const AdminRecommendations = () => {
               filtered.map((rec) => (
                 <TableRow key={rec.id} className={rec.is_hidden ? "opacity-50" : ""}>
                   <TableCell className="font-serif font-bold text-foreground">
-                    <div className="flex items-center gap-2">
-                      {rec.professional_first_name}
-                      {rec.is_admin_post && (
-                        <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">מנהל</Badge>
-                      )}
-                    </div>
+                    {rec.professional_first_name}
                   </TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.professional_last_name || "—"}</TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.category}</TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.recommender_name}</TableCell>
+                  <TableCell>
+                    {rec.recommender_name === "המלצת מערכת" ? (
+                      <Badge variant="secondary" className="font-body text-xs">מערכת</Badge>
+                    ) : rec.is_admin_post ? (
+                      <Badge className="bg-primary/20 text-primary border-primary/30 font-body text-xs">מנהל</Badge>
+                    ) : (
+                      <Badge className="bg-accent/50 text-accent-foreground border-accent font-body text-xs">גולש</Badge>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-0.5" dir="ltr">
                       {[1, 2, 3, 4, 5].map((s) => (
