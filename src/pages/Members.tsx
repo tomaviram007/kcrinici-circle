@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import MemberProfilePopup from "@/components/MemberProfilePopup";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Phone, Briefcase, MapPin, Pencil, Search, Cake, Send, Heart, MessageCircle, Calendar, Globe, Facebook, Instagram, Linkedin, LayoutGrid, List } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
@@ -45,6 +46,7 @@ const Members = () => {
   const coverImage = usePageCover("members", heroImg);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [editMember, setEditMember] = useState<any | null>(null);
+  const [viewMember, setViewMember] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "", hobbies: "", website_url: "", facebook_url: "", instagram_url: "", linkedin_url: "" });
   const [saving, setSaving] = useState(false);
@@ -96,7 +98,7 @@ const Members = () => {
     if (isOwnCard(member)) {
       openEdit(member);
     } else {
-      navigate(`/members/${member.id}`);
+      setViewMember(member);
     }
   };
 
@@ -448,6 +450,7 @@ const Members = () => {
         </div>
       </DialogContent>
     </Dialog>
+    <MemberProfilePopup member={viewMember} open={!!viewMember} onOpenChange={(open) => !open && setViewMember(null)} />
     <QuoteSection page="members" />
     </>
   );
