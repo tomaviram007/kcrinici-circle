@@ -292,6 +292,15 @@ const AdminRecommendations = () => {
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.category}</TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{rec.recommender_name}</TableCell>
                   <TableCell>
+                    {rec.recommender_name === "המלצת מערכת" ? (
+                      <Badge variant="secondary" className="font-body text-xs">מערכת</Badge>
+                    ) : rec.is_admin_post ? (
+                      <Badge className="bg-primary/20 text-primary border-primary/30 font-body text-xs">מנהל</Badge>
+                    ) : (
+                      <Badge className="bg-accent/50 text-accent-foreground border-accent font-body text-xs">גולש</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-0.5" dir="ltr">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star key={s} className={`h-3.5 w-3.5 ${s <= rec.rating ? "fill-primary text-primary" : "text-muted-foreground/20"}`} />
