@@ -160,6 +160,21 @@ const AdminRecommendations = () => {
 
     const fullName = [formData.professional_first_name, formData.professional_last_name].filter(Boolean).join(" ");
 
+    // Resolve recommender info for both create and edit
+    let recommenderName = "המלצת מערכת";
+    let recommenderUserId: string | null = null;
+    let isAdminPost = true;
+
+    if (formData.recommenderMode === "self") {
+      recommenderName = profile?.full_name || "מנהל מערכת";
+      recommenderUserId = user?.id || null;
+    } else if (formData.recommenderMode === "member") {
+      const selected = members.find((m) => m.user_id === formData.selectedMemberId);
+      recommenderName = selected?.full_name || "חבר מועדון";
+      recommenderUserId = formData.selectedMemberId || null;
+      isAdminPost = false;
+    }
+
     if (editingId) {
       const { error } = await (supabase as any).from("professional_recommendations").update({
         professional_name: fullName,
@@ -169,6 +184,9 @@ const AdminRecommendations = () => {
         description: formData.description,
         phone: formData.phone,
         rating: formData.rating,
+        recommender_name: recommenderName,
+        recommender_user_id: recommenderUserId,
+        is_admin_post: isAdminPost,
       }).eq("id", editingId);
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
       toast({ title: "ההמלצה עודכנה בהצלחה!" });
