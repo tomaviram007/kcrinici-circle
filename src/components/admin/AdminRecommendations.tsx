@@ -359,9 +359,30 @@ const AdminRecommendations = () => {
               </div>
             </div>
             {!editingId && (
-              <div className="bg-gold/10 border border-gold/20 rounded-lg p-3 flex items-center gap-2">
-                <Award className="h-4 w-4 text-gold" />
-                <span className="font-body text-sm text-muted-foreground">יפורסם כ: <strong className="text-gold">מומלץ קרניצי</strong></span>
+              <div className="space-y-3">
+                <Label className="font-body text-sm font-semibold">שיוך הממליץ</Label>
+                <RadioGroup value={formData.recommenderMode} onValueChange={(v) => setFormData({ ...formData, recommenderMode: v as RecommenderMode, selectedMemberId: "" })} className="gap-2">
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="self" id="rec-self" />
+                    <Label htmlFor="rec-self" className="font-body text-sm cursor-pointer">בשמי ({profile?.full_name || "מנהל"})</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="member" id="rec-member" />
+                    <Label htmlFor="rec-member" className="font-body text-sm cursor-pointer">שייך לגולש אחר</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="system" id="rec-system" />
+                    <Label htmlFor="rec-system" className="font-body text-sm cursor-pointer">המלצת מערכת</Label>
+                  </div>
+                </RadioGroup>
+                {formData.recommenderMode === "member" && (
+                  <Select value={formData.selectedMemberId} onValueChange={(v) => setFormData({ ...formData, selectedMemberId: v })}>
+                    <SelectTrigger className="bg-card border-border font-body"><SelectValue placeholder="בחר גולש..." /></SelectTrigger>
+                    <SelectContent>
+                      {members.map((m) => (<SelectItem key={m.user_id} value={m.user_id}>{m.full_name}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             )}
             <Button type="submit" className="w-full gradient-gold text-primary-foreground font-body">
