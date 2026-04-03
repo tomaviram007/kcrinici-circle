@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -51,6 +52,32 @@ serve(async (req) => {
   }
 
   try {
+    // --- Authentication: verify caller identity ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // User is authenticated - proceed
     const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
     const chatId = Deno.env.get("TELEGRAM_CHAT_ID");
 
@@ -69,14 +96,12 @@ serve(async (req) => {
 
     const text = formatMessage(event_type, data);
 
-    // Build request payload
     const payload: any = {
       chat_id: chatId,
       text,
       parse_mode: "HTML",
     };
 
-    // Add inline keyboard for new member registrations
     if (event_type === "new_member" && data.user_id) {
       payload.reply_markup = {
         inline_keyboard: [
@@ -99,7 +124,7 @@ serve(async (req) => {
     if (!response.ok) {
       console.error(`Telegram API error [${response.status}]:`, JSON.stringify(result));
       return new Response(
-        JSON.stringify({ error: "Telegram API error", details: result }),
+        JSON.stringify({ error: "Telegram API error" }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -111,7 +136,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Telegram notify error:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
