@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, X, Eye, EyeOff, Edit, Trash2, Plus, Star, Search, Award } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const CATEGORIES = [
   "שיפוצים", "חשמל ואינסטלציה", "פיננסיים", "רכב", "אירועים",
