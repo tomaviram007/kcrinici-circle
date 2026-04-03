@@ -450,6 +450,7 @@ const Members = () => {
         </div>
       </DialogContent>
     </Dialog>
+    <MemberProfilePopup member={viewMember} open={!!viewMember} onOpenChange={(open) => !open && setViewMember(null)} />
     <QuoteSection page="members" />
     </>
   );
