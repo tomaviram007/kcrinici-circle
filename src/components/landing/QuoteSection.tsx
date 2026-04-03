@@ -84,8 +84,8 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
   return (
     <section
-      className="relative overflow-hidden flex items-center justify-center"
-      style={{ height: `${height}vw`, minHeight: "260px" }}
+      className="relative overflow-hidden flex items-center justify-center py-16 sm:py-0"
+      style={{ minHeight: "260px", height: `clamp(260px, ${height}vw, 90vh)` }}
     >
       <div
         ref={bgRef}
@@ -96,15 +96,15 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
       <div
         ref={ref}
-        className="relative z-10 flex flex-col items-center justify-center px-6 text-center"
+        className="relative z-10 flex flex-col items-center justify-center px-6 sm:px-12 text-center max-w-4xl mx-auto"
       >
         <blockquote
-          className="font-serif font-bold text-white leading-relaxed opacity-0 drop-shadow-lg"
-          style={{ fontSize: `clamp(16px, 3.5vw, ${fontSize}px)` }}
+          className="font-serif font-bold text-white leading-snug opacity-0 drop-shadow-lg"
+          style={{ fontSize: `clamp(20px, 4vw, ${fontSize}px)` }}
         >
           {quote.text}
         </blockquote>
-        <p className="mt-4 font-body text-sm sm:text-base text-gold/80 opacity-0 drop-shadow-md">
+        <p className="mt-3 sm:mt-4 font-body text-xs sm:text-base text-gold/80 opacity-0 drop-shadow-md tracking-wide">
           {quote.author}{quote.author_title ? ` — ${quote.author_title}` : ""}
         </p>
       </div>

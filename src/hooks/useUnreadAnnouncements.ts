@@ -11,8 +11,7 @@ export interface UnreadAnnouncement {
 }
 
 const getLastSeen = (): string =>
-  localStorage.getItem(LS_KEY) ??
-  new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  localStorage.getItem(LS_KEY) ?? "2000-01-01T00:00:00Z";
 
 export const markAnnouncementsAsSeen = () => {
   localStorage.setItem(LS_KEY, new Date().toISOString());
