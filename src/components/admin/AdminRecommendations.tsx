@@ -191,20 +191,6 @@ const AdminRecommendations = () => {
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
       toast({ title: "ההמלצה עודכנה בהצלחה!" });
     } else {
-      let recommenderName = "המלצת מערכת";
-      let recommenderUserId: string | null = null;
-      let isAdminPost = true;
-
-      if (formData.recommenderMode === "self") {
-        recommenderName = profile?.full_name || "מנהל מערכת";
-        recommenderUserId = user?.id || null;
-      } else if (formData.recommenderMode === "member") {
-        const selected = members.find((m) => m.user_id === formData.selectedMemberId);
-        recommenderName = selected?.full_name || "חבר מועדון";
-        recommenderUserId = formData.selectedMemberId || null;
-        isAdminPost = false;
-      }
-
       const { error } = await (supabase as any).from("professional_recommendations").insert({
         professional_name: fullName,
         professional_first_name: formData.professional_first_name,
