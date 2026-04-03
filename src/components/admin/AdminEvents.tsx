@@ -33,6 +33,7 @@ const AdminEvents = () => {
   const [rsvpData, setRsvpData] = useState<Record<string, RsvpProfile[]>>({});
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [rsvpDialogEvent, setRsvpDialogEvent] = useState<any | null>(null);
+  const [sendingReminders, setSendingReminders] = useState(false);
 
   const fetchEvents = async () => {
     const { data } = await supabase.from("events").select("*").order("event_date", { ascending: true });
