@@ -49,8 +49,8 @@ const AdminDashboard = () => {
         supabase.from("polls").select("is_active"),
       ]);
       setStats({
-        approvedMembers: (profiles || []).filter(p => p.is_approved).length,
-        pendingMembers: (profiles || []).filter(p => !p.is_approved).length,
+        approvedMembers: (profiles || []).filter(p => p.is_approved && !p.is_removed).length,
+        pendingMembers: (profiles || []).filter(p => !p.is_approved && !p.is_removed).length,
         upcomingEvents: (events || []).length,
         activeJobs: (jobs || []).filter(j => j.is_approved && j.is_active).length,
         activePolls: (polls || []).filter(p => p.is_active).length,
