@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send } from "lucide-react";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,7 @@ const AdminEvents = () => {
   const [rsvpData, setRsvpData] = useState<Record<string, RsvpProfile[]>>({});
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [rsvpDialogEvent, setRsvpDialogEvent] = useState<any | null>(null);
+  const [sendingReminders, setSendingReminders] = useState(false);
 
   const fetchEvents = async () => {
     const { data } = await supabase.from("events").select("*").order("event_date", { ascending: true });
@@ -152,9 +153,32 @@ const AdminEvents = () => {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-serif text-xl font-bold text-foreground">ניהול אירועים</h3>
-        <Button size="sm" onClick={() => { setShowForm(!showForm); setEditId(null); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
-          <Plus className="h-4 w-4 ml-1" /> הוסף
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              setSendingReminders(true);
+              try {
+                const { data, error } = await supabase.functions.invoke("event-reminders");
+                if (error) throw error;
+                toast({ title: `תזכורות נשלחו`, description: `${data?.sent || 0} הודעות נשלחו בהצלחה` });
+              } catch (err: any) {
+                toast({ title: "שגיאה בשליחת תזכורות", description: err.message, variant: "destructive" });
+              } finally {
+                setSendingReminders(false);
+              }
+            }}
+            disabled={sendingReminders}
+            className="font-body border-primary/30 text-primary hover:bg-primary/10"
+          >
+            <Bell className="h-4 w-4 ml-1" />
+            {sendingReminders ? "שולח..." : "שלח תזכורות"}
+          </Button>
+          <Button size="sm" onClick={() => { setShowForm(!showForm); setEditId(null); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
+            <Plus className="h-4 w-4 ml-1" /> הוסף
+          </Button>
+        </div>
       </div>
 
       {showForm && (
