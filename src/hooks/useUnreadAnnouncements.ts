@@ -21,8 +21,9 @@ export const useUnreadAnnouncements = (userId: string | null) => {
       .eq("user_id", userId)
       .maybeSingle();
 
-    const lastSeen = (profile as any)?.last_seen_announcements;
-    if (!lastSeen) { setCount(0); setItems([]); return; }
+    // If user has never visited announcements, show last 30 days as unread
+    const lastSeen = (profile as any)?.last_seen_announcements
+      ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
     const { data } = await supabase
       .from("announcements")
