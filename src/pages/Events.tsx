@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useConfetti } from "@/hooks/useConfetti";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -45,6 +46,7 @@ const Events = () => {
   const [filterMonth, setFilterMonth] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { fireRSVP } = useConfetti();
 
   useEffect(() => {
     const init = async () => {
@@ -98,6 +100,7 @@ const Events = () => {
       await supabase.from("event_rsvps").upsert({ event_id: eventId, user_id: userId, status: "attending" }, { onConflict: "event_id,user_id" });
       setRsvps((prev) => ({ ...prev, [eventId]: "attending" }));
       setRsvpCounts((prev) => ({ ...prev, [eventId]: (prev[eventId] || 0) + 1 }));
+      fireRSVP();
       toast({ title: "אישרת הגעה! 🎉" });
     }
   };

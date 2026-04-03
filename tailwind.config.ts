@@ -101,6 +101,15 @@ export default {
           "0%, 100%": { transform: "translateY(0) rotate(0deg)" },
           "50%": { transform: "translateY(-8px) rotate(1deg)" },
         },
+        "btn-pop": {
+          "0%": { transform: "scale(1)" },
+          "40%": { transform: "scale(0.93)" },
+          "100%": { transform: "scale(1)" },
+        },
+        "confetti-fall": {
+          "0%": { opacity: "1", transform: "translateY(-10px) rotate(0deg)" },
+          "100%": { opacity: "0", transform: "translateY(60px) rotate(360deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -108,6 +117,7 @@ export default {
         "fade-up": "fade-up 0.8s ease-out forwards",
         "shimmer": "shimmer 3s ease-in-out infinite",
         "float": "float 4s ease-in-out infinite",
+        "btn-pop": "btn-pop 0.25s ease-out",
       },
     },
   },

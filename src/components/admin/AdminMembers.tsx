@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
+import { useConfetti } from "@/hooks/useConfetti";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
@@ -47,6 +48,7 @@ const PROTECTED_ADMIN_ID = "6227d1da-8f99-4b82-bd30-a3dc2e3a3885";
 
 const AdminMembers = () => {
   const { toast } = useToast();
+  const { fireMemberApproved } = useConfetti();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -115,6 +117,7 @@ const AdminMembers = () => {
     supabase.functions.invoke("notify-member", { body: { userId, action: "approve" } });
     const profile = profiles.find(p => p.user_id === userId);
     sendTelegramNotification("member_approved", { name: profile?.full_name, phone: profile?.phone, profession: profile?.profession });
+    fireMemberApproved();
     toast({ title: "אושר!", description: "החבר אושר בהצלחה והודעה נשלחה." });
     fetchProfiles();
   };

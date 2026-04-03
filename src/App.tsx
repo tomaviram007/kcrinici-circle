@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-ro
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/layout/Header";
+import PageTransition from "@/components/layout/PageTransition";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import BirthdayPopup from "@/components/BirthdayPopup";
@@ -58,6 +59,7 @@ const AppLayout = () => {
   return (
     <>
       {!hideHeader && <Header />}
+      <PageTransition>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
@@ -77,6 +79,7 @@ const AppLayout = () => {
         <Route path="/deals" element={<ProtectedRoute><Deals /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </PageTransition>
       {!hideHeader && <FloatingWhatsApp />}
       {!hideHeader && <BirthdayPopup />}
     </>

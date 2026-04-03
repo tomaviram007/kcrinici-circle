@@ -16,6 +16,16 @@ const isBirthdayToday = (birthDate: string | null): boolean => {
   return bd.getMonth() === now.getMonth() && bd.getDate() === now.getDate();
 };
 
+const daysUntilBirthday = (birthDate: string | null): number | null => {
+  if (!birthDate) return null;
+  const now = new Date();
+  const bd = new Date(birthDate + "T00:00:00");
+  const next = new Date(now.getFullYear(), bd.getMonth(), bd.getDate());
+  if (next < now) next.setFullYear(now.getFullYear() + 1);
+  const diff = Math.round((next.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return diff <= 14 && diff > 0 ? diff : null;
+};
+
 const formatHebrewDate = (dateStr: string): string => {
   const date = new Date(dateStr + "T00:00:00");
   return date.toLocaleDateString("he-IL", { day: "numeric", month: "long" });
@@ -31,6 +41,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
   if (!member) return null;
 
   const birthdayToday = isBirthdayToday(member.birth_date);
+  const daysLeft = daysUntilBirthday(member.birth_date);
 
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,6 +78,12 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
               <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-gold/15 border border-gold/30 px-3 py-1 text-xs font-body text-gold animate-pulse">
                 <Cake className="h-3.5 w-3.5" />
                 🎂 חוגג יום הולדת היום!
+              </div>
+            )}
+            {!birthdayToday && daysLeft !== null && (
+              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary border border-border px-3 py-1 text-xs font-body text-muted-foreground">
+                <Cake className="h-3.5 w-3.5 text-gold" />
+                עוד {daysLeft} ימים ליום ההולדת 🎉
               </div>
             )}
           </div>
