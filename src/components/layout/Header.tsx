@@ -107,7 +107,17 @@ const Header = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  return (
+  const hasNewDot = (path: string): boolean => {
+    if (!user) return false;
+    if (path === "/deals") return newContent.deals;
+    if (path === "/jobs") return newContent.jobs;
+    if (path === "/announcements") return newContent.announcements;
+    return false;
+  };
+
+  const NewDot = () => (
+    <span className="absolute -top-0.5 -left-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse shadow-[0_0_6px_hsl(var(--destructive)/0.6)]" />
+  );
     <>
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md w-full">
         <div className="w-full px-4 md:px-6 relative flex items-center py-[8vw] md:py-3">
