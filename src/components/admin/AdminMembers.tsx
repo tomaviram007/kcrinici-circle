@@ -87,16 +87,7 @@ const AdminMembers = () => {
     setProfiles(allProfiles);
     setLoading(false);
 
-    // Fetch emails for removed members via RPC
-    const removedIds = allProfiles.filter(p => p.is_removed).map(p => p.user_id);
-    if (removedIds.length > 0) {
-      const { data: emailData } = await supabase.rpc("get_user_emails", { user_ids: removedIds });
-      if (emailData) {
-        const emailMap: Record<string, string> = {};
-        (emailData as { uid: string; email: string }[]).forEach(row => { emailMap[row.uid] = row.email; });
-        setMemberEmails(emailMap);
-      }
-    }
+    // Email fetching removed – get_user_emails RPC no longer exists
   };
 
   useEffect(() => {
