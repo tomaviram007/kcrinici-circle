@@ -257,6 +257,35 @@ const AdminMembers = () => {
   const approved = filtered.filter((p) => p.is_approved && !p.is_removed);
   const removed = filtered.filter((p) => p.is_removed);
 
+  const exportMembersCSV = (data: Profile[]) => {
+    const BOM = "\uFEFF";
+    const headers = ["שם מלא","טלפון","מקצוע","מומחיות","כתובת","תאריך הצטרפות","סטטוס","תאריך לידה","תחביבים","אתר","פייסבוק","אינסטגרם","לינקדאין"];
+    const rows = data.map(p => [
+      p.full_name,
+      p.phone,
+      p.profession,
+      p.expertise || "",
+      p.address,
+      new Date(p.created_at).toLocaleDateString("he-IL"),
+      p.is_removed ? "הוסר" : p.is_approved ? "מאושר" : "ממתין",
+      p.birth_date ? new Date(p.birth_date).toLocaleDateString("he-IL") : "",
+      p.hobbies || "",
+      p.website_url || "",
+      p.facebook_url || "",
+      p.instagram_url || "",
+      p.linkedin_url || "",
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","));
+    const csv = BOM + [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `members_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "הקובץ יורד", description: `${data.length} חברים יוצאו בהצלחה` });
+  };
+
   if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
 
   return (
