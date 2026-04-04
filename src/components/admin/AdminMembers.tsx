@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Check, X, Clock, Users, Search, Pencil, Trash2, KeyRound, Eye, EyeOff,
-  UserX, RotateCcw, Phone, MapPin, Briefcase, Calendar, User, Globe, Facebook, Instagram, Linkedin, Sparkles,
+  UserX, RotateCcw, Phone, MapPin, Briefcase, Calendar, User, Globe, Facebook, Instagram, Linkedin, Sparkles, Download,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
