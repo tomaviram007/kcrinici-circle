@@ -261,16 +261,26 @@ const AdminMembers = () => {
 
   return (
     <div className="space-y-6">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="חיפוש לפי שם, מקצוע או טלפון..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pr-10 bg-card"
-          autoComplete="off"
-        />
+      {/* Search + Export */}
+      <div className="flex gap-2 items-center">
+        <div className="relative flex-1">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="חיפוש לפי שם, מקצוע או טלפון..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pr-10 bg-card"
+            autoComplete="off"
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="shrink-0 gap-1.5 font-body text-xs h-9"
+          onClick={() => exportMembersCSV(profiles)}
+        >
+          <Download className="h-4 w-4" /> ייצוא CSV
+        </Button>
       </div>
 
       {/* Bulk action bar */}
