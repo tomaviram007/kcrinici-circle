@@ -119,7 +119,8 @@ const Deals = () => {
 
   const handleWebsiteClick = (deal: Deal) => {
     trackClick(deal.id, "website_click_count");
-    window.open(deal.website_url!, "_blank");
+    const url = deal.website_url!.startsWith("http") ? deal.website_url! : `https://${deal.website_url!}`;
+    window.open(url, "_blank");
   };
 
   const handleWhatsApp = (deal: Deal) => {
