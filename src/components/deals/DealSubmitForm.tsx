@@ -55,7 +55,7 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
       coupon_code: form.coupon_code || null,
       business_name: form.business_name,
       business_phone: form.business_phone || null,
-      website_url: form.website_url || null,
+      website_url: form.website_url ? (form.website_url.startsWith("http") ? form.website_url : `https://${form.website_url}`) : null,
       category: form.category,
       expires_at: form.expires_at || null,
       is_active: true,
