@@ -19,7 +19,7 @@ const registerSchema = z.object({
   profession: z.string().trim().min(2, "מקצוע חייב להכיל לפחות 2 תווים").max(100, "מקצוע ארוך מדי"),
   expertise: z.string().max(200, "מומחיות ארוכה מדי").optional().or(z.literal("")),
   bio: z.string().max(500, "ביוגרפיה ארוכה מדי").optional().or(z.literal("")),
-  hobbies: z.string().max(300, "תחביבים ארוכים מדי").optional().or(z.literal("")),
+  hobbies: z.string().trim().min(2, "יש למלא תחביבים").max(300, "תחביבים ארוכים מדי"),
   website_url: z.string().url("כתובת URL לא תקינה").optional().or(z.literal("")),
   facebook_url: z.string().url("כתובת URL לא תקינה").optional().or(z.literal("")),
   instagram_url: z.string().url("כתובת URL לא תקינה").optional().or(z.literal("")),
@@ -225,7 +225,7 @@ const Register = () => {
           </div>
 
           <Field name="bio" label="משהו שהשכנים צריכים לדעת עליך" textarea placeholder="ביוגרפיה קצרה..." {...fieldProps} />
-          <Field name="hobbies" label="מה התחביבים שלך?" placeholder="למשל: ספורט, בישול, טכנולוגיה..." {...fieldProps} />
+          <Field name="hobbies" label="מה התחביבים שלך?" required placeholder="למשל: ספורט, בישול, טכנולוגיה..." {...fieldProps} />
 
           <div className="border-t border-border pt-4 sm:pt-5 space-y-3 sm:space-y-4">
             <p className="font-body text-sm text-muted-foreground">קישורים חברתיים (אופציונלי)</p>
