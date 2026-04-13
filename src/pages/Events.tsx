@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search, Pencil } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search, Pencil, CreditCard } from "lucide-react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,7 @@ const Events = () => {
   const [rsvpCounts, setRsvpCounts] = useState<Record<string, number>>({});
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [paymentPopupEvent, setPaymentPopupEvent] = useState<any | null>(null);
   const [eventCreator, setEventCreator] = useState<any | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -93,21 +94,42 @@ const Events = () => {
     }
   }, [events]);
 
-  const handleRsvp = async (eventId: string) => {
-    if (!userId) return;
-    const current = rsvps[eventId];
-    if (current === "attending") {
-      await supabase.from("event_rsvps").delete().eq("event_id", eventId).eq("user_id", userId);
-      setRsvps((prev) => { const n = { ...prev }; delete n[eventId]; return n; });
-      setRsvpCounts((prev) => ({ ...prev, [eventId]: Math.max(0, (prev[eventId] || 1) - 1) }));
-      toast({ title: "ביטלת את אישור ההגעה" });
-    } else {
-      await supabase.from("event_rsvps").upsert({ event_id: eventId, user_id: userId, status: "attending" }, { onConflict: "event_id,user_id" });
-      setRsvps((prev) => ({ ...prev, [eventId]: "attending" }));
-      setRsvpCounts((prev) => ({ ...prev, [eventId]: (prev[eventId] || 0) + 1 }));
-      fireRSVP();
-      toast({ title: "אישרת הגעה! 🎉" });
+  const attemptRsvp = (event: any) => {
+    if (!userId) {
+      toast({ title: "יש להתחבר כדי לאשר הגעה", variant: "destructive" });
+      return;
     }
+    const current = rsvps[event.id];
+    if (current === "attending") {
+      cancelRsvp(event.id);
+    } else if (event.price && event.payment_link) {
+      setPaymentPopupEvent(event);
+    } else {
+      confirmRsvp(event.id);
+    }
+  };
+
+  const confirmRsvp = async (eventId: string) => {
+    if (!userId) return;
+    await supabase.from("event_rsvps").upsert({ event_id: eventId, user_id: userId, status: "attending", payment_status: "pending" }, { onConflict: "event_id,user_id" });
+    setRsvps((prev) => ({ ...prev, [eventId]: "attending" }));
+    setRsvpCounts((prev) => ({ ...prev, [eventId]: (prev[eventId] || 0) + 1 }));
+    fireRSVP();
+    toast({ title: "אישרת הגעה! 🎉" });
+    setPaymentPopupEvent(null);
+  };
+
+  const cancelRsvp = async (eventId: string) => {
+    if (!userId) return;
+    await supabase.from("event_rsvps").delete().eq("event_id", eventId).eq("user_id", userId);
+    setRsvps((prev) => { const n = { ...prev }; delete n[eventId]; return n; });
+    setRsvpCounts((prev) => ({ ...prev, [eventId]: Math.max(0, (prev[eventId] || 1) - 1) }));
+    toast({ title: "ביטלת את אישור ההגעה" });
+  };
+
+  const handleRsvp = async (eventId: string) => {
+    const event = events.find(e => e.id === eventId);
+    if (event) attemptRsvp(event);
   };
 
   const openEventPopup = async (event: any) => {
@@ -403,6 +425,23 @@ const Events = () => {
                       <span>{count} מאשרים הגעה</span>
                     </div>
                   )}
+                  {selectedEvent.price && (
+                    <div className="flex items-center gap-2 font-body text-sm text-gold">
+                      <CreditCard className="h-4 w-4 shrink-0" />
+                      <span>עלות השתתפות: ₪{Number(selectedEvent.price).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {selectedEvent.payment_link && (
+                    <a
+                      href={selectedEvent.payment_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 font-body text-sm text-gold hover:underline"
+                    >
+                      <CreditCard className="h-4 w-4 shrink-0" />
+                      קישור לתשלום
+                    </a>
+                  )}
                 </div>
 
                 {/* Creator info */}
@@ -430,7 +469,7 @@ const Events = () => {
                 {/* Action buttons */}
                 <div className="mt-auto flex flex-col gap-2.5 pt-4 border-t border-border">
                   <Button
-                    onClick={(e) => { e.stopPropagation(); handleRsvp(selectedEvent.id); }}
+                    onClick={(e) => { e.stopPropagation(); attemptRsvp(selectedEvent); }}
                     className={cn(
                       "w-full font-body",
                       isAttending
@@ -453,6 +492,44 @@ const Events = () => {
             </div>
           );
         })()}
+      </DialogContent>
+    </Dialog>
+
+    {/* Payment Confirmation Popup */}
+    <Dialog open={!!paymentPopupEvent} onOpenChange={() => setPaymentPopupEvent(null)}>
+      <DialogContent dir="rtl" className="max-w-sm">
+        <DialogTitle className="font-serif text-xl text-center">אישור הגעה ותשלום</DialogTitle>
+        <DialogDescription className="sr-only">פרטי תשלום לאירוע</DialogDescription>
+        {paymentPopupEvent && (
+          <div className="space-y-4 pt-2">
+            <div className="rounded-lg bg-secondary p-4 text-center space-y-1">
+              <p className="font-body text-sm text-muted-foreground">ההשתתפות באירוע</p>
+              <p className="font-serif text-lg font-bold text-foreground">{paymentPopupEvent.title}</p>
+              <p className="font-body text-sm text-muted-foreground">כרוכה בתשלום של</p>
+              <p className="font-serif text-3xl font-bold text-gold">₪{Number(paymentPopupEvent.price).toLocaleString()}</p>
+            </div>
+            <p className="font-body text-xs text-center text-muted-foreground leading-relaxed">
+              לאחר אישור ההגעה, תועבר/י לדף התשלום. ההרשמה תושלם לאחר ביצוע התשלום.
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => {
+                  confirmRsvp(paymentPopupEvent.id);
+                  if (paymentPopupEvent.payment_link) {
+                    window.open(paymentPopupEvent.payment_link, "_blank");
+                  }
+                }}
+                className="gradient-gold text-primary-foreground font-body"
+              >
+                <CreditCard className="h-4 w-4 ml-1" />
+                אישור הגעה ומעבר לתשלום
+              </Button>
+              <Button variant="ghost" onClick={() => setPaymentPopupEvent(null)} className="font-body text-muted-foreground">
+                ביטול
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
     <QuoteSection page="events" />
