@@ -63,7 +63,7 @@ const groups = [
   },
 ];
 
-const AdminSidebar = ({ activeTab, onTabChange, collapsed = false }: AdminSidebarProps) => {
+const AdminSidebar = ({ activeTab, onTabChange, collapsed = false, hasPermission }: AdminSidebarProps) => {
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
