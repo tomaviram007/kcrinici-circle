@@ -11,6 +11,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import Footer from "@/components/layout/Footer";
 import BirthdayPopup from "@/components/BirthdayPopup";
+import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import { toast } from "sonner";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -87,6 +88,12 @@ const AppLayout = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       </PageTransition>
+      {/* Global ad banner before footer */}
+      {!hideHeader && (
+        <div className="mx-auto max-w-7xl px-4 py-6">
+          <SmartAdBanner placement="inline" />
+        </div>
+      )}
       {!hideHeader && <Footer />}
       {!hideHeader && <FloatingWhatsApp />}
       {!hideHeader && <BirthdayPopup />}
