@@ -11,6 +11,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import PageHero from "@/components/PageHero";
 
 import QuoteSection from "@/components/landing/QuoteSection";
+import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import heroImg from "@/assets/hero-gallery.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import { validateImageFile } from "@/lib/file-validation";
@@ -781,6 +782,9 @@ const Gallery = () => {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <SmartAdBanner placement="sidebar" />
     </div>
     <QuoteSection page="gallery" />
     </>
