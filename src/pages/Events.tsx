@@ -215,6 +215,11 @@ const Events = () => {
         </Select>
       </div>
 
+      {/* Ad below hero area */}
+      <div className="mb-6">
+        <SmartAdBanner placement="premium" targetPage="events" slotIndex={0} />
+      </div>
+
       {(() => {
         const filtered = events.filter((event) => {
           if (filterMonth !== "all") {
@@ -227,15 +232,26 @@ const Events = () => {
           }
           return true;
         });
-        return (
-      <div ref={gridRef} className="columns-1 sm:columns-2 lg:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4">
-        {filtered.map((event, i) => {
+
+        // Insert ads every 5 events
+        const MAX_ADS = 4;
+        let adSlot = 0;
+        const elements: React.ReactNode[] = [];
+        filtered.forEach((event, i) => {
+          if (i > 0 && i % 5 === 0 && adSlot < MAX_ADS - 1) {
+            elements.push(
+              <div key={`ad-${adSlot}`} className="break-inside-avoid mb-3 sm:mb-4">
+                <SmartAdBanner placement="inline_repeat" targetPage="events" slotIndex={adSlot + 1} />
+              </div>
+            );
+            adSlot++;
+          }
           const date = new Date(event.event_date);
           const bgClass = BG_VARIANTS[i % BG_VARIANTS.length];
           const isAttending = rsvps[event.id] === "attending";
           const count = rsvpCounts[event.id] || 0;
 
-          return (
+          elements.push(
             <div
               key={event.id}
               onClick={() => openEventPopup(event)}
@@ -250,7 +266,6 @@ const Events = () => {
                 <div className={`w-full h-40 ${bgClass}`} />
               )}
 
-              {/* Date badge - overlaid on top-right of image */}
               <div className="absolute top-3 right-3 z-10">
                 <div className="inline-flex flex-col items-center rounded-lg bg-background/60 backdrop-blur-sm px-3 py-2 border border-border/50">
                   <span className="font-serif text-2xl font-bold text-gold leading-none">{date.getDate()}</span>
@@ -296,7 +311,11 @@ const Events = () => {
               <div className="absolute bottom-0 right-0 w-24 h-24 bg-gold/5 rounded-tl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
           );
-        })}
+        });
+
+        return (
+      <div ref={gridRef} className="columns-1 sm:columns-2 lg:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4">
+        {elements}
       </div>
         );
       })()}

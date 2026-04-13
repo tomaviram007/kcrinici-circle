@@ -658,6 +658,11 @@ const Announcements = () => {
         </div>
       )}
 
+      {/* ==================== PREMIUM AD - Between sections ==================== */}
+      <div className="my-8">
+        <SmartAdBanner placement="premium" targetPage="announcements" slotIndex={0} />
+      </div>
+
       {/* ==================== SEPARATOR ==================== */}
       <Separator className="my-12" />
 
