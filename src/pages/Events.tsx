@@ -529,6 +529,54 @@ const Events = () => {
                           window.open(waUrl, "_blank");
                         }
                       }}
+                      onContextMenu={async (e) => {
+                        e.preventDefault();
+                        const date = new Date(selectedEvent.event_date);
+                        const siteUrl = window.location.origin;
+                        const eventUrl = `${siteUrl}/events`;
+                        
+                        let text = `🎉 ${selectedEvent.title}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`;
+                        if (selectedEvent.location) text += `\n📍 ${selectedEvent.location}`;
+                        if (selectedEvent.price) text += `\n💰 עלות: ₪${Number(selectedEvent.price).toLocaleString()}`;
+                        if (selectedEvent.payment_link) text += `\n💳 לתשלום: ${selectedEvent.payment_link}`;
+                        if (selectedEvent.description) text += `\n\n${selectedEvent.description}`;
+                        text += `\n\n🔗 ${eventUrl}`;
+                        
+                        try {
+                          await navigator.clipboard.writeText(text);
+                          toast({ title: "הטקסט הועתק ללוח! 📋" });
+                        } catch {
+                          toast({ title: "לא ניתן להעתיק", variant: "destructive" });
+                        }
+                      }}
+                      onTouchStart={(e) => {
+                        const timer = setTimeout(async () => {
+                          const date = new Date(selectedEvent.event_date);
+                          const siteUrl = window.location.origin;
+                          const eventUrl = `${siteUrl}/events`;
+                          
+                          let text = `🎉 ${selectedEvent.title}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`;
+                          if (selectedEvent.location) text += `\n📍 ${selectedEvent.location}`;
+                          if (selectedEvent.price) text += `\n💰 עלות: ₪${Number(selectedEvent.price).toLocaleString()}`;
+                          if (selectedEvent.payment_link) text += `\n💳 לתשלום: ${selectedEvent.payment_link}`;
+                          if (selectedEvent.description) text += `\n\n${selectedEvent.description}`;
+                          text += `\n\n🔗 ${eventUrl}`;
+                          
+                          try {
+                            await navigator.clipboard.writeText(text);
+                            toast({ title: "הטקסט הועתק ללוח! 📋" });
+                          } catch {
+                            toast({ title: "לא ניתן להעתיק", variant: "destructive" });
+                          }
+                        }, 600);
+                        (e.currentTarget as any)._longPressTimer = timer;
+                      }}
+                      onTouchEnd={(e) => {
+                        clearTimeout((e.currentTarget as any)._longPressTimer);
+                      }}
+                      onTouchMove={(e) => {
+                        clearTimeout((e.currentTarget as any)._longPressTimer);
+                      }}
                     >
                       <Share2 className="h-4 w-4" />
                     </Button>
