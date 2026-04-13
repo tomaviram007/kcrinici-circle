@@ -143,14 +143,13 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
             const img = e.currentTarget;
             if (!img.dataset.retried) {
               img.dataset.retried = "1";
-              img.src = ad.media_url + "?retry=" + Date.now();
+              setTimeout(() => {
+                img.src = ad.media_url + (ad.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
+              }, 500);
             } else {
-              // Show the image anyway with direct background
               setImageLoaded(true);
             }
           }}
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
         />
       )}
 
