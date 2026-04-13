@@ -12,6 +12,7 @@ import { Search, Plus, Star, Phone, User, Briefcase, MessageCircle } from "lucid
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import recommendationsHero from "@/assets/recommendations-hero.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 
@@ -370,6 +371,9 @@ const Recommendations = () => {
           </form>
         </DialogContent>
       </Dialog>
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        <SmartAdBanner placement="sidebar" />
+      </div>
     </>
   );
 };

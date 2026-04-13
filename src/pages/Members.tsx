@@ -11,6 +11,7 @@ import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import QuoteSection from "@/components/landing/QuoteSection";
+import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import heroImg from "@/assets/hero-members.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import {
@@ -419,6 +420,9 @@ const Members = () => {
       </DialogContent>
     </Dialog>
     <MemberProfilePopup member={viewMember} open={!!viewMember} onOpenChange={(open) => !open && setViewMember(null)} />
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <SmartAdBanner placement="sidebar" />
+    </div>
     <QuoteSection page="members" />
     </>
   );

@@ -14,6 +14,7 @@ import { fireConfetti } from "@/lib/confetti";
 import QuoteSection from "@/components/landing/QuoteSection";
 import SaleImageUpload from "@/components/announcements/SaleImageUpload";
 import heroImg from "@/assets/hero-announcements.jpg";
+import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
 import { Separator } from "@/components/ui/separator";
@@ -733,6 +734,9 @@ const Announcements = () => {
       </DialogContent>
     </Dialog>
 
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <SmartAdBanner placement="sidebar" />
+    </div>
     <QuoteSection page="announcements" />
     </>
   );
