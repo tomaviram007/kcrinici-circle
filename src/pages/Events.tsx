@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search, Pencil } from "lucide-react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 
@@ -47,6 +49,9 @@ const Events = () => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { fireRSVP } = useConfetti();
+  const { hasPermission } = useUserPermissions();
+  const navigate = useNavigate();
+  const canEditEvents = hasPermission("manage_events");
 
   useEffect(() => {
     const init = async () => {
@@ -289,6 +294,16 @@ const Events = () => {
         >
           <X className="h-4 w-4 text-muted-foreground" />
         </button>
+
+        {canEditEvents && selectedEvent && (
+          <button
+            onClick={() => navigate("/admin?tab=events")}
+            className="absolute left-14 top-4 z-20 rounded-full bg-gold/20 backdrop-blur-sm p-1.5 border border-gold/30 hover:bg-gold/30 transition-colors"
+            title="עריכת אירוע"
+          >
+            <Pencil className="h-4 w-4 text-gold" />
+          </button>
+        )}
 
         {selectedEvent && (() => {
           const date = new Date(selectedEvent.event_date);

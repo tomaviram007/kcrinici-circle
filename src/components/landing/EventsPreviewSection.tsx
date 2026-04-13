@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import { Calendar, MapPin, Lock, CheckCircle, CalendarPlus, X, CreditCard, ExternalLink } from "lucide-react";
+import { Calendar, MapPin, Lock, CheckCircle, CalendarPlus, X, CreditCard, ExternalLink, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import gsap from "gsap";
 
 interface Props {
@@ -26,6 +27,9 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
   const [rsvpCounts, setRsvpCounts] = useState<Record<string, number>>({});
   const sectionRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { hasPermission } = useUserPermissions();
+  const navigate = useNavigate();
+  const canEditEvents = hasPermission("manage_events");
 
   useEffect(() => {
     const init = async () => {
@@ -226,7 +230,18 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
 
                 <div className="p-5 sm:p-6 space-y-4">
                   <div>
-                    <h3 className="font-serif text-2xl font-bold text-foreground">{selectedEvent.title}</h3>
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="font-serif text-2xl font-bold text-foreground">{selectedEvent.title}</h3>
+                      {canEditEvents && (
+                        <button
+                          onClick={() => navigate("/admin?tab=events")}
+                          className="shrink-0 rounded-full bg-gold/20 p-1.5 border border-gold/30 hover:bg-gold/30 transition-colors"
+                          title="עריכת אירוע"
+                        >
+                          <Pencil className="h-3.5 w-3.5 text-gold" />
+                        </button>
+                      )}
+                    </div>
                     <p className="mt-2 font-body text-sm leading-relaxed text-muted-foreground">{selectedEvent.description}</p>
                   </div>
 
