@@ -124,18 +124,26 @@ const AdminDashboard = () => {
           </div>
 
           <div className="flex-1 min-w-0">
-            {activeTab === "members" && <AdminMembers />}
-            {activeTab === "announcements" && <AdminAnnouncements />}
-            {activeTab === "jobs" && <AdminJobs />}
-            {activeTab === "events" && <AdminEvents />}
-            {activeTab === "polls" && <AdminPolls />}
-            {activeTab === "recommendations" && <AdminRecommendations />}
-            {activeTab === "gallery" && <AdminGalleryApproval />}
-            {activeTab === "quotes" && <AdminQuotes />}
-            {activeTab === "logo" && <AdminLogo />}
-            {activeTab === "covers" && <AdminCovers />}
-            {activeTab === "deals" && <AdminDeals />}
-            {activeTab === "team" && <AdminTeam />}
+            {activeTab === "members" && hasPermission("manage_members") && <AdminMembers />}
+            {activeTab === "announcements" && hasPermission("manage_announcements") && <AdminAnnouncements />}
+            {activeTab === "jobs" && hasPermission("manage_jobs") && <AdminJobs />}
+            {activeTab === "events" && hasPermission("manage_events") && <AdminEvents />}
+            {activeTab === "polls" && hasPermission("manage_polls") && <AdminPolls />}
+            {activeTab === "recommendations" && hasPermission("manage_recommendations") && <AdminRecommendations />}
+            {activeTab === "gallery" && hasPermission("manage_gallery") && <AdminGalleryApproval />}
+            {activeTab === "quotes" && hasPermission("manage_quotes") && <AdminQuotes />}
+            {activeTab === "logo" && hasPermission("manage_settings") && <AdminLogo />}
+            {activeTab === "covers" && hasPermission("manage_quotes") && <AdminCovers />}
+            {activeTab === "deals" && hasPermission("manage_deals") && <AdminDeals />}
+            {activeTab === "team" && hasPermission("manage_team") && <AdminTeam />}
+            {/* Show access denied message if no permission */}
+            {TAB_PERMISSION_MAP[activeTab] && !hasPermission(TAB_PERMISSION_MAP[activeTab]) && (
+              <div className="rounded-xl border border-border bg-card p-8 text-center">
+                <Shield className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="font-serif text-lg font-bold text-foreground mb-1">אין הרשאה</p>
+                <p className="font-body text-sm text-muted-foreground">אין לך הרשאה לגשת לעמוד זה. פנה למנהל המערכת.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
