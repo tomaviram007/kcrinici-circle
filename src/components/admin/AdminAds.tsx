@@ -342,11 +342,24 @@ const AdminAds = () => {
                 return (
                   <div key={c.id} className="rounded-xl border border-border bg-card overflow-hidden">
                     {/* media preview */}
-                    <div className="relative h-32 bg-muted">
+                    <div className="relative h-32 bg-muted/50">
                       {c.media_type === "video" ? (
                         <video src={c.media_url} className="w-full h-full object-cover" muted />
                       ) : (
-                        <img src={c.media_url} alt={c.alt_text || c.title} className="w-full h-full object-cover" />
+                        <img 
+                          src={c.media_url} 
+                          alt={c.alt_text || c.title} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const img = e.currentTarget;
+                            if (!img.dataset.retried) {
+                              img.dataset.retried = "1";
+                              setTimeout(() => {
+                                img.src = c.media_url + (c.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
+                              }, 500);
+                            }
+                          }}
+                        />
                       )}
                       <span className={cn("absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full", status.color)}>{status.label}</span>
                       <span className="absolute top-2 right-2 text-[10px] font-medium px-2 py-0.5 rounded-full bg-background/80 backdrop-blur">{PLACEMENT_LABELS[c.placement]}</span>
