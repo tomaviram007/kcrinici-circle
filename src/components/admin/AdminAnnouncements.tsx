@@ -57,8 +57,10 @@ const AdminAnnouncements = () => {
   };
 
   const handleDelete = async (id: string) => {
+    const item = items.find(i => i.id === id);
     await supabase.from("announcements").delete().eq("id", id);
     toast({ title: "נמחק" });
+    logAuditAction("delete", "announcement", id, item?.title);
     fetchItems();
   };
 
