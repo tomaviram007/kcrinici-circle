@@ -108,10 +108,16 @@ const AdminAds = () => {
   /* ─── KPI calculations ─── */
   const now = new Date();
   const activeCampaigns = campaigns.filter(c => c.is_active && new Date(c.start_date) <= now && new Date(c.end_date) >= now);
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const totalClicks = campaigns.reduce((s, c) => s + c.click_count, 0);
   const totalImpressions = campaigns.reduce((s, c) => s + c.impression_count, 0);
   const expectedRevenue = activeCampaigns.reduce((s, c) => s + (c.price || 0), 0);
+
+  /* ─── Expiring soon (within 3 days) ─── */
+  const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+  const expiringSoon = campaigns.filter(c => {
+    const end = new Date(c.end_date);
+    return c.is_active && end >= now && end <= threeDaysFromNow;
+  });
 
   /* ─── Advertiser CRUD ─── */
   const saveAdvertiser = async () => {
