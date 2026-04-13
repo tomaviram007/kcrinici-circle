@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send } from "lucide-react";
+import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send, Link2, CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -17,12 +17,14 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 
-const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "" };
+const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false };
 
 interface RsvpProfile {
   full_name: string;
   profession: string;
   status: string;
+  payment_status: string;
+  user_id: string;
 }
 
 const AdminEvents = () => {
@@ -46,7 +48,7 @@ const AdminEvents = () => {
       const eventIds = data.map(e => e.id);
       const { data: rsvps } = await supabase
         .from("event_rsvps")
-        .select("event_id, status, user_id")
+        .select("event_id, status, user_id, payment_status")
         .in("event_id", eventIds);
 
       if (rsvps && rsvps.length > 0) {
@@ -66,6 +68,8 @@ const AdminEvents = () => {
             full_name: profile?.full_name || "לא ידוע",
             profession: profile?.profession || "",
             status: rsvp.status,
+            payment_status: rsvp.payment_status || "not_required",
+            user_id: rsvp.user_id,
           });
         }
         setRsvpData(grouped);
@@ -104,7 +108,12 @@ const AdminEvents = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
-    const payload = { ...form, image_url: form.image_url || null, created_by: session?.user?.id || null };
+    const payload = {
+      ...form,
+      image_url: form.image_url || null,
+      payment_link: form.payment_link || null,
+      created_by: session?.user?.id || null,
+    };
     if (editId) {
       const { error } = await supabase.from("events").update(payload).eq("id", editId);
       if (error) {
@@ -145,6 +154,8 @@ const AdminEvents = () => {
       event_date: event.event_date?.slice(0, 16) || "",
       location: event.location || "",
       image_url: event.image_url || "",
+      payment_link: event.payment_link || "",
+      registration_required: event.registration_required || false,
     });
     setEditId(event.id);
     setShowForm(true);
@@ -288,6 +299,27 @@ const AdminEvents = () => {
               <MapPin className="h-3 w-3" /> צפה במפה
             </a>
           )}
+
+          {/* Payment & Registration */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              placeholder="קישור לתשלום (פייבוקס / ביט)"
+              value={form.payment_link}
+              onChange={(e) => setForm({ ...form, payment_link: e.target.value })}
+              className="bg-background"
+              dir="ltr"
+            />
+            <label className="flex items-center gap-2 font-body text-sm text-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.registration_required}
+                onChange={(e) => setForm({ ...form, registration_required: e.target.checked })}
+                className="rounded border-border"
+              />
+              נדרשת הרשמה מראש
+            </label>
+          </div>
+
           <Button type="submit" className="gradient-gold text-primary-foreground font-body">{editId ? "עדכן" : "הוסף"}</Button>
         </form>
       )}
@@ -331,7 +363,7 @@ const AdminEvents = () => {
               </div>
 
               {/* RSVP summary */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={() => rsvps.length > 0 && setRsvpDialogEvent(event)}
                   className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 font-body text-xs text-foreground hover:bg-secondary/80 transition-colors"
@@ -340,6 +372,20 @@ const AdminEvents = () => {
                   {attending} אישרו הגעה
                   {rsvps.length > 0 && <ChevronDown className="h-3 w-3 text-muted-foreground" />}
                 </button>
+                {event.payment_link && (
+                  <>
+                    <span className="flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 font-body text-xs text-foreground">
+                      <CreditCard className="h-3.5 w-3.5 text-gold" />
+                      {rsvps.filter(r => r.payment_status === "paid").length} שילמו
+                    </span>
+                    <a href={event.payment_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 font-body text-xs text-primary hover:bg-primary/20 transition-colors">
+                      <Link2 className="h-3.5 w-3.5" /> קישור תשלום
+                    </a>
+                  </>
+                )}
+                {event.registration_required && (
+                  <span className="rounded-md bg-accent/50 px-2 py-1 font-body text-xs text-accent-foreground">📋 הרשמה נדרשת</span>
+                )}
               </div>
             </div>
           );
@@ -348,31 +394,108 @@ const AdminEvents = () => {
 
       {/* RSVP Dialog */}
       <Dialog open={!!rsvpDialogEvent} onOpenChange={() => setRsvpDialogEvent(null)}>
-        <DialogContent dir="rtl" className="max-h-[85vh] overflow-y-auto">
+        <DialogContent dir="rtl" className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-serif text-xl">
-              מאשרי הגעה – {rsvpDialogEvent?.title}
+              נרשמים – {rsvpDialogEvent?.title}
             </DialogTitle>
-            <DialogDescription className="sr-only">רשימת מאשרי הגעה לאירוע</DialogDescription>
+            <DialogDescription className="sr-only">רשימת נרשמים לאירוע</DialogDescription>
           </DialogHeader>
-          {rsvpDialogEvent && (
-            <div className="space-y-2 mt-2">
-              {(rsvpData[rsvpDialogEvent.id] || [])
-                .filter(r => r.status === "attending")
-                .map((r, i) => (
-                  <div key={i} className="flex items-center justify-between rounded-md border border-border p-3">
-                    <div>
-                      <p className="font-body text-sm font-medium text-foreground">{r.full_name}</p>
-                      <p className="font-body text-xs text-muted-foreground">{r.profession}</p>
-                    </div>
-                    <span className="rounded-full bg-green-500/10 px-2 py-0.5 font-body text-xs text-green-600">מגיע/ה</span>
+          {rsvpDialogEvent && (() => {
+            const allRsvps = rsvpData[rsvpDialogEvent.id] || [];
+            const attendingList = allRsvps.filter(r => r.status === "attending");
+            const declinedList = allRsvps.filter(r => r.status === "declined");
+            const hasPayment = !!rsvpDialogEvent.payment_link;
+
+            const togglePayment = async (userId: string, newStatus: string) => {
+              await supabase
+                .from("event_rsvps")
+                .update({ payment_status: newStatus })
+                .eq("event_id", rsvpDialogEvent.id)
+                .eq("user_id", userId);
+              fetchEvents();
+            };
+
+            return (
+              <div className="space-y-4 mt-2">
+                {/* Summary */}
+                <div className="flex gap-3 text-center">
+                  <div className="flex-1 rounded-lg bg-secondary p-2">
+                    <p className="font-body text-lg font-bold text-foreground">{attendingList.length}</p>
+                    <p className="font-body text-xs text-muted-foreground">מגיעים</p>
                   </div>
-                ))}
-              {(rsvpData[rsvpDialogEvent.id] || []).filter(r => r.status === "attending").length === 0 && (
-                <p className="font-body text-sm text-muted-foreground text-center py-4">אין אישורי הגעה עדיין</p>
-              )}
-            </div>
-          )}
+                  <div className="flex-1 rounded-lg bg-secondary p-2">
+                    <p className="font-body text-lg font-bold text-foreground">{declinedList.length}</p>
+                    <p className="font-body text-xs text-muted-foreground">לא מגיעים</p>
+                  </div>
+                  {hasPayment && (
+                    <div className="flex-1 rounded-lg bg-secondary p-2">
+                      <p className="font-body text-lg font-bold text-foreground">{attendingList.filter(r => r.payment_status === "paid").length}</p>
+                      <p className="font-body text-xs text-muted-foreground">שילמו</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Attending */}
+                <div>
+                  <h4 className="font-body text-sm font-semibold text-foreground mb-2 flex items-center gap-1">
+                    <CheckCircle2 className="h-4 w-4 text-primary" /> מאשרים ({attendingList.length})
+                  </h4>
+                  {attendingList.length === 0 ? (
+                    <p className="font-body text-sm text-muted-foreground text-center py-3">אין אישורי הגעה עדיין</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {attendingList.map((r, i) => (
+                        <div key={i} className="flex items-center justify-between rounded-md border border-border p-2.5">
+                          <div>
+                            <p className="font-body text-sm font-medium text-foreground">{r.full_name}</p>
+                            <p className="font-body text-xs text-muted-foreground">{r.profession}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {hasPayment && (
+                              <button
+                                onClick={() => togglePayment(r.user_id, r.payment_status === "paid" ? "pending" : "paid")}
+                                className={cn(
+                                  "flex items-center gap-1 rounded-full px-2.5 py-1 font-body text-xs transition-colors cursor-pointer",
+                                  r.payment_status === "paid"
+                                    ? "bg-primary/10 text-primary"
+                                    : "bg-destructive/10 text-destructive"
+                                )}
+                              >
+                                <CreditCard className="h-3 w-3" />
+                                {r.payment_status === "paid" ? "שולם" : "לא שולם"}
+                              </button>
+                            )}
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 font-body text-xs text-primary">מגיע/ה</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Declined */}
+                {declinedList.length > 0 && (
+                  <div>
+                    <h4 className="font-body text-sm font-semibold text-foreground mb-2 flex items-center gap-1">
+                      <XCircle className="h-4 w-4 text-destructive" /> לא מגיעים ({declinedList.length})
+                    </h4>
+                    <div className="space-y-1.5">
+                      {declinedList.map((r, i) => (
+                        <div key={i} className="flex items-center justify-between rounded-md border border-border p-2.5 opacity-60">
+                          <div>
+                            <p className="font-body text-sm font-medium text-foreground">{r.full_name}</p>
+                            <p className="font-body text-xs text-muted-foreground">{r.profession}</p>
+                          </div>
+                          <span className="rounded-full bg-destructive/10 px-2 py-0.5 font-body text-xs text-destructive">לא מגיע/ה</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>

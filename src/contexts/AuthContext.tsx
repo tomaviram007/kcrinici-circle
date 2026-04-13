@@ -6,6 +6,7 @@ interface AuthContextValue {
   user: User | null;
   isApproved: boolean;
   isAdmin: boolean;
+  isTeamMember: boolean;
   loading: boolean;
   sessionExpired: boolean;
 }
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   isApproved: false,
   isAdmin: false,
+  isTeamMember: false,
   loading: true,
   sessionExpired: false,
 });
@@ -31,9 +33,11 @@ async function fetchProfileAndRoles(userId: string) {
       throw profileResult.error ?? rolesResult.error;
     }
 
+    const roles = rolesResult.data || [];
     return {
       isApproved: profileResult.data?.is_approved ?? false,
-      isAdmin: rolesResult.data?.some((r) => r.role === "admin") ?? false,
+      isAdmin: roles.some((r) => r.role === "admin"),
+      isTeamMember: roles.length > 0,
     };
   } catch {
     return null;
@@ -44,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isApproved, setIsApproved] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isTeamMember, setIsTeamMember] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -66,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const resetAccessState = () => {
       setIsApproved(false);
       setIsAdmin(false);
+      setIsTeamMember(false);
       lastFetchedUserRef.current = null;
       fetchingRef.current = false;
     };
@@ -111,6 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setIsApproved(result.isApproved);
       setIsAdmin(result.isAdmin);
+      setIsTeamMember(result.isTeamMember);
       setLoading(false);
       lastFetchedUserRef.current = userId;
       fetchingRef.current = false;
@@ -222,5 +229,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  return <AuthContext.Provider value={{ user, isApproved, isAdmin, loading, sessionExpired }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, isApproved, isAdmin, isTeamMember, loading, sessionExpired }}>{children}</AuthContext.Provider>;
 };
