@@ -23,7 +23,7 @@ gsap.registerPlugin(ScrollToPlugin);
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isApproved, isAdmin, loading } = useAuth();
+  const { user, isApproved, isAdmin, isTeamMember, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMemberDialog, setShowMemberDialog] = useState(false);
   const { birthdays } = useBirthdaysThisWeek();
@@ -95,7 +95,7 @@ const Header = () => {
     { to: "/gallery", label: "גלריה", protected: false },
     { to: "/recommendations", label: "אנשי מקצוע", protected: false },
     { to: "/deals", label: "הטבות", protected: false },
-    ...(isAdmin ? [{ to: "/admin", label: "שולחן המנהל", protected: true }] : []),
+    ...((isAdmin || isTeamMember) ? [{ to: "/admin", label: "שולחן המנהל", protected: true }] : []),
   ];
 
   const handleNavClick = (e: React.MouseEvent, link: { to: string; protected: boolean }) => {
