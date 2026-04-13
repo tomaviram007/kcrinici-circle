@@ -149,6 +149,7 @@ const AdminAnnouncements = () => {
                 <h4 className="font-serif text-base font-bold text-foreground">{item.title}</h4>
                 <p className="font-body text-sm text-muted-foreground line-clamp-3">{item.content}</p>
                 <p className="mt-1 font-body text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString("he-IL")}</p>
+                <CreatorBadge entityType="announcement" entityId={item.id} createdBy={item.created_by} />
               </div>
               <div className="flex gap-1 shrink-0 mr-3">
                 <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>

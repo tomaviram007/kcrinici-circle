@@ -235,6 +235,7 @@ const AdminJobs = () => {
                   {job.contact_name && <span className="font-body text-xs text-muted-foreground flex items-center gap-0.5"><User className="h-3 w-3" />{job.contact_name}</span>}
                   {job.contact && <span className="font-body text-xs text-muted-foreground">טלפון: {job.contact}</span>}
                   <span className="font-body text-xs text-muted-foreground">פורסם: {new Date(job.created_at).toLocaleDateString("he-IL")}</span>
+                  <CreatorBadge entityType="job" entityId={job.id} createdBy={job.created_by} />
                 </div>
               </div>
             );
