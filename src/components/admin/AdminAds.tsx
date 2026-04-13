@@ -419,17 +419,20 @@ const AdminAds = () => {
           <DialogHeader><DialogTitle className="font-serif">{editingCamp ? "עריכת קמפיין" : "קמפיין חדש"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label>מפרסם *</Label>
+              <FieldLabel label="מפרסם" tooltip="בחר את העסק שעבורו נוצר הקמפיין. אם העסק לא מופיע, הוסף אותו קודם בטאב 'מפרסמים'." required />
               <Select value={campForm.advertiser_id} onValueChange={v => setCampForm(f => ({ ...f, advertiser_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="בחר מפרסם" /></SelectTrigger>
                 <SelectContent>{advertisers.map(a => <SelectItem key={a.id} value={a.id}>{a.business_name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>כותרת קמפיין *</Label><Input value={campForm.title} onChange={e => setCampForm(f => ({ ...f, title: e.target.value }))} /></div>
+            <div>
+              <FieldLabel label="כותרת קמפיין" tooltip="שם פנימי לזיהוי הקמפיין בלוח הניהול. לא מוצג לגולשים." required />
+              <Input value={campForm.title} onChange={e => setCampForm(f => ({ ...f, title: e.target.value }))} />
+            </div>
 
             {/* media upload */}
             <div>
-              <Label>מדיה (תמונה / MP4) *</Label>
+              <FieldLabel label="מדיה (תמונה / MP4)" tooltip="הקובץ שיוצג כבאנר באתר. פורמטים נתמכים: JPG, PNG, WebP או וידאו MP4. מקסימום 10MB." required />
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
               {mediaPreview ? (
                 <div className="relative mt-2 rounded-lg overflow-hidden border border-border">
@@ -448,11 +451,14 @@ const AdminAds = () => {
               )}
             </div>
 
-            <div><Label>קישור יעד *</Label><Input value={campForm.target_url} onChange={e => setCampForm(f => ({ ...f, target_url: e.target.value }))} placeholder="https://..." /></div>
+            <div>
+              <FieldLabel label="קישור יעד" tooltip="הכתובת שאליה הגולש יועבר בלחיצה על הבאנר. למשל: אתר המפרסם, דף נחיתה או קישור לוואטסאפ." required />
+              <Input value={campForm.target_url} onChange={e => setCampForm(f => ({ ...f, target_url: e.target.value }))} placeholder="https://..." />
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>מיקום באתר *</Label>
+                <FieldLabel label="מיקום באתר" tooltip="היכן הבאנר יוצג: Hero – בראש דף הבית, סרגל צד – בצד עמודי תוכן, בין תכנים – בין הסקשנים בדף הבית." required />
                 <Select value={campForm.placement} onValueChange={v => setCampForm(f => ({ ...f, placement: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -462,22 +468,37 @@ const AdminAds = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>עדיפות (0=רגיל)</Label><Input type="number" value={campForm.priority} onChange={e => setCampForm(f => ({ ...f, priority: Number(e.target.value) }))} /></div>
+              <div>
+                <FieldLabel label="עדיפות" tooltip="מספר גבוה יותר = הבאנר יוצג ראשון ברוטציה. ברירת מחדל 0 (רגיל)." />
+                <Input type="number" value={campForm.priority} onChange={e => setCampForm(f => ({ ...f, priority: Number(e.target.value) }))} />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>תאריך התחלה *</Label><Input type="datetime-local" value={campForm.start_date} onChange={e => setCampForm(f => ({ ...f, start_date: e.target.value }))} /></div>
-              <div><Label>תאריך סיום *</Label><Input type="datetime-local" value={campForm.end_date} onChange={e => setCampForm(f => ({ ...f, end_date: e.target.value }))} /></div>
+              <div>
+                <FieldLabel label="תאריך התחלה" tooltip="מתי הבאנר יתחיל להופיע באתר. לפני תאריך זה הקמפיין יהיה בסטטוס 'מתוזמן'." required />
+                <Input type="datetime-local" value={campForm.start_date} onChange={e => setCampForm(f => ({ ...f, start_date: e.target.value }))} />
+              </div>
+              <div>
+                <FieldLabel label="תאריך סיום" tooltip="מתי הבאנר יפסיק להופיע. לאחר תאריך זה הקמפיין יעבור לסטטוס 'הסתיים' אוטומטית." required />
+                <Input type="datetime-local" value={campForm.end_date} onChange={e => setCampForm(f => ({ ...f, end_date: e.target.value }))} />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>מחיר (₪)</Label><Input type="number" value={campForm.price} onChange={e => setCampForm(f => ({ ...f, price: Number(e.target.value) }))} /></div>
-              <div><Label>Alt Text</Label><Input value={campForm.alt_text} onChange={e => setCampForm(f => ({ ...f, alt_text: e.target.value }))} placeholder="תיאור לקורא מסך" /></div>
+              <div>
+                <FieldLabel label="מחיר (₪)" tooltip="הסכום שהמפרסם משלם עבור קמפיין זה. משמש לחישוב הכנסה צפויה בדשבורד." />
+                <Input type="number" value={campForm.price} onChange={e => setCampForm(f => ({ ...f, price: Number(e.target.value) }))} />
+              </div>
+              <div>
+                <FieldLabel label="Alt Text" tooltip="תיאור טקסטואלי של הבאנר לטובת נגישות וקוראי מסך. חשוב לעמידה בתקני WCAG." />
+                <Input value={campForm.alt_text} onChange={e => setCampForm(f => ({ ...f, alt_text: e.target.value }))} placeholder="תיאור לקורא מסך" />
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
               <Switch checked={campForm.is_active} onCheckedChange={v => setCampForm(f => ({ ...f, is_active: v }))} />
-              <Label>פעיל</Label>
+              <FieldLabel label="פעיל" tooltip="כיבוי מפסיק את הצגת הבאנר באתר מיידית, ללא קשר לתאריכים." />
             </div>
 
             <Button onClick={saveCampaign} disabled={uploading} className="w-full">
