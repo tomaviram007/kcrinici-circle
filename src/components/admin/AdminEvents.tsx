@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send } from "lucide-react";
+import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send, Link2, CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -17,12 +17,14 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 
-const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "" };
+const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false };
 
 interface RsvpProfile {
   full_name: string;
   profession: string;
   status: string;
+  payment_status: string;
+  user_id: string;
 }
 
 const AdminEvents = () => {
@@ -46,7 +48,7 @@ const AdminEvents = () => {
       const eventIds = data.map(e => e.id);
       const { data: rsvps } = await supabase
         .from("event_rsvps")
-        .select("event_id, status, user_id")
+        .select("event_id, status, user_id, payment_status")
         .in("event_id", eventIds);
 
       if (rsvps && rsvps.length > 0) {
@@ -66,6 +68,8 @@ const AdminEvents = () => {
             full_name: profile?.full_name || "לא ידוע",
             profession: profile?.profession || "",
             status: rsvp.status,
+            payment_status: rsvp.payment_status || "not_required",
+            user_id: rsvp.user_id,
           });
         }
         setRsvpData(grouped);
@@ -104,7 +108,12 @@ const AdminEvents = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
-    const payload = { ...form, image_url: form.image_url || null, created_by: session?.user?.id || null };
+    const payload = {
+      ...form,
+      image_url: form.image_url || null,
+      payment_link: form.payment_link || null,
+      created_by: session?.user?.id || null,
+    };
     if (editId) {
       const { error } = await supabase.from("events").update(payload).eq("id", editId);
       if (error) {
@@ -145,6 +154,8 @@ const AdminEvents = () => {
       event_date: event.event_date?.slice(0, 16) || "",
       location: event.location || "",
       image_url: event.image_url || "",
+      payment_link: event.payment_link || "",
+      registration_required: event.registration_required || false,
     });
     setEditId(event.id);
     setShowForm(true);
