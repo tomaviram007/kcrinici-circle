@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { MapPin, Mail, Phone } from "lucide-react";
+import { useSiteLogo } from "@/hooks/useSiteLogo";
 
 const Footer = () => {
+  const { logoUrl } = useSiteLogo();
   const currentYear = new Date().getFullYear();
 
   const sitemapLinks = [
@@ -27,9 +29,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
           {/* About */}
           <div className="space-y-3">
-            <h3 className="font-serif text-lg font-bold text-foreground">
-              הגברים של ק. קריניצי
-            </h3>
+            <Link to="/" className="flex items-center gap-3">
+              <img src={logoUrl} alt="לוגו המועדון" className="h-12 w-12 rounded-full object-contain" />
+              <h3 className="font-serif text-lg font-bold text-foreground">
+                הגברים של ק. קריניצי
+              </h3>
+            </Link>
             <p className="font-body text-sm text-muted-foreground leading-relaxed">
               מועדון חברים אקסקלוסיבי המחבר בין אנשי עסקים ואנשי מקצוע מובילים. נטוורקינג, אירועים והזדמנויות עסקיות.
             </p>
