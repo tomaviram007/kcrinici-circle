@@ -12,6 +12,7 @@ import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 
 import QuoteSection from "@/components/landing/QuoteSection";
+import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import heroImg from "@/assets/hero-events.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import {
@@ -610,6 +611,9 @@ const Events = () => {
         )}
       </DialogContent>
     </Dialog>
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <SmartAdBanner placement="sidebar" />
+    </div>
     <QuoteSection page="events" />
     </>
   );

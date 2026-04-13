@@ -12,6 +12,7 @@ import { Search, Plus, Star, Phone, User, Briefcase, MessageCircle } from "lucid
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import recommendationsHero from "@/assets/recommendations-hero.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 

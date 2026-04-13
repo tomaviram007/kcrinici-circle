@@ -13,6 +13,7 @@ import { fireConfetti } from "@/lib/confetti";
 
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-jobs.jpg";
+import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import { usePageCover } from "@/hooks/usePageCover";
 
 const JOB_TYPES = [
@@ -291,6 +292,9 @@ const Jobs = () => {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <SmartAdBanner placement="sidebar" />
     </div>
     <QuoteSection page="jobs" />
     </>
