@@ -312,7 +312,7 @@ const Events = () => {
           const images = getPopupImages();
 
           return (
-            <div className="flex flex-col md:flex-row min-h-[400px] max-h-[85vh]">
+            <div className="flex flex-col md:flex-row min-h-[400px]">
               {/* Left side - Image / Gallery */}
               <div className="md:w-1/2 relative bg-secondary flex items-center justify-center min-h-[200px] md:min-h-full">
                 {images.length > 0 ? (
