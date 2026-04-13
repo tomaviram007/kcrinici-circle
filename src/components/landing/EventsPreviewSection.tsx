@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import { Calendar, MapPin, Lock, CheckCircle, CalendarPlus, X, CreditCard, ExternalLink } from "lucide-react";
+import { Calendar, MapPin, Lock, CheckCircle, CalendarPlus, X, CreditCard, ExternalLink, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import gsap from "gsap";
 
 interface Props {
