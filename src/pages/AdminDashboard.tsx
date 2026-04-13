@@ -502,8 +502,9 @@ const AdminTeam = () => {
       <div className="grid gap-3 md:grid-cols-2">
         {roles.map((role) => {
           const member = members.find((m: any) => m.user_id === role.user_id);
-          const perms = ROLE_PERMISSIONS[role.role];
           const isExpanded = expandedRoleId === role.id;
+          const grantedPerms = userPermissions[role.user_id] || [];
+          const isAdmin = role.role === "admin";
           return (
             <div key={role.id} className="rounded-lg border border-border bg-card p-4 space-y-3">
               <div className="flex items-center justify-between">
@@ -524,7 +525,7 @@ const AdminTeam = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  {role.role !== "admin" && (
+                  {!isAdmin && (
                     <Button size="sm" variant="ghost" onClick={() => handleRemoveRole(role.id)} className="text-destructive hover:text-destructive">
                       <X className="h-4 w-4" />
                     </Button>
@@ -532,52 +533,65 @@ const AdminTeam = () => {
                 </div>
               </div>
 
-              {isExpanded && perms && (
+              {isExpanded && (
                 <div className="border-t border-border pt-3 space-y-3">
-                  {perms.allowed.length > 0 && (
-                    <div>
-                      <p className="font-body text-xs font-semibold text-green-400 mb-1">✅ מותר:</p>
-                      <ul className="space-y-0.5 pr-3">
-                        {perms.allowed.map((item, i) => (
-                          <li key={i} className="font-body text-xs text-muted-foreground flex items-start gap-1.5">
-                            <span className="text-green-400 mt-0.5 shrink-0">•</span> {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {perms.forbidden.length > 0 && (
-                    <div>
-                      <p className="font-body text-xs font-semibold text-red-400 mb-1">🚫 אסור:</p>
-                      <ul className="space-y-0.5 pr-3">
-                        {perms.forbidden.map((item, i) => (
-                          <li key={i} className="font-body text-xs text-muted-foreground flex items-start gap-1.5">
-                            <span className="text-red-400 mt-0.5 shrink-0">•</span> {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  <p className="font-body text-xs font-semibold text-gold mb-2">הרשאות:</p>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {ALL_PERMISSIONS.map((perm) => {
+                      const isGranted = isAdmin || grantedPerms.includes(perm.key);
+                      return (
+                        <label
+                          key={perm.key}
+                          className={`flex items-center gap-2 font-body text-xs cursor-pointer rounded px-2 py-1.5 transition-colors ${
+                            isGranted ? "bg-accent/30 text-foreground" : "text-muted-foreground"
+                          } ${isAdmin ? "opacity-60 cursor-default" : "hover:bg-accent/20"}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isGranted}
+                            disabled={isAdmin}
+                            onChange={() => togglePermission(role.user_id, perm.key)}
+                            className="accent-gold h-3.5 w-3.5 rounded"
+                          />
+                          <span>{perm.label}</span>
+                          {isGranted ? (
+                            <span className="mr-auto text-emerald-500 text-[10px]">✓</span>
+                          ) : (
+                            <span className="mr-auto text-destructive text-[10px]">✗</span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {!isAdmin && (
+                    <Button
+                      size="sm"
+                      onClick={() => savePermissions(role.user_id)}
+                      disabled={savingPerms === role.user_id}
+                      className="gradient-gold text-primary-foreground font-body w-full text-xs h-8"
+                    >
+                      {savingPerms === role.user_id ? "שומר..." : "שמור הרשאות"}
+                    </Button>
                   )}
 
-                  {role.role !== "admin" && (
+                  {!isAdmin && (
                     <div className="border-t border-border pt-3">
                       <p className="font-body text-xs font-semibold text-gold mb-2">שנה תפקיד:</p>
-                      <div className="flex gap-2">
-                        <Select
-                          value={role.role}
-                          onValueChange={(newRole) => handleChangeRole(role.id, newRole)}
-                          disabled={changingRole === role.id}
-                        >
-                          <SelectTrigger className="w-full font-body bg-background text-xs h-8">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="chief_editor">עורך ראשי</SelectItem>
-                            <SelectItem value="editor">עורך משני</SelectItem>
-                            <SelectItem value="moderator">מנחה</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <Select
+                        value={role.role}
+                        onValueChange={(newRole) => handleChangeRole(role.id, newRole)}
+                        disabled={changingRole === role.id}
+                      >
+                        <SelectTrigger className="w-full font-body bg-background text-xs h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="chief_editor">עורך ראשי</SelectItem>
+                          <SelectItem value="editor">עורך משני</SelectItem>
+                          <SelectItem value="moderator">מנחה</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
                 </div>
