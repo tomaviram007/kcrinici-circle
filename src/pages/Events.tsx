@@ -493,13 +493,20 @@ const Events = () => {
                       className="font-body border-border text-muted-foreground hover:text-foreground"
                       onClick={async () => {
                         const date = new Date(selectedEvent.event_date);
-                        const text = `🎉 ${selectedEvent.title}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}${selectedEvent.location ? `\n📍 ${selectedEvent.location}` : ""}${selectedEvent.description ? `\n\n${selectedEvent.description}` : ""}`;
+                        const siteUrl = window.location.origin;
+                        const eventUrl = `${siteUrl}/events`;
+                        
+                        let text = `🎉 ${selectedEvent.title}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`;
+                        if (selectedEvent.location) text += `\n📍 ${selectedEvent.location}`;
+                        if (selectedEvent.price) text += `\n💰 עלות: ₪${Number(selectedEvent.price).toLocaleString()}`;
+                        if (selectedEvent.payment_link) text += `\n💳 לתשלום: ${selectedEvent.payment_link}`;
+                        if (selectedEvent.description) text += `\n\n${selectedEvent.description}`;
+                        text += `\n\n🔗 ${eventUrl}`;
                         
                         if (navigator.share) {
                           try {
-                            const shareData: ShareData = { title: selectedEvent.title, text };
+                            const shareData: ShareData = { title: selectedEvent.title, text, url: eventUrl };
                             
-                            // Try to include the image as a file
                             if (selectedEvent.image_url) {
                               try {
                                 const response = await fetch(selectedEvent.image_url);
@@ -515,6 +522,9 @@ const Events = () => {
                             await navigator.share(shareData);
                           } catch {}
                         } else {
+                          navigator.clipboard?.writeText(text).then(() => {
+                            toast({ title: "הטקסט הועתק ללוח! 📋" });
+                          });
                           const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
                           window.open(waUrl, "_blank");
                         }
