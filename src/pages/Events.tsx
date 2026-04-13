@@ -469,7 +469,7 @@ const Events = () => {
                 {/* Action buttons */}
                 <div className="mt-auto flex flex-col gap-2.5 pt-4 border-t border-border">
                   <Button
-                    onClick={(e) => { e.stopPropagation(); handleRsvp(selectedEvent.id); }}
+                    onClick={(e) => { e.stopPropagation(); attemptRsvp(selectedEvent); }}
                     className={cn(
                       "w-full font-body",
                       isAttending
