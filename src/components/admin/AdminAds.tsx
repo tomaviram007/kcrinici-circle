@@ -543,21 +543,27 @@ const AdminAds = () => {
                   {campForm.media_type === "video" ? (
                     <video src={mediaPreview} className="w-full h-40 object-cover" muted controls playsInline />
                   ) : (
-                    <img
-                      src={mediaPreview}
-                      className="w-full h-40 object-cover"
-                      alt="תצוגה מקדימה"
-                      loading="eager"
-                      decoding="async"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        const img = e.currentTarget;
-                        if (!img.dataset.retried) {
-                          img.dataset.retried = "1";
-                          img.src = mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "t=" + Date.now();
-                        }
-                      }}
-                    />
+                    <div className="relative w-full h-40">
+                      <div
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${mediaPreview})` }}
+                      />
+                      <img
+                        src={mediaPreview}
+                        className="relative w-full h-full object-cover"
+                        alt="תצוגה מקדימה"
+                        loading="eager"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          if (!img.dataset.retried) {
+                            img.dataset.retried = "1";
+                            img.src = mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "t=" + Date.now();
+                          } else {
+                            img.style.display = "none";
+                          }
+                        }}
+                      />
+                    </div>
                   )}
                   <div className="absolute top-2 left-2 flex gap-1">
                     <button type="button" onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
