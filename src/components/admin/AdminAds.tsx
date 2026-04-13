@@ -364,19 +364,20 @@ const AdminAds = () => {
                     {/* media preview */}
                     <div className="relative h-32 bg-muted/50">
                       {c.media_type === "video" ? (
-                        <video src={c.media_url} className="w-full h-full object-cover" muted />
+                        <video src={c.media_url} className="w-full h-full object-cover" muted playsInline controls={false} />
                       ) : (
-                        <img 
-                          src={c.media_url} 
-                          alt={c.alt_text || c.title} 
+                        <img
+                          src={c.media_url}
+                          alt={c.alt_text || c.title}
                           className="w-full h-full object-cover"
+                          loading="eager"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
                           onError={(e) => {
                             const img = e.currentTarget;
                             if (!img.dataset.retried) {
                               img.dataset.retried = "1";
-                              setTimeout(() => {
-                                img.src = c.media_url + (c.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
-                              }, 500);
+                              img.src = c.media_url + (c.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
                             }
                           }}
                         />
@@ -530,34 +531,35 @@ const AdminAds = () => {
               <FieldLabel label="מדיה (תמונה / MP4)" tooltip="הקובץ שיוצג כבאנר באתר. פורמטים נתמכים: JPG, PNG, WebP או וידאו MP4. מקסימום 10MB." required />
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
               {mediaPreview ? (
-                <div className="relative mt-2 rounded-lg overflow-hidden border border-border bg-muted/30">
+                <div className="relative mt-2 min-h-40 rounded-lg overflow-hidden border border-border bg-muted/30">
                   {campForm.media_type === "video" ? (
-                    <video src={mediaPreview} className="w-full h-40 object-cover" muted controls />
+                    <video src={mediaPreview} className="w-full h-40 object-cover" muted controls playsInline />
                   ) : (
-                    <img 
-                      src={mediaPreview} 
-                      className="w-full h-40 object-cover" 
-                      alt="תצוגה מקדימה" 
+                    <img
+                      src={mediaPreview}
+                      className="w-full h-40 object-cover"
+                      alt="תצוגה מקדימה"
+                      loading="eager"
+                      decoding="async"
+                      referrerPolicy="no-referrer"
                       onError={(e) => {
                         const img = e.currentTarget;
                         if (!img.dataset.retried) {
                           img.dataset.retried = "1";
-                          setTimeout(() => {
-                            img.src = mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "t=" + Date.now();
-                          }, 500);
+                          img.src = mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "t=" + Date.now();
                         }
                       }}
                     />
                   )}
                   <div className="absolute top-2 left-2 flex gap-1">
-                    <button onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
+                    <button type="button" onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
                   </div>
-                  <button onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
+                  <button type="button" onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
                     החלף מדיה
                   </button>
                 </div>
               ) : (
-                <button onClick={() => fileRef.current?.click()} className="mt-2 w-full h-32 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 transition-colors">
+                <button type="button" onClick={() => fileRef.current?.click()} className="mt-2 flex h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
                   <Upload className="h-6 w-6" />
                   <span className="text-sm">גרור או לחץ להעלאה</span>
                 </button>

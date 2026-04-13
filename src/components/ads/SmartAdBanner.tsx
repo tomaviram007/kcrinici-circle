@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,8 @@ interface AdCampaign {
   max_appearances: number;
 }
 
+const appendCacheBust = (url: string) => `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
+
 const SmartAdBanner = ({
   placement,
   targetPage = "all",
@@ -35,14 +37,17 @@ const SmartAdBanner = ({
   const [current, setCurrent] = useState(0);
   const trackedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
+  const fallbackKey = useMemo(() => fallbackPlacements.filter(Boolean).join("|"), [fallbackPlacements]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchAds = async () => {
       const now = new Date().toISOString();
-      const placementsToTry = [placement, ...fallbackPlacements.filter((item) => item !== placement)];
+      const placementsToTry = [placement, ...fallbackKey.split("|").filter((item) => item && item !== placement)];
 
       for (const placementOption of placementsToTry) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("ad_campaigns")
           .select("id, media_type, media_url, target_url, alt_text, priority, max_appearances")
           .eq("placement", placementOption)
@@ -52,20 +57,32 @@ const SmartAdBanner = ({
           .or(`target_page.eq.${targetPage},target_page.eq.all`)
           .order("priority", { ascending: false });
 
+        if (cancelled || error) continue;
+
         const filtered = (data || []).filter((ad: AdCampaign) => slotIndex < (ad.max_appearances || 1));
         if (filtered.length > 0) {
-          setAds(filtered);
+          setAds((prev) => {
+            const prevKey = prev.map((item) => item.id).join("|");
+            const nextKey = filtered.map((item) => item.id).join("|");
+            return prevKey === nextKey ? prev : filtered;
+          });
           setCurrent(0);
           return;
         }
       }
 
-      setAds([]);
-      setCurrent(0);
+      if (!cancelled) {
+        setAds([]);
+        setCurrent(0);
+      }
     };
 
     fetchAds();
-  }, [placement, targetPage, slotIndex, fallbackPlacements]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [placement, targetPage, slotIndex, fallbackKey]);
 
   const trackImpression = useCallback(async (campaignId: string) => {
     if (trackedRef.current.has(campaignId)) return;
@@ -78,9 +95,10 @@ const SmartAdBanner = ({
 
   useEffect(() => {
     if (!ads.length || !containerRef.current) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting && ads[current]) {
             trackImpression(ads[current].id);
           }
@@ -88,6 +106,7 @@ const SmartAdBanner = ({
       },
       { threshold: 0.5 }
     );
+
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, [ads, current, trackImpression]);
@@ -95,7 +114,7 @@ const SmartAdBanner = ({
   useEffect(() => {
     if (ads.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrent(prev => (prev + 1) % ads.length);
+      setCurrent((prev) => (prev + 1) % ads.length);
     }, rotateInterval);
     return () => clearInterval(timer);
   }, [ads.length, rotateInterval]);
@@ -134,9 +153,10 @@ const SmartAdBanner = ({
       role="link"
       tabIndex={0}
       aria-label={ad.alt_text || "פרסומת"}
-      onKeyDown={(e) => { if (e.key === "Enter") handleClick(ad); }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") handleClick(ad);
+      }}
     >
-
       {ad.media_type === "video" ? (
         <video
           src={ad.media_url}
@@ -149,16 +169,16 @@ const SmartAdBanner = ({
       ) : (
         <img
           src={ad.media_url}
-          alt={ad.alt_text || ""}
+          alt={ad.alt_text || ad.title || "פרסומת"}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="eager"
+          decoding="async"
+          referrerPolicy="no-referrer"
           onError={(e) => {
             const img = e.currentTarget;
             if (!img.dataset.retried) {
               img.dataset.retried = "1";
-              setTimeout(() => {
-                img.src = ad.media_url + (ad.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
-              }, 500);
+              img.src = appendCacheBust(ad.media_url);
             }
           }}
         />
@@ -172,14 +192,19 @@ const SmartAdBanner = ({
 
       {ads.length > 1 && (
         <div className="absolute bottom-2 right-2 flex gap-1">
-          {ads.map((_, i) => (
+          {ads.map((item, i) => (
             <button
-              key={i}
-              onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+              key={item.id}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrent(i);
+              }}
               className={cn(
                 "h-1.5 w-1.5 rounded-full transition-all",
                 i === current ? "bg-white w-4" : "bg-white/50"
               )}
+              aria-label={`עבור לפרסומת ${i + 1}`}
             />
           ))}
         </div>
