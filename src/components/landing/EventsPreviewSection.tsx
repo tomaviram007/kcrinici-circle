@@ -27,6 +27,9 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
   const [rsvpCounts, setRsvpCounts] = useState<Record<string, number>>({});
   const sectionRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { hasPermission } = useUserPermissions();
+  const navigate = useNavigate();
+  const canEditEvents = hasPermission("manage_events");
 
   useEffect(() => {
     const init = async () => {
