@@ -9,6 +9,7 @@ interface SmartAdBannerProps {
   slotIndex?: number;
   className?: string;
   rotateInterval?: number;
+  fallbackPlacements?: string[];
 }
 
 interface AdCampaign {
@@ -21,35 +22,50 @@ interface AdCampaign {
   max_appearances: number;
 }
 
-const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className, rotateInterval = 6000 }: SmartAdBannerProps) => {
+const SmartAdBanner = ({
+  placement,
+  targetPage = "all",
+  slotIndex = 0,
+  className,
+  rotateInterval = 6000,
+  fallbackPlacements = [],
+}: SmartAdBannerProps) => {
   const { user } = useAuth();
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [current, setCurrent] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(true);
   const trackedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchAds = async () => {
       const now = new Date().toISOString();
-      const { data } = await supabase
-        .from("ad_campaigns")
-        .select("id, media_type, media_url, target_url, alt_text, priority, max_appearances")
-        .eq("placement", placement)
-        .eq("is_active", true)
-        .lte("start_date", now)
-        .or(`end_date.is.null,end_date.gte.${now}`)
-        .or(`target_page.eq.${targetPage},target_page.eq.all`)
-        .order("priority", { ascending: false });
+      const placementsToTry = [placement, ...fallbackPlacements.filter((item) => item !== placement)];
 
-      // Filter ads: only show if slotIndex < max_appearances
-      const filtered = (data || []).filter((ad: any) => slotIndex < (ad.max_appearances || 1));
-      setAds(filtered);
+      for (const placementOption of placementsToTry) {
+        const { data } = await supabase
+          .from("ad_campaigns")
+          .select("id, media_type, media_url, target_url, alt_text, priority, max_appearances")
+          .eq("placement", placementOption)
+          .eq("is_active", true)
+          .lte("start_date", now)
+          .or(`end_date.is.null,end_date.gte.${now}`)
+          .or(`target_page.eq.${targetPage},target_page.eq.all`)
+          .order("priority", { ascending: false });
+
+        const filtered = (data || []).filter((ad: AdCampaign) => slotIndex < (ad.max_appearances || 1));
+        if (filtered.length > 0) {
+          setAds(filtered);
+          setCurrent(0);
+          return;
+        }
+      }
+
+      setAds([]);
+      setCurrent(0);
     };
-    fetchAds();
-  }, [placement, targetPage, slotIndex]);
 
-  // No opacity transition - show image immediately
+    fetchAds();
+  }, [placement, targetPage, slotIndex, fallbackPlacements]);
 
   const trackImpression = useCallback(async (campaignId: string) => {
     if (trackedRef.current.has(campaignId)) return;
