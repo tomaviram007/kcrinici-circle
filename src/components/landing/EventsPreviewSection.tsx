@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Calendar, MapPin, Lock, CheckCircle, CalendarPlus, X } from "lucide-react";
+import { Calendar, MapPin, Lock, CheckCircle, CalendarPlus, X, CreditCard, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ const mockEvents = [
 const EventsPreviewSection = ({ isApproved }: Props) => {
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [paymentPopupEvent, setPaymentPopupEvent] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [rsvps, setRsvps] = useState<Record<string, string>>({});
   const [rsvpCounts, setRsvpCounts] = useState<Record<string, number>>({});
