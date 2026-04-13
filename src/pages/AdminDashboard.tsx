@@ -269,11 +269,66 @@ const AdminGalleryApproval = () => {
 const AdminTeam = () => {
   const { toast } = useToast();
   const [members, setMembers] = useState<any[]>([]);
+  const [allMembers, setAllMembers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchEmail, setSearchEmail] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("editor");
   const [adding, setAdding] = useState(false);
+
+  const ROLE_LABELS: Record<string, string> = {
+    admin: "מנהל ראשי",
+    chief_editor: "עורך ראשי",
+    editor: "עורך משני",
+    moderator: "מנחה",
+  };
+
+  const fetchTeam = async () => {
+    const [rolesRes, allMembersRes] = await Promise.all([
+      supabase.from("user_roles").select("*"),
+      supabase.from("profiles").select("user_id, full_name, avatar_url").eq("is_approved", true).eq("is_removed", false).order("full_name"),
+    ]);
+    const rolesData = rolesRes.data || [];
+    setRoles(rolesData);
+    setAllMembers(allMembersRes.data || []);
+
+    const userIds = [...new Set(rolesData.map((r: any) => r.user_id))];
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, profession, avatar_url").in("user_id", userIds);
+      setMembers(profiles || []);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchTeam(); }, []);
+
+  const availableMembers = allMembers.filter(
+    (m) => !roles.some((r: any) => r.user_id === m.user_id)
+  );
+
+  const handleAddRole = async () => {
+    if (!selectedUserId) return;
+    setAdding(true);
+    try {
+      const member = allMembers.find((m) => m.user_id === selectedUserId);
+      const { error } = await supabase.from("user_roles").insert({ user_id: selectedUserId, role: selectedRole } as any);
+      if (error) {
+        if (error.message.includes("duplicate")) {
+          toast({ title: "כבר קיים", description: "לחבר כבר יש תפקיד זה", variant: "destructive" });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({ title: "נוסף בהצלחה!", description: `${member?.full_name || "חבר"} קיבל תפקיד ${ROLE_LABELS[selectedRole] || selectedRole}` });
+        setSelectedUserId("");
+      }
+      await fetchTeam();
+    } catch (err: any) {
+      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+    } finally {
+      setAdding(false);
+    }
+  };
 
   const ROLE_LABELS: Record<string, string> = {
     admin: "מנהל ראשי",
