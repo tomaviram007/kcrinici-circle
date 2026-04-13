@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send, Link2, CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send, Link2, CreditCard, CheckCircle2, XCircle, Clock, Download } from "lucide-react";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,7 @@ interface RsvpProfile {
   status: string;
   payment_status: string;
   user_id: string;
+  confirmed_at: string;
 }
 
 const AdminEvents = () => {
