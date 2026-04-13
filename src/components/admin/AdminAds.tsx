@@ -261,6 +261,27 @@ const AdminAds = () => {
         ))}
       </div>
 
+      {/* Expiring campaigns alert */}
+      {expiringSoon.length > 0 && (
+        <div className="mb-6 rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            <h4 className="font-serif font-bold text-yellow-600">קמפיינים שעומדים להסתיים בקרוב</h4>
+          </div>
+          <div className="space-y-1">
+            {expiringSoon.map(c => {
+              const adv = advertisers.find(a => a.id === c.advertiser_id);
+              const daysLeft = Math.ceil((new Date(c.end_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              return (
+                <p key={c.id} className="text-sm text-yellow-700">
+                  <strong>{c.title}</strong> ({adv?.business_name}) – מסתיים בעוד {daysLeft} {daysLeft === 1 ? "יום" : "ימים"}
+                </p>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="campaigns" className="gap-1.5"><ImageIcon className="h-4 w-4" />קמפיינים</TabsTrigger>
