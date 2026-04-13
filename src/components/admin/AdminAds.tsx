@@ -486,7 +486,9 @@ const AdminAds = () => {
                       const status = getCampaignStatus(c);
                       return (
                         <div key={c.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
-                          <div className="h-10 w-16 rounded overflow-hidden bg-muted/50 shrink-0" style={{ backgroundImage: `url(${c.media_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                          <div className="h-10 w-16 rounded overflow-hidden bg-muted/50 shrink-0">
+                            <img src={optimizeImageUrl(c.media_url, 200)} alt={c.title} className="w-full h-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = c.media_url; }} />
+                          </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">{c.title}</p>
                             <p className="text-xs text-muted-foreground">{PLACEMENT_LABELS[c.placement]} · <Eye className="inline h-3 w-3" /> {c.impression_count} · <MousePointerClick className="inline h-3 w-3" /> {c.click_count}</p>
