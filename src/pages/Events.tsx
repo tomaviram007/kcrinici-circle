@@ -94,21 +94,42 @@ const Events = () => {
     }
   }, [events]);
 
-  const handleRsvp = async (eventId: string) => {
-    if (!userId) return;
-    const current = rsvps[eventId];
-    if (current === "attending") {
-      await supabase.from("event_rsvps").delete().eq("event_id", eventId).eq("user_id", userId);
-      setRsvps((prev) => { const n = { ...prev }; delete n[eventId]; return n; });
-      setRsvpCounts((prev) => ({ ...prev, [eventId]: Math.max(0, (prev[eventId] || 1) - 1) }));
-      toast({ title: "ביטלת את אישור ההגעה" });
-    } else {
-      await supabase.from("event_rsvps").upsert({ event_id: eventId, user_id: userId, status: "attending" }, { onConflict: "event_id,user_id" });
-      setRsvps((prev) => ({ ...prev, [eventId]: "attending" }));
-      setRsvpCounts((prev) => ({ ...prev, [eventId]: (prev[eventId] || 0) + 1 }));
-      fireRSVP();
-      toast({ title: "אישרת הגעה! 🎉" });
+  const attemptRsvp = (event: any) => {
+    if (!userId) {
+      toast({ title: "יש להתחבר כדי לאשר הגעה", variant: "destructive" });
+      return;
     }
+    const current = rsvps[event.id];
+    if (current === "attending") {
+      cancelRsvp(event.id);
+    } else if (event.price && event.payment_link) {
+      setPaymentPopupEvent(event);
+    } else {
+      confirmRsvp(event.id);
+    }
+  };
+
+  const confirmRsvp = async (eventId: string) => {
+    if (!userId) return;
+    await supabase.from("event_rsvps").upsert({ event_id: eventId, user_id: userId, status: "attending", payment_status: "pending" }, { onConflict: "event_id,user_id" });
+    setRsvps((prev) => ({ ...prev, [eventId]: "attending" }));
+    setRsvpCounts((prev) => ({ ...prev, [eventId]: (prev[eventId] || 0) + 1 }));
+    fireRSVP();
+    toast({ title: "אישרת הגעה! 🎉" });
+    setPaymentPopupEvent(null);
+  };
+
+  const cancelRsvp = async (eventId: string) => {
+    if (!userId) return;
+    await supabase.from("event_rsvps").delete().eq("event_id", eventId).eq("user_id", userId);
+    setRsvps((prev) => { const n = { ...prev }; delete n[eventId]; return n; });
+    setRsvpCounts((prev) => ({ ...prev, [eventId]: Math.max(0, (prev[eventId] || 1) - 1) }));
+    toast({ title: "ביטלת את אישור ההגעה" });
+  };
+
+  const handleRsvp = async (eventId: string) => {
+    const event = events.find(e => e.id === eventId);
+    if (event) attemptRsvp(event);
   };
 
   const openEventPopup = async (event: any) => {
