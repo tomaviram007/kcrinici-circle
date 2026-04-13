@@ -549,22 +549,17 @@ const AdminAds = () => {
                     <video src={mediaPreview} className="w-full h-40 object-cover" muted controls playsInline />
                   ) : (
                     <div className="relative w-full h-40">
-                      <div
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${mediaPreview})` }}
-                      />
                       <img
-                        src={mediaPreview}
-                        className="relative w-full h-full object-cover"
+                        src={mediaFile ? mediaPreview! : optimizeImageUrl(mediaPreview!, 800)}
+                        className="w-full h-full object-cover"
                         alt="תצוגה מקדימה"
                         loading="eager"
+                        decoding="async"
                         onError={(e) => {
                           const img = e.currentTarget;
-                          if (!img.dataset.retried) {
+                          if (!img.dataset.retried && mediaPreview) {
                             img.dataset.retried = "1";
-                            img.src = mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "t=" + Date.now();
-                          } else {
-                            img.style.display = "none";
+                            img.src = mediaPreview; // fallback to original URL
                           }
                         }}
                       />
