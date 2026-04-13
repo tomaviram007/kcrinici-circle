@@ -120,7 +120,6 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
           autoPlay
           loop
           playsInline
-          loading="lazy"
         />
       ) : (
         <img
