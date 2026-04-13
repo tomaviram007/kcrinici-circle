@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const resetAccessState = () => {
       setIsApproved(false);
       setIsAdmin(false);
+      setIsTeamMember(false);
       lastFetchedUserRef.current = null;
       fetchingRef.current = false;
     };
@@ -116,6 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setIsApproved(result.isApproved);
       setIsAdmin(result.isAdmin);
+      setIsTeamMember(result.isTeamMember);
       setLoading(false);
       lastFetchedUserRef.current = userId;
       fetchingRef.current = false;
@@ -227,5 +229,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  return <AuthContext.Provider value={{ user, isApproved, isAdmin, loading, sessionExpired }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, isApproved, isAdmin, isTeamMember, loading, sessionExpired }}>{children}</AuthContext.Provider>;
 };
