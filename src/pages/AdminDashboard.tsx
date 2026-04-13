@@ -266,6 +266,25 @@ const AdminGalleryApproval = () => {
 };
 
 // Team Management Component
+const ROLE_PERMISSIONS: Record<string, { allowed: string[]; forbidden: string[] }> = {
+  admin: {
+    allowed: ["ניהול מלא של כל המערכת", "ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "ניהול תוכן, אירועים והטבות", "גישה להגדרות מערכת"],
+    forbidden: [],
+  },
+  chief_editor: {
+    allowed: ["ניהול מודעות ואישורן", "ניהול אירועים וגלריה", "ניהול משרות והמלצות", "ניהול הטבות וסקרים", "עריכת ציטוטים וקאברים"],
+    forbidden: ["ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "שינוי הגדרות מערכת"],
+  },
+  editor: {
+    allowed: ["ניהול מודעות ואישורן", "ניהול אירועים וגלריה", "ניהול משרות והמלצות"],
+    forbidden: ["ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "ניהול הטבות וסקרים", "שינוי הגדרות מערכת"],
+  },
+  moderator: {
+    allowed: ["אישור/דחייה של תוכן גולשים", "צפייה בתוכן ממתין לאישור"],
+    forbidden: ["ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "יצירת תוכן חדש", "עריכת הגדרות מערכת"],
+  },
+};
+
 const AdminTeam = () => {
   const { toast } = useToast();
   const [members, setMembers] = useState<any[]>([]);
@@ -275,6 +294,8 @@ const AdminTeam = () => {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("editor");
   const [adding, setAdding] = useState(false);
+  const [expandedRoleId, setExpandedRoleId] = useState<string | null>(null);
+  const [changingRole, setChangingRole] = useState<string | null>(null);
 
   const ROLE_LABELS: Record<string, string> = {
     admin: "מנהל ראשי",
@@ -330,6 +351,19 @@ const AdminTeam = () => {
     }
   };
 
+  const handleChangeRole = async (roleId: string, newRole: string) => {
+    setChangingRole(roleId);
+    try {
+      const { error } = await supabase.from("user_roles").update({ role: newRole } as any).eq("id", roleId);
+      if (error) throw error;
+      toast({ title: "התפקיד עודכן בהצלחה" });
+      await fetchTeam();
+    } catch (err: any) {
+      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+    } finally {
+      setChangingRole(null);
+    }
+  };
   const handleRemoveRole = async (roleId: string) => {
     const { error } = await supabase.from("user_roles").delete().eq("id", roleId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
@@ -384,25 +418,85 @@ const AdminTeam = () => {
       <div className="grid gap-3 md:grid-cols-2">
         {roles.map((role) => {
           const member = members.find((m: any) => m.user_id === role.user_id);
+          const perms = ROLE_PERMISSIONS[role.role];
+          const isExpanded = expandedRoleId === role.id;
           return (
-            <div key={role.id} className="rounded-lg border border-border bg-card p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-secondary border border-gold/20 flex items-center justify-center overflow-hidden">
-                  {member?.avatar_url ? (
-                    <img src={member.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
-                  ) : (
-                    <Users className="h-5 w-5 text-gold" />
+            <div key={role.id} className="rounded-lg border border-border bg-card p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div
+                  className="flex items-center gap-3 cursor-pointer flex-1"
+                  onClick={() => setExpandedRoleId(isExpanded ? null : role.id)}
+                >
+                  <div className="h-10 w-10 rounded-full bg-secondary border border-gold/20 flex items-center justify-center overflow-hidden shrink-0">
+                    {member?.avatar_url ? (
+                      <img src={member.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
+                    ) : (
+                      <Users className="h-5 w-5 text-gold" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-serif text-sm font-bold text-foreground">{member?.full_name || "משתמש"}</p>
+                    <p className="font-body text-xs text-gold">{ROLE_LABELS[role.role] || role.role}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  {role.role !== "admin" && (
+                    <Button size="sm" variant="ghost" onClick={() => handleRemoveRole(role.id)} className="text-destructive hover:text-destructive">
+                      <X className="h-4 w-4" />
+                    </Button>
                   )}
                 </div>
-                <div>
-                  <p className="font-serif text-sm font-bold text-foreground">{member?.full_name || "משתמש"}</p>
-                  <p className="font-body text-xs text-gold">{ROLE_LABELS[role.role] || role.role}</p>
-                </div>
               </div>
-              {role.role !== "admin" && (
-                <Button size="sm" variant="ghost" onClick={() => handleRemoveRole(role.id)} className="text-destructive hover:text-destructive">
-                  <X className="h-4 w-4" />
-                </Button>
+
+              {isExpanded && perms && (
+                <div className="border-t border-border pt-3 space-y-3">
+                  {perms.allowed.length > 0 && (
+                    <div>
+                      <p className="font-body text-xs font-semibold text-green-400 mb-1">✅ מותר:</p>
+                      <ul className="space-y-0.5 pr-3">
+                        {perms.allowed.map((item, i) => (
+                          <li key={i} className="font-body text-xs text-muted-foreground flex items-start gap-1.5">
+                            <span className="text-green-400 mt-0.5 shrink-0">•</span> {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {perms.forbidden.length > 0 && (
+                    <div>
+                      <p className="font-body text-xs font-semibold text-red-400 mb-1">🚫 אסור:</p>
+                      <ul className="space-y-0.5 pr-3">
+                        {perms.forbidden.map((item, i) => (
+                          <li key={i} className="font-body text-xs text-muted-foreground flex items-start gap-1.5">
+                            <span className="text-red-400 mt-0.5 shrink-0">•</span> {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {role.role !== "admin" && (
+                    <div className="border-t border-border pt-3">
+                      <p className="font-body text-xs font-semibold text-gold mb-2">שנה תפקיד:</p>
+                      <div className="flex gap-2">
+                        <Select
+                          value={role.role}
+                          onValueChange={(newRole) => handleChangeRole(role.id, newRole)}
+                          disabled={changingRole === role.id}
+                        >
+                          <SelectTrigger className="w-full font-body bg-background text-xs h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="chief_editor">עורך ראשי</SelectItem>
+                            <SelectItem value="editor">עורך משני</SelectItem>
+                            <SelectItem value="moderator">מנחה</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           );
