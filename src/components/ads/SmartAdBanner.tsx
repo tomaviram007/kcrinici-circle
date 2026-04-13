@@ -169,7 +169,7 @@ const SmartAdBanner = ({
       ) : (
         <img
           src={ad.media_url}
-          alt={ad.alt_text || ad.title || "פרסומת"}
+          alt={ad.alt_text || "פרסומת"}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="eager"
           decoding="async"
