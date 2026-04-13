@@ -24,12 +24,14 @@ export type Database = {
           id: string
           impression_count: number
           is_active: boolean
+          max_appearances: number
           media_type: string
           media_url: string
           placement: string
           price: number | null
           priority: number
           start_date: string
+          target_page: string
           target_url: string
           title: string
           updated_at: string
@@ -43,12 +45,14 @@ export type Database = {
           id?: string
           impression_count?: number
           is_active?: boolean
+          max_appearances?: number
           media_type?: string
           media_url: string
           placement?: string
           price?: number | null
           priority?: number
           start_date: string
+          target_page?: string
           target_url: string
           title: string
           updated_at?: string
@@ -62,12 +66,14 @@ export type Database = {
           id?: string
           impression_count?: number
           is_active?: boolean
+          max_appearances?: number
           media_type?: string
           media_url?: string
           placement?: string
           price?: number | null
           priority?: number
           start_date?: string
+          target_page?: string
           target_url?: string
           title?: string
           updated_at?: string
