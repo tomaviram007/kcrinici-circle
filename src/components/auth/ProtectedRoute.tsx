@@ -53,7 +53,7 @@ const TeaserOverlay = ({ type }: { type: "no-session" | "not-approved" }) => (
 );
 
 const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false }: ProtectedRouteProps) => {
-  const { user, isApproved, isAdmin, loading } = useAuth();
+  const { user, isApproved, isAdmin, isTeamMember, loading } = useAuth();
 
   if (loading) return (
     <div className="flex min-h-[60vh] items-center justify-center">
@@ -82,7 +82,7 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
     );
   }
 
-  if (requireAdmin && !isAdmin) return <Navigate to="/dashboard" replace />;
+  if (requireAdmin && !isAdmin && !isTeamMember) return <Navigate to="/dashboard" replace />;
 
   return <>{children}</>;
 };
