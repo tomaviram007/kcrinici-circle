@@ -110,8 +110,17 @@ const AdminEvents = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
+    
+    // Convert local datetime to ISO with timezone offset so the DB stores it correctly
+    let eventDateISO = form.event_date;
+    if (form.event_date && !form.event_date.includes('+') && !form.event_date.includes('Z')) {
+      const localDate = new Date(form.event_date);
+      eventDateISO = localDate.toISOString();
+    }
+    
     const payload = {
       ...form,
+      event_date: eventDateISO,
       image_url: form.image_url || null,
       payment_link: form.payment_link || null,
       price: form.price ? parseFloat(form.price) : null,
