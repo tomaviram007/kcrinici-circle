@@ -46,7 +46,7 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
   const trackImpression = useCallback(async (campaignId: string) => {
     if (trackedRef.current.has(campaignId)) return;
     trackedRef.current.add(campaignId);
-    await supabase.rpc("track_ad_impression", {
+    await supabase.rpc("track_ad_impression" as any, {
       p_campaign_id: campaignId,
       p_user_id: user?.id || null,
     });
@@ -80,7 +80,7 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
 
   // Track click
   const handleClick = async (ad: AdCampaign) => {
-    await supabase.rpc("track_ad_click", {
+    await supabase.rpc("track_ad_click" as any, {
       p_campaign_id: ad.id,
       p_user_id: user?.id || null,
     });
