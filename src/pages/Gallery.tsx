@@ -721,10 +721,9 @@ const Gallery = () => {
                   </div>
                 );
               }
-              elements.push((() => {
               const creator = albumCreators[album.created_by || ""];
               const isPending = !(album as any).is_approved && album.created_by === userId;
-              return (
+              elements.push(
                 <div
                   key={album.id}
                   onClick={() => openAlbum(album)}
@@ -766,6 +765,7 @@ const Gallery = () => {
                   )}
                 </div>
               );
+              return elements;
             })}
           </div>
         );
