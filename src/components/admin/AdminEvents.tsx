@@ -17,7 +17,7 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 
-const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false };
+const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "" };
 
 interface RsvpProfile {
   full_name: string;
@@ -112,6 +112,7 @@ const AdminEvents = () => {
       ...form,
       image_url: form.image_url || null,
       payment_link: form.payment_link || null,
+      price: form.price ? parseFloat(form.price) : null,
       created_by: session?.user?.id || null,
     };
     if (editId) {
@@ -156,6 +157,7 @@ const AdminEvents = () => {
       image_url: event.image_url || "",
       payment_link: event.payment_link || "",
       registration_required: event.registration_required || false,
+      price: event.price ? String(event.price) : "",
     });
     setEditId(event.id);
     setShowForm(true);
@@ -301,11 +303,21 @@ const AdminEvents = () => {
           )}
 
           {/* Payment & Registration */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
               placeholder="קישור לתשלום (פייבוקס / ביט)"
               value={form.payment_link}
               onChange={(e) => setForm({ ...form, payment_link: e.target.value })}
+              className="bg-background"
+              dir="ltr"
+            />
+            <Input
+              placeholder="מחיר (₪)"
+              type="number"
+              min="0"
+              step="1"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
               className="bg-background"
               dir="ltr"
             />
@@ -378,6 +390,11 @@ const AdminEvents = () => {
                       <CreditCard className="h-3.5 w-3.5 text-gold" />
                       {rsvps.filter(r => r.payment_status === "paid").length} שילמו
                     </span>
+                    {event.price && (
+                      <span className="rounded-md bg-gold/10 px-2 py-1 font-body text-xs text-gold font-semibold">
+                        ₪{Number(event.price).toLocaleString()}
+                      </span>
+                    )}
                     <a href={event.payment_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 font-body text-xs text-primary hover:bg-primary/20 transition-colors">
                       <Link2 className="h-3.5 w-3.5" /> קישור תשלום
                     </a>
