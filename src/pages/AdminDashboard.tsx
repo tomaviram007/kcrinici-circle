@@ -379,7 +379,6 @@ const AdminTeam = () => {
           </Button>
         </div>
       </div>
-      </div>
 
       {/* Team list */}
       <div className="grid gap-3 md:grid-cols-2">
