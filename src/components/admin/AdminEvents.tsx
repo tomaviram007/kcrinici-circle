@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send, Link2, CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send, Link2, CreditCard, CheckCircle2, XCircle, Clock, Download } from "lucide-react";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,7 @@ interface RsvpProfile {
   status: string;
   payment_status: string;
   user_id: string;
+  confirmed_at: string;
 }
 
 const AdminEvents = () => {
@@ -48,7 +49,7 @@ const AdminEvents = () => {
       const eventIds = data.map(e => e.id);
       const { data: rsvps } = await supabase
         .from("event_rsvps")
-        .select("event_id, status, user_id, payment_status")
+        .select("event_id, status, user_id, payment_status, created_at")
         .in("event_id", eventIds);
 
       if (rsvps && rsvps.length > 0) {
@@ -70,6 +71,7 @@ const AdminEvents = () => {
             status: rsvp.status,
             payment_status: rsvp.payment_status || "not_required",
             user_id: rsvp.user_id,
+            confirmed_at: rsvp.created_at,
           });
         }
         setRsvpData(grouped);
@@ -433,25 +435,56 @@ const AdminEvents = () => {
               fetchEvents();
             };
 
+            const exportCsv = () => {
+              const headers = ["שם", "מקצוע", "סטטוס", "תאריך אישור", ...(hasPayment ? ["סטטוס תשלום"] : [])];
+              const rows = allRsvps.map(r => [
+                r.full_name,
+                r.profession,
+                r.status === "attending" ? "מגיע/ה" : "לא מגיע/ה",
+                new Date(r.confirmed_at).toLocaleString("he-IL"),
+                ...(hasPayment ? [r.payment_status === "paid" ? "שולם" : "לא שולם"] : []),
+              ]);
+              const bom = "\uFEFF";
+              const csv = bom + [headers, ...rows].map(r => r.join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `נרשמים_${rsvpDialogEvent.title.replace(/\s+/g, "_")}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            };
+
+            const formatDate = (d: string) => {
+              const date = new Date(d);
+              return date.toLocaleDateString("he-IL", { day: "numeric", month: "short" }) + " " + date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+            };
+
             return (
               <div className="space-y-4 mt-2">
-                {/* Summary */}
-                <div className="flex gap-3 text-center">
-                  <div className="flex-1 rounded-lg bg-secondary p-2">
-                    <p className="font-body text-lg font-bold text-foreground">{attendingList.length}</p>
-                    <p className="font-body text-xs text-muted-foreground">מגיעים</p>
-                  </div>
-                  <div className="flex-1 rounded-lg bg-secondary p-2">
-                    <p className="font-body text-lg font-bold text-foreground">{declinedList.length}</p>
-                    <p className="font-body text-xs text-muted-foreground">לא מגיעים</p>
-                  </div>
-                  {hasPayment && (
+                {/* Summary + Export */}
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-3 text-center flex-1">
                     <div className="flex-1 rounded-lg bg-secondary p-2">
-                      <p className="font-body text-lg font-bold text-foreground">{attendingList.filter(r => r.payment_status === "paid").length}</p>
-                      <p className="font-body text-xs text-muted-foreground">שילמו</p>
+                      <p className="font-body text-lg font-bold text-foreground">{attendingList.length}</p>
+                      <p className="font-body text-xs text-muted-foreground">מגיעים</p>
                     </div>
-                  )}
+                    <div className="flex-1 rounded-lg bg-secondary p-2">
+                      <p className="font-body text-lg font-bold text-foreground">{declinedList.length}</p>
+                      <p className="font-body text-xs text-muted-foreground">לא מגיעים</p>
+                    </div>
+                    {hasPayment && (
+                      <div className="flex-1 rounded-lg bg-secondary p-2">
+                        <p className="font-body text-lg font-bold text-foreground">{attendingList.filter(r => r.payment_status === "paid").length}</p>
+                        <p className="font-body text-xs text-muted-foreground">שילמו</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                <Button variant="outline" size="sm" onClick={exportCsv} className="w-full font-body border-border text-foreground">
+                  <Download className="h-4 w-4 ml-1" />
+                  ייצוא CSV
+                </Button>
 
                 {/* Attending */}
                 <div>
@@ -467,6 +500,9 @@ const AdminEvents = () => {
                           <div>
                             <p className="font-body text-sm font-medium text-foreground">{r.full_name}</p>
                             <p className="font-body text-xs text-muted-foreground">{r.profession}</p>
+                            <p className="font-body text-[10px] text-muted-foreground/60 mt-0.5 flex items-center gap-1">
+                              <Clock className="h-2.5 w-2.5" /> {formatDate(r.confirmed_at)}
+                            </p>
                           </div>
                           <div className="flex items-center gap-2">
                             {hasPayment && (
@@ -503,6 +539,9 @@ const AdminEvents = () => {
                           <div>
                             <p className="font-body text-sm font-medium text-foreground">{r.full_name}</p>
                             <p className="font-body text-xs text-muted-foreground">{r.profession}</p>
+                            <p className="font-body text-[10px] text-muted-foreground/60 mt-0.5 flex items-center gap-1">
+                              <Clock className="h-2.5 w-2.5" /> {formatDate(r.confirmed_at)}
+                            </p>
                           </div>
                           <span className="rounded-full bg-destructive/10 px-2 py-0.5 font-body text-xs text-destructive">לא מגיע/ה</span>
                         </div>
