@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search, Pencil, CreditCard } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search, Pencil, CreditCard, Share2 } from "lucide-react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -481,12 +481,30 @@ const Events = () => {
                     <CheckCircle className="h-4 w-4 ml-2" />
                     {isAttending ? "מגיע ✓ — לחץ לביטול" : "אישור הגעה"}
                   </Button>
-                  <a href={googleCalendarUrl(selectedEvent)} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="w-full font-body border-border text-muted-foreground hover:text-foreground">
-                      <CalendarPlus className="h-4 w-4 ml-2" />
-                      הוסף ליומן Google
+                  <div className="flex gap-2">
+                    <a href={googleCalendarUrl(selectedEvent)} target="_blank" rel="noopener noreferrer" className="flex-1">
+                      <Button variant="outline" className="w-full font-body border-border text-muted-foreground hover:text-foreground">
+                        <CalendarPlus className="h-4 w-4 ml-2" />
+                        הוסף ליומן
+                      </Button>
+                    </a>
+                    <Button
+                      variant="outline"
+                      className="font-body border-border text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        const date = new Date(selectedEvent.event_date);
+                        const text = `🎉 ${selectedEvent.title}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}${selectedEvent.location ? `\n📍 ${selectedEvent.location}` : ""}${selectedEvent.description ? `\n\n${selectedEvent.description}` : ""}`;
+                        if (navigator.share) {
+                          navigator.share({ title: selectedEvent.title, text }).catch(() => {});
+                        } else {
+                          const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                          window.open(waUrl, "_blank");
+                        }
+                      }}
+                    >
+                      <Share2 className="h-4 w-4" />
                     </Button>
-                  </a>
+                  </div>
                 </div>
               </div>
             </div>
