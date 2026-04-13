@@ -20,6 +20,7 @@ import AdminDeals from "@/components/admin/AdminDeals";
 import AdminMembers from "@/components/admin/AdminMembers";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminBirthdayWidget from "@/components/admin/AdminBirthdayWidget";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import AdminNotificationCenter from "@/components/admin/AdminNotificationCenter";
 import PageHero from "@/components/PageHero";
 
