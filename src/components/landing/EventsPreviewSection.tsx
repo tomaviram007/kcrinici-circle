@@ -288,6 +288,50 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
           })()}
         </DialogContent>
       </Dialog>
+
+      {/* Payment Confirmation Popup */}
+      <Dialog open={!!paymentPopupEvent} onOpenChange={() => setPaymentPopupEvent(null)}>
+        <DialogContent dir="rtl" className="max-w-sm">
+          <DialogTitle className="font-serif text-xl text-center">אישור הגעה ותשלום</DialogTitle>
+          <DialogDescription className="sr-only">פרטי תשלום לאירוע</DialogDescription>
+          {paymentPopupEvent && (
+            <div className="space-y-4 pt-2">
+              <div className="rounded-lg bg-secondary p-4 text-center space-y-1">
+                <p className="font-body text-sm text-muted-foreground">ההשתתפות באירוע</p>
+                <p className="font-serif text-lg font-bold text-foreground">{paymentPopupEvent.title}</p>
+                <p className="font-body text-sm text-muted-foreground">כרוכה בתשלום של</p>
+                <p className="font-serif text-3xl font-bold text-gold">₪{Number(paymentPopupEvent.price).toLocaleString()}</p>
+              </div>
+
+              <p className="font-body text-xs text-center text-muted-foreground leading-relaxed">
+                לאחר אישור ההגעה, תועבר/י לדף התשלום. ההרשמה תושלם לאחר ביצוע התשלום.
+              </p>
+
+              <div className="flex flex-col gap-2">
+                <Button
+                  onClick={() => {
+                    confirmRsvp(paymentPopupEvent.id);
+                    if (paymentPopupEvent.payment_link) {
+                      window.open(paymentPopupEvent.payment_link, "_blank");
+                    }
+                  }}
+                  className="gradient-gold text-primary-foreground font-body"
+                >
+                  <CreditCard className="h-4 w-4 ml-1" />
+                  אישור הגעה ומעבר לתשלום
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setPaymentPopupEvent(null)}
+                  className="font-body text-muted-foreground"
+                >
+                  ביטול
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
