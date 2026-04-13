@@ -497,13 +497,31 @@ const AdminAds = () => {
               <FieldLabel label="מדיה (תמונה / MP4)" tooltip="הקובץ שיוצג כבאנר באתר. פורמטים נתמכים: JPG, PNG, WebP או וידאו MP4. מקסימום 10MB." required />
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
               {mediaPreview ? (
-                <div className="relative mt-2 rounded-lg overflow-hidden border border-border">
+                <div className="relative mt-2 rounded-lg overflow-hidden border border-border bg-muted/30">
                   {campForm.media_type === "video" ? (
                     <video src={mediaPreview} className="w-full h-40 object-cover" muted controls />
                   ) : (
-                    <img src={mediaPreview} className="w-full h-40 object-cover" alt="" />
+                    <img 
+                      src={mediaPreview} 
+                      className="w-full h-40 object-cover" 
+                      alt="תצוגה מקדימה" 
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (!img.dataset.retried) {
+                          img.dataset.retried = "1";
+                          setTimeout(() => {
+                            img.src = mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "t=" + Date.now();
+                          }, 500);
+                        }
+                      }}
+                    />
                   )}
-                  <button onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="absolute top-2 left-2 bg-background/80 rounded-full p-1"><X className="h-4 w-4" /></button>
+                  <div className="absolute top-2 left-2 flex gap-1">
+                    <button onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
+                  </div>
+                  <button onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
+                    החלף מדיה
+                  </button>
                 </div>
               ) : (
                 <button onClick={() => fileRef.current?.click()} className="mt-2 w-full h-32 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 transition-colors">
