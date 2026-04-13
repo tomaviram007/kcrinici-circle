@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -188,6 +188,7 @@ const mobileNavGroups = [
     items: [
       { id: "polls", label: "סקרים", icon: BarChart3 },
       { id: "quotes", label: "ציטוטים", icon: Quote },
+      { id: "ads", label: "פרסום", icon: Tv },
     ],
   },
 ];
