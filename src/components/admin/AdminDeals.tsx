@@ -363,7 +363,7 @@ const AdminDeals = () => {
                   <p className="font-serif text-sm font-bold text-foreground truncate">{deal.title}</p>
                   <p className="font-body text-xs text-muted-foreground">{deal.business_name} · {deal.category}</p>
                   <CreatorBadge entityType="deal" entityId={deal.id} createdBy={deal.created_by} />
-              </div>
+                </div>
               {deal.discount_label && (
                 <span className="shrink-0 rounded-full bg-primary/20 px-2 py-0.5 text-xs font-bold text-primary">
                   {deal.discount_label}
