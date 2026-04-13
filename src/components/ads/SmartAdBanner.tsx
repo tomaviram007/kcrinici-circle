@@ -170,7 +170,7 @@ const SmartAdBanner = ({
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-hidden rounded-xl cursor-pointer group border border-border/30",
+        "relative overflow-hidden rounded-xl cursor-pointer group border border-border/30 bg-muted",
         sizeClasses[placement] || sizeClasses.inline,
         className
       )}
