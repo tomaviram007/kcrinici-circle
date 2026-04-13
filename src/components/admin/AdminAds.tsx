@@ -33,6 +33,8 @@ interface Campaign {
   media_url: string;
   target_url: string;
   placement: string;
+  target_page: string;
+  max_appearances: number;
   alt_text: string | null;
   start_date: string;
   end_date: string | null;
@@ -45,9 +47,21 @@ interface Campaign {
 }
 
 const PLACEMENT_LABELS: Record<string, string> = {
+  premium: "פרימיום – מיקום בולט",
   hero: "Hero – ראש העמוד",
   sidebar: "סרגל צד",
   inline: "בין תכנים",
+  between_content: "בין סקשנים",
+  inline_repeat: "חוזר ברשימה (כל X פריטים)",
+};
+
+const PAGE_LABELS: Record<string, string> = {
+  all: "כל העמודים",
+  home: "דף הבית",
+  announcements: "לוח מודעות",
+  members: "חברי המועדון",
+  events: "אירועים",
+  gallery: "גלריה",
 };
 
 /* ─── Field label with tooltip ─── */
