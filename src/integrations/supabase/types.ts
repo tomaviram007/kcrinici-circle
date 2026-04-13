@@ -196,6 +196,7 @@ export type Database = {
           created_at: string
           event_id: string
           id: string
+          payment_status: string
           status: string
           user_id: string
         }
@@ -203,6 +204,7 @@ export type Database = {
           created_at?: string
           event_id: string
           id?: string
+          payment_status?: string
           status?: string
           user_id: string
         }
@@ -210,6 +212,7 @@ export type Database = {
           created_at?: string
           event_id?: string
           id?: string
+          payment_status?: string
           status?: string
           user_id?: string
         }
@@ -232,6 +235,8 @@ export type Database = {
           id: string
           image_url: string | null
           location: string | null
+          payment_link: string | null
+          registration_required: boolean
           title: string
           updated_at: string
         }
@@ -243,6 +248,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           location?: string | null
+          payment_link?: string | null
+          registration_required?: boolean
           title: string
           updated_at?: string
         }
@@ -254,6 +261,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           location?: string | null
+          payment_link?: string | null
+          registration_required?: boolean
           title?: string
           updated_at?: string
         }
