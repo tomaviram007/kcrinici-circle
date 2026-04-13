@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SmartAdBannerProps {
   placement: string;
@@ -46,6 +47,7 @@ const SmartAdBanner = ({
   const { user } = useAuth();
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [current, setCurrent] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const trackedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const fallbackKey = useMemo(() => fallbackPlacements.filter(Boolean).join("|"), [fallbackPlacements]);
@@ -138,6 +140,7 @@ const SmartAdBanner = ({
   useEffect(() => {
     if (ads.length <= 1) return;
     const timer = setInterval(() => {
+      setImageLoaded(false);
       setCurrent((prev) => (prev + 1) % ads.length);
     }, rotateInterval);
     return () => clearInterval(timer);
@@ -170,7 +173,7 @@ const SmartAdBanner = ({
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-hidden rounded-xl cursor-pointer group border border-border/30",
+        "relative overflow-hidden rounded-xl cursor-pointer group border border-border/30 bg-muted",
         sizeClasses[placement] || sizeClasses.inline,
         className
       )}
@@ -195,18 +198,28 @@ const SmartAdBanner = ({
         <img
           src={displayUrl}
           alt={ad.alt_text || "פרסומת"}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
+            imageLoaded ? "opacity-100" : "opacity-0"
+          )}
           loading="eager"
           decoding="async"
+          onLoad={() => setImageLoaded(true)}
           onError={(e) => {
             const img = e.currentTarget;
             if (!img.dataset.retried) {
-              // On error, fall back to the original (non-transformed) URL
               img.dataset.retried = "1";
               img.src = ad.media_url;
+            } else {
+              setImageLoaded(true);
             }
           }}
         />
+      )}
+
+      {/* Loading skeleton */}
+      {!imageLoaded && ad.media_type !== "video" && (
+        <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
       )}
 
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
