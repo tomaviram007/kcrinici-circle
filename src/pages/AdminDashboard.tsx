@@ -327,6 +327,12 @@ const AdminTeam = () => {
     (m) => !roles.some((r: any) => r.user_id === m.user_id)
   );
 
+  const sendWhatsAppNotification = (phone: string, name: string, message: string) => {
+    const cleaned = phone.replace(/[^0-9]/g, '');
+    const formatted = cleaned.startsWith('0') ? '972' + cleaned.slice(1) : cleaned;
+    window.open(`https://wa.me/${formatted}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
   const handleAddRole = async () => {
     if (!selectedUserId) return;
     setAdding(true);
@@ -340,7 +346,12 @@ const AdminTeam = () => {
           throw error;
         }
       } else {
-        toast({ title: "נוסף בהצלחה!", description: `${member?.full_name || "חבר"} קיבל תפקיד ${ROLE_LABELS[selectedRole] || selectedRole}` });
+        const roleName = ROLE_LABELS[selectedRole] || selectedRole;
+        toast({ title: "נוסף בהצלחה!", description: `${member?.full_name || "חבר"} קיבל תפקיד ${roleName}` });
+        if (member?.phone) {
+          const msg = `היי ${member.full_name}, קיבלת תפקיד חדש במועדון: ${roleName}! 🎉\nמעכשיו יש לך הרשאות מתאימות במערכת.\nבהצלחה! 💪\nhttps://kcrinici-circle.lovable.app`;
+          sendWhatsAppNotification(member.phone, member.full_name, msg);
+        }
         setSelectedUserId("");
       }
       await fetchTeam();
@@ -356,7 +367,14 @@ const AdminTeam = () => {
     try {
       const { error } = await supabase.from("user_roles").update({ role: newRole } as any).eq("id", roleId);
       if (error) throw error;
+      const roleEntry = roles.find((r: any) => r.id === roleId);
+      const member = roleEntry ? allMembers.find((m) => m.user_id === roleEntry.user_id) : null;
+      const roleName = ROLE_LABELS[newRole] || newRole;
       toast({ title: "התפקיד עודכן בהצלחה" });
+      if (member?.phone) {
+        const msg = `היי ${member.full_name}, התפקיד שלך במועדון עודכן ל: ${roleName}.\nההרשאות שלך עודכנו בהתאם.\nhttps://kcrinici-circle.lovable.app`;
+        sendWhatsAppNotification(member.phone, member.full_name, msg);
+      }
       await fetchTeam();
     } catch (err: any) {
       toast({ title: "שגיאה", description: err.message, variant: "destructive" });
