@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Plus, Building2, BarChart3, Eye, MousePointerClick, Trash2, Pencil, Upload, X, Calendar, Link2, Image as ImageIcon, Video, Users, HelpCircle } from "lucide-react";
+import { Plus, Building2, BarChart3, Eye, MousePointerClick, Trash2, Pencil, Upload, X, Calendar, Link2, Image as ImageIcon, Video, Users, HelpCircle, AlertTriangle } from "lucide-react";
+import AdReportExport from "./AdReportExport";
 
 /* ─── types ─── */
 interface Advertiser {
@@ -107,10 +108,16 @@ const AdminAds = () => {
   /* ─── KPI calculations ─── */
   const now = new Date();
   const activeCampaigns = campaigns.filter(c => c.is_active && new Date(c.start_date) <= now && new Date(c.end_date) >= now);
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const totalClicks = campaigns.reduce((s, c) => s + c.click_count, 0);
   const totalImpressions = campaigns.reduce((s, c) => s + c.impression_count, 0);
   const expectedRevenue = activeCampaigns.reduce((s, c) => s + (c.price || 0), 0);
+
+  /* ─── Expiring soon (within 3 days) ─── */
+  const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+  const expiringSoon = campaigns.filter(c => {
+    const end = new Date(c.end_date);
+    return c.is_active && end >= now && end <= threeDaysFromNow;
+  });
 
   /* ─── Advertiser CRUD ─── */
   const saveAdvertiser = async () => {
@@ -254,6 +261,27 @@ const AdminAds = () => {
         ))}
       </div>
 
+      {/* Expiring campaigns alert */}
+      {expiringSoon.length > 0 && (
+        <div className="mb-6 rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            <h4 className="font-serif font-bold text-yellow-600">קמפיינים שעומדים להסתיים בקרוב</h4>
+          </div>
+          <div className="space-y-1">
+            {expiringSoon.map(c => {
+              const adv = advertisers.find(a => a.id === c.advertiser_id);
+              const daysLeft = Math.ceil((new Date(c.end_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              return (
+                <p key={c.id} className="text-sm text-yellow-700">
+                  <strong>{c.title}</strong> ({adv?.business_name}) – מסתיים בעוד {daysLeft} {daysLeft === 1 ? "יום" : "ימים"}
+                </p>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="campaigns" className="gap-1.5"><ImageIcon className="h-4 w-4" />קמפיינים</TabsTrigger>
@@ -372,6 +400,7 @@ const AdminAds = () => {
                   <div><span className="text-muted-foreground">אימייל:</span> {adv.email || "—"}</div>
                 </div>
                 {adv.notes && <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">{adv.notes}</p>}
+                <AdReportExport advertiser={adv} campaigns={advCamps} />
                 <h4 className="font-serif font-bold">קמפיינים ({advCamps.length})</h4>
                 {advCamps.length === 0 ? <p className="text-sm text-muted-foreground">אין קמפיינים למפרסם זה.</p> : (
                   <div className="space-y-2 max-h-60 overflow-y-auto">

@@ -2,11 +2,12 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { ExternalLink } from "lucide-react";
 
 interface SmartAdBannerProps {
   placement: "hero" | "sidebar" | "inline";
   className?: string;
-  rotateInterval?: number; // ms, default 6000
+  rotateInterval?: number;
 }
 
 interface AdCampaign {
@@ -22,10 +23,11 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
   const { user } = useAuth();
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [current, setCurrent] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const trackedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch active ads for this placement
   useEffect(() => {
     const fetchAds = async () => {
       const now = new Date().toISOString();
@@ -42,7 +44,12 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
     fetchAds();
   }, [placement]);
 
-  // Track impression when ad becomes visible
+  // Reset load state when ad changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageError(false);
+  }, [current]);
+
   const trackImpression = useCallback(async (campaignId: string) => {
     if (trackedRef.current.has(campaignId)) return;
     trackedRef.current.add(campaignId);
@@ -52,7 +59,6 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
     });
   }, [user]);
 
-  // IntersectionObserver for impression tracking
   useEffect(() => {
     if (!ads.length || !containerRef.current) return;
     const observer = new IntersectionObserver(
@@ -69,7 +75,6 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
     return () => observer.disconnect();
   }, [ads, current, trackImpression]);
 
-  // Auto-rotate
   useEffect(() => {
     if (ads.length <= 1) return;
     const timer = setInterval(() => {
@@ -78,7 +83,6 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
     return () => clearInterval(timer);
   }, [ads.length, rotateInterval]);
 
-  // Track click
   const handleClick = async (ad: AdCampaign) => {
     await supabase.rpc("track_ad_click" as any, {
       p_campaign_id: ad.id,
@@ -102,7 +106,7 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-hidden rounded-xl cursor-pointer group",
+        "relative overflow-hidden rounded-xl cursor-pointer group border border-border/30",
         sizeClasses[placement],
         className
       )}
@@ -112,6 +116,23 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
       aria-label={ad.alt_text || "פרסומת"}
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(ad); }}
     >
+      {/* Loading skeleton */}
+      {!imageLoaded && !imageError && ad.media_type !== "video" && (
+        <div className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center z-10">
+          <span className="text-xs text-muted-foreground">טוען פרסומת...</span>
+        </div>
+      )}
+
+      {/* Error fallback */}
+      {imageError && (
+        <div className="absolute inset-0 bg-muted flex items-center justify-center z-10">
+          <div className="text-center space-y-1">
+            <ExternalLink className="h-6 w-6 mx-auto text-muted-foreground" />
+            <span className="text-xs text-muted-foreground block">לחץ לצפייה</span>
+          </div>
+        </div>
+      )}
+
       {ad.media_type === "video" ? (
         <video
           src={ad.media_url}
@@ -125,8 +146,13 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
         <img
           src={ad.media_url}
           alt={ad.alt_text || ""}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className={cn(
+            "w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
+            imageLoaded ? "opacity-100" : "opacity-0"
+          )}
           loading="lazy"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
         />
       )}
 
