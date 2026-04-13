@@ -255,7 +255,7 @@ const AdminAds = () => {
     setEditingCamp(null);
     setMediaFile(null);
     setMediaPreview(null);
-    setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "hero", alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 });
+    setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 });
     fetchAll();
   };
 
@@ -274,7 +274,8 @@ const AdminAds = () => {
   const openEditCamp = (c: Campaign) => {
     setCampForm({
       advertiser_id: c.advertiser_id, title: c.title, media_type: c.media_type, target_url: c.target_url,
-      placement: c.placement, alt_text: c.alt_text || "", start_date: c.start_date.slice(0, 16), end_date: c.end_date ? c.end_date.slice(0, 16) : "",
+      placement: c.placement, target_page: (c as any).target_page || "all", max_appearances: (c as any).max_appearances || 1,
+      alt_text: c.alt_text || "", start_date: c.start_date.slice(0, 16), end_date: c.end_date ? c.end_date.slice(0, 16) : "",
       is_active: c.is_active, price: c.price, priority: c.priority,
     });
     setEditingCamp(c.id);
@@ -346,7 +347,7 @@ const AdminAds = () => {
             <h3 className="font-serif text-xl font-bold flex items-center gap-2">
               <ImageIcon className="h-5 w-5 text-gold" /> ניהול קמפיינים
             </h3>
-            <Button size="sm" onClick={() => { setCampDialog(true); setEditingCamp(null); setMediaPreview(null); setMediaFile(null); setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "hero", alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 }); }}>
+            <Button size="sm" onClick={() => { setCampDialog(true); setEditingCamp(null); setMediaPreview(null); setMediaFile(null); setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 }); }}>
               <Plus className="h-4 w-4 ml-1" /> קמפיין חדש
             </Button>
           </div>
