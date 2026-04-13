@@ -362,27 +362,22 @@ const AdminAds = () => {
                 return (
                   <div key={c.id} className="rounded-xl border border-border bg-card overflow-hidden">
                     {/* media preview */}
-                    <div className="relative h-32 bg-muted/30">
+                    <div className="relative h-32 bg-muted/50">
                       {c.media_type === "video" ? (
-                        <video src={c.media_url} className="w-full h-full object-cover" muted />
+                        <video src={c.media_url} className="w-full h-full object-cover" muted playsInline controls={false} />
                       ) : (
-                        <img 
-                          src={c.media_url + (c.media_url.includes("?") ? "&" : "?") + "v=1"} 
-                          alt={c.alt_text || c.title} 
-                          className="w-full h-full object-cover block"
-                          crossOrigin="anonymous"
+                        <img
+                          src={c.media_url}
+                          alt={c.alt_text || c.title}
+                          className="w-full h-full object-cover"
                           loading="eager"
+                          decoding="async"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             const img = e.currentTarget;
-                            if (!img.dataset.retry) {
-                              img.dataset.retry = "1";
-                              img.crossOrigin = null as any;
-                              img.src = c.media_url + "?t=" + Date.now();
-                            } else if (img.dataset.retry === "1") {
-                              img.dataset.retry = "2";
-                              img.removeAttribute("crossorigin");
-                              img.src = c.media_url;
+                            if (!img.dataset.retried) {
+                              img.dataset.retried = "1";
+                              img.src = c.media_url + (c.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
                             }
                           }}
                         />
@@ -481,7 +476,6 @@ const AdminAds = () => {
                       return (
                         <div key={c.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
                           <img src={c.media_url} className="h-10 w-16 rounded object-cover" alt="" />
-
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">{c.title}</p>
                             <p className="text-xs text-muted-foreground">{PLACEMENT_LABELS[c.placement]} · <Eye className="inline h-3 w-3" /> {c.impression_count} · <MousePointerClick className="inline h-3 w-3" /> {c.click_count}</p>
@@ -537,35 +531,35 @@ const AdminAds = () => {
               <FieldLabel label="מדיה (תמונה / MP4)" tooltip="הקובץ שיוצג כבאנר באתר. פורמטים נתמכים: JPG, PNG, WebP או וידאו MP4. מקסימום 10MB." required />
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
               {mediaPreview ? (
-                <div className="relative mt-2 rounded-lg overflow-hidden border border-border bg-muted/30 min-h-[160px]">
+                <div className="relative mt-2 min-h-40 rounded-lg overflow-hidden border border-border bg-muted/30">
                   {campForm.media_type === "video" ? (
-                    <video src={mediaPreview} className="w-full h-40 object-cover" muted controls />
+                    <video src={mediaPreview} className="w-full h-40 object-cover" muted controls playsInline />
                   ) : (
-                    <img 
-                      src={mediaPreview.startsWith("blob:") ? mediaPreview : mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "v=1"} 
-                      className="w-full h-40 object-cover block" 
-                      alt="תצוגה מקדימה" 
+                    <img
+                      src={mediaPreview}
+                      className="w-full h-40 object-cover"
+                      alt="תצוגה מקדימה"
                       loading="eager"
+                      decoding="async"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         const img = e.currentTarget;
-                        if (!img.dataset.retry) {
-                          img.dataset.retry = "1";
-                          img.removeAttribute("crossorigin");
-                          img.src = mediaPreview + "?t=" + Date.now();
+                        if (!img.dataset.retried) {
+                          img.dataset.retried = "1";
+                          img.src = mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "t=" + Date.now();
                         }
                       }}
                     />
                   )}
                   <div className="absolute top-2 left-2 flex gap-1">
-                    <button onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
+                    <button type="button" onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
                   </div>
-                  <button onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
+                  <button type="button" onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
                     החלף מדיה
                   </button>
                 </div>
               ) : (
-                <button type="button" onClick={() => fileRef.current?.click()} className="mt-2 w-full h-32 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 transition-colors">
+                <button type="button" onClick={() => fileRef.current?.click()} className="mt-2 flex h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
                   <Upload className="h-6 w-6" />
                   <span className="text-sm">גרור או לחץ להעלאה</span>
                 </button>
