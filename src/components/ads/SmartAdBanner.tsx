@@ -49,9 +49,7 @@ const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className
     fetchAds();
   }, [placement, targetPage, slotIndex]);
 
-  useEffect(() => {
-    setImageLoaded(false);
-  }, [current]);
+  // No opacity transition - show image immediately
 
   const trackImpression = useCallback(async (campaignId: string) => {
     if (trackedRef.current.has(campaignId)) return;
