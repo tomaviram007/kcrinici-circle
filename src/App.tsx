@@ -9,6 +9,7 @@ import Header from "@/components/layout/Header";
 import PageTransition from "@/components/layout/PageTransition";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import Footer from "@/components/layout/Footer";
 import BirthdayPopup from "@/components/BirthdayPopup";
 import { toast } from "sonner";
 import Index from "./pages/Index";
@@ -80,6 +81,7 @@ const AppLayout = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       </PageTransition>
+      {!hideHeader && <Footer />}
       {!hideHeader && <FloatingWhatsApp />}
       {!hideHeader && <BirthdayPopup />}
     </>
