@@ -44,7 +44,6 @@ const Index = () => {
           });
         }
       }, 600);
-      // Clear state
       window.history.replaceState({}, document.title);
       return () => clearTimeout(timer);
     }
@@ -56,12 +55,17 @@ const Index = () => {
 
       {/* Hero Ad Banner */}
       <div className="mx-auto max-w-7xl px-4 py-4">
-        <SmartAdBanner placement="hero" />
+        <SmartAdBanner placement="hero" targetPage="home" />
       </div>
 
       <ScrollReveal>
         <ClubAboutSection />
       </ScrollReveal>
+
+      {/* Premium ad placement - below About section */}
+      <div className="mx-auto max-w-7xl px-4 py-4">
+        <SmartAdBanner placement="premium" targetPage="home" slotIndex={0} />
+      </div>
 
       {!isApproved && (
         <ScrollReveal>
@@ -73,22 +77,37 @@ const Index = () => {
         <BirthdaysPreviewSection isApproved={isApproved} />
       </ScrollReveal>
 
-      {/* Inline Ad Banner */}
-      <div className="mx-auto max-w-7xl px-4 py-4">
-        <SmartAdBanner placement="inline" />
+      {/* Main content with sidebar layout */}
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="flex gap-6">
+          {/* Main content */}
+          <div className="flex-1 min-w-0">
+            <ScrollReveal>
+              <SalesPreviewSection isApproved={isApproved} />
+            </ScrollReveal>
+
+            {/* Inline Ad Banner */}
+            <div className="py-4">
+              <SmartAdBanner placement="inline" targetPage="home" />
+            </div>
+
+            <ScrollReveal delay={0.05}>
+              <EventsPreviewSection isApproved={isApproved} />
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.05}>
+              <JobsPreviewSection isApproved={isApproved} />
+            </ScrollReveal>
+          </div>
+
+          {/* Left sidebar - 3 ad slots (desktop only) */}
+          <div className="hidden lg:flex flex-col gap-4 w-[280px] shrink-0 pt-4 sticky top-24 self-start">
+            <SmartAdBanner placement="sidebar" targetPage="home" slotIndex={0} className="!h-[220px]" />
+            <SmartAdBanner placement="sidebar" targetPage="home" slotIndex={1} className="!h-[220px]" />
+            <SmartAdBanner placement="sidebar" targetPage="home" slotIndex={2} className="!h-[220px]" />
+          </div>
+        </div>
       </div>
-      
-      <ScrollReveal>
-        <SalesPreviewSection isApproved={isApproved} />
-      </ScrollReveal>
-
-      <ScrollReveal delay={0.05}>
-        <EventsPreviewSection isApproved={isApproved} />
-      </ScrollReveal>
-
-      <ScrollReveal delay={0.05}>
-        <JobsPreviewSection isApproved={isApproved} />
-      </ScrollReveal>
 
       <PollPopup />
     </main>
