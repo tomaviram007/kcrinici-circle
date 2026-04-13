@@ -390,6 +390,11 @@ const AdminEvents = () => {
                       <CreditCard className="h-3.5 w-3.5 text-gold" />
                       {rsvps.filter(r => r.payment_status === "paid").length} שילמו
                     </span>
+                    {event.price && (
+                      <span className="rounded-md bg-gold/10 px-2 py-1 font-body text-xs text-gold font-semibold">
+                        ₪{Number(event.price).toLocaleString()}
+                      </span>
+                    )}
                     <a href={event.payment_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 font-body text-xs text-primary hover:bg-primary/20 transition-colors">
                       <Link2 className="h-3.5 w-3.5" /> קישור תשלום
                     </a>
