@@ -411,7 +411,7 @@ const AdminAds = () => {
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {advertisers.map(adv => {
                 const advCampaigns = campaigns.filter(c => c.advertiser_id === adv.id);
-                const activeCount = advCampaigns.filter(c => c.is_active && new Date(c.start_date) <= now && new Date(c.end_date) >= now).length;
+                const activeCount = advCampaigns.filter(c => c.is_active && new Date(c.start_date) <= now && (!c.end_date || new Date(c.end_date) >= now)).length;
                 return (
                   <div key={adv.id} className="rounded-xl border border-border bg-card p-4 cursor-pointer hover:border-gold/30 transition-all" onClick={() => setSelectedAdv(adv.id)}>
                     <div className="flex items-start justify-between">
