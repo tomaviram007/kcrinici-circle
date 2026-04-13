@@ -160,28 +160,34 @@ const SmartAdBanner = ({
       {ad.media_type === "video" ? (
         <video
           src={ad.media_url}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           muted
           autoPlay
           loop
           playsInline
         />
       ) : (
-        <img
-          src={ad.media_url}
-          alt={ad.alt_text || "פרסומת"}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="eager"
-          decoding="async"
-          referrerPolicy="no-referrer"
-          onError={(e) => {
-            const img = e.currentTarget;
-            if (!img.dataset.retried) {
-              img.dataset.retried = "1";
-              img.src = appendCacheBust(ad.media_url);
-            }
-          }}
-        />
+        <>
+          <div
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+            style={{ backgroundImage: `url(${ad.media_url})` }}
+          />
+          <img
+            src={ad.media_url}
+            alt={ad.alt_text || "פרסומת"}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="eager"
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (!img.dataset.retried) {
+                img.dataset.retried = "1";
+                img.src = appendCacheBust(ad.media_url);
+              } else {
+                img.style.display = "none";
+              }
+            }}
+          />
+        </>
       )}
 
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
