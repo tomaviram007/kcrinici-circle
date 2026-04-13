@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 import { fireConfetti } from "@/lib/confetti";
 import { validateImageFile } from "@/lib/file-validation";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
+import { logAuditAction } from "@/lib/audit-log";
+import CreatorBadge from "@/components/admin/CreatorBadge";
 
 const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "" };
 
@@ -110,8 +112,9 @@ const AdminEvents = () => {
         return;
       }
       toast({ title: "עודכן!" });
+      logAuditAction("update", "event", editId, form.title);
     } else {
-      const { error } = await supabase.from("events").insert(payload);
+      const { error, data: inserted } = await supabase.from("events").insert(payload).select("id").single();
       if (error) {
         toast({ title: "שגיאה בהוספה", description: error.message, variant: "destructive" });
         return;
@@ -119,6 +122,7 @@ const AdminEvents = () => {
       toast({ title: "נוסף!" });
       fireConfetti();
       sendTelegramNotification("new_event", { title: form.title, description: form.description, date: form.event_date, location: form.location });
+      logAuditAction("create", "event", inserted?.id, form.title);
     }
     setForm(EMPTY_FORM);
     setShowForm(false);
@@ -127,8 +131,10 @@ const AdminEvents = () => {
   };
 
   const handleDelete = async (id: string) => {
+    const event = events.find(e => e.id === id);
     await supabase.from("events").delete().eq("id", id);
     toast({ title: "נמחק" });
+    logAuditAction("delete", "event", id, event?.title);
     fetchEvents();
   };
 
@@ -310,10 +316,13 @@ const AdminEvents = () => {
                       </a>
                     )}
                   </div>
-                  <p className="font-body text-xs text-muted-foreground mt-1">
-                    נוצר: {new Date(event.created_at).toLocaleDateString("he-IL")}
-                    {event.updated_at !== event.created_at && ` · עודכן: ${new Date(event.updated_at).toLocaleDateString("he-IL")}`}
-                  </p>
+                  <div className="mt-1 flex items-center gap-2 flex-wrap">
+                    <p className="font-body text-xs text-muted-foreground">
+                      נוצר: {new Date(event.created_at).toLocaleDateString("he-IL")}
+                      {event.updated_at !== event.created_at && ` · עודכן: ${new Date(event.updated_at).toLocaleDateString("he-IL")}`}
+                    </p>
+                    <CreatorBadge entityType="event" entityId={event.id} createdBy={event.created_by} />
+                  </div>
                 </div>
                 <div className="flex gap-1 shrink-0">
                   <Button variant="ghost" size="sm" onClick={() => startEdit(event)}><Edit2 className="h-3.5 w-3.5" /></Button>

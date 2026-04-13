@@ -8,6 +8,8 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { Trash2, Check, Clock, Plus, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fireConfetti } from "@/lib/confetti";
+import { logAuditAction } from "@/lib/audit-log";
+import CreatorBadge from "@/components/admin/CreatorBadge";
 
 const AdminAnnouncements = () => {
   const { toast } = useToast();
@@ -40,20 +42,25 @@ const AdminAnnouncements = () => {
     toast({ title: "פורסם!", description: "המודעה פורסמה בהצלחה." });
     fireConfetti();
     sendTelegramNotification("new_announcement", { title: form.title, content: form.content, category: form.category });
+    logAuditAction("create", "announcement", undefined, form.title);
     setForm({ title: "", content: "", category: "announcement" });
     setShowForm(false);
     fetchItems();
   };
 
   const handleApprove = async (id: string) => {
+    const item = items.find(i => i.id === id);
     await supabase.from("announcements").update({ is_approved: true }).eq("id", id);
     toast({ title: "המודעה אושרה!" });
+    logAuditAction("approve", "announcement", id, item?.title);
     fetchItems();
   };
 
   const handleDelete = async (id: string) => {
+    const item = items.find(i => i.id === id);
     await supabase.from("announcements").delete().eq("id", id);
     toast({ title: "נמחק" });
+    logAuditAction("delete", "announcement", id, item?.title);
     fetchItems();
   };
 
@@ -144,6 +151,7 @@ const AdminAnnouncements = () => {
                 <h4 className="font-serif text-base font-bold text-foreground">{item.title}</h4>
                 <p className="font-body text-sm text-muted-foreground line-clamp-3">{item.content}</p>
                 <p className="mt-1 font-body text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString("he-IL")}</p>
+                <CreatorBadge entityType="announcement" entityId={item.id} createdBy={item.created_by} />
               </div>
               <div className="flex gap-1 shrink-0 mr-3">
                 <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
