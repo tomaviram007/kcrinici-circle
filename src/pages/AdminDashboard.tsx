@@ -35,11 +35,28 @@ interface DashboardStats {
   activePolls: number;
 }
 
+// Map tab IDs to permission keys
+const TAB_PERMISSION_MAP: Record<string, string> = {
+  members: "manage_members",
+  team: "manage_team",
+  announcements: "manage_announcements",
+  jobs: "manage_jobs",
+  events: "manage_events",
+  recommendations: "manage_recommendations",
+  deals: "manage_deals",
+  gallery: "manage_gallery",
+  polls: "manage_polls",
+  quotes: "manage_quotes",
+  logo: "manage_settings",
+  covers: "manage_quotes",
+};
+
 const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "members";
   const [stats, setStats] = useState<DashboardStats>({ approvedMembers: 0, pendingMembers: 0, upcomingEvents: 0, activeJobs: 0, activePolls: 0 });
   const coverImage = usePageCover("admin", heroAdmin);
+  const { hasPermission } = useUserPermissions();
 
   useEffect(() => {
     const fetchStats = async () => {
