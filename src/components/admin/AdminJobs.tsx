@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2, Check, Clock, Plus, X, Power, Tag, Building2, MapPin, Banknote, User } from "lucide-react";
 import { fireConfetti } from "@/lib/confetti";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
+import { logAuditAction } from "@/lib/audit-log";
+import CreatorBadge from "@/components/admin/CreatorBadge";
 
 const JOB_TYPES = [
   { value: "full-time", label: "משרה מלאה" },
@@ -59,20 +61,25 @@ const AdminJobs = () => {
     toast({ title: "פורסם!", description: "המשרה פורסמה בהצלחה." });
     fireConfetti();
     sendTelegramNotification("new_job", { title: form.title, description: form.description, company: form.company_name, location: form.location });
+    logAuditAction("create", "job", undefined, form.title);
     setForm(EMPTY_FORM);
     setShowForm(false);
     fetchJobs();
   };
 
   const handleApprove = async (id: string) => {
+    const job = jobs.find(j => j.id === id);
     await supabase.from("jobs").update({ is_approved: true }).eq("id", id);
     toast({ title: "המשרה אושרה!" });
+    logAuditAction("approve", "job", id, job?.title);
     fetchJobs();
   };
 
   const handleDelete = async (id: string) => {
+    const job = jobs.find(j => j.id === id);
     await supabase.from("jobs").delete().eq("id", id);
     toast({ title: "נמחק" });
+    logAuditAction("delete", "job", id, job?.title);
     fetchJobs();
   };
 

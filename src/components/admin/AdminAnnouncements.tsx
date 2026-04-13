@@ -8,6 +8,8 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { Trash2, Check, Clock, Plus, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fireConfetti } from "@/lib/confetti";
+import { logAuditAction } from "@/lib/audit-log";
+import CreatorBadge from "@/components/admin/CreatorBadge";
 
 const AdminAnnouncements = () => {
   const { toast } = useToast();
@@ -40,14 +42,17 @@ const AdminAnnouncements = () => {
     toast({ title: "פורסם!", description: "המודעה פורסמה בהצלחה." });
     fireConfetti();
     sendTelegramNotification("new_announcement", { title: form.title, content: form.content, category: form.category });
+    logAuditAction("create", "announcement", undefined, form.title);
     setForm({ title: "", content: "", category: "announcement" });
     setShowForm(false);
     fetchItems();
   };
 
   const handleApprove = async (id: string) => {
+    const item = items.find(i => i.id === id);
     await supabase.from("announcements").update({ is_approved: true }).eq("id", id);
     toast({ title: "המודעה אושרה!" });
+    logAuditAction("approve", "announcement", id, item?.title);
     fetchItems();
   };
 
