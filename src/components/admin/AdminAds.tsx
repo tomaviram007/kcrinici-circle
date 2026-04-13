@@ -400,6 +400,7 @@ const AdminAds = () => {
                   <div><span className="text-muted-foreground">אימייל:</span> {adv.email || "—"}</div>
                 </div>
                 {adv.notes && <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">{adv.notes}</p>}
+                <AdReportExport advertiser={adv} campaigns={advCamps} />
                 <h4 className="font-serif font-bold">קמפיינים ({advCamps.length})</h4>
                 {advCamps.length === 0 ? <p className="text-sm text-muted-foreground">אין קמפיינים למפרסם זה.</p> : (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
