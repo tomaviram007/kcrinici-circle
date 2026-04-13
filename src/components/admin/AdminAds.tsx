@@ -362,21 +362,27 @@ const AdminAds = () => {
                 return (
                   <div key={c.id} className="rounded-xl border border-border bg-card overflow-hidden">
                     {/* media preview */}
-                    <div className="relative h-32 bg-muted/50">
+                    <div className="relative h-32 bg-muted/30">
                       {c.media_type === "video" ? (
                         <video src={c.media_url} className="w-full h-full object-cover" muted />
                       ) : (
                         <img 
-                          src={c.media_url} 
+                          src={c.media_url + (c.media_url.includes("?") ? "&" : "?") + "v=1"} 
                           alt={c.alt_text || c.title} 
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover block"
+                          crossOrigin="anonymous"
+                          loading="eager"
+                          referrerPolicy="no-referrer"
                           onError={(e) => {
                             const img = e.currentTarget;
-                            if (!img.dataset.retried) {
-                              img.dataset.retried = "1";
-                              setTimeout(() => {
-                                img.src = c.media_url + (c.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
-                              }, 500);
+                            if (!img.dataset.retry) {
+                              img.dataset.retry = "1";
+                              img.crossOrigin = null as any;
+                              img.src = c.media_url + "?t=" + Date.now();
+                            } else if (img.dataset.retry === "1") {
+                              img.dataset.retry = "2";
+                              img.removeAttribute("crossorigin");
+                              img.src = c.media_url;
                             }
                           }}
                         />
@@ -475,6 +481,7 @@ const AdminAds = () => {
                       return (
                         <div key={c.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
                           <img src={c.media_url} className="h-10 w-16 rounded object-cover" alt="" />
+
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">{c.title}</p>
                             <p className="text-xs text-muted-foreground">{PLACEMENT_LABELS[c.placement]} · <Eye className="inline h-3 w-3" /> {c.impression_count} · <MousePointerClick className="inline h-3 w-3" /> {c.click_count}</p>
@@ -530,21 +537,22 @@ const AdminAds = () => {
               <FieldLabel label="מדיה (תמונה / MP4)" tooltip="הקובץ שיוצג כבאנר באתר. פורמטים נתמכים: JPG, PNG, WebP או וידאו MP4. מקסימום 10MB." required />
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
               {mediaPreview ? (
-                <div className="relative mt-2 rounded-lg overflow-hidden border border-border bg-muted/30">
+                <div className="relative mt-2 rounded-lg overflow-hidden border border-border bg-muted/30 min-h-[160px]">
                   {campForm.media_type === "video" ? (
                     <video src={mediaPreview} className="w-full h-40 object-cover" muted controls />
                   ) : (
                     <img 
-                      src={mediaPreview} 
-                      className="w-full h-40 object-cover" 
+                      src={mediaPreview.startsWith("blob:") ? mediaPreview : mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "v=1"} 
+                      className="w-full h-40 object-cover block" 
                       alt="תצוגה מקדימה" 
+                      loading="eager"
+                      referrerPolicy="no-referrer"
                       onError={(e) => {
                         const img = e.currentTarget;
-                        if (!img.dataset.retried) {
-                          img.dataset.retried = "1";
-                          setTimeout(() => {
-                            img.src = mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "t=" + Date.now();
-                          }, 500);
+                        if (!img.dataset.retry) {
+                          img.dataset.retry = "1";
+                          img.removeAttribute("crossorigin");
+                          img.src = mediaPreview + "?t=" + Date.now();
                         }
                       }}
                     />
@@ -557,7 +565,7 @@ const AdminAds = () => {
                   </button>
                 </div>
               ) : (
-                <button onClick={() => fileRef.current?.click()} className="mt-2 w-full h-32 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 transition-colors">
+                <button type="button" onClick={() => fileRef.current?.click()} className="mt-2 w-full h-32 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 transition-colors">
                   <Upload className="h-6 w-6" />
                   <span className="text-sm">גרור או לחץ להעלאה</span>
                 </button>
