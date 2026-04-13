@@ -17,7 +17,7 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 
-const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false };
+const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "" };
 
 interface RsvpProfile {
   full_name: string;
@@ -112,6 +112,7 @@ const AdminEvents = () => {
       ...form,
       image_url: form.image_url || null,
       payment_link: form.payment_link || null,
+      price: form.price ? parseFloat(form.price) : null,
       created_by: session?.user?.id || null,
     };
     if (editId) {
@@ -156,6 +157,7 @@ const AdminEvents = () => {
       image_url: event.image_url || "",
       payment_link: event.payment_link || "",
       registration_required: event.registration_required || false,
+      price: event.price ? String(event.price) : "",
     });
     setEditId(event.id);
     setShowForm(true);
@@ -301,11 +303,21 @@ const AdminEvents = () => {
           )}
 
           {/* Payment & Registration */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
               placeholder="קישור לתשלום (פייבוקס / ביט)"
               value={form.payment_link}
               onChange={(e) => setForm({ ...form, payment_link: e.target.value })}
+              className="bg-background"
+              dir="ltr"
+            />
+            <Input
+              placeholder="מחיר (₪)"
+              type="number"
+              min="0"
+              step="1"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
               className="bg-background"
               dir="ltr"
             />
