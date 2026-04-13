@@ -198,21 +198,29 @@ const SmartAdBanner = ({
         <img
           src={displayUrl}
           alt={ad.alt_text || "פרסומת"}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
+            imageLoaded ? "opacity-100" : "opacity-0"
+          )}
           loading="eager"
           decoding="async"
+          onLoad={() => setImageLoaded(true)}
           onError={(e) => {
             const img = e.currentTarget;
             if (!img.dataset.retried) {
-              // On error, fall back to the original (non-transformed) URL
               img.dataset.retried = "1";
               img.src = ad.media_url;
+            } else {
+              setImageLoaded(true);
             }
           }}
         />
       )}
 
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
+      {/* Loading skeleton */}
+      {!imageLoaded && ad.media_type !== "video" && (
+        <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
+      )}
 
       <span className="absolute bottom-2 left-2 text-[9px] font-medium text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded pointer-events-none">
         ממומן
