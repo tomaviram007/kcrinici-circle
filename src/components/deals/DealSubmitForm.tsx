@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, X, Send } from "lucide-react";
+import { Plus, X, Send, Upload, ImageIcon } from "lucide-react";
 import BenefitFields from "./BenefitFields";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
 
@@ -37,8 +37,35 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "הקובץ גדול מדי", description: "גודל מקסימלי 2MB", variant: "destructive" });
+      return;
+    }
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
+
+  const uploadLogo = async (): Promise<string | null> => {
+    if (!logoFile || !user?.id) return null;
+    const ext = logoFile.name.split(".").pop();
+    const path = `deal-logos/${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("deals").upload(path, logoFile, { upsert: true });
+    if (error) {
+      console.error("Logo upload error:", error);
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from("deals").getPublicUrl(path);
+    return urlData.publicUrl;
+  };
 
   const handleSubmit = async () => {
     if (!form.title.trim() || !form.business_name.trim() || !form.description.trim()) {
@@ -46,6 +73,9 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
       return;
     }
     setSaving(true);
+
+    const logoUrl = await uploadLogo();
+
     const { error } = await supabase.from("deals").insert({
       title: form.title,
       description: form.description,
@@ -61,6 +91,7 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
       is_active: true,
       is_approved: false,
       created_by: user?.id,
+      business_logo_url: logoUrl,
     } as any);
 
     if (error) {
@@ -75,6 +106,8 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
         discount_label: buildDiscountLabel(form.benefit_type, form.benefit_value),
       });
       setForm(emptyForm);
+      setLogoFile(null);
+      setLogoPreview(null);
       setShowForm(false);
       onSubmitted?.();
     }
@@ -112,7 +145,7 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
         ההטבה תפורסם לאחר אישור מנהל המועדון
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
         <div>
           <Label className="font-body text-xs">שם העסק *</Label>
           <Input value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} className="bg-background" />
@@ -120,6 +153,46 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
         <div>
           <Label className="font-body text-xs">כותרת ההטבה *</Label>
           <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" />
+        </div>
+      </div>
+
+      <div>
+        <Label className="font-body text-xs">לוגו בית העסק</Label>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleLogoSelect}
+        />
+        <div className="flex items-center gap-3 mt-1">
+          {logoPreview ? (
+            <div className="relative">
+              <img src={logoPreview} alt="לוגו" className="h-14 w-14 rounded-lg object-contain border border-primary/20 bg-background p-1" />
+              <button
+                type="button"
+                onClick={() => { setLogoFile(null); setLogoPreview(null); }}
+                className="absolute -top-1.5 -left-1.5 bg-destructive text-destructive-foreground rounded-full h-4 w-4 flex items-center justify-center text-[10px]"
+              >
+                ×
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="h-14 w-14 rounded-lg border border-dashed border-primary/30 bg-background flex flex-col items-center justify-center gap-0.5 hover:border-primary/60 transition-colors"
+            >
+              <ImageIcon className="h-5 w-5 text-muted-foreground" />
+              <span className="text-[9px] text-muted-foreground">העלאה</span>
+            </button>
+          )}
+          {logoPreview && (
+            <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="h-3 w-3 ml-1" />
+              החלף
+            </Button>
+          )}
         </div>
       </div>
 
