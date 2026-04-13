@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Plus, Building2, BarChart3, Eye, MousePointerClick, Trash2, Pencil, Upload, X, Calendar, Link2, Image as ImageIcon, Video, Users, HelpCircle } from "lucide-react";
+import { Plus, Building2, BarChart3, Eye, MousePointerClick, Trash2, Pencil, Upload, X, Calendar, Link2, Image as ImageIcon, Video, Users, HelpCircle, AlertTriangle } from "lucide-react";
+import AdReportExport from "./AdReportExport";
 
 /* ─── types ─── */
 interface Advertiser {
