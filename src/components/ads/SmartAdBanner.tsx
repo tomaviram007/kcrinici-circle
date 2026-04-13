@@ -22,7 +22,18 @@ interface AdCampaign {
   max_appearances: number;
 }
 
-const appendCacheBust = (url: string) => `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
+/**
+ * Convert a Supabase Storage public URL to an optimized render URL.
+ * /storage/v1/object/public/bucket/path  →  /storage/v1/render/image/public/bucket/path?width=W&quality=Q
+ * Non-Supabase URLs or videos are returned as-is.
+ */
+const optimizeImageUrl = (url: string, width = 800, quality = 75): string => {
+  if (!url) return url;
+  // Only transform Supabase storage URLs for images
+  const match = url.match(/(https:\/\/[^/]+\/storage\/v1\/)object\/(public\/.+)/);
+  if (!match) return url;
+  return `${match[1]}render/image/${match[2]}?width=${width}&quality=${quality}`;
+};
 
 const SmartAdBanner = ({
   placement,
@@ -38,6 +49,19 @@ const SmartAdBanner = ({
   const trackedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const fallbackKey = useMemo(() => fallbackPlacements.filter(Boolean).join("|"), [fallbackPlacements]);
+
+  // Choose optimal render width based on placement
+  const renderWidth = useMemo(() => {
+    const widths: Record<string, number> = {
+      hero: 1200,
+      premium: 1200,
+      sidebar: 400,
+      inline: 800,
+      between_content: 800,
+      inline_repeat: 600,
+    };
+    return widths[placement] || 800;
+  }, [placement]);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,6 +155,7 @@ const SmartAdBanner = ({
   if (!ads.length) return null;
 
   const ad = ads[current];
+  const displayUrl = ad.media_type === "video" ? ad.media_url : optimizeImageUrl(ad.media_url, renderWidth);
 
   const sizeClasses: Record<string, string> = {
     hero: "w-full h-[200px] sm:h-[280px] md:h-[350px]",
@@ -167,27 +192,21 @@ const SmartAdBanner = ({
           playsInline
         />
       ) : (
-        <>
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-            style={{ backgroundImage: `url(${ad.media_url})` }}
-          />
-          <img
-            src={ad.media_url}
-            alt={ad.alt_text || "פרסומת"}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="eager"
-            onError={(e) => {
-              const img = e.currentTarget;
-              if (!img.dataset.retried) {
-                img.dataset.retried = "1";
-                img.src = appendCacheBust(ad.media_url);
-              } else {
-                img.style.display = "none";
-              }
-            }}
-          />
-        </>
+        <img
+          src={displayUrl}
+          alt={ad.alt_text || "פרסומת"}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="eager"
+          decoding="async"
+          onError={(e) => {
+            const img = e.currentTarget;
+            if (!img.dataset.retried) {
+              // On error, fall back to the original (non-transformed) URL
+              img.dataset.retried = "1";
+              img.src = ad.media_url;
+            }
+          }}
+        />
       )}
 
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />

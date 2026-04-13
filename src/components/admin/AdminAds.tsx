@@ -14,6 +14,14 @@ import { cn } from "@/lib/utils";
 import { Plus, Building2, BarChart3, Eye, MousePointerClick, Trash2, Pencil, Upload, X, Calendar, Link2, Image as ImageIcon, Video, Users, HelpCircle, AlertTriangle } from "lucide-react";
 import AdReportExport from "./AdReportExport";
 
+/** Convert Supabase Storage URL to optimized render URL */
+const optimizeImageUrl = (url: string, width = 600, quality = 75): string => {
+  if (!url) return url;
+  const match = url.match(/(https:\/\/[^/]+\/storage\/v1\/)object\/(public\/.+)/);
+  if (!match) return url;
+  return `${match[1]}render/image/${match[2]}?width=${width}&quality=${quality}`;
+};
+
 /* ─── types ─── */
 interface Advertiser {
   id: string;
@@ -367,22 +375,17 @@ const AdminAds = () => {
                         <video src={c.media_url} className="absolute inset-0 w-full h-full object-cover" muted playsInline controls={false} />
                       ) : (
                         <>
-                          <div
-                            className="absolute inset-0 bg-cover bg-center"
-                            style={{ backgroundImage: `url(${c.media_url})` }}
-                          />
                           <img
-                            src={c.media_url}
+                            src={optimizeImageUrl(c.media_url, 600)}
                             alt={c.alt_text || c.title}
                             className="absolute inset-0 w-full h-full object-cover"
                             loading="eager"
+                            decoding="async"
                             onError={(e) => {
                               const img = e.currentTarget;
                               if (!img.dataset.retried) {
                                 img.dataset.retried = "1";
-                                img.src = c.media_url + (c.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
-                              } else {
-                                img.style.display = "none";
+                                img.src = c.media_url; // fallback to original
                               }
                             }}
                           />
@@ -483,7 +486,9 @@ const AdminAds = () => {
                       const status = getCampaignStatus(c);
                       return (
                         <div key={c.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
-                          <div className="h-10 w-16 rounded overflow-hidden bg-muted/50 shrink-0" style={{ backgroundImage: `url(${c.media_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                          <div className="h-10 w-16 rounded overflow-hidden bg-muted/50 shrink-0">
+                            <img src={optimizeImageUrl(c.media_url, 200)} alt={c.title} className="w-full h-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = c.media_url; }} />
+                          </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">{c.title}</p>
                             <p className="text-xs text-muted-foreground">{PLACEMENT_LABELS[c.placement]} · <Eye className="inline h-3 w-3" /> {c.impression_count} · <MousePointerClick className="inline h-3 w-3" /> {c.click_count}</p>
@@ -544,22 +549,17 @@ const AdminAds = () => {
                     <video src={mediaPreview} className="w-full h-40 object-cover" muted controls playsInline />
                   ) : (
                     <div className="relative w-full h-40">
-                      <div
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${mediaPreview})` }}
-                      />
                       <img
-                        src={mediaPreview}
-                        className="relative w-full h-full object-cover"
+                        src={mediaFile ? mediaPreview! : optimizeImageUrl(mediaPreview!, 800)}
+                        className="w-full h-full object-cover"
                         alt="תצוגה מקדימה"
                         loading="eager"
+                        decoding="async"
                         onError={(e) => {
                           const img = e.currentTarget;
-                          if (!img.dataset.retried) {
+                          if (!img.dataset.retried && mediaPreview) {
                             img.dataset.retried = "1";
-                            img.src = mediaPreview + (mediaPreview.includes("?") ? "&" : "?") + "t=" + Date.now();
-                          } else {
-                            img.style.display = "none";
+                            img.src = mediaPreview; // fallback to original URL
                           }
                         }}
                       />
