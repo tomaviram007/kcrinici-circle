@@ -266,23 +266,27 @@ const AdminGalleryApproval = () => {
 };
 
 // Team Management Component
-const ROLE_PERMISSIONS: Record<string, { allowed: string[]; forbidden: string[] }> = {
-  admin: {
-    allowed: ["ניהול מלא של כל המערכת", "ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "ניהול תוכן, אירועים והטבות", "גישה להגדרות מערכת"],
-    forbidden: [],
-  },
-  chief_editor: {
-    allowed: ["ניהול מודעות ואישורן", "ניהול אירועים וגלריה", "ניהול משרות והמלצות", "ניהול הטבות וסקרים", "עריכת ציטוטים וקאברים"],
-    forbidden: ["ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "שינוי הגדרות מערכת"],
-  },
-  editor: {
-    allowed: ["ניהול מודעות ואישורן", "ניהול אירועים וגלריה", "ניהול משרות והמלצות"],
-    forbidden: ["ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "ניהול הטבות וסקרים", "שינוי הגדרות מערכת"],
-  },
-  moderator: {
-    allowed: ["אישור/דחייה של תוכן גולשים", "צפייה בתוכן ממתין לאישור"],
-    forbidden: ["ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "יצירת תוכן חדש", "עריכת הגדרות מערכת"],
-  },
+// All available permissions with Hebrew labels
+const ALL_PERMISSIONS = [
+  { key: "manage_announcements", label: "ניהול מודעות ואישורן" },
+  { key: "manage_events", label: "ניהול אירועים" },
+  { key: "manage_gallery", label: "ניהול גלריה" },
+  { key: "manage_jobs", label: "ניהול משרות" },
+  { key: "manage_recommendations", label: "ניהול המלצות" },
+  { key: "manage_deals", label: "ניהול הטבות" },
+  { key: "manage_polls", label: "ניהול סקרים" },
+  { key: "manage_quotes", label: "עריכת ציטוטים וקאברים" },
+  { key: "manage_members", label: "ניהול חברים ואישור בקשות" },
+  { key: "manage_team", label: "ניהול צוות והרשאות" },
+  { key: "manage_settings", label: "שינוי הגדרות מערכת" },
+];
+
+// Default permissions per role (used when first assigning a role)
+const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
+  admin: ALL_PERMISSIONS.map(p => p.key),
+  chief_editor: ["manage_announcements", "manage_events", "manage_gallery", "manage_jobs", "manage_recommendations", "manage_deals", "manage_polls", "manage_quotes"],
+  editor: ["manage_announcements", "manage_events", "manage_gallery", "manage_jobs", "manage_recommendations"],
+  moderator: ["manage_announcements"],
 };
 
 const AdminTeam = () => {
