@@ -330,57 +330,6 @@ const AdminTeam = () => {
     }
   };
 
-  const ROLE_LABELS: Record<string, string> = {
-    admin: "מנהל ראשי",
-    chief_editor: "עורך ראשי",
-    editor: "עורך משני",
-    moderator: "מנחה",
-  };
-
-  const fetchTeam = async () => {
-    const { data: rolesData } = await supabase.from("user_roles").select("*");
-    setRoles(rolesData || []);
-
-    const userIds = [...new Set((rolesData || []).map((r: any) => r.user_id))];
-    if (userIds.length > 0) {
-      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, profession, avatar_url").in("user_id", userIds);
-      setMembers(profiles || []);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchTeam(); }, []);
-
-  const handleAddRole = async () => {
-    if (!searchEmail.trim()) return;
-    setAdding(true);
-    try {
-      // Find user by name
-      const { data: profile } = await supabase.from("profiles").select("user_id, full_name").ilike("full_name", `%${searchEmail.trim()}%`).maybeSingle();
-      if (!profile) {
-        toast({ title: "לא נמצא", description: "לא נמצא חבר עם השם הזה", variant: "destructive" });
-        setAdding(false);
-        return;
-      }
-      const { error } = await supabase.from("user_roles").insert({ user_id: profile.user_id, role: selectedRole } as any);
-      if (error) {
-        if (error.message.includes("duplicate")) {
-          toast({ title: "כבר קיים", description: "לחבר כבר יש תפקיד זה", variant: "destructive" });
-        } else {
-          throw error;
-        }
-      } else {
-        toast({ title: "נוסף בהצלחה!", description: `${profile.full_name} קיבל תפקיד ${ROLE_LABELS[selectedRole] || selectedRole}` });
-        setSearchEmail("");
-      }
-      await fetchTeam();
-    } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
-    } finally {
-      setAdding(false);
-    }
-  };
-
   const handleRemoveRole = async (roleId: string) => {
     const { error } = await supabase.from("user_roles").delete().eq("id", roleId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
@@ -400,13 +349,21 @@ const AdminTeam = () => {
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <p className="font-body text-sm text-gold font-medium">הוסף חבר צוות</p>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Input
-            placeholder="חפש לפי שם חבר..."
-            value={searchEmail}
-            onChange={(e) => setSearchEmail(e.target.value)}
-            className="bg-background flex-1"
-            autoComplete="off"
-          />
+          <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+            <SelectTrigger className="bg-background flex-1 font-body">
+              <SelectValue placeholder="בחר חבר מועדון..." />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {availableMembers.map((m) => (
+                <SelectItem key={m.user_id} value={m.user_id} className="font-body">
+                  {m.full_name}
+                </SelectItem>
+              ))}
+              {availableMembers.length === 0 && (
+                <p className="text-sm text-muted-foreground p-2 text-center font-body">אין חברים זמינים</p>
+              )}
+            </SelectContent>
+          </Select>
           <Select value={selectedRole} onValueChange={setSelectedRole}>
             <SelectTrigger className="w-40 font-body bg-background">
               <SelectValue />
@@ -417,10 +374,11 @@ const AdminTeam = () => {
               <SelectItem value="moderator">מנחה</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleAddRole} disabled={adding || !searchEmail.trim()} className="gradient-gold text-primary-foreground font-body">
+          <Button onClick={handleAddRole} disabled={adding || !selectedUserId} className="gradient-gold text-primary-foreground font-body">
             {adding ? "מוסיף..." : "הוסף"}
           </Button>
         </div>
+      </div>
       </div>
 
       {/* Team list */}
