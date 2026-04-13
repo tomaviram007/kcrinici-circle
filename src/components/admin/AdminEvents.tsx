@@ -363,7 +363,7 @@ const AdminEvents = () => {
               </div>
 
               {/* RSVP summary */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={() => rsvps.length > 0 && setRsvpDialogEvent(event)}
                   className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 font-body text-xs text-foreground hover:bg-secondary/80 transition-colors"
@@ -372,6 +372,20 @@ const AdminEvents = () => {
                   {attending} אישרו הגעה
                   {rsvps.length > 0 && <ChevronDown className="h-3 w-3 text-muted-foreground" />}
                 </button>
+                {event.payment_link && (
+                  <>
+                    <span className="flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 font-body text-xs text-foreground">
+                      <CreditCard className="h-3.5 w-3.5 text-gold" />
+                      {rsvps.filter(r => r.payment_status === "paid").length} שילמו
+                    </span>
+                    <a href={event.payment_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 font-body text-xs text-primary hover:bg-primary/20 transition-colors">
+                      <Link2 className="h-3.5 w-3.5" /> קישור תשלום
+                    </a>
+                  </>
+                )}
+                {event.registration_required && (
+                  <span className="rounded-md bg-accent/50 px-2 py-1 font-body text-xs text-accent-foreground">📋 הרשמה נדרשת</span>
+                )}
               </div>
             </div>
           );
