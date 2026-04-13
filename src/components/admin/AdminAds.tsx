@@ -375,22 +375,17 @@ const AdminAds = () => {
                         <video src={c.media_url} className="absolute inset-0 w-full h-full object-cover" muted playsInline controls={false} />
                       ) : (
                         <>
-                          <div
-                            className="absolute inset-0 bg-cover bg-center"
-                            style={{ backgroundImage: `url(${c.media_url})` }}
-                          />
                           <img
-                            src={c.media_url}
+                            src={optimizeImageUrl(c.media_url, 600)}
                             alt={c.alt_text || c.title}
                             className="absolute inset-0 w-full h-full object-cover"
                             loading="eager"
+                            decoding="async"
                             onError={(e) => {
                               const img = e.currentTarget;
                               if (!img.dataset.retried) {
                                 img.dataset.retried = "1";
-                                img.src = c.media_url + (c.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
-                              } else {
-                                img.style.display = "none";
+                                img.src = c.media_url; // fallback to original
                               }
                             }}
                           />
