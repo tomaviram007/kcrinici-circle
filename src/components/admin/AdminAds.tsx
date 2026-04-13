@@ -49,7 +49,22 @@ const PLACEMENT_LABELS: Record<string, string> = {
   inline: "בין תכנים",
 };
 
-/* ─── main component ─── */
+/* ─── Field label with tooltip ─── */
+const FieldLabel = ({ label, tooltip, required }: { label: string; tooltip: string; required?: boolean }) => (
+  <div className="flex items-center gap-1.5 mb-1">
+    <Label>{label}{required && " *"}</Label>
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/60 hover:text-muted-foreground cursor-help transition-colors" />
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[220px] text-xs font-body leading-relaxed">
+          {tooltip}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  </div>
+);
 const AdminAds = () => {
   const { toast } = useToast();
   const [tab, setTab] = useState("campaigns");
