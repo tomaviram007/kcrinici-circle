@@ -191,9 +191,16 @@ const mobileNavGroups = [
 
 const allMobileItems = mobileNavGroups.flatMap((g) => g.items);
 
-const AdminMobileNav = ({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) => {
+const AdminMobileNav = ({ activeTab, onTabChange, hasPermission }: { activeTab: string; onTabChange: (tab: string) => void; hasPermission: (p: string) => boolean }) => {
   const [open, setOpen] = useState(false);
   const activeItem = allMobileItems.find((i) => i.id === activeTab);
+
+  const filteredGroups = mobileNavGroups
+    .map(g => ({ ...g, items: g.items.filter(item => {
+      const perm = TAB_PERMISSION_MAP[item.id];
+      return !perm || hasPermission(perm);
+    })}))
+    .filter(g => g.items.length > 0);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -209,7 +216,7 @@ const AdminMobileNav = ({ activeTab, onTabChange }: { activeTab: string; onTabCh
       <SheetContent side="right" className="w-72 p-4" dir="rtl">
         <p className="font-serif text-lg font-bold text-foreground mb-4">ניווט מהיר</p>
         <nav className="space-y-3">
-          {mobileNavGroups.map((group) => (
+          {filteredGroups.map((group) => (
             <div key={group.label}>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 px-2 mb-1">{group.label}</p>
               <div className="space-y-0.5">
