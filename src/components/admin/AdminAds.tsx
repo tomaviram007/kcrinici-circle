@@ -78,11 +78,11 @@ const AdminAds = () => {
 
   const fetchAll = async () => {
     const [{ data: adv }, { data: camp }] = await Promise.all([
-      supabase.from("advertisers").select("*").order("created_at", { ascending: false }),
-      supabase.from("ad_campaigns").select("*").order("created_at", { ascending: false }),
+      supabase.from("advertisers" as any).select("*").order("created_at", { ascending: false }),
+      supabase.from("ad_campaigns" as any).select("*").order("created_at", { ascending: false }),
     ]);
-    setAdvertisers(adv || []);
-    setCampaigns(camp || []);
+    setAdvertisers((adv as any[]) || []);
+    setCampaigns((camp as any[]) || []);
     setLoading(false);
   };
 
@@ -100,11 +100,11 @@ const AdminAds = () => {
   const saveAdvertiser = async () => {
     if (!advForm.business_name.trim()) { toast({ title: "שם העסק חובה", variant: "destructive" }); return; }
     if (editingAdv) {
-      const { error } = await supabase.from("advertisers").update(advForm).eq("id", editingAdv);
+      const { error } = await supabase.from("advertisers" as any).update(advForm).eq("id", editingAdv);
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
       toast({ title: "מפרסם עודכן" });
     } else {
-      const { error } = await supabase.from("advertisers").insert(advForm);
+      const { error } = await supabase.from("advertisers" as any).insert(advForm);
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
       toast({ title: "מפרסם נוסף" });
     }
@@ -116,7 +116,7 @@ const AdminAds = () => {
 
   const deleteAdvertiser = async (id: string) => {
     if (!confirm("למחוק את המפרסם וכל הקמפיינים שלו?")) return;
-    await supabase.from("advertisers").delete().eq("id", id);
+    await supabase.from("advertisers" as any).delete().eq("id", id);
     toast({ title: "מפרסם נמחק" });
     setSelectedAdv(null);
     fetchAll();
@@ -169,11 +169,11 @@ const AdminAds = () => {
     };
 
     if (editingCamp) {
-      const { error } = await supabase.from("ad_campaigns").update(payload).eq("id", editingCamp);
+      const { error } = await supabase.from("ad_campaigns" as any).update(payload).eq("id", editingCamp);
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); setUploading(false); return; }
       toast({ title: "קמפיין עודכן" });
     } else {
-      const { error } = await supabase.from("ad_campaigns").insert(payload);
+      const { error } = await supabase.from("ad_campaigns" as any).insert(payload);
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); setUploading(false); return; }
       toast({ title: "קמפיין נוצר" });
     }
@@ -189,13 +189,13 @@ const AdminAds = () => {
 
   const deleteCampaign = async (id: string) => {
     if (!confirm("למחוק קמפיין זה?")) return;
-    await supabase.from("ad_campaigns").delete().eq("id", id);
+    await supabase.from("ad_campaigns" as any).delete().eq("id", id);
     toast({ title: "קמפיין נמחק" });
     fetchAll();
   };
 
   const toggleCampaign = async (id: string, active: boolean) => {
-    await supabase.from("ad_campaigns").update({ is_active: active }).eq("id", id);
+    await supabase.from("ad_campaigns" as any).update({ is_active: active }).eq("id", id);
     fetchAll();
   };
 
