@@ -571,15 +571,33 @@ const AdminAds = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <FieldLabel label="מיקום באתר" tooltip="היכן הבאנר יוצג: Hero – בראש דף הבית, סרגל צד – בצד עמודי תוכן, בין תכנים – בין הסקשנים בדף הבית." required />
+                <FieldLabel label="עמוד יעד" tooltip="באיזה עמוד הקמפיין יוצג. 'כל העמודים' יציג בכל מקום שיש שטח פרסום מתאים." required />
+                <Select value={campForm.target_page} onValueChange={v => setCampForm(f => ({ ...f, target_page: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(PAGE_LABELS).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>{v}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <FieldLabel label="סוג מיקום" tooltip="פרימיום – מיקום בולט, Hero – בראש העמוד, סרגל צד – בצד, בין תכנים – בין סקשנים, חוזר ברשימה – כל X פריטים." required />
                 <Select value={campForm.placement} onValueChange={v => setCampForm(f => ({ ...f, placement: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="hero">Hero – ראש העמוד</SelectItem>
-                    <SelectItem value="sidebar">סרגל צד</SelectItem>
-                    <SelectItem value="inline">בין תכנים</SelectItem>
+                    {Object.entries(PLACEMENT_LABELS).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>{v}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <FieldLabel label="כמות הופעות בעמוד" tooltip="כמה פעמים המודעה תוצג באותו עמוד (מקסימום 4). רלוונטי למיקומי 'חוזר ברשימה'." />
+                <Input type="number" min={1} max={4} value={campForm.max_appearances} onChange={e => setCampForm(f => ({ ...f, max_appearances: Math.min(4, Math.max(1, Number(e.target.value))) }))} />
               </div>
               <div>
                 <FieldLabel label="עדיפות" tooltip="מספר גבוה יותר = הבאנר יוצג ראשון ברוטציה. ברירת מחדל 0 (רגיל)." />
