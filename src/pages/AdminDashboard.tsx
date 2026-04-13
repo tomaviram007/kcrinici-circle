@@ -311,17 +311,29 @@ const AdminTeam = () => {
   };
 
   const fetchTeam = async () => {
-    const [rolesRes, allMembersRes] = await Promise.all([
+    const [rolesRes, allMembersRes, permsRes] = await Promise.all([
       supabase.from("user_roles").select("*"),
-      supabase.from("profiles").select("user_id, full_name, avatar_url").eq("is_approved", true).eq("is_removed", false).order("full_name"),
+      supabase.from("profiles").select("user_id, full_name, avatar_url, phone").eq("is_approved", true).eq("is_removed", false).order("full_name"),
+      supabase.from("user_permissions").select("*"),
     ]);
     const rolesData = rolesRes.data || [];
     setRoles(rolesData);
     setAllMembers(allMembersRes.data || []);
 
+    // Build permissions map: userId -> granted permission keys
+    const permsData = permsRes.data || [];
+    const permsMap: Record<string, string[]> = {};
+    for (const p of permsData) {
+      if (p.granted) {
+        if (!permsMap[p.user_id]) permsMap[p.user_id] = [];
+        permsMap[p.user_id].push(p.permission);
+      }
+    }
+    setUserPermissions(permsMap);
+
     const userIds = [...new Set(rolesData.map((r: any) => r.user_id))];
     if (userIds.length > 0) {
-      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, profession, avatar_url").in("user_id", userIds);
+      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, profession, avatar_url, phone").in("user_id", userIds);
       setMembers(profiles || []);
     }
     setLoading(false);
