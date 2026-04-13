@@ -10,7 +10,23 @@ interface AdminSidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   collapsed?: boolean;
+  hasPermission?: (permission: string) => boolean;
 }
+
+const TAB_PERMISSION_MAP: Record<string, string> = {
+  members: "manage_members",
+  team: "manage_team",
+  announcements: "manage_announcements",
+  jobs: "manage_jobs",
+  events: "manage_events",
+  recommendations: "manage_recommendations",
+  deals: "manage_deals",
+  gallery: "manage_gallery",
+  polls: "manage_polls",
+  quotes: "manage_quotes",
+  logo: "manage_settings",
+  covers: "manage_quotes",
+};
 
 const groups = [
   {

@@ -120,7 +120,7 @@ const AdminDashboard = () => {
         {/* Sidebar + Content layout */}
         <div className="flex gap-6" dir="rtl">
           <div className="hidden lg:block">
-            <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+            <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} hasPermission={hasPermission} />
           </div>
 
           <div className="flex-1 min-w-0">
