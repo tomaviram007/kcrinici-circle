@@ -29,6 +29,9 @@ import ResetPassword from "./pages/ResetPassword";
 import Gallery from "./pages/Gallery";
 import Recommendations from "./pages/Recommendations";
 import Deals from "./pages/Deals";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Regulations from "./pages/Regulations";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +81,9 @@ const AppLayout = () => {
         <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
         <Route path="/recommendations" element={<Recommendations />} />
         <Route path="/deals" element={<ProtectedRoute><Deals /></ProtectedRoute>} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/regulations" element={<Regulations />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </PageTransition>
