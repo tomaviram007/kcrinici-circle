@@ -20,7 +20,7 @@ export type Database = {
           alt_text: string | null
           click_count: number
           created_at: string
-          end_date: string
+          end_date: string | null
           id: string
           impression_count: number
           is_active: boolean
@@ -39,7 +39,7 @@ export type Database = {
           alt_text?: string | null
           click_count?: number
           created_at?: string
-          end_date: string
+          end_date?: string | null
           id?: string
           impression_count?: number
           is_active?: boolean
@@ -58,7 +58,7 @@ export type Database = {
           alt_text?: string | null
           click_count?: number
           created_at?: string
-          end_date?: string
+          end_date?: string | null
           id?: string
           impression_count?: number
           is_active?: boolean
