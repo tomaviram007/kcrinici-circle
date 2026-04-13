@@ -425,6 +425,23 @@ const Events = () => {
                       <span>{count} מאשרים הגעה</span>
                     </div>
                   )}
+                  {selectedEvent.price && (
+                    <div className="flex items-center gap-2 font-body text-sm text-gold">
+                      <CreditCard className="h-4 w-4 shrink-0" />
+                      <span>עלות השתתפות: ₪{Number(selectedEvent.price).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {selectedEvent.payment_link && (
+                    <a
+                      href={selectedEvent.payment_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 font-body text-sm text-gold hover:underline"
+                    >
+                      <CreditCard className="h-4 w-4 shrink-0" />
+                      קישור לתשלום
+                    </a>
+                  )}
                 </div>
 
                 {/* Creator info */}
