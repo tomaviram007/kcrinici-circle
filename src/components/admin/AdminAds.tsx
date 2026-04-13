@@ -151,6 +151,37 @@ const AdminAds = () => {
     setAdvDialog(true);
   };
 
+  /* ─── Image compression ─── */
+  const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<File> => {
+    return new Promise((resolve) => {
+      if (!file.type.startsWith("image/")) { resolve(file); return; }
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const scale = img.width > maxWidth ? maxWidth / img.width : 1;
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size < file.size) {
+              resolve(new File([blob], file.name.replace(/\.\w+$/, ".webp"), { type: "image/webp" }));
+            } else {
+              resolve(file);
+            }
+          },
+          "image/webp",
+          quality
+        );
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  };
+
   /* ─── Campaign CRUD ─── */
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -171,9 +202,11 @@ const AdminAds = () => {
 
     let media_url = "";
     if (mediaFile) {
-      const ext = mediaFile.name.split(".").pop();
+      // Compress images before upload
+      const fileToUpload = await compressImage(mediaFile);
+      const ext = fileToUpload.name.split(".").pop();
       const path = `campaigns/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("ads").upload(path, mediaFile);
+      const { error: upErr } = await supabase.storage.from("ads").upload(path, fileToUpload);
       if (upErr) { toast({ title: "שגיאת העלאה", description: upErr.message, variant: "destructive" }); setUploading(false); return; }
       const { data: urlData } = supabase.storage.from("ads").getPublicUrl(path);
       media_url = urlData.publicUrl;
