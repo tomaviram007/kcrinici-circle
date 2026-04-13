@@ -491,11 +491,29 @@ const Events = () => {
                     <Button
                       variant="outline"
                       className="font-body border-border text-muted-foreground hover:text-foreground"
-                      onClick={() => {
+                      onClick={async () => {
                         const date = new Date(selectedEvent.event_date);
                         const text = `🎉 ${selectedEvent.title}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}${selectedEvent.location ? `\n📍 ${selectedEvent.location}` : ""}${selectedEvent.description ? `\n\n${selectedEvent.description}` : ""}`;
+                        
                         if (navigator.share) {
-                          navigator.share({ title: selectedEvent.title, text }).catch(() => {});
+                          try {
+                            const shareData: ShareData = { title: selectedEvent.title, text };
+                            
+                            // Try to include the image as a file
+                            if (selectedEvent.image_url) {
+                              try {
+                                const response = await fetch(selectedEvent.image_url);
+                                const blob = await response.blob();
+                                const ext = blob.type.includes("png") ? "png" : "jpg";
+                                const file = new File([blob], `${selectedEvent.title}.${ext}`, { type: blob.type });
+                                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                  shareData.files = [file];
+                                }
+                              } catch {}
+                            }
+                            
+                            await navigator.share(shareData);
+                          } catch {}
                         } else {
                           const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
                           window.open(waUrl, "_blank");
