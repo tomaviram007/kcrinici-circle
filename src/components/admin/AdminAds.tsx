@@ -362,28 +362,36 @@ const AdminAds = () => {
                 return (
                   <div key={c.id} className="rounded-xl border border-border bg-card overflow-hidden">
                     {/* media preview */}
-                    <div className="relative h-32 bg-muted/50">
+                    <div className="relative h-32 bg-muted/50 flex items-center justify-center">
                       {c.media_type === "video" ? (
-                        <video src={c.media_url} className="w-full h-full object-cover" muted playsInline controls={false} />
+                        <video src={c.media_url} className="absolute inset-0 w-full h-full object-cover" muted playsInline controls={false} />
                       ) : (
-                        <img
-                          src={c.media_url}
-                          alt={c.alt_text || c.title}
-                          className="w-full h-full object-cover"
-                          loading="eager"
-                          decoding="async"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            const img = e.currentTarget;
-                            if (!img.dataset.retried) {
-                              img.dataset.retried = "1";
-                              img.src = c.media_url + (c.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
-                            }
-                          }}
-                        />
+                        <>
+                          <div
+                            className="absolute inset-0 bg-cover bg-center"
+                            style={{ backgroundImage: `url(${c.media_url})` }}
+                          />
+                          <img
+                            src={c.media_url}
+                            alt={c.alt_text || c.title}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            loading="eager"
+                            onError={(e) => {
+                              const img = e.currentTarget;
+                              if (!img.dataset.retried) {
+                                img.dataset.retried = "1";
+                                img.src = c.media_url + (c.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
+                              } else {
+                                img.style.display = "none";
+                              }
+                            }}
+                          />
+                          {/* Fallback icon when no image loads */}
+                          <ImageIcon className="h-8 w-8 text-muted-foreground/30 z-0" />
+                        </>
                       )}
-                      <span className={cn("absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full", status.color)}>{status.label}</span>
-                      <span className="absolute top-2 right-2 text-[10px] font-medium px-2 py-0.5 rounded-full bg-background/80 backdrop-blur">{PLACEMENT_LABELS[c.placement]}</span>
+                      <span className={cn("absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full z-10", status.color)}>{status.label}</span>
+                      <span className="absolute top-2 right-2 text-[10px] font-medium px-2 py-0.5 rounded-full bg-background/80 backdrop-blur z-10">{PLACEMENT_LABELS[c.placement]}</span>
                     </div>
                     <div className="p-4 space-y-2">
                       <div className="flex items-start justify-between">
