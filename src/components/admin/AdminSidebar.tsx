@@ -88,9 +88,14 @@ const AdminSidebar = ({ activeTab, onTabChange, collapsed = false, hasPermission
   const filteredGroups = groups
     .map((g) => ({
       ...g,
-      items: g.items.filter((item) =>
-        search ? item.label.includes(search) : true
-      ),
+      items: g.items.filter((item) => {
+        if (search && !item.label.includes(search)) return false;
+        if (hasPermission) {
+          const perm = TAB_PERMISSION_MAP[item.id];
+          if (perm && !hasPermission(perm)) return false;
+        }
+        return true;
+      }),
     }))
     .filter((g) => g.items.length > 0);
 
