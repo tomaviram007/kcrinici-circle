@@ -114,7 +114,7 @@ const AdminDashboard = () => {
 
         {/* Mobile: tab selector dropdown */}
         <div className="block lg:hidden mb-4" dir="rtl">
-          <AdminMobileNav activeTab={activeTab} onTabChange={handleTabChange} />
+          <AdminMobileNav activeTab={activeTab} onTabChange={handleTabChange} hasPermission={hasPermission} />
         </div>
 
         {/* Sidebar + Content layout */}
