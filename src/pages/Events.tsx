@@ -285,7 +285,7 @@ const Events = () => {
 
     {/* Event Detail Popup */}
     <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
-      <DialogContent className="sm:max-w-4xl p-0 overflow-hidden gap-0" dir="rtl">
+      <DialogContent className="sm:max-w-6xl p-0 overflow-hidden gap-0" dir="rtl">
         <DialogTitle className="sr-only">פרטי אירוע</DialogTitle>
         <DialogDescription className="sr-only">מידע מפורט על האירוע</DialogDescription>
         <button
@@ -312,7 +312,7 @@ const Events = () => {
           const images = getPopupImages();
 
           return (
-            <div className="flex flex-col md:flex-row min-h-[400px] max-h-[85vh]">
+            <div className="flex flex-col md:flex-row min-h-[400px]">
               {/* Left side - Image / Gallery */}
               <div className="md:w-1/2 relative bg-secondary flex items-center justify-center min-h-[200px] md:min-h-full">
                 {images.length > 0 ? (
@@ -360,7 +360,7 @@ const Events = () => {
               </div>
 
               {/* Right side - Info */}
-              <div className="md:w-1/2 p-5 sm:p-7 overflow-y-auto flex flex-col">
+              <div className="md:w-1/2 p-5 sm:p-7 flex flex-col">
                 {/* Date badge */}
                 <div className="inline-flex self-start flex-col items-center rounded-lg bg-secondary px-3 py-2 border border-border/50 mb-4">
                   <span className="font-serif text-2xl font-bold text-gold leading-none">{date.getDate()}</span>
