@@ -360,7 +360,7 @@ const Events = () => {
               </div>
 
               {/* Right side - Info */}
-              <div className="md:w-1/2 p-5 sm:p-7 overflow-y-auto flex flex-col">
+              <div className="md:w-1/2 p-5 sm:p-7 flex flex-col">
                 {/* Date badge */}
                 <div className="inline-flex self-start flex-col items-center rounded-lg bg-secondary px-3 py-2 border border-border/50 mb-4">
                   <span className="font-serif text-2xl font-bold text-gold leading-none">{date.getDate()}</span>
