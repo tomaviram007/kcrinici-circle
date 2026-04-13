@@ -33,6 +33,8 @@ interface Campaign {
   media_url: string;
   target_url: string;
   placement: string;
+  target_page: string;
+  max_appearances: number;
   alt_text: string | null;
   start_date: string;
   end_date: string | null;
@@ -45,9 +47,21 @@ interface Campaign {
 }
 
 const PLACEMENT_LABELS: Record<string, string> = {
+  premium: "פרימיום – מיקום בולט",
   hero: "Hero – ראש העמוד",
   sidebar: "סרגל צד",
   inline: "בין תכנים",
+  between_content: "בין סקשנים",
+  inline_repeat: "חוזר ברשימה (כל X פריטים)",
+};
+
+const PAGE_LABELS: Record<string, string> = {
+  all: "כל העמודים",
+  home: "דף הבית",
+  announcements: "לוח מודעות",
+  members: "חברי המועדון",
+  events: "אירועים",
+  gallery: "גלריה",
 };
 
 /* ─── Field label with tooltip ─── */
@@ -81,7 +95,8 @@ const AdminAds = () => {
   // campaign form
   const [campDialog, setCampDialog] = useState(false);
   const [campForm, setCampForm] = useState({
-    advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "hero",
+    advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium",
+    target_page: "all", max_appearances: 1,
     alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0,
   });
   const [editingCamp, setEditingCamp] = useState<string | null>(null);
@@ -240,7 +255,7 @@ const AdminAds = () => {
     setEditingCamp(null);
     setMediaFile(null);
     setMediaPreview(null);
-    setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "hero", alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 });
+    setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 });
     fetchAll();
   };
 
@@ -259,7 +274,8 @@ const AdminAds = () => {
   const openEditCamp = (c: Campaign) => {
     setCampForm({
       advertiser_id: c.advertiser_id, title: c.title, media_type: c.media_type, target_url: c.target_url,
-      placement: c.placement, alt_text: c.alt_text || "", start_date: c.start_date.slice(0, 16), end_date: c.end_date ? c.end_date.slice(0, 16) : "",
+      placement: c.placement, target_page: (c as any).target_page || "all", max_appearances: (c as any).max_appearances || 1,
+      alt_text: c.alt_text || "", start_date: c.start_date.slice(0, 16), end_date: c.end_date ? c.end_date.slice(0, 16) : "",
       is_active: c.is_active, price: c.price, priority: c.priority,
     });
     setEditingCamp(c.id);
@@ -331,7 +347,7 @@ const AdminAds = () => {
             <h3 className="font-serif text-xl font-bold flex items-center gap-2">
               <ImageIcon className="h-5 w-5 text-gold" /> ניהול קמפיינים
             </h3>
-            <Button size="sm" onClick={() => { setCampDialog(true); setEditingCamp(null); setMediaPreview(null); setMediaFile(null); setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "hero", alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 }); }}>
+            <Button size="sm" onClick={() => { setCampDialog(true); setEditingCamp(null); setMediaPreview(null); setMediaFile(null); setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 }); }}>
               <Plus className="h-4 w-4 ml-1" /> קמפיין חדש
             </Button>
           </div>
@@ -555,15 +571,33 @@ const AdminAds = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <FieldLabel label="מיקום באתר" tooltip="היכן הבאנר יוצג: Hero – בראש דף הבית, סרגל צד – בצד עמודי תוכן, בין תכנים – בין הסקשנים בדף הבית." required />
+                <FieldLabel label="עמוד יעד" tooltip="באיזה עמוד הקמפיין יוצג. 'כל העמודים' יציג בכל מקום שיש שטח פרסום מתאים." required />
+                <Select value={campForm.target_page} onValueChange={v => setCampForm(f => ({ ...f, target_page: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(PAGE_LABELS).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>{v}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <FieldLabel label="סוג מיקום" tooltip="פרימיום – מיקום בולט, Hero – בראש העמוד, סרגל צד – בצד, בין תכנים – בין סקשנים, חוזר ברשימה – כל X פריטים." required />
                 <Select value={campForm.placement} onValueChange={v => setCampForm(f => ({ ...f, placement: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="hero">Hero – ראש העמוד</SelectItem>
-                    <SelectItem value="sidebar">סרגל צד</SelectItem>
-                    <SelectItem value="inline">בין תכנים</SelectItem>
+                    {Object.entries(PLACEMENT_LABELS).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>{v}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <FieldLabel label="כמות הופעות בעמוד" tooltip="כמה פעמים המודעה תוצג באותו עמוד (מקסימום 4). רלוונטי למיקומי 'חוזר ברשימה'." />
+                <Input type="number" min={1} max={4} value={campForm.max_appearances} onChange={e => setCampForm(f => ({ ...f, max_appearances: Math.min(4, Math.max(1, Number(e.target.value))) }))} />
               </div>
               <div>
                 <FieldLabel label="עדיפות" tooltip="מספר גבוה יותר = הבאנר יוצג ראשון ברוטציה. ברירת מחדל 0 (רגיל)." />

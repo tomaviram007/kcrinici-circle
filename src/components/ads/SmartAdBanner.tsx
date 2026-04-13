@@ -4,7 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 interface SmartAdBannerProps {
-  placement: "hero" | "sidebar" | "inline";
+  placement: string;
+  targetPage?: string;
+  slotIndex?: number;
   className?: string;
   rotateInterval?: number;
 }
@@ -16,9 +18,10 @@ interface AdCampaign {
   target_url: string;
   alt_text: string | null;
   priority: number;
+  max_appearances: number;
 }
 
-const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdBannerProps) => {
+const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className, rotateInterval = 6000 }: SmartAdBannerProps) => {
   const { user } = useAuth();
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [current, setCurrent] = useState(0);
@@ -31,18 +34,21 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
       const now = new Date().toISOString();
       const { data } = await supabase
         .from("ad_campaigns")
-        .select("id, media_type, media_url, target_url, alt_text, priority")
+        .select("id, media_type, media_url, target_url, alt_text, priority, max_appearances")
         .eq("placement", placement)
         .eq("is_active", true)
         .lte("start_date", now)
         .or(`end_date.is.null,end_date.gte.${now}`)
+        .or(`target_page.eq.${targetPage},target_page.eq.all`)
         .order("priority", { ascending: false });
-      setAds(data || []);
+
+      // Filter ads: only show if slotIndex < max_appearances
+      const filtered = (data || []).filter((ad: any) => slotIndex < (ad.max_appearances || 1));
+      setAds(filtered);
     };
     fetchAds();
-  }, [placement]);
+  }, [placement, targetPage, slotIndex]);
 
-  // Reset load state when ad changes
   useEffect(() => {
     setImageLoaded(false);
   }, [current]);
@@ -95,8 +101,11 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
 
   const sizeClasses: Record<string, string> = {
     hero: "w-full h-[200px] sm:h-[280px] md:h-[350px]",
+    premium: "w-full h-[180px] sm:h-[250px] md:h-[300px]",
     sidebar: "w-full h-[250px]",
     inline: "w-full h-[120px] sm:h-[180px]",
+    between_content: "w-full h-[120px] sm:h-[180px]",
+    inline_repeat: "w-full h-[100px] sm:h-[140px]",
   };
 
   return (
@@ -104,7 +113,7 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
       ref={containerRef}
       className={cn(
         "relative overflow-hidden rounded-xl cursor-pointer group border border-border/30",
-        sizeClasses[placement],
+        sizeClasses[placement] || sizeClasses.inline,
         className
       )}
       onClick={() => handleClick(ad)}
@@ -113,7 +122,6 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
       aria-label={ad.alt_text || "פרסומת"}
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(ad); }}
     >
-      {/* Loading skeleton - shows until image loads */}
       {!imageLoaded && ad.media_type !== "video" && (
         <div className="absolute inset-0 bg-muted/50 animate-pulse flex items-center justify-center z-10">
           <span className="text-xs text-muted-foreground">טוען פרסומת...</span>
@@ -139,7 +147,6 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
           )}
           onLoad={() => setImageLoaded(true)}
           onError={(e) => {
-            // Retry once on error - large images may timeout
             const img = e.currentTarget;
             if (!img.dataset.retried) {
               img.dataset.retried = "1";
@@ -153,15 +160,12 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
         />
       )}
 
-      {/* Subtle overlay on hover */}
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
 
-      {/* Ad indicator */}
       <span className="absolute bottom-2 left-2 text-[9px] font-medium text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded pointer-events-none">
         ממומן
       </span>
 
-      {/* Rotation dots */}
       {ads.length > 1 && (
         <div className="absolute bottom-2 right-2 flex gap-1">
           {ads.map((_, i) => (

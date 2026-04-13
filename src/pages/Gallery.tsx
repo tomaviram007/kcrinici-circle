@@ -711,10 +711,19 @@ const Gallery = () => {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((album) => {
+            {filtered.map((album, idx) => {
+              const elements: React.ReactNode[] = [];
+              // Insert ad every 5 galleries (max 4 ads)
+              if (idx > 0 && idx % 5 === 0 && Math.floor(idx / 5) <= 4) {
+                elements.push(
+                  <div key={`ad-${idx}`} className="col-span-full">
+                    <SmartAdBanner placement="inline_repeat" targetPage="gallery" slotIndex={Math.floor(idx / 5) - 1} />
+                  </div>
+                );
+              }
               const creator = albumCreators[album.created_by || ""];
               const isPending = !(album as any).is_approved && album.created_by === userId;
-              return (
+              elements.push(
                 <div
                   key={album.id}
                   onClick={() => openAlbum(album)}
@@ -756,6 +765,7 @@ const Gallery = () => {
                   )}
                 </div>
               );
+              return elements;
             })}
           </div>
         );

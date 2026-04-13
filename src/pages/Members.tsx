@@ -219,9 +219,20 @@ const Members = () => {
       {/* Grid / List */}
       {viewMode === "grid" ? (
       <div ref={gridRef} className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 sm:gap-4">
-        {filtered.map((member) => {
+        {filtered.map((member, idx) => {
           const birthdayToday = isBirthdayToday(member.birth_date);
-          return (
+          const elements: React.ReactNode[] = [];
+
+          // Insert ad every 15 members (max 4 ads)
+          if (idx > 0 && idx % 15 === 0 && Math.floor(idx / 15) <= 4) {
+            elements.push(
+              <div key={`ad-${idx}`} className="col-span-full">
+                <SmartAdBanner placement="inline_repeat" targetPage="members" slotIndex={Math.floor(idx / 15) - 1} />
+              </div>
+            );
+          }
+
+          elements.push(
             <div
               key={member.id}
               className={`member-card group cursor-pointer rounded-lg border bg-card p-4 transition-all hover:border-gold/20 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)] ${isOwnCard(member) ? "ring-1 ring-gold/30" : "border-border"} ${birthdayToday ? "border-gold/40 shadow-[0_0_20px_hsl(43_72%_52%/0.12)]" : ""}`}
@@ -263,6 +274,7 @@ const Members = () => {
               </div>
             </div>
           );
+          return elements;
         })}
       </div>
       ) : (
