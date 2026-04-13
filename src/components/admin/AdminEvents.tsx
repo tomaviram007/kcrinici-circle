@@ -49,7 +49,7 @@ const AdminEvents = () => {
       const eventIds = data.map(e => e.id);
       const { data: rsvps } = await supabase
         .from("event_rsvps")
-        .select("event_id, status, user_id, payment_status")
+        .select("event_id, status, user_id, payment_status, created_at")
         .in("event_id", eventIds);
 
       if (rsvps && rsvps.length > 0) {
@@ -71,6 +71,7 @@ const AdminEvents = () => {
             status: rsvp.status,
             payment_status: rsvp.payment_status || "not_required",
             user_id: rsvp.user_id,
+            confirmed_at: rsvp.created_at,
           });
         }
         setRsvpData(grouped);
