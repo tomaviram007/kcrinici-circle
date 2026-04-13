@@ -35,7 +35,7 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
         .eq("placement", placement)
         .eq("is_active", true)
         .lte("start_date", now)
-        .gte("end_date", now)
+        .or(`end_date.is.null,end_date.gte.${now}`)
         .order("priority", { ascending: false });
       setAds(data || []);
     };
