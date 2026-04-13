@@ -300,6 +300,8 @@ const AdminTeam = () => {
   const [adding, setAdding] = useState(false);
   const [expandedRoleId, setExpandedRoleId] = useState<string | null>(null);
   const [changingRole, setChangingRole] = useState<string | null>(null);
+  const [userPermissions, setUserPermissions] = useState<Record<string, string[]>>({});
+  const [savingPerms, setSavingPerms] = useState<string | null>(null);
 
   const ROLE_LABELS: Record<string, string> = {
     admin: "מנהל ראשי",
