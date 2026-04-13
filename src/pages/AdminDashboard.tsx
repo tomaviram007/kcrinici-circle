@@ -269,9 +269,10 @@ const AdminGalleryApproval = () => {
 const AdminTeam = () => {
   const { toast } = useToast();
   const [members, setMembers] = useState<any[]>([]);
+  const [allMembers, setAllMembers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchEmail, setSearchEmail] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("editor");
   const [adding, setAdding] = useState(false);
 
@@ -283,10 +284,15 @@ const AdminTeam = () => {
   };
 
   const fetchTeam = async () => {
-    const { data: rolesData } = await supabase.from("user_roles").select("*");
-    setRoles(rolesData || []);
+    const [rolesRes, allMembersRes] = await Promise.all([
+      supabase.from("user_roles").select("*"),
+      supabase.from("profiles").select("user_id, full_name, avatar_url").eq("is_approved", true).eq("is_removed", false).order("full_name"),
+    ]);
+    const rolesData = rolesRes.data || [];
+    setRoles(rolesData);
+    setAllMembers(allMembersRes.data || []);
 
-    const userIds = [...new Set((rolesData || []).map((r: any) => r.user_id))];
+    const userIds = [...new Set(rolesData.map((r: any) => r.user_id))];
     if (userIds.length > 0) {
       const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, profession, avatar_url").in("user_id", userIds);
       setMembers(profiles || []);
@@ -296,18 +302,16 @@ const AdminTeam = () => {
 
   useEffect(() => { fetchTeam(); }, []);
 
+  const availableMembers = allMembers.filter(
+    (m) => !roles.some((r: any) => r.user_id === m.user_id)
+  );
+
   const handleAddRole = async () => {
-    if (!searchEmail.trim()) return;
+    if (!selectedUserId) return;
     setAdding(true);
     try {
-      // Find user by name
-      const { data: profile } = await supabase.from("profiles").select("user_id, full_name").ilike("full_name", `%${searchEmail.trim()}%`).maybeSingle();
-      if (!profile) {
-        toast({ title: "לא נמצא", description: "לא נמצא חבר עם השם הזה", variant: "destructive" });
-        setAdding(false);
-        return;
-      }
-      const { error } = await supabase.from("user_roles").insert({ user_id: profile.user_id, role: selectedRole } as any);
+      const member = allMembers.find((m) => m.user_id === selectedUserId);
+      const { error } = await supabase.from("user_roles").insert({ user_id: selectedUserId, role: selectedRole } as any);
       if (error) {
         if (error.message.includes("duplicate")) {
           toast({ title: "כבר קיים", description: "לחבר כבר יש תפקיד זה", variant: "destructive" });
@@ -315,8 +319,8 @@ const AdminTeam = () => {
           throw error;
         }
       } else {
-        toast({ title: "נוסף בהצלחה!", description: `${profile.full_name} קיבל תפקיד ${ROLE_LABELS[selectedRole] || selectedRole}` });
-        setSearchEmail("");
+        toast({ title: "נוסף בהצלחה!", description: `${member?.full_name || "חבר"} קיבל תפקיד ${ROLE_LABELS[selectedRole] || selectedRole}` });
+        setSelectedUserId("");
       }
       await fetchTeam();
     } catch (err: any) {
@@ -345,13 +349,21 @@ const AdminTeam = () => {
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <p className="font-body text-sm text-gold font-medium">הוסף חבר צוות</p>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Input
-            placeholder="חפש לפי שם חבר..."
-            value={searchEmail}
-            onChange={(e) => setSearchEmail(e.target.value)}
-            className="bg-background flex-1"
-            autoComplete="off"
-          />
+          <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+            <SelectTrigger className="bg-background flex-1 font-body">
+              <SelectValue placeholder="בחר חבר מועדון..." />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {availableMembers.map((m) => (
+                <SelectItem key={m.user_id} value={m.user_id} className="font-body">
+                  {m.full_name}
+                </SelectItem>
+              ))}
+              {availableMembers.length === 0 && (
+                <p className="text-sm text-muted-foreground p-2 text-center font-body">אין חברים זמינים</p>
+              )}
+            </SelectContent>
+          </Select>
           <Select value={selectedRole} onValueChange={setSelectedRole}>
             <SelectTrigger className="w-40 font-body bg-background">
               <SelectValue />
@@ -362,7 +374,7 @@ const AdminTeam = () => {
               <SelectItem value="moderator">מנחה</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleAddRole} disabled={adding || !searchEmail.trim()} className="gradient-gold text-primary-foreground font-body">
+          <Button onClick={handleAddRole} disabled={adding || !selectedUserId} className="gradient-gold text-primary-foreground font-body">
             {adding ? "מוסיף..." : "הוסף"}
           </Button>
         </div>
