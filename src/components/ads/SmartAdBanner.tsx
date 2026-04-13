@@ -134,11 +134,8 @@ const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className
         <img
           src={ad.media_url}
           alt={ad.alt_text || ""}
-          className={cn(
-            "w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
-            imageLoaded ? "opacity-100" : "opacity-0"
-          )}
-          onLoad={() => setImageLoaded(true)}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="eager"
           onError={(e) => {
             const img = e.currentTarget;
             if (!img.dataset.retried) {
@@ -146,8 +143,6 @@ const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className
               setTimeout(() => {
                 img.src = ad.media_url + (ad.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
               }, 500);
-            } else {
-              setImageLoaded(true);
             }
           }}
         />
