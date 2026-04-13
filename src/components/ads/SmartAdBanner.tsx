@@ -2,7 +2,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { ExternalLink } from "lucide-react";
 
 interface SmartAdBannerProps {
   placement: "hero" | "sidebar" | "inline";
@@ -24,7 +23,6 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [current, setCurrent] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const trackedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +45,6 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
   // Reset load state when ad changes
   useEffect(() => {
     setImageLoaded(false);
-    setImageError(false);
   }, [current]);
 
   const trackImpression = useCallback(async (campaignId: string) => {
@@ -116,20 +113,10 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
       aria-label={ad.alt_text || "פרסומת"}
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(ad); }}
     >
-      {/* Loading skeleton */}
-      {!imageLoaded && !imageError && ad.media_type !== "video" && (
-        <div className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center z-10">
+      {/* Loading skeleton - shows until image loads */}
+      {!imageLoaded && ad.media_type !== "video" && (
+        <div className="absolute inset-0 bg-muted/50 animate-pulse flex items-center justify-center z-10">
           <span className="text-xs text-muted-foreground">טוען פרסומת...</span>
-        </div>
-      )}
-
-      {/* Error fallback */}
-      {imageError && (
-        <div className="absolute inset-0 bg-muted flex items-center justify-center z-10">
-          <div className="text-center space-y-1">
-            <ExternalLink className="h-6 w-6 mx-auto text-muted-foreground" />
-            <span className="text-xs text-muted-foreground block">לחץ לצפייה</span>
-          </div>
         </div>
       )}
 
@@ -150,17 +137,28 @@ const SmartAdBanner = ({ placement, className, rotateInterval = 6000 }: SmartAdB
             "w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
-          loading="lazy"
           onLoad={() => setImageLoaded(true)}
-          onError={() => setImageError(true)}
+          onError={(e) => {
+            // Retry once on error - large images may timeout
+            const img = e.currentTarget;
+            if (!img.dataset.retried) {
+              img.dataset.retried = "1";
+              img.src = ad.media_url + "?retry=" + Date.now();
+            } else {
+              // Show the image anyway with direct background
+              setImageLoaded(true);
+            }
+          }}
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
         />
       )}
 
       {/* Subtle overlay on hover */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
 
       {/* Ad indicator */}
-      <span className="absolute bottom-2 left-2 text-[9px] font-medium text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded">
+      <span className="absolute bottom-2 left-2 text-[9px] font-medium text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded pointer-events-none">
         ממומן
       </span>
 
