@@ -222,6 +222,8 @@ const SmartAdBanner = ({
         <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
       )}
 
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
+
       <span className="absolute bottom-2 left-2 text-[9px] font-medium text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded pointer-events-none">
         ממומן
       </span>
