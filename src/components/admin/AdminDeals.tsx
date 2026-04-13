@@ -123,6 +123,7 @@ const AdminDeals = () => {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
     } else {
       toast({ title: editingId ? "ההטבה עודכנה!" : "ההטבה נוספה!" });
+      logAuditAction(editingId ? "update" : "create", "deal", editingId || undefined, form.title);
       setShowForm(false);
       setEditingId(null);
       setForm(emptyForm);
@@ -151,11 +152,13 @@ const AdminDeals = () => {
   };
 
   const handleDelete = async (id: string) => {
+    const deal = deals.find(d => d.id === id);
     const { error } = await supabase.from("deals").delete().eq("id", id);
     if (error) {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "ההטבה נמחקה" });
+      logAuditAction("delete", "deal", id, deal?.title);
       fetchDeals();
     }
   };
@@ -168,6 +171,7 @@ const AdminDeals = () => {
   const handleApprove = async (deal: Deal) => {
     await supabase.from("deals").update({ is_approved: true }).eq("id", deal.id);
     toast({ title: "ההטבה אושרה!" });
+    logAuditAction("approve", "deal", deal.id, deal.title);
     fetchDeals();
   };
 
