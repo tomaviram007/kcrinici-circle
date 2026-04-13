@@ -120,11 +120,6 @@ const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className
       aria-label={ad.alt_text || "פרסומת"}
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(ad); }}
     >
-      {!imageLoaded && ad.media_type !== "video" && (
-        <div className="absolute inset-0 bg-muted/50 animate-pulse flex items-center justify-center z-10">
-          <span className="text-xs text-muted-foreground">טוען פרסומת...</span>
-        </div>
-      )}
 
       {ad.media_type === "video" ? (
         <video
