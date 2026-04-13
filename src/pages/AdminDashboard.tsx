@@ -351,7 +351,19 @@ const AdminTeam = () => {
     }
   };
 
-  const handleRemoveRole = async (roleId: string) => {
+  const handleChangeRole = async (roleId: string, newRole: string) => {
+    setChangingRole(roleId);
+    try {
+      const { error } = await supabase.from("user_roles").update({ role: newRole } as any).eq("id", roleId);
+      if (error) throw error;
+      toast({ title: "התפקיד עודכן בהצלחה" });
+      await fetchTeam();
+    } catch (err: any) {
+      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+    } finally {
+      setChangingRole(null);
+    }
+  };
     const { error } = await supabase.from("user_roles").delete().eq("id", roleId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "התפקיד הוסר" });
