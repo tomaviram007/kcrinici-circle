@@ -660,7 +660,12 @@ const Announcements = () => {
 
       {/* ==================== PREMIUM AD - Between sections ==================== */}
       <div className="my-8">
-        <SmartAdBanner placement="premium" targetPage="announcements" slotIndex={0} />
+        <SmartAdBanner
+          placement="premium"
+          targetPage="announcements"
+          slotIndex={0}
+          fallbackPlacements={["between_content", "inline", "sidebar", "hero"]}
+        />
       </div>
 
       {/* ==================== SEPARATOR ==================== */}
@@ -740,7 +745,7 @@ const Announcements = () => {
     </Dialog>
 
     <div className="mx-auto max-w-7xl px-4 py-6">
-      <SmartAdBanner placement="sidebar" />
+      <SmartAdBanner placement="sidebar" targetPage="announcements" />
     </div>
     <QuoteSection page="announcements" />
     </>
