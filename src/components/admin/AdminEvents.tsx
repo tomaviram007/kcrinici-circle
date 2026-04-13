@@ -160,10 +160,17 @@ const AdminEvents = () => {
   };
 
   const startEdit = (event: any) => {
+    // Convert stored UTC date to local datetime-local format for the form
+    let localDateStr = "";
+    if (event.event_date) {
+      const d = new Date(event.event_date);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      localDateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
     setForm({
       title: event.title,
       description: event.description,
-      event_date: event.event_date?.slice(0, 16) || "",
+      event_date: localDateStr,
       location: event.location || "",
       image_url: event.image_url || "",
       payment_link: event.payment_link || "",
