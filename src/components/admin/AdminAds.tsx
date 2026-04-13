@@ -14,6 +14,14 @@ import { cn } from "@/lib/utils";
 import { Plus, Building2, BarChart3, Eye, MousePointerClick, Trash2, Pencil, Upload, X, Calendar, Link2, Image as ImageIcon, Video, Users, HelpCircle, AlertTriangle } from "lucide-react";
 import AdReportExport from "./AdReportExport";
 
+/** Convert Supabase Storage URL to optimized render URL */
+const optimizeImageUrl = (url: string, width = 600, quality = 75): string => {
+  if (!url) return url;
+  const match = url.match(/(https:\/\/[^/]+\/storage\/v1\/)object\/(public\/.+)/);
+  if (!match) return url;
+  return `${match[1]}render/image/${match[2]}?width=${width}&quality=${quality}`;
+};
+
 /* ─── types ─── */
 interface Advertiser {
   id: string;
