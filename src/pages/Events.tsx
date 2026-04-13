@@ -49,6 +49,9 @@ const Events = () => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { fireRSVP } = useConfetti();
+  const { hasPermission } = useUserPermissions();
+  const navigate = useNavigate();
+  const canEditEvents = hasPermission("manage_events");
 
   useEffect(() => {
     const init = async () => {
