@@ -257,7 +257,7 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
 
                   <div className="flex flex-col gap-2 pt-2">
                     <Button
-                      onClick={() => handleRsvp(selectedEvent.id)}
+                      onClick={() => attemptRsvp(selectedEvent)}
                       className={isAttending
                         ? "gradient-gold text-primary-foreground font-body"
                         : "border-gold/40 text-gold hover:bg-gold/10 font-body"
