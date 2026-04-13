@@ -140,6 +140,7 @@ const SmartAdBanner = ({
   useEffect(() => {
     if (ads.length <= 1) return;
     const timer = setInterval(() => {
+      setImageLoaded(false);
       setCurrent((prev) => (prev + 1) % ads.length);
     }, rotateInterval);
     return () => clearInterval(timer);
