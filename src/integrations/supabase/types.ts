@@ -14,6 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_campaigns: {
+        Row: {
+          advertiser_id: string
+          alt_text: string | null
+          click_count: number
+          created_at: string
+          end_date: string
+          id: string
+          impression_count: number
+          is_active: boolean
+          media_type: string
+          media_url: string
+          placement: string
+          price: number | null
+          priority: number
+          start_date: string
+          target_url: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id: string
+          alt_text?: string | null
+          click_count?: number
+          created_at?: string
+          end_date: string
+          id?: string
+          impression_count?: number
+          is_active?: boolean
+          media_type?: string
+          media_url: string
+          placement?: string
+          price?: number | null
+          priority?: number
+          start_date: string
+          target_url: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string
+          alt_text?: string | null
+          click_count?: number
+          created_at?: string
+          end_date?: string
+          id?: string
+          impression_count?: number
+          is_active?: boolean
+          media_type?: string
+          media_url?: string
+          placement?: string
+          price?: number | null
+          priority?: number
+          start_date?: string
+          target_url?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaigns_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_clicks: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_clicks_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_impressions: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_impressions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advertisers: {
+        Row: {
+          business_name: string
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          id: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_name: string
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           category: string
@@ -847,6 +1006,14 @@ export type Database = {
         Returns: undefined
       }
       is_approved_user: { Args: { _user_id: string }; Returns: boolean }
+      track_ad_click: {
+        Args: { p_campaign_id: string; p_user_id?: string }
+        Returns: undefined
+      }
+      track_ad_impression: {
+        Args: { p_campaign_id: string; p_user_id?: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "chief_editor" | "editor"

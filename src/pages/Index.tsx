@@ -15,6 +15,7 @@ import CTASection from "@/components/landing/CTASection";
 import PollPopup from "@/components/PollPopup";
 import ScrollReveal from "@/components/ScrollReveal";
 import ClubAboutSection from "@/components/ClubAboutSection";
+import SmartAdBanner from "@/components/ads/SmartAdBanner";
 
 const Index = () => {
   const { user, isApproved } = useAuth();
@@ -53,6 +54,11 @@ const Index = () => {
     <main className="min-h-screen bg-background">
       <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
 
+      {/* Hero Ad Banner */}
+      <div className="mx-auto max-w-7xl px-4 py-4">
+        <SmartAdBanner placement="hero" />
+      </div>
+
       <ScrollReveal>
         <ClubAboutSection />
       </ScrollReveal>
@@ -66,6 +72,11 @@ const Index = () => {
       <ScrollReveal>
         <BirthdaysPreviewSection isApproved={isApproved} />
       </ScrollReveal>
+
+      {/* Inline Ad Banner */}
+      <div className="mx-auto max-w-7xl px-4 py-4">
+        <SmartAdBanner placement="inline" />
+      </div>
       
       <ScrollReveal>
         <SalesPreviewSection isApproved={isApproved} />
