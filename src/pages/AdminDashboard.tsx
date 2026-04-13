@@ -17,6 +17,7 @@ import AdminLogo from "@/components/admin/AdminLogo";
 import AdminRecommendations from "@/components/admin/AdminRecommendations";
 import AdminCovers from "@/components/admin/AdminCovers";
 import AdminDeals from "@/components/admin/AdminDeals";
+import AdminAds from "@/components/admin/AdminAds";
 import AdminMembers from "@/components/admin/AdminMembers";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminBirthdayWidget from "@/components/admin/AdminBirthdayWidget";
@@ -49,6 +50,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   quotes: "manage_quotes",
   logo: "manage_settings",
   covers: "manage_quotes",
+  ads: "manage_settings",
 };
 
 const AdminDashboard = () => {
@@ -135,6 +137,7 @@ const AdminDashboard = () => {
             {activeTab === "logo" && hasPermission("manage_settings") && <AdminLogo />}
             {activeTab === "covers" && hasPermission("manage_quotes") && <AdminCovers />}
             {activeTab === "deals" && hasPermission("manage_deals") && <AdminDeals />}
+            {activeTab === "ads" && hasPermission("manage_settings") && <AdminAds />}
             {activeTab === "team" && hasPermission("manage_team") && <AdminTeam />}
             {/* Show access denied message if no permission */}
             {TAB_PERMISSION_MAP[activeTab] && !hasPermission(TAB_PERMISSION_MAP[activeTab]) && (
