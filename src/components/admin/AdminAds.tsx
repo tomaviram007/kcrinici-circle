@@ -78,11 +78,11 @@ const AdminAds = () => {
 
   const fetchAll = async () => {
     const [{ data: adv }, { data: camp }] = await Promise.all([
-      supabase.from("advertisers").select("*").order("created_at", { ascending: false }),
-      supabase.from("ad_campaigns").select("*").order("created_at", { ascending: false }),
+      supabase.from("advertisers" as any).select("*").order("created_at", { ascending: false }),
+      supabase.from("ad_campaigns" as any).select("*").order("created_at", { ascending: false }),
     ]);
-    setAdvertisers(adv || []);
-    setCampaigns(camp || []);
+    setAdvertisers((adv as any[]) || []);
+    setCampaigns((camp as any[]) || []);
     setLoading(false);
   };
 
