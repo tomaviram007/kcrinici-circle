@@ -364,6 +364,12 @@ const AdminTeam = () => {
           throw error;
         }
       } else {
+        // Save default permissions for this role
+        const defaultPerms = DEFAULT_ROLE_PERMISSIONS[selectedRole] || [];
+        if (defaultPerms.length > 0) {
+          const permRows = defaultPerms.map(p => ({ user_id: selectedUserId, permission: p, granted: true }));
+          await supabase.from("user_permissions").upsert(permRows as any, { onConflict: "user_id,permission" });
+        }
         const roleName = ROLE_LABELS[selectedRole] || selectedRole;
         toast({ title: "נוסף בהצלחה!", description: `${member?.full_name || "חבר"} קיבל תפקיד ${roleName}` });
         if (member?.phone) {
@@ -380,13 +386,51 @@ const AdminTeam = () => {
     }
   };
 
+  const togglePermission = (userId: string, permKey: string) => {
+    setUserPermissions(prev => {
+      const current = prev[userId] || [];
+      const has = current.includes(permKey);
+      return { ...prev, [userId]: has ? current.filter(k => k !== permKey) : [...current, permKey] };
+    });
+  };
+
+  const savePermissions = async (userId: string) => {
+    setSavingPerms(userId);
+    try {
+      const granted = userPermissions[userId] || [];
+      // Delete all existing permissions for this user
+      await supabase.from("user_permissions").delete().eq("user_id", userId);
+      // Insert granted ones
+      if (granted.length > 0) {
+        const rows = granted.map(p => ({ user_id: userId, permission: p, granted: true }));
+        const { error } = await supabase.from("user_permissions").insert(rows as any);
+        if (error) throw error;
+      }
+      toast({ title: "ההרשאות נשמרו בהצלחה ✅" });
+    } catch (err: any) {
+      toast({ title: "שגיאה בשמירת הרשאות", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingPerms(null);
+    }
+  };
+
   const handleChangeRole = async (roleId: string, newRole: string) => {
     setChangingRole(roleId);
     try {
       const { error } = await supabase.from("user_roles").update({ role: newRole } as any).eq("id", roleId);
       if (error) throw error;
       const roleEntry = roles.find((r: any) => r.id === roleId);
-      const member = roleEntry ? allMembers.find((m) => m.user_id === roleEntry.user_id) : null;
+      const userId = roleEntry?.user_id;
+      const member = userId ? allMembers.find((m) => m.user_id === userId) : null;
+      // Update permissions to match new role defaults
+      if (userId) {
+        await supabase.from("user_permissions").delete().eq("user_id", userId);
+        const defaultPerms = DEFAULT_ROLE_PERMISSIONS[newRole] || [];
+        if (defaultPerms.length > 0) {
+          const rows = defaultPerms.map(p => ({ user_id: userId, permission: p, granted: true }));
+          await supabase.from("user_permissions").insert(rows as any);
+        }
+      }
       const roleName = ROLE_LABELS[newRole] || newRole;
       toast({ title: "התפקיד עודכן בהצלחה" });
       if (member?.phone) {
@@ -401,6 +445,10 @@ const AdminTeam = () => {
     }
   };
   const handleRemoveRole = async (roleId: string) => {
+    const roleEntry = roles.find((r: any) => r.id === roleId);
+    if (roleEntry) {
+      await supabase.from("user_permissions").delete().eq("user_id", roleEntry.user_id);
+    }
     const { error } = await supabase.from("user_roles").delete().eq("id", roleId);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "התפקיד הוסר" });
