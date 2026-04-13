@@ -35,7 +35,7 @@ interface Campaign {
   placement: string;
   alt_text: string | null;
   start_date: string;
-  end_date: string;
+  end_date: string | null;
   is_active: boolean;
   price: number;
   priority: number;
