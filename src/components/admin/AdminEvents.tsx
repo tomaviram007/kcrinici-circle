@@ -299,6 +299,27 @@ const AdminEvents = () => {
               <MapPin className="h-3 w-3" /> צפה במפה
             </a>
           )}
+
+          {/* Payment & Registration */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              placeholder="קישור לתשלום (פייבוקס / ביט)"
+              value={form.payment_link}
+              onChange={(e) => setForm({ ...form, payment_link: e.target.value })}
+              className="bg-background"
+              dir="ltr"
+            />
+            <label className="flex items-center gap-2 font-body text-sm text-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.registration_required}
+                onChange={(e) => setForm({ ...form, registration_required: e.target.checked })}
+                className="rounded border-border"
+              />
+              נדרשת הרשמה מראש
+            </label>
+          </div>
+
           <Button type="submit" className="gradient-gold text-primary-foreground font-body">{editId ? "עדכן" : "הוסף"}</Button>
         </form>
       )}
