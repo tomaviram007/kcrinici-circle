@@ -37,8 +37,35 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "הקובץ גדול מדי", description: "גודל מקסימלי 2MB", variant: "destructive" });
+      return;
+    }
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
+
+  const uploadLogo = async (): Promise<string | null> => {
+    if (!logoFile || !user?.id) return null;
+    const ext = logoFile.name.split(".").pop();
+    const path = `deal-logos/${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("deals").upload(path, logoFile, { upsert: true });
+    if (error) {
+      console.error("Logo upload error:", error);
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from("deals").getPublicUrl(path);
+    return urlData.publicUrl;
+  };
 
   const handleSubmit = async () => {
     if (!form.title.trim() || !form.business_name.trim() || !form.description.trim()) {
@@ -46,6 +73,9 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
       return;
     }
     setSaving(true);
+
+    const logoUrl = await uploadLogo();
+
     const { error } = await supabase.from("deals").insert({
       title: form.title,
       description: form.description,
@@ -61,6 +91,7 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
       is_active: true,
       is_approved: false,
       created_by: user?.id,
+      business_logo_url: logoUrl,
     } as any);
 
     if (error) {
@@ -75,6 +106,8 @@ const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
         discount_label: buildDiscountLabel(form.benefit_type, form.benefit_value),
       });
       setForm(emptyForm);
+      setLogoFile(null);
+      setLogoPreview(null);
       setShowForm(false);
       onSubmitted?.();
     }
