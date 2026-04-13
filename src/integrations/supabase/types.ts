@@ -236,6 +236,7 @@ export type Database = {
           image_url: string | null
           location: string | null
           payment_link: string | null
+          price: number | null
           registration_required: boolean
           title: string
           updated_at: string
@@ -249,6 +250,7 @@ export type Database = {
           image_url?: string | null
           location?: string | null
           payment_link?: string | null
+          price?: number | null
           registration_required?: boolean
           title: string
           updated_at?: string
@@ -262,6 +264,7 @@ export type Database = {
           image_url?: string | null
           location?: string | null
           payment_link?: string | null
+          price?: number | null
           registration_required?: boolean
           title?: string
           updated_at?: string
