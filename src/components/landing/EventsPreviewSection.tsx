@@ -213,6 +213,7 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
             const date = new Date(selectedEvent.event_date);
             const isAttending = rsvps[selectedEvent.id] === "attending";
             const count = rsvpCounts[selectedEvent.id] || 0;
+            const count = rsvpCounts[selectedEvent.id] || 0;
 
             return (
               <>
