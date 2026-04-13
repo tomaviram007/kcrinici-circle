@@ -41,6 +41,7 @@ const Events = () => {
   const [rsvpCounts, setRsvpCounts] = useState<Record<string, number>>({});
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [paymentPopupEvent, setPaymentPopupEvent] = useState<any | null>(null);
   const [eventCreator, setEventCreator] = useState<any | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
