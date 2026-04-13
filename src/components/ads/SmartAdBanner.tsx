@@ -25,7 +25,7 @@ const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className
   const { user } = useAuth();
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [current, setCurrent] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(true);
   const trackedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -49,9 +49,7 @@ const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className
     fetchAds();
   }, [placement, targetPage, slotIndex]);
 
-  useEffect(() => {
-    setImageLoaded(false);
-  }, [current]);
+  // No opacity transition - show image immediately
 
   const trackImpression = useCallback(async (campaignId: string) => {
     if (trackedRef.current.has(campaignId)) return;
@@ -122,11 +120,6 @@ const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className
       aria-label={ad.alt_text || "פרסומת"}
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(ad); }}
     >
-      {!imageLoaded && ad.media_type !== "video" && (
-        <div className="absolute inset-0 bg-muted/50 animate-pulse flex items-center justify-center z-10">
-          <span className="text-xs text-muted-foreground">טוען פרסומת...</span>
-        </div>
-      )}
 
       {ad.media_type === "video" ? (
         <video
@@ -141,11 +134,8 @@ const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className
         <img
           src={ad.media_url}
           alt={ad.alt_text || ""}
-          className={cn(
-            "w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
-            imageLoaded ? "opacity-100" : "opacity-0"
-          )}
-          onLoad={() => setImageLoaded(true)}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="eager"
           onError={(e) => {
             const img = e.currentTarget;
             if (!img.dataset.retried) {
@@ -153,8 +143,6 @@ const SmartAdBanner = ({ placement, targetPage = "all", slotIndex = 0, className
               setTimeout(() => {
                 img.src = ad.media_url + (ad.media_url.includes("?") ? "&" : "?") + "t=" + Date.now();
               }, 500);
-            } else {
-              setImageLoaded(true);
             }
           }}
         />
