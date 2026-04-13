@@ -266,6 +266,25 @@ const AdminGalleryApproval = () => {
 };
 
 // Team Management Component
+const ROLE_PERMISSIONS: Record<string, { allowed: string[]; forbidden: string[] }> = {
+  admin: {
+    allowed: ["ניהול מלא של כל המערכת", "ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "ניהול תוכן, אירועים והטבות", "גישה להגדרות מערכת"],
+    forbidden: [],
+  },
+  chief_editor: {
+    allowed: ["ניהול מודעות ואישורן", "ניהול אירועים וגלריה", "ניהול משרות והמלצות", "ניהול הטבות וסקרים", "עריכת ציטוטים וקאברים"],
+    forbidden: ["ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "שינוי הגדרות מערכת"],
+  },
+  editor: {
+    allowed: ["ניהול מודעות ואישורן", "ניהול אירועים וגלריה", "ניהול משרות והמלצות"],
+    forbidden: ["ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "ניהול הטבות וסקרים", "שינוי הגדרות מערכת"],
+  },
+  moderator: {
+    allowed: ["אישור/דחייה של תוכן גולשים", "צפייה בתוכן ממתין לאישור"],
+    forbidden: ["ניהול חברים ואישור בקשות", "ניהול צוות והרשאות", "יצירת תוכן חדש", "עריכת הגדרות מערכת"],
+  },
+};
+
 const AdminTeam = () => {
   const { toast } = useToast();
   const [members, setMembers] = useState<any[]>([]);
@@ -275,6 +294,8 @@ const AdminTeam = () => {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("editor");
   const [adding, setAdding] = useState(false);
+  const [expandedRoleId, setExpandedRoleId] = useState<string | null>(null);
+  const [changingRole, setChangingRole] = useState<string | null>(null);
 
   const ROLE_LABELS: Record<string, string> = {
     admin: "מנהל ראשי",
