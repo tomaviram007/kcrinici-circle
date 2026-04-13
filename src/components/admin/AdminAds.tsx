@@ -107,7 +107,7 @@ const AdminAds = () => {
 
   /* ─── KPI calculations ─── */
   const now = new Date();
-  const activeCampaigns = campaigns.filter(c => c.is_active && new Date(c.start_date) <= now && new Date(c.end_date) >= now);
+  const activeCampaigns = campaigns.filter(c => c.is_active && new Date(c.start_date) <= now && (!c.end_date || new Date(c.end_date) >= now));
   const totalClicks = campaigns.reduce((s, c) => s + c.click_count, 0);
   const totalImpressions = campaigns.reduce((s, c) => s + c.impression_count, 0);
   const expectedRevenue = activeCampaigns.reduce((s, c) => s + (c.price || 0), 0);
@@ -115,6 +115,7 @@ const AdminAds = () => {
   /* ─── Expiring soon (within 3 days) ─── */
   const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
   const expiringSoon = campaigns.filter(c => {
+    if (!c.end_date) return false;
     const end = new Date(c.end_date);
     return c.is_active && end >= now && end <= threeDaysFromNow;
   });
@@ -195,7 +196,7 @@ const AdminAds = () => {
   };
 
   const saveCampaign = async () => {
-    if (!campForm.advertiser_id || !campForm.title || !campForm.target_url || !campForm.start_date || !campForm.end_date) {
+    if (!campForm.advertiser_id || !campForm.title || !campForm.target_url || !campForm.start_date) {
       toast({ title: "יש למלא את כל השדות הנדרשים", variant: "destructive" }); return;
     }
     setUploading(true);
@@ -221,7 +222,7 @@ const AdminAds = () => {
       ...campForm,
       media_url,
       start_date: new Date(campForm.start_date).toISOString(),
-      end_date: new Date(campForm.end_date).toISOString(),
+      end_date: campForm.end_date ? new Date(campForm.end_date).toISOString() : null,
     };
 
     if (editingCamp) {
@@ -258,7 +259,7 @@ const AdminAds = () => {
   const openEditCamp = (c: Campaign) => {
     setCampForm({
       advertiser_id: c.advertiser_id, title: c.title, media_type: c.media_type, target_url: c.target_url,
-      placement: c.placement, alt_text: c.alt_text || "", start_date: c.start_date.slice(0, 16), end_date: c.end_date.slice(0, 16),
+      placement: c.placement, alt_text: c.alt_text || "", start_date: c.start_date.slice(0, 16), end_date: c.end_date ? c.end_date.slice(0, 16) : "",
       is_active: c.is_active, price: c.price, priority: c.priority,
     });
     setEditingCamp(c.id);
@@ -268,10 +269,13 @@ const AdminAds = () => {
 
   const getCampaignStatus = (c: Campaign) => {
     if (!c.is_active) return { label: "מושבת", color: "bg-muted text-muted-foreground" };
-    const s = new Date(c.start_date), e = new Date(c.end_date);
+    const s = new Date(c.start_date);
     if (now < s) return { label: "מתוזמן", color: "bg-blue-500/15 text-blue-600" };
-    if (now > e) return { label: "הסתיים", color: "bg-red-500/15 text-red-600" };
-    return { label: "פעיל", color: "bg-green-500/15 text-green-600" };
+    if (c.end_date) {
+      const e = new Date(c.end_date);
+      if (now > e) return { label: "הסתיים", color: "bg-red-500/15 text-red-600" };
+    }
+    return { label: c.end_date ? "פעיל" : "פעיל (ללא הגבלה)", color: "bg-green-500/15 text-green-600" };
   };
 
   if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
@@ -375,7 +379,7 @@ const AdminAds = () => {
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{c.impression_count}</span>
                         <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" />{c.click_count}</span>
-                        <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{new Date(c.end_date).toLocaleDateString("he-IL")}</span>
+                        <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{c.end_date ? new Date(c.end_date).toLocaleDateString("he-IL") : "ללא הגבלה"}</span>
                       </div>
                       <div className="flex items-center gap-2 pt-1">
                         <Switch checked={c.is_active} onCheckedChange={(v) => toggleCampaign(c.id, v)} />
@@ -573,7 +577,7 @@ const AdminAds = () => {
                 <Input type="datetime-local" value={campForm.start_date} onChange={e => setCampForm(f => ({ ...f, start_date: e.target.value }))} />
               </div>
               <div>
-                <FieldLabel label="תאריך סיום" tooltip="מתי הבאנר יפסיק להופיע. לאחר תאריך זה הקמפיין יעבור לסטטוס 'הסתיים' אוטומטית." required />
+                <FieldLabel label="תאריך סיום" tooltip="מתי הבאנר יפסיק להופיע. השאר ריק כדי שהקמפיין ירוץ ללא הגבלת זמן עד שמכבים אותו ידנית." />
                 <Input type="datetime-local" value={campForm.end_date} onChange={e => setCampForm(f => ({ ...f, end_date: e.target.value }))} />
               </div>
             </div>
