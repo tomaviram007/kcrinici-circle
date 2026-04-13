@@ -295,6 +295,16 @@ const Events = () => {
           <X className="h-4 w-4 text-muted-foreground" />
         </button>
 
+        {canEditEvents && selectedEvent && (
+          <button
+            onClick={() => navigate("/admin?tab=events")}
+            className="absolute left-14 top-4 z-20 rounded-full bg-gold/20 backdrop-blur-sm p-1.5 border border-gold/30 hover:bg-gold/30 transition-colors"
+            title="עריכת אירוע"
+          >
+            <Pencil className="h-4 w-4 text-gold" />
+          </button>
+        )}
+
         {selectedEvent && (() => {
           const date = new Date(selectedEvent.event_date);
           const isAttending = rsvps[selectedEvent.id] === "attending";
