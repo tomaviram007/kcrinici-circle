@@ -57,14 +57,14 @@ const SmartAdBanner = ({
   // Choose optimal render width based on placement
   const renderWidth = useMemo(() => {
     const widths: Record<string, number> = {
-      hero: 1200,
-      premium: 1200,
+      hero: 1400,
+      premium: 1400,
       sidebar: 400,
-      inline: 800,
-      between_content: 800,
-      inline_repeat: 600,
+      inline: 1200,
+      between_content: 1200,
+      inline_repeat: 800,
     };
-    return widths[placement] || 800;
+    return widths[placement] || 1200;
   }, [placement]);
 
   useEffect(() => {
