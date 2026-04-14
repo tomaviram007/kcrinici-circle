@@ -562,9 +562,9 @@ const AdminAds = () => {
               <Input value={campForm.title} onChange={e => setCampForm(f => ({ ...f, title: e.target.value }))} />
             </div>
 
-            {/* media upload */}
+            {/* media upload or URL */}
             <div>
-              <FieldLabel label="מדיה (תמונה / MP4)" tooltip="הקובץ שיוצג כבאנר באתר. פורמטים נתמכים: JPG, PNG, WebP או וידאו MP4. מקסימום 10MB." required />
+              <FieldLabel label="מדיה (תמונה / MP4)" tooltip="ניתן להעלות קובץ (JPG, PNG, WebP, MP4 עד 10MB) או להדביק קישור ישיר לתמונה או וידאו." required />
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
               {mediaPreview ? (
                 <div className="relative mt-2 min-h-40 rounded-lg overflow-hidden border border-border bg-muted/30">
@@ -582,7 +582,7 @@ const AdminAds = () => {
                           const img = e.currentTarget;
                           if (!img.dataset.retried && mediaPreview) {
                             img.dataset.retried = "1";
-                            img.src = mediaPreview; // fallback to original URL
+                            img.src = mediaPreview;
                           }
                         }}
                       />
@@ -596,10 +596,34 @@ const AdminAds = () => {
                   </button>
                 </div>
               ) : (
-                <button type="button" onClick={() => fileRef.current?.click()} className="mt-2 flex h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
-                  <Upload className="h-6 w-6" />
-                  <span className="text-sm">גרור או לחץ להעלאה</span>
-                </button>
+                <div className="mt-2 space-y-2">
+                  <button type="button" onClick={() => fileRef.current?.click()} className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
+                    <Upload className="h-5 w-5" />
+                    <span className="text-sm">העלאת קובץ</span>
+                  </button>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex-1 h-px bg-border" />
+                    <span>או הדבק קישור</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                  <Input
+                    placeholder="https://example.com/image.jpg"
+                    onBlur={(e) => {
+                      const url = e.target.value.trim();
+                      if (!url) return;
+                      const isVideo = /\.(mp4)$/i.test(url);
+                      setCampForm(f => ({ ...f, media_type: isVideo ? "video" : "image" }));
+                      setMediaPreview(url);
+                      setMediaFile(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        (e.target as HTMLInputElement).blur();
+                      }
+                    }}
+                  />
+                </div>
               )}
             </div>
 
