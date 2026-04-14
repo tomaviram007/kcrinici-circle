@@ -175,7 +175,7 @@ const SmartAdBanner = ({
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-hidden rounded-xl cursor-pointer group border border-border/30 bg-muted",
+        "relative overflow-hidden rounded-2xl cursor-pointer group border border-border/20 bg-muted shadow-sm hover:shadow-md transition-shadow duration-300",
         sizeClasses[placement] || sizeClasses.inline,
         className
       )}
@@ -190,7 +190,7 @@ const SmartAdBanner = ({
       {ad.media_type === "video" ? (
         <video
           src={ad.media_url}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           muted
           autoPlay
           loop
@@ -201,7 +201,7 @@ const SmartAdBanner = ({
           src={displayUrl}
           alt={ad.alt_text || "פרסומת"}
           className={cn(
-            "absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
+            "absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-[1.03]",
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
           loading="eager"
@@ -224,9 +224,11 @@ const SmartAdBanner = ({
         <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
       )}
 
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none" />
 
-      <span className="absolute bottom-2 left-2 text-[9px] font-medium text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded pointer-events-none">
+      {/* Sponsored label */}
+      <span className="absolute bottom-3 left-3 text-[10px] font-medium text-white/70 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-md pointer-events-none">
         ממומן
       </span>
 
