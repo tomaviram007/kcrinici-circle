@@ -161,12 +161,12 @@ const SmartAdBanner = ({
   const displayUrl = ad.media_type === "video" ? ad.media_url : optimizeImageUrl(ad.media_url, renderWidth);
 
   const sizeClasses: Record<string, string> = {
-    hero: "w-full h-[200px] sm:h-[280px] md:h-[350px]",
-    premium: "w-full h-[180px] sm:h-[250px] md:h-[300px]",
-    sidebar: "w-full h-[250px]",
-    inline: "w-full h-[120px] sm:h-[180px]",
-    between_content: "w-full h-[120px] sm:h-[180px]",
-    inline_repeat: "w-full h-[100px] sm:h-[140px]",
+    hero: "w-full aspect-[16/5] sm:aspect-[16/5] md:aspect-[16/4]",
+    premium: "w-full aspect-[16/5] sm:aspect-[16/5] md:aspect-[16/4]",
+    sidebar: "w-full aspect-[4/3]",
+    inline: "w-full aspect-[16/4] sm:aspect-[16/4]",
+    between_content: "w-full aspect-[16/4] sm:aspect-[16/4]",
+    inline_repeat: "w-full aspect-[16/4] sm:aspect-[16/3]",
   };
 
   return (
