@@ -44,6 +44,8 @@ const SmartAdBanner = ({
   rotateInterval = 6000,
   fallbackPlacements = [],
 }: SmartAdBannerProps) => {
+  // Premium banner flag for hero/premium placements
+  const isPremium = placement === "hero" || placement === "premium";
   const { user } = useAuth();
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [current, setCurrent] = useState(0);
