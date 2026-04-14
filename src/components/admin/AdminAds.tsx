@@ -234,6 +234,9 @@ const AdminAds = () => {
       if (upErr) { toast({ title: "שגיאת העלאה", description: upErr.message, variant: "destructive" }); setUploading(false); return; }
       const { data: urlData } = supabase.storage.from("ads").getPublicUrl(path);
       media_url = urlData.publicUrl;
+    } else if (mediaPreview) {
+      // URL pasted directly or existing campaign media
+      media_url = mediaPreview;
     } else if (editingCamp) {
       const existing = campaigns.find(c => c.id === editingCamp);
       media_url = existing?.media_url || "";
