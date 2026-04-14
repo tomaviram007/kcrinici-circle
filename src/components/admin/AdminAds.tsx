@@ -234,9 +234,6 @@ const AdminAds = () => {
       if (upErr) { toast({ title: "שגיאת העלאה", description: upErr.message, variant: "destructive" }); setUploading(false); return; }
       const { data: urlData } = supabase.storage.from("ads").getPublicUrl(path);
       media_url = urlData.publicUrl;
-    } else if (mediaPreview) {
-      // URL pasted directly or existing campaign media
-      media_url = mediaPreview;
     } else if (editingCamp) {
       const existing = campaigns.find(c => c.id === editingCamp);
       media_url = existing?.media_url || "";
@@ -565,9 +562,9 @@ const AdminAds = () => {
               <Input value={campForm.title} onChange={e => setCampForm(f => ({ ...f, title: e.target.value }))} />
             </div>
 
-            {/* media upload or URL */}
+            {/* media upload */}
             <div>
-              <FieldLabel label="מדיה (תמונה / MP4)" tooltip="ניתן להעלות קובץ (JPG, PNG, WebP, MP4 עד 10MB) או להדביק קישור ישיר לתמונה או וידאו." required />
+              <FieldLabel label="מדיה (תמונה / MP4)" tooltip="הקובץ שיוצג כבאנר באתר. פורמטים נתמכים: JPG, PNG, WebP או וידאו MP4. מקסימום 10MB." required />
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
               {mediaPreview ? (
                 <div className="relative mt-2 min-h-40 rounded-lg overflow-hidden border border-border bg-muted/30">
@@ -585,7 +582,7 @@ const AdminAds = () => {
                           const img = e.currentTarget;
                           if (!img.dataset.retried && mediaPreview) {
                             img.dataset.retried = "1";
-                            img.src = mediaPreview;
+                            img.src = mediaPreview; // fallback to original URL
                           }
                         }}
                       />
@@ -599,34 +596,10 @@ const AdminAds = () => {
                   </button>
                 </div>
               ) : (
-                <div className="mt-2 space-y-2">
-                  <button type="button" onClick={() => fileRef.current?.click()} className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
-                    <Upload className="h-5 w-5" />
-                    <span className="text-sm">העלאת קובץ</span>
-                  </button>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="flex-1 h-px bg-border" />
-                    <span>או הדבק קישור</span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-                  <Input
-                    placeholder="https://example.com/image.jpg"
-                    onBlur={(e) => {
-                      const url = e.target.value.trim();
-                      if (!url) return;
-                      const isVideo = /\.(mp4)$/i.test(url);
-                      setCampForm(f => ({ ...f, media_type: isVideo ? "video" : "image" }));
-                      setMediaPreview(url);
-                      setMediaFile(null);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        (e.target as HTMLInputElement).blur();
-                      }
-                    }}
-                  />
-                </div>
+                <button type="button" onClick={() => fileRef.current?.click()} className="mt-2 flex h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
+                  <Upload className="h-6 w-6" />
+                  <span className="text-sm">גרור או לחץ להעלאה</span>
+                </button>
               )}
             </div>
 
