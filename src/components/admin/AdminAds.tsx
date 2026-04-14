@@ -352,9 +352,32 @@ const AdminAds = () => {
         {/* ── Campaigns Tab ── */}
         <TabsContent value="campaigns">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-serif text-xl font-bold flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-gold" /> ניהול קמפיינים
-            </h3>
+            <div className="flex items-center gap-3">
+              <h3 className="font-serif text-xl font-bold flex items-center gap-2">
+                <ImageIcon className="h-5 w-5 text-gold" /> ניהול קמפיינים
+              </h3>
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted px-2.5 py-1.5 rounded-lg transition-colors cursor-help border border-border/50">
+                      <HelpCircle className="h-3.5 w-3.5" />
+                      <span>מידות מומלצות</span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[360px] text-xs font-body leading-relaxed p-4 space-y-2">
+                    <p className="font-bold text-sm mb-2">📐 הנחיות עיצוב באנר פרסומי</p>
+                    <p>באנר פרסומי מומלץ לעצב בפורמט רחב וברור כדי שייראה ייצוגי ובולט.</p>
+                    <div className="space-y-1">
+                      <p><strong>דסקטופ:</strong> 1280×340 פיקסלים (יחס ~4:1)</p>
+                      <p><strong>טאבלט:</strong> 900×300 פיקסלים</p>
+                      <p><strong>מובייל:</strong> 390×220 פיקסלים</p>
+                    </div>
+                    <p>חשוב לשמור טקסטים, לוגו וכפתורים בתוך <strong>אזור בטוח פנימי</strong> (80px מהקצוות בדסקטופ, 24-32px במובייל), כדי למנוע חיתוך בקצוות במסכים שונים.</p>
+                    <p>מומלץ למקם את המסר המרכזי במרכז הבאנר ולהשתמש בתמונה שמתאימה לחיתוך רספונסיבי.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <Button size="sm" onClick={() => { setCampDialog(true); setEditingCamp(null); setMediaPreview(null); setMediaFile(null); setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 }); }}>
               <Plus className="h-4 w-4 ml-1" /> קמפיין חדש
             </Button>

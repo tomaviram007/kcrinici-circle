@@ -44,6 +44,8 @@ const SmartAdBanner = ({
   rotateInterval = 6000,
   fallbackPlacements = [],
 }: SmartAdBannerProps) => {
+  // Premium banner flag for hero/premium placements
+  const isPremium = placement === "hero" || placement === "premium";
   const { user } = useAuth();
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [current, setCurrent] = useState(0);
@@ -55,14 +57,14 @@ const SmartAdBanner = ({
   // Choose optimal render width based on placement
   const renderWidth = useMemo(() => {
     const widths: Record<string, number> = {
-      hero: 1200,
-      premium: 1200,
+      hero: 1400,
+      premium: 1400,
       sidebar: 400,
-      inline: 800,
-      between_content: 800,
-      inline_repeat: 600,
+      inline: 1200,
+      between_content: 1200,
+      inline_repeat: 800,
     };
-    return widths[placement] || 800;
+    return widths[placement] || 1200;
   }, [placement]);
 
   useEffect(() => {
@@ -161,19 +163,19 @@ const SmartAdBanner = ({
   const displayUrl = ad.media_type === "video" ? ad.media_url : optimizeImageUrl(ad.media_url, renderWidth);
 
   const sizeClasses: Record<string, string> = {
-    hero: "w-full aspect-[16/5] sm:aspect-[16/5] md:aspect-[16/4]",
-    premium: "w-full aspect-[16/5] sm:aspect-[16/5] md:aspect-[16/4]",
+    hero: "w-full max-w-[1280px] mx-auto min-h-[200px] sm:min-h-[280px] md:min-h-[320px] lg:min-h-[340px]",
+    premium: "w-full max-w-[1280px] mx-auto min-h-[200px] sm:min-h-[280px] md:min-h-[320px] lg:min-h-[340px]",
     sidebar: "w-full aspect-[4/3]",
-    inline: "w-full aspect-[16/4] sm:aspect-[16/4]",
-    between_content: "w-full aspect-[16/4] sm:aspect-[16/4]",
-    inline_repeat: "w-full aspect-[16/4] sm:aspect-[16/3]",
+    inline: "w-full max-w-[1280px] mx-auto min-h-[180px] sm:min-h-[240px] md:min-h-[280px]",
+    between_content: "w-full max-w-[1280px] mx-auto min-h-[180px] sm:min-h-[240px] md:min-h-[280px]",
+    inline_repeat: "w-full max-w-[1280px] mx-auto min-h-[160px] sm:min-h-[200px] md:min-h-[240px]",
   };
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-hidden rounded-xl cursor-pointer group border border-border/30 bg-muted",
+        "relative overflow-hidden rounded-2xl cursor-pointer group border border-border/20 bg-muted shadow-sm hover:shadow-md transition-shadow duration-300",
         sizeClasses[placement] || sizeClasses.inline,
         className
       )}
@@ -188,7 +190,7 @@ const SmartAdBanner = ({
       {ad.media_type === "video" ? (
         <video
           src={ad.media_url}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           muted
           autoPlay
           loop
@@ -199,7 +201,7 @@ const SmartAdBanner = ({
           src={displayUrl}
           alt={ad.alt_text || "פרסומת"}
           className={cn(
-            "absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
+            "absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-[1.03]",
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
           loading="eager"
@@ -222,9 +224,11 @@ const SmartAdBanner = ({
         <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
       )}
 
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none" />
 
-      <span className="absolute bottom-2 left-2 text-[9px] font-medium text-white/60 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded pointer-events-none">
+      {/* Sponsored label */}
+      <span className="absolute bottom-3 left-3 text-[10px] font-medium text-white/70 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-md pointer-events-none">
         ממומן
       </span>
 
