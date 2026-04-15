@@ -9,6 +9,7 @@ import { usePendingCount } from "@/hooks/usePendingCount";
 import { useNewContent } from "@/hooks/useNewContent";
 import { useSiteLogo } from "@/hooks/useSiteLogo";
 import gsap from "gsap";
+import { hapticFeedback } from "@/lib/haptic";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import {
   Dialog,
@@ -99,6 +100,7 @@ const Header = () => {
   ];
 
   const handleNavClick = (e: React.MouseEvent, link: { to: string; protected: boolean }) => {
+    hapticFeedback();
     if (link.protected && !user) {
       e.preventDefault();
       setShowMemberDialog(true);
