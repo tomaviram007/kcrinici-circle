@@ -127,3 +127,29 @@
     box-shadow: 0 0 30px hsl(var(--gold) / 0.15);
   }
 }
+
+/* Ensure touch targets are large enough on mobile */
+@media (max-width: 768px) {
+  button, a, [role="button"], [tabindex="0"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Reduce padding on tight layouts */
+  .member-card, .event-card, .job-card, .deal-card, .rec-card {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Active press visual feedback for all interactive elements */
+@media (pointer: coarse) {
+  button:active,
+  a:active,
+  [role="button"]:active,
+  .cursor-pointer:active {
+    opacity: 0.85;
+    transform: scale(0.97);
+    transition: transform 0.1s ease, opacity 0.1s ease;
+  }
+}
