@@ -474,7 +474,7 @@ const Announcements = () => {
     <>
     <PageHero image={coverImage} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון" />
     
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8 md:px-6 md:py-12">
+    <div className="mx-auto max-w-6xl px-5 py-4 sm:px-6 sm:py-8 md:py-12">
 
       {/* Tuesday Banner */}
       {isTuesday && (
@@ -744,7 +744,7 @@ const Announcements = () => {
       </DialogContent>
     </Dialog>
 
-    <div className="mx-auto max-w-7xl px-4 py-6">
+    <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
       <SmartAdBanner placement="sidebar" targetPage="announcements" />
     </div>
     <QuoteSection page="announcements" />

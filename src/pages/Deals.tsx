@@ -141,7 +141,7 @@ const Deals = () => {
         subtitle="מבצעים והנחות מיוחדות לחברי המועדון בלבד"
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6" dir="rtl">
+      <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8" dir="rtl">
         {/* Member submit form */}
         {user && isApproved && <DealSubmitForm />}
 
@@ -349,7 +349,7 @@ const Deals = () => {
           )}
         </DialogContent>
       </Dialog>
-      <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
         <SmartAdBanner placement="sidebar" />
       </div>
     </>

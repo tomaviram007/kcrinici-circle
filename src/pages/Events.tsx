@@ -194,7 +194,7 @@ const Events = () => {
     <>
     <PageHero image={coverImage} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
     
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-6xl px-5 py-4 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-10">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
           אירועים <span className="text-gold">ומפגשים</span>
@@ -630,7 +630,7 @@ const Events = () => {
         )}
       </DialogContent>
     </Dialog>
-    <div className="mx-auto max-w-7xl px-4 py-6">
+    <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
       <SmartAdBanner placement="sidebar" />
     </div>
     <QuoteSection page="events" />
