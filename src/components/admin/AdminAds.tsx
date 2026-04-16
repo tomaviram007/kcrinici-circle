@@ -712,10 +712,12 @@ const AdminAds = () => {
               <FieldLabel label="פעיל" tooltip="כיבוי מפסיק את הצגת הבאנר באתר מיידית, ללא קשר לתאריכים." />
             </div>
 
+            </div>
+          </div>
+
             <Button onClick={saveCampaign} disabled={uploading} className="w-full">
               {uploading ? "מעלה..." : editingCamp ? "עדכן קמפיין" : "צור קמפיין"}
             </Button>
-          </div>
         </DialogContent>
       </Dialog>
     </div>
