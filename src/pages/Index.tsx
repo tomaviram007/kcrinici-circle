@@ -78,7 +78,7 @@ const Index = () => {
       </ScrollReveal>
 
       {/* Main content with sidebar layout */}
-      <div className="mx-auto max-w-7xl px-4">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <div className="flex gap-6">
           {/* Main content */}
           <div className="flex-1 min-w-0">
