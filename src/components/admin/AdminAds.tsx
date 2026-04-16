@@ -79,12 +79,21 @@ const PLACEMENT_GROUPS = [
   },
 ];
 
+/** Which pages each placement is available on */
+const PLACEMENT_PAGES: Record<string, string[]> = {
+  hero: ["home"],
+  premium: ["home"],
+  inline: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
+  between_content: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
+  inline_repeat: ["announcements", "members", "events", "deals", "jobs", "recommendations"],
+  sidebar: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
+};
+
 const PLACEMENT_LABELS: Record<string, string> = Object.fromEntries(
   PLACEMENT_GROUPS.flatMap(g => g.items.map(i => [i.value, i.label]))
 );
 
 const PAGE_OPTIONS = [
-  { value: "all", label: "כל העמודים" },
   { value: "home", label: "דף הבית" },
   { value: "announcements", label: "לוח מודעות" },
   { value: "members", label: "חברי המועדון" },
@@ -129,7 +138,7 @@ const AdminAds = () => {
   const [campDialog, setCampDialog] = useState(false);
   const [campForm, setCampForm] = useState({
     advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium",
-    target_page: "all", max_appearances: 1,
+    target_page: "home", max_appearances: 1,
     alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0,
   });
    const [editingCamp, setEditingCamp] = useState<string | null>(null);
@@ -294,7 +303,7 @@ const AdminAds = () => {
     setMediaPreview(null);
     setMediaUrlInput("");
     setMediaSource("file");
-    setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 });
+    setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "home", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 });
     fetchAll();
   };
 
@@ -419,7 +428,7 @@ const AdminAds = () => {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <Button size="sm" onClick={() => { setCampDialog(true); setEditingCamp(null); setMediaPreview(null); setMediaFile(null); setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 }); }}>
+            <Button size="sm" onClick={() => { setCampDialog(true); setEditingCamp(null); setMediaPreview(null); setMediaFile(null); setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "home", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 }); }}>
               <Plus className="h-4 w-4 ml-1" /> קמפיין חדש
             </Button>
           </div>
@@ -471,7 +480,7 @@ const AdminAds = () => {
                         <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{c.impression_count}</span>
                         <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" />{c.click_count}</span>
                         <span className="flex items-center gap-1 font-medium text-foreground/70">{PLACEMENT_LABELS[c.placement]}</span>
-                        {c.target_page !== "all" && <span className="flex items-center gap-1">עמודים: {c.target_page.split(",").map(p => PAGE_LABELS[p] || p).join(", ")}</span>}
+                        <span className="flex items-center gap-1">עמודים: {c.target_page.split(",").map(p => PAGE_LABELS[p] || p).join(", ")}</span>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />עלה: {new Date(c.start_date).toLocaleDateString("he-IL")}</span>
@@ -695,40 +704,11 @@ const AdminAds = () => {
             {/* Left column - settings */}
             <div className="space-y-3 overflow-y-auto pr-3">
               <div>
-                <FieldLabel label="עמודי יעד" tooltip="באילו עמודים הקמפיין יוצג. בחר 'כל העמודים' או סמן עמודים ספציפיים." required />
-                <div className="rounded-lg border border-border bg-background p-3 space-y-2 max-h-[160px] overflow-y-auto">
-                  {PAGE_OPTIONS.map(page => {
-                    const selectedPages = campForm.target_page.split(",").filter(Boolean);
-                    const isAll = selectedPages.includes("all");
-                    const isChecked = page.value === "all" ? isAll : selectedPages.includes(page.value);
-                    return (
-                      <label key={page.value} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 transition-colors">
-                        <Checkbox
-                          checked={isChecked}
-                          disabled={page.value !== "all" && isAll}
-                          onCheckedChange={(checked) => {
-                            if (page.value === "all") {
-                              setCampForm(f => ({ ...f, target_page: checked ? "all" : "" }));
-                            } else {
-                              let pages = selectedPages.filter(p => p !== "all");
-                              if (checked) {
-                                pages.push(page.value);
-                              } else {
-                                pages = pages.filter(p => p !== page.value);
-                              }
-                              setCampForm(f => ({ ...f, target_page: pages.length ? pages.join(",") : "all" }));
-                            }
-                          }}
-                        />
-                        <span className={cn("text-sm", page.value !== "all" && isAll && "text-muted-foreground")}>{page.label}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-              <div>
                 <FieldLabel label="סוג מיקום" tooltip="היכן הבאנר יוצג בעמוד: ראש העמוד, בתוך התוכן, או בסרגל הצד." required />
-                <Select value={campForm.placement} onValueChange={v => setCampForm(f => ({ ...f, placement: v }))}>
+                <Select value={campForm.placement} onValueChange={v => {
+                  const validPages = PLACEMENT_PAGES[v] || [];
+                  setCampForm(f => ({ ...f, placement: v, target_page: validPages.join(",") }));
+                }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {PLACEMENT_GROUPS.map((group, gi) => (
@@ -747,6 +727,53 @@ const AdminAds = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <FieldLabel label="עמודי יעד" tooltip="באילו עמודים הקמפיין יוצג. העמודים הזמינים תלויים בסוג המיקום שנבחר." required />
+                <div className="rounded-lg border border-border bg-background p-3 space-y-2 max-h-[160px] overflow-y-auto">
+                  {(() => {
+                    const validPages = PLACEMENT_PAGES[campForm.placement] || [];
+                    const selectedPages = campForm.target_page.split(",").filter(Boolean);
+                    const allValid = validPages.every(p => selectedPages.includes(p));
+                    return (
+                      <>
+                        {validPages.length > 1 && (
+                          <label className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 transition-colors border-b border-border/50 pb-2 mb-1">
+                            <Checkbox
+                              checked={allValid}
+                              onCheckedChange={(checked) => {
+                                setCampForm(f => ({ ...f, target_page: checked ? validPages.join(",") : "" }));
+                              }}
+                            />
+                            <span className="text-sm font-medium">כל העמודים הזמינים</span>
+                          </label>
+                        )}
+                        {PAGE_OPTIONS.map(page => {
+                          const isValid = validPages.includes(page.value);
+                          const isChecked = selectedPages.includes(page.value);
+                          return (
+                            <label key={page.value} className={cn("flex items-center gap-2 rounded px-1 py-0.5 transition-colors", isValid ? "cursor-pointer hover:bg-muted/50" : "opacity-40 cursor-not-allowed")}>
+                              <Checkbox
+                                checked={isChecked}
+                                disabled={!isValid}
+                                onCheckedChange={(checked) => {
+                                  let pages = selectedPages.filter(Boolean);
+                                  if (checked) {
+                                    pages.push(page.value);
+                                  } else {
+                                    pages = pages.filter(p => p !== page.value);
+                                  }
+                                  setCampForm(f => ({ ...f, target_page: pages.length ? pages.join(",") : "" }));
+                                }}
+                              />
+                              <span className={cn("text-sm", !isValid && "text-muted-foreground")}>{page.label}</span>
+                            </label>
+                          );
+                        })}
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
