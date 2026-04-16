@@ -215,7 +215,7 @@ const SmartAdBanner = ({
               img.dataset.retried = "1";
               img.src = ad.media_url;
             } else {
-              setImageLoaded(true);
+              setImageFailed(true);
             }
           }}
         />
