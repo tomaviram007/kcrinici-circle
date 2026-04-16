@@ -407,9 +407,9 @@ const AdminAds = () => {
                 const adv = advertisers.find(a => a.id === c.advertiser_id);
                 const status = getCampaignStatus(c);
                 return (
-                  <div key={c.id} className="rounded-xl border border-border bg-card overflow-hidden">
-                    {/* media preview */}
-                    <div className="relative h-32 bg-muted/50 flex items-center justify-center">
+                  <div key={c.id} className="rounded-xl border border-border bg-card overflow-hidden flex flex-row-reverse" dir="rtl">
+                    {/* media preview - right side */}
+                    <div className="relative w-48 min-h-[140px] shrink-0 bg-muted/50 flex items-center justify-center">
                       {c.media_type === "video" ? (
                         <video src={c.media_url} className="absolute inset-0 w-full h-full object-cover" muted playsInline controls={false} />
                       ) : (
@@ -424,18 +424,17 @@ const AdminAds = () => {
                               const img = e.currentTarget;
                               if (!img.dataset.retried) {
                                 img.dataset.retried = "1";
-                                img.src = c.media_url; // fallback to original
+                                img.src = c.media_url;
                               }
                             }}
                           />
-                          {/* Fallback icon when no image loads */}
                           <ImageIcon className="h-8 w-8 text-muted-foreground/30 z-0" />
                         </>
                       )}
                       <span className={cn("absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full z-10", status.color)}>{status.label}</span>
-                      <span className="absolute top-2 right-2 text-[10px] font-medium px-2 py-0.5 rounded-full bg-background/80 backdrop-blur z-10">{PLACEMENT_LABELS[c.placement]}</span>
                     </div>
-                    <div className="p-4 space-y-2">
+                    {/* text content - left side */}
+                    <div className="flex-1 p-4 flex flex-col justify-between gap-2">
                       <div className="flex items-start justify-between">
                         <div>
                           <h4 className="font-serif font-bold text-foreground">{c.title}</h4>
@@ -443,10 +442,15 @@ const AdminAds = () => {
                         </div>
                         <p className="text-sm font-bold text-primary">₪{c.price?.toLocaleString()}</p>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{c.impression_count}</span>
                         <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" />{c.click_count}</span>
-                        <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{c.end_date ? new Date(c.end_date).toLocaleDateString("he-IL") : "ללא הגבלה"}</span>
+                        <span className="flex items-center gap-1 font-medium text-foreground/70">{PLACEMENT_LABELS[c.placement]}</span>
+                        {c.target_page !== "all" && <span className="flex items-center gap-1">עמוד: {PAGE_LABELS[c.target_page] || c.target_page}</span>}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />עלה: {new Date(c.start_date).toLocaleDateString("he-IL")}</span>
+                        <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{c.end_date ? `עד: ${new Date(c.end_date).toLocaleDateString("he-IL")}` : "ללא הגבלה"}</span>
                       </div>
                       <div className="flex items-center gap-2 pt-1">
                         <Switch checked={c.is_active} onCheckedChange={(v) => toggleCampaign(c.id, v)} />
