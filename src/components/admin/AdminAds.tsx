@@ -567,171 +567,176 @@ const AdminAds = () => {
 
       {/* ── Campaign Form Dialog ── */}
       <Dialog open={campDialog} onOpenChange={setCampDialog}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="max-w-[65vw] h-[65vh] flex flex-col" dir="rtl">
           <DialogHeader><DialogTitle className="font-serif">{editingCamp ? "עריכת קמפיין" : "קמפיין חדש"}</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <FieldLabel label="מפרסם" tooltip="בחר את העסק שעבורו נוצר הקמפיין. אם העסק לא מופיע, הוסף אותו קודם בטאב 'מפרסמים'." required />
-              <Select value={campForm.advertiser_id} onValueChange={v => setCampForm(f => ({ ...f, advertiser_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="בחר מפרסם" /></SelectTrigger>
-                <SelectContent>{advertisers.map(a => <SelectItem key={a.id} value={a.id}>{a.business_name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <FieldLabel label="כותרת קמפיין" tooltip="שם פנימי לזיהוי הקמפיין בלוח הניהול. לא מוצג לגולשים." required />
-              <Input value={campForm.title} onChange={e => setCampForm(f => ({ ...f, title: e.target.value }))} />
-            </div>
-
-            {/* media upload */}
-            <div>
-              <FieldLabel label="מדיה (תמונה / MP4)" tooltip="ניתן להעלות קובץ מהמחשב או להזין קישור ישיר לתמונה/וידאו." required />
-              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
-
-              {/* Source toggle */}
-              <div className="flex gap-1 mt-1 mb-2">
-                <button type="button" onClick={() => setMediaSource("file")} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors", mediaSource === "file" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>
-                  <Upload className="h-3.5 w-3.5" />
-                  העלאת קובץ
-                </button>
-                <button type="button" onClick={() => setMediaSource("url")} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors", mediaSource === "url" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>
-                  <Link2 className="h-3.5 w-3.5" />
-                  קישור לתמונה
-                </button>
+          <div className="flex-1 grid grid-cols-2 gap-6 overflow-hidden">
+            {/* Right column - media & basic info */}
+            <div className="space-y-3 overflow-y-auto pl-3">
+              <div>
+                <FieldLabel label="מפרסם" tooltip="בחר את העסק שעבורו נוצר הקמפיין. אם העסק לא מופיע, הוסף אותו קודם בטאב 'מפרסמים'." required />
+                <Select value={campForm.advertiser_id} onValueChange={v => setCampForm(f => ({ ...f, advertiser_id: v }))}>
+                  <SelectTrigger><SelectValue placeholder="בחר מפרסם" /></SelectTrigger>
+                  <SelectContent>{advertisers.map(a => <SelectItem key={a.id} value={a.id}>{a.business_name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <FieldLabel label="כותרת קמפיין" tooltip="שם פנימי לזיהוי הקמפיין בלוח הניהול. לא מוצג לגולשים." required />
+                <Input value={campForm.title} onChange={e => setCampForm(f => ({ ...f, title: e.target.value }))} />
               </div>
 
-              {mediaSource === "file" ? (
-                <>
-                  {mediaPreview ? (
-                    <div className="relative min-h-40 rounded-lg overflow-hidden border border-border bg-muted/30">
-                      {campForm.media_type === "video" ? (
-                        <video src={mediaPreview} className="w-full h-40 object-cover" muted controls playsInline />
-                      ) : (
-                        <div className="relative w-full h-40">
-                          <img
-                            src={mediaFile ? mediaPreview! : optimizeImageUrl(mediaPreview!, 800)}
-                            className="w-full h-full object-cover"
-                            alt="תצוגה מקדימה"
-                            loading="eager"
-                            decoding="async"
-                            onError={(e) => {
-                              const img = e.currentTarget;
-                              if (!img.dataset.retried && mediaPreview) {
-                                img.dataset.retried = "1";
-                                img.src = mediaPreview;
-                              }
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="absolute top-2 left-2 flex gap-1">
-                        <button type="button" onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
-                      </div>
-                      <button type="button" onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
-                        החלף מדיה
-                      </button>
-                    </div>
-                  ) : (
-                    <button type="button" onClick={() => fileRef.current?.click()} className="flex h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
-                      <Upload className="h-6 w-6" />
-                      <span className="text-sm">גרור או לחץ להעלאה</span>
-                    </button>
-                  )}
-                </>
-              ) : (
-                <div className="space-y-2">
-                  <Input
-                    value={mediaUrlInput}
-                    onChange={e => setMediaUrlInput(e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                    dir="ltr"
-                  />
-                  {mediaUrlInput.trim() && (
-                    <div className="relative rounded-lg overflow-hidden border border-border bg-muted/30 h-40">
-                      <img
-                        src={mediaUrlInput.trim()}
-                        className="w-full h-full object-cover"
-                        alt="תצוגה מקדימה"
-                        onError={(e) => { e.currentTarget.style.display = "none"; }}
-                        onLoad={(e) => { e.currentTarget.style.display = "block"; }}
-                      />
-                    </div>
-                  )}
+              {/* media upload */}
+              <div>
+                <FieldLabel label="מדיה (תמונה / MP4)" tooltip="ניתן להעלות קובץ מהמחשב או להזין קישור ישיר לתמונה/וידאו." required />
+                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
+
+                <div className="flex gap-1 mt-1 mb-2">
+                  <button type="button" onClick={() => setMediaSource("file")} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors", mediaSource === "file" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>
+                    <Upload className="h-3.5 w-3.5" />
+                    העלאת קובץ
+                  </button>
+                  <button type="button" onClick={() => setMediaSource("url")} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors", mediaSource === "url" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>
+                    <Link2 className="h-3.5 w-3.5" />
+                    קישור לתמונה
+                  </button>
                 </div>
-              )}
+
+                {mediaSource === "file" ? (
+                  <>
+                    {mediaPreview ? (
+                      <div className="relative min-h-32 rounded-lg overflow-hidden border border-border bg-muted/30">
+                        {campForm.media_type === "video" ? (
+                          <video src={mediaPreview} className="w-full h-32 object-cover" muted controls playsInline />
+                        ) : (
+                          <div className="relative w-full h-32">
+                            <img
+                              src={mediaFile ? mediaPreview! : optimizeImageUrl(mediaPreview!, 800)}
+                              className="w-full h-full object-cover"
+                              alt="תצוגה מקדימה"
+                              loading="eager"
+                              decoding="async"
+                              onError={(e) => {
+                                const img = e.currentTarget;
+                                if (!img.dataset.retried && mediaPreview) {
+                                  img.dataset.retried = "1";
+                                  img.src = mediaPreview;
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
+                        <div className="absolute top-2 left-2 flex gap-1">
+                          <button type="button" onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
+                        </div>
+                        <button type="button" onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
+                          החלף מדיה
+                        </button>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => fileRef.current?.click()} className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
+                        <Upload className="h-6 w-6" />
+                        <span className="text-sm">גרור או לחץ להעלאה</span>
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <Input
+                      value={mediaUrlInput}
+                      onChange={e => setMediaUrlInput(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      dir="ltr"
+                    />
+                    {mediaUrlInput.trim() && (
+                      <div className="relative rounded-lg overflow-hidden border border-border bg-muted/30 h-32">
+                        <img
+                          src={mediaUrlInput.trim()}
+                          className="w-full h-full object-cover"
+                          alt="תצוגה מקדימה"
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                          onLoad={(e) => { e.currentTarget.style.display = "block"; }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <FieldLabel label="קישור יעד" tooltip="הכתובת שאליה הגולש יועבר בלחיצה על הבאנר." required />
+                <Input value={campForm.target_url} onChange={e => setCampForm(f => ({ ...f, target_url: e.target.value }))} placeholder="https://..." />
+              </div>
             </div>
 
-            <div>
-              <FieldLabel label="קישור יעד" tooltip="הכתובת שאליה הגולש יועבר בלחיצה על הבאנר. למשל: אתר המפרסם, דף נחיתה או קישור לוואטסאפ." required />
-              <Input value={campForm.target_url} onChange={e => setCampForm(f => ({ ...f, target_url: e.target.value }))} placeholder="https://..." />
-            </div>
+            {/* Left column - settings */}
+            <div className="space-y-3 overflow-y-auto pr-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FieldLabel label="עמוד יעד" tooltip="באיזה עמוד הקמפיין יוצג." required />
+                  <Select value={campForm.target_page} onValueChange={v => setCampForm(f => ({ ...f, target_page: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(PAGE_LABELS).map(([k, v]) => (
+                        <SelectItem key={k} value={k}>{v}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <FieldLabel label="סוג מיקום" tooltip="פרימיום, Hero, סרגל צד, בין תכנים, חוזר ברשימה." required />
+                  <Select value={campForm.placement} onValueChange={v => setCampForm(f => ({ ...f, placement: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(PLACEMENT_LABELS).map(([k, v]) => (
+                        <SelectItem key={k} value={k}>{v}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <FieldLabel label="עמוד יעד" tooltip="באיזה עמוד הקמפיין יוצג. 'כל העמודים' יציג בכל מקום שיש שטח פרסום מתאים." required />
-                <Select value={campForm.target_page} onValueChange={v => setCampForm(f => ({ ...f, target_page: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(PAGE_LABELS).map(([k, v]) => (
-                      <SelectItem key={k} value={k}>{v}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FieldLabel label="כמות הופעות בעמוד" tooltip="כמה פעמים המודעה תוצג באותו עמוד (מקסימום 4)." />
+                  <Input type="number" min={1} max={4} value={campForm.max_appearances} onChange={e => setCampForm(f => ({ ...f, max_appearances: Math.min(4, Math.max(1, Number(e.target.value))) }))} />
+                </div>
+                <div>
+                  <FieldLabel label="עדיפות" tooltip="מספר גבוה יותר = הבאנר יוצג ראשון ברוטציה." />
+                  <Input type="number" value={campForm.priority} onChange={e => setCampForm(f => ({ ...f, priority: Number(e.target.value) }))} />
+                </div>
               </div>
-              <div>
-                <FieldLabel label="סוג מיקום" tooltip="פרימיום – מיקום בולט, Hero – בראש העמוד, סרגל צד – בצד, בין תכנים – בין סקשנים, חוזר ברשימה – כל X פריטים." required />
-                <Select value={campForm.placement} onValueChange={v => setCampForm(f => ({ ...f, placement: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(PLACEMENT_LABELS).map(([k, v]) => (
-                      <SelectItem key={k} value={k}>{v}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FieldLabel label="תאריך התחלה" tooltip="מתי הבאנר יתחיל להופיע באתר." required />
+                  <Input type="datetime-local" value={campForm.start_date} onChange={e => setCampForm(f => ({ ...f, start_date: e.target.value }))} />
+                </div>
+                <div>
+                  <FieldLabel label="תאריך סיום" tooltip="מתי הבאנר יפסיק להופיע. השאר ריק לקמפיין ללא הגבלה." />
+                  <Input type="datetime-local" value={campForm.end_date} onChange={e => setCampForm(f => ({ ...f, end_date: e.target.value }))} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FieldLabel label="מחיר (₪)" tooltip="הסכום שהמפרסם משלם עבור קמפיין זה." />
+                  <Input type="number" value={campForm.price} onChange={e => setCampForm(f => ({ ...f, price: Number(e.target.value) }))} />
+                </div>
+                <div>
+                  <FieldLabel label="Alt Text" tooltip="תיאור טקסטואלי של הבאנר לנגישות." />
+                  <Input value={campForm.alt_text} onChange={e => setCampForm(f => ({ ...f, alt_text: e.target.value }))} placeholder="תיאור לקורא מסך" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Switch checked={campForm.is_active} onCheckedChange={v => setCampForm(f => ({ ...f, is_active: v }))} />
+                <FieldLabel label="פעיל" tooltip="כיבוי מפסיק את הצגת הבאנר באתר מיידית." />
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <FieldLabel label="כמות הופעות בעמוד" tooltip="כמה פעמים המודעה תוצג באותו עמוד (מקסימום 4). רלוונטי למיקומי 'חוזר ברשימה'." />
-                <Input type="number" min={1} max={4} value={campForm.max_appearances} onChange={e => setCampForm(f => ({ ...f, max_appearances: Math.min(4, Math.max(1, Number(e.target.value))) }))} />
-              </div>
-              <div>
-                <FieldLabel label="עדיפות" tooltip="מספר גבוה יותר = הבאנר יוצג ראשון ברוטציה. ברירת מחדל 0 (רגיל)." />
-                <Input type="number" value={campForm.priority} onChange={e => setCampForm(f => ({ ...f, priority: Number(e.target.value) }))} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <FieldLabel label="תאריך התחלה" tooltip="מתי הבאנר יתחיל להופיע באתר. לפני תאריך זה הקמפיין יהיה בסטטוס 'מתוזמן'." required />
-                <Input type="datetime-local" value={campForm.start_date} onChange={e => setCampForm(f => ({ ...f, start_date: e.target.value }))} />
-              </div>
-              <div>
-                <FieldLabel label="תאריך סיום" tooltip="מתי הבאנר יפסיק להופיע. השאר ריק כדי שהקמפיין ירוץ ללא הגבלת זמן עד שמכבים אותו ידנית." />
-                <Input type="datetime-local" value={campForm.end_date} onChange={e => setCampForm(f => ({ ...f, end_date: e.target.value }))} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <FieldLabel label="מחיר (₪)" tooltip="הסכום שהמפרסם משלם עבור קמפיין זה. משמש לחישוב הכנסה צפויה בדשבורד." />
-                <Input type="number" value={campForm.price} onChange={e => setCampForm(f => ({ ...f, price: Number(e.target.value) }))} />
-              </div>
-              <div>
-                <FieldLabel label="Alt Text" tooltip="תיאור טקסטואלי של הבאנר לטובת נגישות וקוראי מסך. חשוב לעמידה בתקני WCAG." />
-                <Input value={campForm.alt_text} onChange={e => setCampForm(f => ({ ...f, alt_text: e.target.value }))} placeholder="תיאור לקורא מסך" />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Switch checked={campForm.is_active} onCheckedChange={v => setCampForm(f => ({ ...f, is_active: v }))} />
-              <FieldLabel label="פעיל" tooltip="כיבוי מפסיק את הצגת הבאנר באתר מיידית, ללא קשר לתאריכים." />
-            </div>
-
-            <Button onClick={saveCampaign} disabled={uploading} className="w-full">
-              {uploading ? "מעלה..." : editingCamp ? "עדכן קמפיין" : "צור קמפיין"}
-            </Button>
           </div>
+
+          <Button onClick={saveCampaign} disabled={uploading} className="w-full mt-3">
+            {uploading ? "מעלה..." : editingCamp ? "עדכן קמפיין" : "צור קמפיין"}
+          </Button>
         </DialogContent>
       </Dialog>
     </div>
