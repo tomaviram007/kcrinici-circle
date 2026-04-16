@@ -79,35 +79,26 @@ const Index = () => {
         <BirthdaysPreviewSection isApproved={isApproved} />
       </ScrollReveal>
 
-      {/* Main content with sidebar layout */}
-      <div className="w-full px-5 sm:px-6">
-        <div className="flex gap-6">
-          {/* Main content */}
-          <div className="flex-1 min-w-0">
-            <ScrollReveal>
-              <SalesPreviewSection isApproved={isApproved} />
-            </ScrollReveal>
+      <ContentWithSidebarAds targetPage="home">
+        <div className="px-5 sm:px-6">
+          <ScrollReveal>
+            <SalesPreviewSection isApproved={isApproved} />
+          </ScrollReveal>
 
-            {/* Inline Ad Banner */}
-            <div className="py-4">
-              <SmartAdBanner placement="inline" targetPage="home" />
-            </div>
-
-            <ScrollReveal delay={0.05}>
-              <EventsPreviewSection isApproved={isApproved} />
-            </ScrollReveal>
-
-            <ScrollReveal delay={0.05}>
-              <JobsPreviewSection isApproved={isApproved} />
-            </ScrollReveal>
+          {/* Inline Ad Banner */}
+          <div className="py-4">
+            <SmartAdBanner placement="inline" targetPage="home" />
           </div>
 
-          {/* Left sidebar - unique ads only (desktop) */}
-          <div className="hidden lg:block w-[280px] shrink-0 pt-4 sticky top-24 self-start">
-            <SidebarAdStack targetPage="home" maxSlots={3} />
-          </div>
+          <ScrollReveal delay={0.05}>
+            <EventsPreviewSection isApproved={isApproved} />
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.05}>
+            <JobsPreviewSection isApproved={isApproved} />
+          </ScrollReveal>
         </div>
-      </div>
+      </ContentWithSidebarAds>
 
       <PollPopup />
     </main>
