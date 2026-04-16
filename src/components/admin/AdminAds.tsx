@@ -592,9 +592,9 @@ const AdminAds = () => {
 
       {/* ── Campaign Form Dialog ── */}
       <Dialog open={campDialog} onOpenChange={setCampDialog}>
-        <DialogContent className="max-w-[65vw] h-[65vh] flex flex-col" dir="rtl">
+        <DialogContent className="max-w-[65vw] max-h-[85vh] flex flex-col" dir="rtl">
           <DialogHeader><DialogTitle className="font-serif">{editingCamp ? "עריכת קמפיין" : "קמפיין חדש"}</DialogTitle></DialogHeader>
-          <div className="flex-1 grid grid-cols-2 gap-6 overflow-hidden">
+          <div className="flex-1 min-h-0 grid grid-cols-2 gap-6">
             {/* Right column - media & basic info */}
             <div className="space-y-3 overflow-y-auto pl-3">
               <div>
