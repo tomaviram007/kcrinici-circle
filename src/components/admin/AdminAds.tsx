@@ -74,7 +74,9 @@ const PLACEMENT_GROUPS = [
   {
     group: "סרגל צד",
     items: [
-      { value: "sidebar", label: "סרגל צד", desc: "באנר בצד העמוד (מוצג בדסקטופ בלבד)" },
+      { value: "sidebar", label: "סרגל צד (כללי)", desc: "באנר בשני צדדי העמוד (מוצג בדסקטופ בלבד)" },
+      { value: "sidebar_right", label: "סרגל צד ימני", desc: "באנר בצד ימין בלבד (דסקטופ)" },
+      { value: "sidebar_left", label: "סרגל צד שמאלי", desc: "באנר בצד שמאל בלבד (דסקטופ)" },
     ],
   },
 ];
