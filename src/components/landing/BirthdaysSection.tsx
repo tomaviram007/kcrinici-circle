@@ -75,7 +75,7 @@ const BirthdaysSection = ({ isApproved = false }: Props) => {
   if (birthdays.length === 0) return null;
 
   return (
-    <section className="relative py-12 px-4 sm:py-24 sm:px-6 overflow-hidden" ref={sectionRef}>
+    <section className="relative py-8 px-5 sm:py-24 sm:px-6 overflow-hidden" ref={sectionRef}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 sm:mb-16 text-center">
           <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">חוגגים השבוע</p>

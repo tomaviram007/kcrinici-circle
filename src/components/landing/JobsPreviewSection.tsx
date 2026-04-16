@@ -56,7 +56,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
   const displayItems = isApproved ? (jobs.length > 0 ? jobs : []) : mockJobs;
 
   return (
-    <section className="py-12 px-4 sm:py-24 sm:px-6" ref={sectionRef}>
+    <section className="py-8 px-5 sm:py-24 sm:px-6" ref={sectionRef}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 sm:mb-16 text-center">
           <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">הזדמנויות</p>
