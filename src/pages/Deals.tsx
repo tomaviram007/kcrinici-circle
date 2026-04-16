@@ -154,6 +154,7 @@ const Deals = () => {
         )}
       </PageHero>
 
+      <ContentWithSidebarAds targetPage="deals">
       <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8" dir="rtl">
         {/* Member submit form */}
         {user && isApproved && <DealSubmitForm externalOpen={showSubmitForm} />}
@@ -362,9 +363,7 @@ const Deals = () => {
           )}
         </DialogContent>
       </Dialog>
-      <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
-        <SmartAdBanner placement="sidebar" />
-      </div>
+      </ContentWithSidebarAds>
     </>
   );
 };

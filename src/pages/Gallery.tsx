@@ -644,7 +644,7 @@ const Gallery = () => {
   return (
     <>
     <PageHero image={coverImage} title="גלריית" highlight="תמונות" subtitle="רגעים מיוחדים מאירועי ומפגשי המועדון" />
-    
+    <ContentWithSidebarAds targetPage="gallery">
     <div className="mx-auto max-w-5xl px-5 py-4 sm:px-6 sm:py-8 md:py-12">
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -794,9 +794,7 @@ const Gallery = () => {
         </DialogContent>
       </Dialog>
     </div>
-    <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
-      <SmartAdBanner placement="sidebar" />
-    </div>
+    </ContentWithSidebarAds>
     <QuoteSection page="gallery" />
     </>
   );

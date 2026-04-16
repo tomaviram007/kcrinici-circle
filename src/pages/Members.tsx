@@ -172,7 +172,7 @@ const Members = () => {
   return (
     <>
     <PageHero image={coverImage} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
-    
+    <ContentWithSidebarAds targetPage="members">
     <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
@@ -433,9 +433,7 @@ const Members = () => {
       </DialogContent>
     </Dialog>
     <MemberProfilePopup member={viewMember} open={!!viewMember} onOpenChange={(open) => !open && setViewMember(null)} />
-    <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
-      <SmartAdBanner placement="sidebar" />
-    </div>
+    </ContentWithSidebarAds>
     <QuoteSection page="members" />
     </>
   );
