@@ -6,9 +6,10 @@ interface PageHeroProps {
   title: string;
   highlight: string;
   subtitle: string;
+  children?: React.ReactNode;
 }
 
-const PageHero = ({ image, title, highlight, subtitle }: PageHeroProps) => {
+const PageHero = ({ image, title, highlight, subtitle, children }: PageHeroProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +49,7 @@ const PageHero = ({ image, title, highlight, subtitle }: PageHeroProps) => {
         <p className="mt-3 max-w-lg font-body text-sm text-muted-foreground sm:text-base">
           {subtitle}
         </p>
+        {children}
       </div>
     </section>
   );
