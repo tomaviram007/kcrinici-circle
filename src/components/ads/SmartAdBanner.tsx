@@ -50,6 +50,7 @@ const SmartAdBanner = ({
   const [ads, setAds] = useState<AdCampaign[]>([]);
   const [current, setCurrent] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   const trackedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const fallbackKey = useMemo(() => fallbackPlacements.filter(Boolean).join("|"), [fallbackPlacements]);
@@ -143,6 +144,7 @@ const SmartAdBanner = ({
     if (ads.length <= 1) return;
     const timer = setInterval(() => {
       setImageLoaded(false);
+      setImageFailed(false);
       setCurrent((prev) => (prev + 1) % ads.length);
     }, rotateInterval);
     return () => clearInterval(timer);
@@ -157,7 +159,7 @@ const SmartAdBanner = ({
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  if (!ads.length) return null;
+  if (!ads.length || imageFailed) return null;
 
   const ad = ads[current];
   const displayUrl = ad.media_type === "video" ? ad.media_url : optimizeImageUrl(ad.media_url, renderWidth);
@@ -213,7 +215,7 @@ const SmartAdBanner = ({
               img.dataset.retried = "1";
               img.src = ad.media_url;
             } else {
-              setImageLoaded(true);
+              setImageFailed(true);
             }
           }}
         />
