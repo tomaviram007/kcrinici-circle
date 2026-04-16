@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import PageHero from "@/components/PageHero";
 import QuoteSection from "@/components/landing/QuoteSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
+import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
 import DealSubmitForm from "@/components/deals/DealSubmitForm";
@@ -153,6 +154,7 @@ const Deals = () => {
         )}
       </PageHero>
 
+      <ContentWithSidebarAds targetPage="deals">
       <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8" dir="rtl">
         {/* Member submit form */}
         {user && isApproved && <DealSubmitForm externalOpen={showSubmitForm} />}
@@ -361,9 +363,7 @@ const Deals = () => {
           )}
         </DialogContent>
       </Dialog>
-      <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
-        <SmartAdBanner placement="sidebar" />
-      </div>
+      </ContentWithSidebarAds>
     </>
   );
 };

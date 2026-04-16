@@ -15,6 +15,7 @@ import QuoteSection from "@/components/landing/QuoteSection";
 import SaleImageUpload from "@/components/announcements/SaleImageUpload";
 import heroImg from "@/assets/hero-announcements.jpg";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
+import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
 import { Separator } from "@/components/ui/separator";
@@ -473,7 +474,7 @@ const Announcements = () => {
   return (
     <>
     <PageHero image={coverImage} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון" />
-    
+    <ContentWithSidebarAds targetPage="announcements">
     <div className="mx-auto max-w-6xl px-5 py-4 sm:px-6 sm:py-8 md:py-12">
 
       {/* Tuesday Banner */}
@@ -744,9 +745,7 @@ const Announcements = () => {
       </DialogContent>
     </Dialog>
 
-    <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
-      <SmartAdBanner placement="sidebar" targetPage="announcements" />
-    </div>
+    </ContentWithSidebarAds>
     <QuoteSection page="announcements" />
     </>
   );

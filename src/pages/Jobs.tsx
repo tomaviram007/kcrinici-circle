@@ -14,6 +14,7 @@ import { fireConfetti } from "@/lib/confetti";
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-jobs.jpg";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
+import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
 
 const JOB_TYPES = [
@@ -86,7 +87,7 @@ const Jobs = () => {
   return (
     <>
     <PageHero image={coverImage} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה" />
-    
+    <ContentWithSidebarAds targetPage="jobs">
     <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex flex-col gap-4">
         <div className="flex items-start sm:items-center justify-between gap-3">
@@ -293,9 +294,7 @@ const Jobs = () => {
         </DialogContent>
       </Dialog>
     </div>
-    <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
-      <SmartAdBanner placement="sidebar" />
-    </div>
+    </ContentWithSidebarAds>
     <QuoteSection page="jobs" />
     </>
   );

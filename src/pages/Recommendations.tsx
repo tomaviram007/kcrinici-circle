@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
+import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import recommendationsHero from "@/assets/recommendations-hero.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 
@@ -225,7 +226,7 @@ const Recommendations = () => {
     <>
       <PageHero image={coverImage} title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים" />
       
-
+      <ContentWithSidebarAds targetPage="recommendations">
       <div className="max-w-7xl mx-auto px-5 py-4 sm:px-6 sm:py-8" dir="rtl">
         {/* Action Bar */}
         <div className="flex flex-col md:flex-row gap-4 mb-6 items-start md:items-center">
@@ -371,7 +372,7 @@ const Recommendations = () => {
           </form>
         </DialogContent>
       </Dialog>
-      <SmartAdBanner placement="sidebar" targetPage="recommendations" className="mx-auto max-w-7xl px-5 sm:px-6" />
+      </ContentWithSidebarAds>
     </>
   );
 };
