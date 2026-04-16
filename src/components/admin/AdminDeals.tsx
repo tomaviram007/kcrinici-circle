@@ -212,7 +212,7 @@ const AdminDeals = () => {
 
       {/* Inline form - full width, no scroll */}
       {showForm && (
-        <div className="rounded-xl border border-primary/30 bg-card p-5 space-y-4" dir="rtl">
+        <div className="rounded-xl border border-primary/30 bg-card p-3 sm:p-5 space-y-4" dir="rtl">
           <div className="flex items-center justify-between">
             <p className="font-serif text-lg font-bold text-foreground">
               {editingId ? "עריכת הטבה" : "הטבה חדשה"}
@@ -241,7 +241,7 @@ const AdminDeals = () => {
           </div>
 
           {/* Row 3: benefit type + value + coupon + category */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <BenefitFields
               benefitType={form.benefit_type}
               benefitValue={form.benefit_value}
