@@ -163,12 +163,12 @@ const SmartAdBanner = ({
   const displayUrl = ad.media_type === "video" ? ad.media_url : optimizeImageUrl(ad.media_url, renderWidth);
 
   const sizeClasses: Record<string, string> = {
-    hero: "w-full max-w-[1280px] mx-auto min-h-[200px] sm:min-h-[280px] md:min-h-[320px] lg:min-h-[340px]",
-    premium: "w-full max-w-[1280px] mx-auto min-h-[200px] sm:min-h-[280px] md:min-h-[320px] lg:min-h-[340px]",
+    hero: "w-full max-w-[1280px] mx-auto aspect-[16/9] sm:aspect-[3/1] md:aspect-[32/9] lg:aspect-[1280/340]",
+    premium: "w-full max-w-[1280px] mx-auto aspect-[16/9] sm:aspect-[3/1] md:aspect-[32/9] lg:aspect-[1280/340]",
     sidebar: "w-full aspect-[4/3]",
-    inline: "w-full max-w-[1280px] mx-auto min-h-[180px] sm:min-h-[240px] md:min-h-[280px]",
-    between_content: "w-full max-w-[1280px] mx-auto min-h-[180px] sm:min-h-[240px] md:min-h-[280px]",
-    inline_repeat: "w-full max-w-[1280px] mx-auto min-h-[160px] sm:min-h-[200px] md:min-h-[240px]",
+    inline: "w-full max-w-[1280px] mx-auto aspect-[16/9] sm:aspect-[3/1] md:aspect-[32/9]",
+    between_content: "w-full max-w-[1280px] mx-auto aspect-[16/9] sm:aspect-[3/1] md:aspect-[32/9]",
+    inline_repeat: "w-full max-w-[1280px] mx-auto aspect-[2/1] sm:aspect-[3/1] md:aspect-[4/1]",
   };
 
   return (
