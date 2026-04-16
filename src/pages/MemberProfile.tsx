@@ -63,7 +63,7 @@ const MemberProfile = () => {
     <>
       <PageHero image={coverImage} title="פרופיל" highlight="חבר" subtitle="אנשי המקצוע והעשייה של השכונה" />
 
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-3xl px-5 py-4 sm:px-6 sm:py-8">
         <Button
           variant="ghost"
           onClick={() => navigate("/members")}
