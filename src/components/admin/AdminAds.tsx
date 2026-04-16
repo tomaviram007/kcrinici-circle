@@ -89,6 +89,8 @@ const PLACEMENT_PAGES: Record<string, string[]> = {
   between_content: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
   inline_repeat: ["announcements", "members", "events", "deals", "jobs", "recommendations"],
   sidebar: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
+  sidebar_right: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
+  sidebar_left: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
 };
 
 const PLACEMENT_LABELS: Record<string, string> = Object.fromEntries(
