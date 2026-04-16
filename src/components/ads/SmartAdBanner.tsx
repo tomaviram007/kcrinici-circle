@@ -15,6 +15,7 @@ interface SmartAdBannerProps {
 
 interface AdCampaign {
   id: string;
+  title: string;
   media_type: string;
   media_url: string;
   target_url: string;
