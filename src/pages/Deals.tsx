@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Tag, Search, Copy, MessageCircle, Clock, Store, ExternalLink } from "lucide-react";
+import { Tag, Search, Copy, MessageCircle, Clock, Store, ExternalLink, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +46,7 @@ const Deals = () => {
   const [searchText, setSearchText] = useState("");
   const [filterCategory, setFilterCategory] = useState("הכל");
   const [copied, setCopied] = useState(false);
+  const [showSubmitForm, setShowSubmitForm] = useState(false);
   const coverImage = usePageCover("deals", heroEvents);
   const gridRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -139,11 +140,22 @@ const Deals = () => {
         title="הטבות"
         highlight="בלעדיות"
         subtitle="מבצעים והנחות מיוחדות לחברי המועדון בלבד"
-      />
+      >
+        {user && isApproved && (
+          <Button
+            onClick={() => setShowSubmitForm(true)}
+            size="lg"
+            className="mt-6 font-body text-lg px-8 py-6 bg-primary/90 hover:bg-primary text-primary-foreground border border-primary/50 rounded-xl shadow-lg"
+          >
+            הצע הטבה חדשה
+            <Plus className="h-5 w-5 mr-2" />
+          </Button>
+        )}
+      </PageHero>
 
       <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8" dir="rtl">
         {/* Member submit form */}
-        {user && isApproved && <DealSubmitForm />}
+        {user && isApproved && <DealSubmitForm externalOpen={showSubmitForm} />}
 
         {/* Filter bar */}
         <div className="mb-4 sm:mb-8 flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
