@@ -342,14 +342,15 @@ const AdminDeals = () => {
       )}
 
       {/* Approved deals */}
-      <div ref={cardsRef} className="grid gap-3 md:grid-cols-2">
+      <div ref={cardsRef} className="grid gap-3">
         {approvedDeals.map((deal) => (
           <div
             key={deal.id}
-            className={`deal-card rounded-xl border p-4 transition-all ${
+            className={`deal-card rounded-xl border p-3 sm:p-4 transition-all ${
               deal.is_active ? "border-border bg-card" : "border-border/30 bg-card/50 opacity-60"
             }`}
           >
+            {/* Title row */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <div className="h-9 w-9 rounded-lg border border-border/40 bg-background/60 flex items-center justify-center shrink-0 overflow-hidden">
@@ -360,8 +361,8 @@ const AdminDeals = () => {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-serif text-sm font-bold text-foreground truncate">{deal.title}</p>
-                  <p className="font-body text-xs text-muted-foreground">{deal.business_name} · {deal.category}</p>
+                  <p className="font-serif text-sm font-bold text-foreground line-clamp-2">{deal.title}</p>
+                  <p className="font-body text-xs text-muted-foreground truncate">{deal.business_name} · {deal.category}</p>
                   <CreatorBadge entityType="deal" entityId={deal.id} createdBy={deal.created_by} />
                 </div>
               </div>
@@ -372,28 +373,32 @@ const AdminDeals = () => {
               )}
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Button size="icon" variant="ghost" className="h-8 w-8 border border-border/50" onClick={() => handleDelete(deal.id)}>
-                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8 border border-primary/30" onClick={() => handleEdit(deal)}>
-                  <Pencil className="h-3.5 w-3.5 text-primary" />
-                </Button>
+            {/* Actions row - stacked on mobile */}
+            <div className="mt-3 flex items-center justify-between gap-2">
+              {/* Toggle - left side */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="font-body text-xs text-muted-foreground whitespace-nowrap">{deal.is_active ? "פעיל" : "מושהה"}</span>
+                <Switch checked={deal.is_active} onCheckedChange={() => handleToggleActive(deal)} className="shrink-0" />
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1 font-body text-xs text-muted-foreground" title="לחיצות על קבל הטבה">
+              {/* Stats */}
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="flex items-center gap-0.5 font-body text-xs" title="לחיצות על קבל הטבה">
                   <MousePointerClick className="h-3 w-3" /> {deal.claim_count || 0}
                 </span>
-                <span className="flex items-center gap-1 font-body text-xs text-muted-foreground" title="לחיצות על עבור לאתר">
+                <span className="flex items-center gap-0.5 font-body text-xs" title="לחיצות על עבור לאתר">
                   <ExternalLink className="h-3 w-3" /> {deal.website_click_count || 0}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="font-body text-xs text-muted-foreground">{deal.is_active ? "פעיל" : "מושהה"}</span>
-                <Switch checked={deal.is_active} onCheckedChange={() => handleToggleActive(deal)} className="shrink-0" />
+              {/* Edit/Delete buttons */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Button size="icon" variant="ghost" className="h-9 w-9 border border-primary/30" onClick={() => handleEdit(deal)}>
+                  <Pencil className="h-4 w-4 text-primary" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-9 w-9 border border-border/50" onClick={() => handleDelete(deal.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
               </div>
             </div>
           </div>
