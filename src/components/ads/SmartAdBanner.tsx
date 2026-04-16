@@ -87,17 +87,24 @@ const SmartAdBanner = ({
       for (const placementOption of placementsToTry) {
         const { data, error } = await supabase
           .from("ad_campaigns")
-          .select("id, title, media_type, media_url, target_url, alt_text, priority, max_appearances")
+          .select("id, title, media_type, media_url, target_url, alt_text, priority, max_appearances, target_page")
           .eq("placement", placementOption)
           .eq("is_active", true)
           .lte("start_date", now)
           .or(`end_date.is.null,end_date.gte.${now}`)
-          .or(`target_page.eq.${targetPage},target_page.eq.all`)
           .order("priority", { ascending: false });
 
         if (cancelled || error) continue;
 
-        const filtered = (data || []).filter((ad: AdCampaign) => slotIndex < (ad.max_appearances || 1));
+        // Filter ads that target this page (supports comma-separated pages)
+        const pageFiltered = (data || []).filter((ad: any) => {
+          const pages = (ad.target_page || "all").split(",");
+          return pages.includes("all") || pages.includes(targetPage);
+        });
+
+        if (cancelled || error) continue;
+
+        const filtered = pageFiltered.filter((ad: AdCampaign) => slotIndex < (ad.max_appearances || 1));
         if (filtered.length > 0) {
           setAds((prev) => {
             const prevKey = prev.map((item) => item.id).join("|");

@@ -471,7 +471,7 @@ const AdminAds = () => {
                         <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{c.impression_count}</span>
                         <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" />{c.click_count}</span>
                         <span className="flex items-center gap-1 font-medium text-foreground/70">{PLACEMENT_LABELS[c.placement]}</span>
-                        {c.target_page !== "all" && <span className="flex items-center gap-1">עמוד: {PAGE_LABELS[c.target_page] || c.target_page}</span>}
+                        {c.target_page !== "all" && <span className="flex items-center gap-1">עמודים: {c.target_page.split(",").map(p => PAGE_LABELS[p] || p).join(", ")}</span>}
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />עלה: {new Date(c.start_date).toLocaleDateString("he-IL")}</span>
