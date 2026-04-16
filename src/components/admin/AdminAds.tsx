@@ -294,6 +294,16 @@ const AdminAds = () => {
     });
     setEditingCamp(c.id);
     setMediaPreview(c.media_url);
+    setMediaFile(null);
+    // Detect if media_url is external (not from our storage)
+    const isStorageUrl = c.media_url?.includes('/storage/v1/');
+    if (isStorageUrl) {
+      setMediaSource("file");
+      setMediaUrlInput("");
+    } else {
+      setMediaSource("url");
+      setMediaUrlInput(c.media_url || "");
+    }
     setCampDialog(true);
   };
 
