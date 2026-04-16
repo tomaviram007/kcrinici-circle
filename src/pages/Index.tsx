@@ -54,7 +54,7 @@ const Index = () => {
       <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
 
       {/* Hero Ad Banner */}
-      <div className="mx-auto max-w-7xl px-4 py-4">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4">
         <SmartAdBanner placement="hero" targetPage="home" />
       </div>
 
@@ -63,7 +63,7 @@ const Index = () => {
       </ScrollReveal>
 
       {/* Premium ad placement - below About section */}
-      <div className="mx-auto max-w-7xl px-4 py-4">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4">
         <SmartAdBanner placement="premium" targetPage="home" slotIndex={0} />
       </div>
 
@@ -78,7 +78,7 @@ const Index = () => {
       </ScrollReveal>
 
       {/* Main content with sidebar layout */}
-      <div className="mx-auto max-w-7xl px-4">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <div className="flex gap-6">
           {/* Main content */}
           <div className="flex-1 min-w-0">

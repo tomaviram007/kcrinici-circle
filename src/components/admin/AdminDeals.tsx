@@ -372,7 +372,7 @@ const AdminDeals = () => {
               )}
             </div>
 
-            <div className="mt-3 flex items-center justify-between gap-3">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Button size="icon" variant="ghost" className="h-8 w-8 border border-border/50" onClick={() => handleDelete(deal.id)}>
                   <Trash2 className="h-3.5 w-3.5 text-destructive" />

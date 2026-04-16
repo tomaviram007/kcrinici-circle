@@ -141,12 +141,12 @@ const Deals = () => {
         subtitle="מבצעים והנחות מיוחדות לחברי המועדון בלבד"
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6" dir="rtl">
+      <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8" dir="rtl">
         {/* Member submit form */}
         {user && isApproved && <DealSubmitForm />}
 
         {/* Filter bar */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="mb-4 sm:mb-8 flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
@@ -349,7 +349,7 @@ const Deals = () => {
           )}
         </DialogContent>
       </Dialog>
-      <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
         <SmartAdBanner placement="sidebar" />
       </div>
     </>

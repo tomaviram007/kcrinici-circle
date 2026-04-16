@@ -87,7 +87,7 @@ const Jobs = () => {
     <>
     <PageHero image={coverImage} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה" />
     
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex flex-col gap-4">
         <div className="flex items-start sm:items-center justify-between gap-3">
           <div>
@@ -293,7 +293,7 @@ const Jobs = () => {
         </DialogContent>
       </Dialog>
     </div>
-    <div className="mx-auto max-w-7xl px-4 py-6">
+    <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
       <SmartAdBanner placement="sidebar" />
     </div>
     <QuoteSection page="jobs" />

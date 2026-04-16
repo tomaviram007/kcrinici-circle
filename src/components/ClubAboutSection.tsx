@@ -17,7 +17,7 @@ const ClubAboutSection = () => {
   }, []);
 
   return (
-    <section className="mx-auto max-w-4xl px-4 py-10 sm:py-14 md:px-6 text-center">
+    <section className="mx-auto max-w-4xl px-5 py-8 sm:px-6 sm:py-14 text-center">
       <div className="mb-4 mx-auto h-px w-12 gradient-gold opacity-40" />
       <h2 className="font-serif text-xl font-bold text-foreground sm:text-2xl">
         אודות <span className="text-gold">המועדון</span>

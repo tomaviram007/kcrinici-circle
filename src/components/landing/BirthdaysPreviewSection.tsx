@@ -100,7 +100,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
 
   return (
     <>
-    <section id="birthdays-section" className="py-10 px-4 sm:py-16 sm:px-6" dir="rtl" ref={sectionRef}>
+    <section id="birthdays-section" className="py-8 px-5 sm:py-16 sm:px-6" dir="rtl" ref={sectionRef}>
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 sm:mb-16 text-center">
           <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">

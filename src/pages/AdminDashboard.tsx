@@ -95,16 +95,16 @@ const AdminDashboard = () => {
     <>
       <PageHero image={coverImage} title="שולחן" highlight="המנהל" subtitle="ניהול המועדון, אישור חברים ופרסום תוכן" />
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 overflow-x-hidden">
+      <div className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-8 overflow-x-hidden">
         {/* Notification center + Stats row */}
         <div className="flex items-center justify-between mb-4" dir="rtl">
           <h2 className="font-serif text-lg font-bold text-foreground">סקירה כללית</h2>
           <AdminNotificationCenter onNavigate={handleTabChange} />
         </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mb-4 sm:mb-6 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {statCards.map((s) => (
-            <div key={s.label} className="rounded-xl border border-border bg-card p-4 text-center space-y-1 cursor-pointer transition-all hover:border-gold/30 hover:shadow-[0_0_20px_hsl(43_72%_52%/0.08)]" onClick={() => handleTabChange(s.tab)}>
+            <div key={s.label} className="rounded-xl border border-border bg-card p-3 sm:p-4 text-center space-y-1 cursor-pointer transition-all hover:border-gold/30 hover:shadow-[0_0_20px_hsl(43_72%_52%/0.08)]" onClick={() => handleTabChange(s.tab)}>
               <s.icon className={`h-5 w-5 mx-auto ${s.accent}`} />
               <p className="font-serif text-2xl font-bold text-foreground">{s.value}</p>
               <p className="font-body text-xs text-muted-foreground">{s.label}</p>
@@ -217,7 +217,7 @@ const AdminMobileNav = ({ activeTab, onTabChange, hasPermission }: { activeTab: 
           <Menu className="h-4 w-4 text-muted-foreground" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-72 p-4" dir="rtl">
+      <SheetContent side="right" className="w-72 p-4 overflow-y-auto" dir="rtl">
         <p className="font-serif text-lg font-bold text-foreground mb-4">ניווט מהיר</p>
         <nav className="space-y-3">
           {filteredGroups.map((group) => (

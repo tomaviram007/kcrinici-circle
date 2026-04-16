@@ -10,7 +10,7 @@ const CTASection = ({ isLoggedIn = false }: Props) => {
   const isPending = isLoggedIn; // logged in but not approved
 
   return (
-    <section className="py-12 px-4 sm:py-24 sm:px-6">
+    <section className="py-8 px-5 sm:py-24 sm:px-6">
       <div className="mx-auto max-w-3xl text-center">
         <div className="rounded-2xl border border-gold/20 bg-card p-6 sm:p-12 md:p-16 glow-gold">
           {isPending ? (

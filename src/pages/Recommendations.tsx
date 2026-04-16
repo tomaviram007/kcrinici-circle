@@ -226,7 +226,7 @@ const Recommendations = () => {
       <PageHero image={coverImage} title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים" />
       
 
-      <div className="max-w-7xl mx-auto px-4 py-8" dir="rtl">
+      <div className="max-w-7xl mx-auto px-5 py-4 sm:px-6 sm:py-8" dir="rtl">
         {/* Action Bar */}
         <div className="flex flex-col md:flex-row gap-4 mb-6 items-start md:items-center">
           {user && isApproved && (
@@ -371,7 +371,7 @@ const Recommendations = () => {
           </form>
         </DialogContent>
       </Dialog>
-      <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
         <SmartAdBanner placement="sidebar" />
       </div>
     </>
