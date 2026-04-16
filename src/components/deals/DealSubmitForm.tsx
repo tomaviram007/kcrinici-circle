@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -114,7 +114,12 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
     setSaving(false);
   };
 
+  useEffect(() => {
+    if (externalOpen) setShowForm(true);
+  }, [externalOpen]);
+
   if (!showForm) {
+    if (externalOpen !== undefined) return null;
     return (
       <div className="flex justify-center mb-6">
         <Button
@@ -122,8 +127,8 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
           variant="outline"
           className="font-body border-primary/30 text-primary hover:bg-primary/10"
         >
-          <Plus className="h-4 w-4 ml-1" />
           הצע הטבה חדשה
+          <Plus className="h-4 w-4 mr-1" />
         </Button>
       </div>
     );
