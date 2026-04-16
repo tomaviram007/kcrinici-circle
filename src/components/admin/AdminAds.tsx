@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -82,14 +83,19 @@ const PLACEMENT_LABELS: Record<string, string> = Object.fromEntries(
   PLACEMENT_GROUPS.flatMap(g => g.items.map(i => [i.value, i.label]))
 );
 
-const PAGE_LABELS: Record<string, string> = {
-  all: "כל העמודים",
-  home: "דף הבית",
-  announcements: "לוח מודעות",
-  members: "חברי המועדון",
-  events: "אירועים",
-  gallery: "גלריה",
-};
+const PAGE_OPTIONS = [
+  { value: "all", label: "כל העמודים" },
+  { value: "home", label: "דף הבית" },
+  { value: "announcements", label: "לוח מודעות" },
+  { value: "members", label: "חברי המועדון" },
+  { value: "events", label: "אירועים" },
+  { value: "gallery", label: "גלריה" },
+  { value: "deals", label: "הטבות" },
+  { value: "jobs", label: "דרושים" },
+  { value: "recommendations", label: "המלצות" },
+];
+
+const PAGE_LABELS: Record<string, string> = Object.fromEntries(PAGE_OPTIONS.map(p => [p.value, p.label]));
 
 /* ─── Field label with tooltip ─── */
 const FieldLabel = ({ label, tooltip, required }: { label: string; tooltip: string; required?: boolean }) => (
