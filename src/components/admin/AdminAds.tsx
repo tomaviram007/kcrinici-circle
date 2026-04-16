@@ -267,6 +267,8 @@ const AdminAds = () => {
     setEditingCamp(null);
     setMediaFile(null);
     setMediaPreview(null);
+    setMediaUrlInput("");
+    setMediaSource("file");
     setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 });
     fetchAll();
   };
