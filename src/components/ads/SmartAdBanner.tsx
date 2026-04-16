@@ -78,7 +78,7 @@ const SmartAdBanner = ({
       for (const placementOption of placementsToTry) {
         const { data, error } = await supabase
           .from("ad_campaigns")
-          .select("id, media_type, media_url, target_url, alt_text, priority, max_appearances")
+          .select("id, title, media_type, media_url, target_url, alt_text, priority, max_appearances")
           .eq("placement", placementOption)
           .eq("is_active", true)
           .lte("start_date", now)
