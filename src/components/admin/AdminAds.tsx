@@ -79,12 +79,21 @@ const PLACEMENT_GROUPS = [
   },
 ];
 
+/** Which pages each placement is available on */
+const PLACEMENT_PAGES: Record<string, string[]> = {
+  hero: ["home"],
+  premium: ["home"],
+  inline: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
+  between_content: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
+  inline_repeat: ["announcements", "members", "events", "deals", "jobs", "recommendations"],
+  sidebar: ["home", "announcements", "members", "events", "gallery", "deals", "jobs", "recommendations"],
+};
+
 const PLACEMENT_LABELS: Record<string, string> = Object.fromEntries(
   PLACEMENT_GROUPS.flatMap(g => g.items.map(i => [i.value, i.label]))
 );
 
 const PAGE_OPTIONS = [
-  { value: "all", label: "כל העמודים" },
   { value: "home", label: "דף הבית" },
   { value: "announcements", label: "לוח מודעות" },
   { value: "members", label: "חברי המועדון" },
