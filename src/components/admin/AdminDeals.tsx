@@ -181,10 +181,10 @@ const AdminDeals = () => {
   if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-serif text-xl font-bold text-foreground flex items-center gap-2">
-         <Tag className="h-5 w-5 text-gold" /> ניהול הטבות ({deals.length})
+    <div className="space-y-4 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <h3 className="font-serif text-lg sm:text-xl font-bold text-foreground flex items-center gap-2 flex-wrap">
+         <Tag className="h-5 w-5 text-gold shrink-0" /> ניהול הטבות ({deals.length})
           {pendingDeals.length > 0 && (
             <Badge variant="destructive" className="font-body text-xs">{pendingDeals.length} ממתינות</Badge>
           )}
@@ -199,7 +199,7 @@ const AdminDeals = () => {
               setShowForm(true);
             }
           }}
-          className="gradient-gold text-primary-foreground font-body"
+          className="gradient-gold text-primary-foreground font-body w-full sm:w-auto"
           size="sm"
         >
           {showForm && !editingId ? (
@@ -212,7 +212,7 @@ const AdminDeals = () => {
 
       {/* Inline form - full width, no scroll */}
       {showForm && (
-        <div className="rounded-xl border border-primary/30 bg-card p-5 space-y-4" dir="rtl">
+        <div className="rounded-xl border border-primary/30 bg-card p-3 sm:p-5 space-y-4" dir="rtl">
           <div className="flex items-center justify-between">
             <p className="font-serif text-lg font-bold text-foreground">
               {editingId ? "עריכת הטבה" : "הטבה חדשה"}
@@ -241,7 +241,7 @@ const AdminDeals = () => {
           </div>
 
           {/* Row 3: benefit type + value + coupon + category */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <BenefitFields
               benefitType={form.benefit_type}
               benefitValue={form.benefit_value}
@@ -304,9 +304,9 @@ const AdminDeals = () => {
           <h4 className="font-serif text-sm font-bold text-destructive flex items-center gap-2 mt-2">
             <Clock className="h-4 w-4" /> ממתינות לאישור ({pendingDeals.length})
           </h4>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3">
             {pendingDeals.map((deal) => (
-              <div key={deal.id} className="deal-card rounded-xl border-2 border-amber-500/40 bg-amber-500/5 p-4 transition-all">
+              <div key={deal.id} className="deal-card rounded-xl border-2 border-amber-500/40 bg-amber-500/5 p-3 sm:p-4 transition-all">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="h-9 w-9 rounded-lg border border-border/40 bg-background/60 flex items-center justify-center shrink-0 overflow-hidden">
@@ -317,22 +317,22 @@ const AdminDeals = () => {
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-serif text-sm font-bold text-foreground truncate">{deal.title}</p>
-                      <p className="font-body text-xs text-muted-foreground">{deal.business_name} · {deal.category}</p>
+                      <p className="font-serif text-sm font-bold text-foreground line-clamp-2">{deal.title}</p>
+                      <p className="font-body text-xs text-muted-foreground truncate">{deal.business_name} · {deal.category}</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-[10px] font-body border-amber-500/50 text-amber-600">ממתינה</Badge>
+                  <Badge variant="outline" className="text-[10px] font-body border-amber-500/50 text-amber-600 shrink-0">ממתינה</Badge>
                 </div>
                 <p className="font-body text-xs text-muted-foreground mt-2 line-clamp-2">{deal.description}</p>
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3 flex items-center gap-2 flex-wrap">
                   <Button size="sm" className="gradient-gold text-primary-foreground font-body" onClick={() => handleApprove(deal)}>
                     <CheckCircle className="h-3.5 w-3.5 ml-1" /> אשר
                   </Button>
                   <Button size="sm" variant="ghost" className="font-body" onClick={() => handleEdit(deal)}>
                     <Pencil className="h-3.5 w-3.5 ml-1" /> ערוך
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleDelete(deal.id)}>
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  <Button size="icon" variant="ghost" className="h-9 w-9" onClick={() => handleDelete(deal.id)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
               </div>
@@ -342,14 +342,15 @@ const AdminDeals = () => {
       )}
 
       {/* Approved deals */}
-      <div ref={cardsRef} className="grid gap-3 md:grid-cols-2">
+      <div ref={cardsRef} className="grid gap-3">
         {approvedDeals.map((deal) => (
           <div
             key={deal.id}
-            className={`deal-card rounded-xl border p-4 transition-all ${
+            className={`deal-card rounded-xl border p-3 sm:p-4 transition-all ${
               deal.is_active ? "border-border bg-card" : "border-border/30 bg-card/50 opacity-60"
             }`}
           >
+            {/* Title row */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <div className="h-9 w-9 rounded-lg border border-border/40 bg-background/60 flex items-center justify-center shrink-0 overflow-hidden">
@@ -360,8 +361,8 @@ const AdminDeals = () => {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-serif text-sm font-bold text-foreground truncate">{deal.title}</p>
-                  <p className="font-body text-xs text-muted-foreground">{deal.business_name} · {deal.category}</p>
+                  <p className="font-serif text-sm font-bold text-foreground line-clamp-2">{deal.title}</p>
+                  <p className="font-body text-xs text-muted-foreground truncate">{deal.business_name} · {deal.category}</p>
                   <CreatorBadge entityType="deal" entityId={deal.id} createdBy={deal.created_by} />
                 </div>
               </div>
@@ -372,28 +373,32 @@ const AdminDeals = () => {
               )}
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Button size="icon" variant="ghost" className="h-8 w-8 border border-border/50" onClick={() => handleDelete(deal.id)}>
-                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8 border border-primary/30" onClick={() => handleEdit(deal)}>
-                  <Pencil className="h-3.5 w-3.5 text-primary" />
-                </Button>
+            {/* Actions row - stacked on mobile */}
+            <div className="mt-3 flex items-center justify-between gap-2">
+              {/* Toggle - left side */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="font-body text-xs text-muted-foreground whitespace-nowrap">{deal.is_active ? "פעיל" : "מושהה"}</span>
+                <Switch checked={deal.is_active} onCheckedChange={() => handleToggleActive(deal)} className="shrink-0" />
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1 font-body text-xs text-muted-foreground" title="לחיצות על קבל הטבה">
+              {/* Stats */}
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="flex items-center gap-0.5 font-body text-xs" title="לחיצות על קבל הטבה">
                   <MousePointerClick className="h-3 w-3" /> {deal.claim_count || 0}
                 </span>
-                <span className="flex items-center gap-1 font-body text-xs text-muted-foreground" title="לחיצות על עבור לאתר">
+                <span className="flex items-center gap-0.5 font-body text-xs" title="לחיצות על עבור לאתר">
                   <ExternalLink className="h-3 w-3" /> {deal.website_click_count || 0}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="font-body text-xs text-muted-foreground">{deal.is_active ? "פעיל" : "מושהה"}</span>
-                <Switch checked={deal.is_active} onCheckedChange={() => handleToggleActive(deal)} className="shrink-0" />
+              {/* Edit/Delete buttons */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Button size="icon" variant="ghost" className="h-9 w-9 border border-primary/30" onClick={() => handleEdit(deal)}>
+                  <Pencil className="h-4 w-4 text-primary" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-9 w-9 border border-border/50" onClick={() => handleDelete(deal.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
               </div>
             </div>
           </div>
