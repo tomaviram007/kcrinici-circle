@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
@@ -732,9 +732,9 @@ const AdminAds = () => {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {PLACEMENT_GROUPS.map((group, gi) => (
-                      <div key={group.group}>
-                        {gi > 0 && <div className="h-px bg-border my-1" />}
-                        <p className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider">{group.group}</p>
+                      <SelectGroup key={group.group}>
+                        {gi > 0 && <SelectSeparator />}
+                        <SelectLabel className="text-[10px] font-bold text-gold/70 uppercase tracking-wider">{group.group}</SelectLabel>
                         {group.items.map(item => (
                           <SelectItem key={item.value} value={item.value}>
                             <div className="flex flex-col">
@@ -743,7 +743,7 @@ const AdminAds = () => {
                             </div>
                           </SelectItem>
                         ))}
-                      </div>
+                      </SelectGroup>
                     ))}
                   </SelectContent>
                 </Select>
