@@ -33,7 +33,7 @@ const buildDiscountLabel = (type: string, value: string) => {
   return null;
 };
 
-const DealSubmitForm = ({ onSubmitted }: { onSubmitted?: () => void }) => {
+const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => void; externalOpen?: boolean }) => {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
