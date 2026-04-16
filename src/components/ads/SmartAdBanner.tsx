@@ -15,6 +15,7 @@ interface SmartAdBannerProps {
 
 interface AdCampaign {
   id: string;
+  title: string;
   media_type: string;
   media_url: string;
   target_url: string;
@@ -77,7 +78,7 @@ const SmartAdBanner = ({
       for (const placementOption of placementsToTry) {
         const { data, error } = await supabase
           .from("ad_campaigns")
-          .select("id, media_type, media_url, target_url, alt_text, priority, max_appearances")
+          .select("id, title, media_type, media_url, target_url, alt_text, priority, max_appearances")
           .eq("placement", placementOption)
           .eq("is_active", true)
           .lte("start_date", now)
@@ -175,7 +176,7 @@ const SmartAdBanner = ({
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-hidden rounded-2xl cursor-pointer group border border-border/20 bg-muted shadow-sm hover:shadow-md transition-shadow duration-300",
+        "relative overflow-hidden rounded-2xl cursor-pointer group border-2 border-gold/60 bg-muted shadow-sm hover:shadow-lg transition-shadow duration-300",
         sizeClasses[placement] || sizeClasses.inline,
         className
       )}
@@ -224,16 +225,23 @@ const SmartAdBanner = ({
         <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
       )}
 
-      {/* Hover overlay */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none" />
+      {/* Bottom gradient overlay for text readability */}
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
+
+      {/* Ad title at bottom right */}
+      {ad.title && (
+        <h3 className="absolute bottom-4 right-5 font-serif text-lg sm:text-xl md:text-2xl font-bold text-white drop-shadow-lg pointer-events-none">
+          {ad.title}
+        </h3>
+      )}
 
       {/* Sponsored label */}
-      <span className="absolute bottom-3 left-3 text-[10px] font-medium text-white/70 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-md pointer-events-none">
+      <span className="absolute top-3 left-3 text-[10px] font-medium text-white/70 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-md pointer-events-none">
         ממומן
       </span>
 
       {ads.length > 1 && (
-        <div className="absolute bottom-2 right-2 flex gap-1">
+        <div className="absolute bottom-2 left-5 flex gap-1">
           {ads.map((item, i) => (
             <button
               key={item.id}
