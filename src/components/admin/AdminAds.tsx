@@ -570,42 +570,79 @@ const AdminAds = () => {
 
             {/* media upload */}
             <div>
-              <FieldLabel label="מדיה (תמונה / MP4)" tooltip="הקובץ שיוצג כבאנר באתר. פורמטים נתמכים: JPG, PNG, WebP או וידאו MP4. מקסימום 10MB." required />
+              <FieldLabel label="מדיה (תמונה / MP4)" tooltip="ניתן להעלות קובץ מהמחשב או להזין קישור ישיר לתמונה/וידאו." required />
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
-              {mediaPreview ? (
-                <div className="relative mt-2 min-h-40 rounded-lg overflow-hidden border border-border bg-muted/30">
-                  {campForm.media_type === "video" ? (
-                    <video src={mediaPreview} className="w-full h-40 object-cover" muted controls playsInline />
+
+              {/* Source toggle */}
+              <div className="flex gap-1 mt-1 mb-2">
+                <button type="button" onClick={() => setMediaSource("file")} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors", mediaSource === "file" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>
+                  <Upload className="h-3.5 w-3.5" />
+                  העלאת קובץ
+                </button>
+                <button type="button" onClick={() => setMediaSource("url")} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors", mediaSource === "url" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>
+                  <Link2 className="h-3.5 w-3.5" />
+                  קישור לתמונה
+                </button>
+              </div>
+
+              {mediaSource === "file" ? (
+                <>
+                  {mediaPreview ? (
+                    <div className="relative min-h-40 rounded-lg overflow-hidden border border-border bg-muted/30">
+                      {campForm.media_type === "video" ? (
+                        <video src={mediaPreview} className="w-full h-40 object-cover" muted controls playsInline />
+                      ) : (
+                        <div className="relative w-full h-40">
+                          <img
+                            src={mediaFile ? mediaPreview! : optimizeImageUrl(mediaPreview!, 800)}
+                            className="w-full h-full object-cover"
+                            alt="תצוגה מקדימה"
+                            loading="eager"
+                            decoding="async"
+                            onError={(e) => {
+                              const img = e.currentTarget;
+                              if (!img.dataset.retried && mediaPreview) {
+                                img.dataset.retried = "1";
+                                img.src = mediaPreview;
+                              }
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className="absolute top-2 left-2 flex gap-1">
+                        <button type="button" onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
+                      </div>
+                      <button type="button" onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
+                        החלף מדיה
+                      </button>
+                    </div>
                   ) : (
-                    <div className="relative w-full h-40">
+                    <button type="button" onClick={() => fileRef.current?.click()} className="flex h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
+                      <Upload className="h-6 w-6" />
+                      <span className="text-sm">גרור או לחץ להעלאה</span>
+                    </button>
+                  )}
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <Input
+                    value={mediaUrlInput}
+                    onChange={e => setMediaUrlInput(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    dir="ltr"
+                  />
+                  {mediaUrlInput.trim() && (
+                    <div className="relative rounded-lg overflow-hidden border border-border bg-muted/30 h-40">
                       <img
-                        src={mediaFile ? mediaPreview! : optimizeImageUrl(mediaPreview!, 800)}
+                        src={mediaUrlInput.trim()}
                         className="w-full h-full object-cover"
                         alt="תצוגה מקדימה"
-                        loading="eager"
-                        decoding="async"
-                        onError={(e) => {
-                          const img = e.currentTarget;
-                          if (!img.dataset.retried && mediaPreview) {
-                            img.dataset.retried = "1";
-                            img.src = mediaPreview; // fallback to original URL
-                          }
-                        }}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        onLoad={(e) => { e.currentTarget.style.display = "block"; }}
                       />
                     </div>
                   )}
-                  <div className="absolute top-2 left-2 flex gap-1">
-                    <button type="button" onClick={() => { setMediaPreview(null); setMediaFile(null); }} className="bg-background/80 rounded-full p-1 hover:bg-background transition-colors"><X className="h-4 w-4" /></button>
-                  </div>
-                  <button type="button" onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
-                    החלף מדיה
-                  </button>
                 </div>
-              ) : (
-                <button type="button" onClick={() => fileRef.current?.click()} className="mt-2 flex h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
-                  <Upload className="h-6 w-6" />
-                  <span className="text-sm">גרור או לחץ להעלאה</span>
-                </button>
               )}
             </div>
 
