@@ -110,6 +110,8 @@ const AdminAds = () => {
   const [editingCamp, setEditingCamp] = useState<string | null>(null);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [mediaUrlInput, setMediaUrlInput] = useState("");
+  const [mediaSource, setMediaSource] = useState<"file" | "url">("file");
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
