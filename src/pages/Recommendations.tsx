@@ -371,9 +371,7 @@ const Recommendations = () => {
           </form>
         </DialogContent>
       </Dialog>
-      <div className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-6">
-        <SmartAdBanner placement="sidebar" />
-      </div>
+      <SmartAdBanner placement="sidebar" targetPage="recommendations" className="mx-auto max-w-7xl px-5 sm:px-6" />
     </>
   );
 };
