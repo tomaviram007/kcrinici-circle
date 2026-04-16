@@ -54,14 +54,33 @@ interface Campaign {
   created_at: string;
 }
 
-const PLACEMENT_LABELS: Record<string, string> = {
-  premium: "פרימיום – מיקום בולט",
-  hero: "Hero – ראש העמוד",
-  sidebar: "סרגל צד",
-  inline: "בין תכנים",
-  between_content: "בין סקשנים",
-  inline_repeat: "חוזר ברשימה (כל X פריטים)",
-};
+const PLACEMENT_GROUPS = [
+  {
+    group: "ראש העמוד",
+    items: [
+      { value: "hero", label: "HERO – באנר ראשי", desc: "באנר גדול בראש העמוד, מעל כל התוכן" },
+      { value: "premium", label: "פרימיום – מתחת ל-Hero", desc: "באנר בולט מיד אחרי ה-Hero" },
+    ],
+  },
+  {
+    group: "תוכן העמוד",
+    items: [
+      { value: "inline", label: "בין תכנים", desc: "באנר בין סקשנים שונים בעמוד" },
+      { value: "between_content", label: "בין סקשנים", desc: "באנר מפריד בין אזורי תוכן" },
+      { value: "inline_repeat", label: "חוזר ברשימה (כל X פריטים)", desc: "מופיע שוב ושוב בתוך רשימות ארוכות" },
+    ],
+  },
+  {
+    group: "סרגל צד",
+    items: [
+      { value: "sidebar", label: "סרגל צד", desc: "באנר בצד העמוד (מוצג בדסקטופ בלבד)" },
+    ],
+  },
+];
+
+const PLACEMENT_LABELS: Record<string, string> = Object.fromEntries(
+  PLACEMENT_GROUPS.flatMap(g => g.items.map(i => [i.value, i.label]))
+);
 
 const PAGE_LABELS: Record<string, string> = {
   all: "כל העמודים",
