@@ -567,7 +567,7 @@ const AdminAds = () => {
 
       {/* ── Campaign Form Dialog ── */}
       <Dialog open={campDialog} onOpenChange={setCampDialog}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="max-w-[65vw] h-[65vh] overflow-y-auto" dir="rtl">
           <DialogHeader><DialogTitle className="font-serif">{editingCamp ? "עריכת קמפיין" : "קמפיין חדש"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
