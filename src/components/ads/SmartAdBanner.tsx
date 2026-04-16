@@ -159,7 +159,7 @@ const SmartAdBanner = ({
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  if (!ads.length) return null;
+  if (!ads.length || imageFailed) return null;
 
   const ad = ads[current];
   const displayUrl = ad.media_type === "video" ? ad.media_url : optimizeImageUrl(ad.media_url, renderWidth);
