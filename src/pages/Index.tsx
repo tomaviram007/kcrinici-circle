@@ -16,6 +16,7 @@ import PollPopup from "@/components/PollPopup";
 import ScrollReveal from "@/components/ScrollReveal";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
+import SidebarAdStack from "@/components/ads/SidebarAdStack";
 
 const Index = () => {
   const { user, isApproved } = useAuth();
@@ -100,11 +101,9 @@ const Index = () => {
             </ScrollReveal>
           </div>
 
-          {/* Left sidebar - 3 ad slots (desktop only) */}
-          <div className="hidden lg:flex flex-col gap-4 w-[280px] shrink-0 pt-4 sticky top-24 self-start">
-            <SmartAdBanner placement="sidebar" targetPage="home" slotIndex={0} className="!h-[220px]" />
-            <SmartAdBanner placement="sidebar" targetPage="home" slotIndex={1} className="!h-[220px]" />
-            <SmartAdBanner placement="sidebar" targetPage="home" slotIndex={2} className="!h-[220px]" />
+          {/* Left sidebar - unique ads only (desktop) */}
+          <div className="hidden lg:block w-[280px] shrink-0 pt-4 sticky top-24 self-start">
+            <SidebarAdStack targetPage="home" maxSlots={3} />
           </div>
         </div>
       </div>

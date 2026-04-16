@@ -11,6 +11,7 @@ interface SmartAdBannerProps {
   className?: string;
   rotateInterval?: number;
   fallbackPlacements?: string[];
+  manualAd?: AdCampaign | null;
 }
 
 interface AdCampaign {
@@ -44,6 +45,7 @@ const SmartAdBanner = ({
   className,
   rotateInterval = 6000,
   fallbackPlacements = [],
+  manualAd = null,
 }: SmartAdBannerProps) => {
   // Premium banner flag for hero/premium placements
   const isPremium = placement === "hero" || placement === "premium";
@@ -69,6 +71,13 @@ const SmartAdBanner = ({
   }, [placement]);
 
   useEffect(() => {
+    // If a manual ad is provided, use it directly - skip fetching
+    if (manualAd) {
+      setAds([manualAd]);
+      setCurrent(0);
+      return;
+    }
+
     let cancelled = false;
 
     const fetchAds = async () => {
@@ -111,7 +120,7 @@ const SmartAdBanner = ({
     return () => {
       cancelled = true;
     };
-  }, [placement, targetPage, slotIndex, fallbackKey]);
+  }, [placement, targetPage, slotIndex, fallbackKey, manualAd]);
 
   const trackImpression = useCallback(async (campaignId: string) => {
     if (trackedRef.current.has(campaignId)) return;
