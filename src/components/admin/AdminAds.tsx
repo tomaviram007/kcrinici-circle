@@ -107,9 +107,11 @@ const AdminAds = () => {
     target_page: "all", max_appearances: 1,
     alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0,
   });
-  const [editingCamp, setEditingCamp] = useState<string | null>(null);
+   const [editingCamp, setEditingCamp] = useState<string | null>(null);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [mediaUrlInput, setMediaUrlInput] = useState("");
+  const [mediaSource, setMediaSource] = useState<"file" | "url">("file");
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
