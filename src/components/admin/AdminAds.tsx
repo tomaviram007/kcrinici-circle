@@ -236,12 +236,14 @@ const AdminAds = () => {
       if (upErr) { toast({ title: "שגיאת העלאה", description: upErr.message, variant: "destructive" }); setUploading(false); return; }
       const { data: urlData } = supabase.storage.from("ads").getPublicUrl(path);
       media_url = urlData.publicUrl;
+    } else if (mediaSource === "url" && mediaUrlInput.trim()) {
+      media_url = mediaUrlInput.trim();
     } else if (editingCamp) {
       const existing = campaigns.find(c => c.id === editingCamp);
       media_url = existing?.media_url || "";
     }
 
-    if (!media_url) { toast({ title: "יש להעלות קובץ מדיה", variant: "destructive" }); setUploading(false); return; }
+    if (!media_url) { toast({ title: "יש להעלות קובץ מדיה או להזין קישור", variant: "destructive" }); setUploading(false); return; }
 
     const payload = {
       ...campForm,
