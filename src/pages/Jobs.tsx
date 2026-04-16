@@ -14,6 +14,7 @@ import { fireConfetti } from "@/lib/confetti";
 import QuoteSection from "@/components/landing/QuoteSection";
 import heroImg from "@/assets/hero-jobs.jpg";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
+import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
 
 const JOB_TYPES = [

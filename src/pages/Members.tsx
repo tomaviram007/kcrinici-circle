@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import QuoteSection from "@/components/landing/QuoteSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
+import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import heroImg from "@/assets/hero-members.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import {

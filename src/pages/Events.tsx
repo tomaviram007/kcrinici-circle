@@ -13,6 +13,7 @@ import PageHero from "@/components/PageHero";
 
 import QuoteSection from "@/components/landing/QuoteSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
+import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import heroImg from "@/assets/hero-events.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import {

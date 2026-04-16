@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import PageHero from "@/components/PageHero";
 import QuoteSection from "@/components/landing/QuoteSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
+import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
 import DealSubmitForm from "@/components/deals/DealSubmitForm";
