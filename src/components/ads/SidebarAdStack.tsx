@@ -30,17 +30,20 @@ const SidebarAdStack = ({ targetPage = "all", maxSlots = 3, className }: Sidebar
       const now = new Date().toISOString();
       const { data, error } = await supabase
         .from("ad_campaigns")
-        .select("id, title, media_type, media_url, target_url, alt_text, priority, max_appearances")
+        .select("id, title, media_type, media_url, target_url, alt_text, priority, max_appearances, target_page")
         .eq("placement", "sidebar")
         .eq("is_active", true)
         .lte("start_date", now)
         .or(`end_date.is.null,end_date.gte.${now}`)
-        .or(`target_page.eq.${targetPage},target_page.eq.all`)
         .order("priority", { ascending: false });
 
       if (cancelled || error) return;
-      // Each unique ad appears at most once per page
-      setAds(data || []);
+      // Filter by target page (supports comma-separated pages)
+      const filtered = (data || []).filter((ad: any) => {
+        const pages = (ad.target_page || "all").split(",");
+        return pages.includes("all") || pages.includes(targetPage);
+      });
+      setAds(filtered || []);
     };
 
     fetchAds();

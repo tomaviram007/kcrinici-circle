@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -82,14 +83,19 @@ const PLACEMENT_LABELS: Record<string, string> = Object.fromEntries(
   PLACEMENT_GROUPS.flatMap(g => g.items.map(i => [i.value, i.label]))
 );
 
-const PAGE_LABELS: Record<string, string> = {
-  all: "כל העמודים",
-  home: "דף הבית",
-  announcements: "לוח מודעות",
-  members: "חברי המועדון",
-  events: "אירועים",
-  gallery: "גלריה",
-};
+const PAGE_OPTIONS = [
+  { value: "all", label: "כל העמודים" },
+  { value: "home", label: "דף הבית" },
+  { value: "announcements", label: "לוח מודעות" },
+  { value: "members", label: "חברי המועדון" },
+  { value: "events", label: "אירועים" },
+  { value: "gallery", label: "גלריה" },
+  { value: "deals", label: "הטבות" },
+  { value: "jobs", label: "דרושים" },
+  { value: "recommendations", label: "המלצות" },
+];
+
+const PAGE_LABELS: Record<string, string> = Object.fromEntries(PAGE_OPTIONS.map(p => [p.value, p.label]));
 
 /* ─── Field label with tooltip ─── */
 const FieldLabel = ({ label, tooltip, required }: { label: string; tooltip: string; required?: boolean }) => (
@@ -465,7 +471,7 @@ const AdminAds = () => {
                         <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{c.impression_count}</span>
                         <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" />{c.click_count}</span>
                         <span className="flex items-center gap-1 font-medium text-foreground/70">{PLACEMENT_LABELS[c.placement]}</span>
-                        {c.target_page !== "all" && <span className="flex items-center gap-1">עמוד: {PAGE_LABELS[c.target_page] || c.target_page}</span>}
+                        {c.target_page !== "all" && <span className="flex items-center gap-1">עמודים: {c.target_page.split(",").map(p => PAGE_LABELS[p] || p).join(", ")}</span>}
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />עלה: {new Date(c.start_date).toLocaleDateString("he-IL")}</span>
@@ -688,40 +694,59 @@ const AdminAds = () => {
 
             {/* Left column - settings */}
             <div className="space-y-3 overflow-y-auto pr-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <FieldLabel label="עמוד יעד" tooltip="באיזה עמוד הקמפיין יוצג." required />
-                  <Select value={campForm.target_page} onValueChange={v => setCampForm(f => ({ ...f, target_page: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(PAGE_LABELS).map(([k, v]) => (
-                        <SelectItem key={k} value={k}>{v}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div>
+                <FieldLabel label="עמודי יעד" tooltip="באילו עמודים הקמפיין יוצג. בחר 'כל העמודים' או סמן עמודים ספציפיים." required />
+                <div className="rounded-lg border border-border bg-background p-3 space-y-2 max-h-[160px] overflow-y-auto">
+                  {PAGE_OPTIONS.map(page => {
+                    const selectedPages = campForm.target_page.split(",").filter(Boolean);
+                    const isAll = selectedPages.includes("all");
+                    const isChecked = page.value === "all" ? isAll : selectedPages.includes(page.value);
+                    return (
+                      <label key={page.value} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 transition-colors">
+                        <Checkbox
+                          checked={isChecked}
+                          disabled={page.value !== "all" && isAll}
+                          onCheckedChange={(checked) => {
+                            if (page.value === "all") {
+                              setCampForm(f => ({ ...f, target_page: checked ? "all" : "" }));
+                            } else {
+                              let pages = selectedPages.filter(p => p !== "all");
+                              if (checked) {
+                                pages.push(page.value);
+                              } else {
+                                pages = pages.filter(p => p !== page.value);
+                              }
+                              setCampForm(f => ({ ...f, target_page: pages.length ? pages.join(",") : "all" }));
+                            }
+                          }}
+                        />
+                        <span className={cn("text-sm", page.value !== "all" && isAll && "text-muted-foreground")}>{page.label}</span>
+                      </label>
+                    );
+                  })}
                 </div>
-                <div>
-                  <FieldLabel label="סוג מיקום" tooltip="היכן הבאנר יוצג בעמוד: ראש העמוד, בתוך התוכן, או בסרגל הצד." required />
-                  <Select value={campForm.placement} onValueChange={v => setCampForm(f => ({ ...f, placement: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {PLACEMENT_GROUPS.map((group, gi) => (
-                        <div key={group.group}>
-                          {gi > 0 && <div className="h-px bg-border my-1" />}
-                          <p className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider">{group.group}</p>
-                          {group.items.map(item => (
-                            <SelectItem key={item.value} value={item.value}>
-                              <div className="flex flex-col">
-                                <span>{item.label}</span>
-                                <span className="text-[10px] text-muted-foreground leading-tight">{item.desc}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </div>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              </div>
+              <div>
+                <FieldLabel label="סוג מיקום" tooltip="היכן הבאנר יוצג בעמוד: ראש העמוד, בתוך התוכן, או בסרגל הצד." required />
+                <Select value={campForm.placement} onValueChange={v => setCampForm(f => ({ ...f, placement: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {PLACEMENT_GROUPS.map((group, gi) => (
+                      <div key={group.group}>
+                        {gi > 0 && <div className="h-px bg-border my-1" />}
+                        <p className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider">{group.group}</p>
+                        {group.items.map(item => (
+                          <SelectItem key={item.value} value={item.value}>
+                            <div className="flex flex-col">
+                              <span>{item.label}</span>
+                              <span className="text-[10px] text-muted-foreground leading-tight">{item.desc}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </div>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
