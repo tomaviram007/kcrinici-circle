@@ -11,6 +11,7 @@ interface SmartAdBannerProps {
   className?: string;
   rotateInterval?: number;
   fallbackPlacements?: string[];
+  manualAd?: AdCampaign | null;
 }
 
 interface AdCampaign {
@@ -44,6 +45,7 @@ const SmartAdBanner = ({
   className,
   rotateInterval = 6000,
   fallbackPlacements = [],
+  manualAd = null,
 }: SmartAdBannerProps) => {
   // Premium banner flag for hero/premium placements
   const isPremium = placement === "hero" || placement === "premium";
