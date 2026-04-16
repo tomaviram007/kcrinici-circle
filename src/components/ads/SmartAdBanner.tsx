@@ -71,6 +71,13 @@ const SmartAdBanner = ({
   }, [placement]);
 
   useEffect(() => {
+    // If a manual ad is provided, use it directly - skip fetching
+    if (manualAd) {
+      setAds([manualAd]);
+      setCurrent(0);
+      return;
+    }
+
     let cancelled = false;
 
     const fetchAds = async () => {
@@ -113,7 +120,7 @@ const SmartAdBanner = ({
     return () => {
       cancelled = true;
     };
-  }, [placement, targetPage, slotIndex, fallbackKey]);
+  }, [placement, targetPage, slotIndex, fallbackKey, manualAd]);
 
   const trackImpression = useCallback(async (campaignId: string) => {
     if (trackedRef.current.has(campaignId)) return;
