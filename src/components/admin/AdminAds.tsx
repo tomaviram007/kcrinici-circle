@@ -138,7 +138,7 @@ const AdminAds = () => {
   const [campDialog, setCampDialog] = useState(false);
   const [campForm, setCampForm] = useState({
     advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium",
-    target_page: "all", max_appearances: 1,
+    target_page: "home", max_appearances: 1,
     alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0,
   });
    const [editingCamp, setEditingCamp] = useState<string | null>(null);
@@ -303,7 +303,7 @@ const AdminAds = () => {
     setMediaPreview(null);
     setMediaUrlInput("");
     setMediaSource("file");
-    setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 });
+    setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "home", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 });
     fetchAll();
   };
 
@@ -428,7 +428,7 @@ const AdminAds = () => {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <Button size="sm" onClick={() => { setCampDialog(true); setEditingCamp(null); setMediaPreview(null); setMediaFile(null); setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "all", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 }); }}>
+            <Button size="sm" onClick={() => { setCampDialog(true); setEditingCamp(null); setMediaPreview(null); setMediaFile(null); setCampForm({ advertiser_id: "", title: "", media_type: "image", target_url: "", placement: "premium", target_page: "home", max_appearances: 1, alt_text: "", start_date: "", end_date: "", is_active: true, price: 0, priority: 0 }); }}>
               <Plus className="h-4 w-4 ml-1" /> קמפיין חדש
             </Button>
           </div>
@@ -480,7 +480,7 @@ const AdminAds = () => {
                         <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{c.impression_count}</span>
                         <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" />{c.click_count}</span>
                         <span className="flex items-center gap-1 font-medium text-foreground/70">{PLACEMENT_LABELS[c.placement]}</span>
-                        {c.target_page !== "all" && <span className="flex items-center gap-1">עמודים: {c.target_page.split(",").map(p => PAGE_LABELS[p] || p).join(", ")}</span>}
+                        <span className="flex items-center gap-1">עמודים: {c.target_page.split(",").map(p => PAGE_LABELS[p] || p).join(", ")}</span>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />עלה: {new Date(c.start_date).toLocaleDateString("he-IL")}</span>
