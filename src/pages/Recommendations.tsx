@@ -372,7 +372,7 @@ const Recommendations = () => {
           </form>
         </DialogContent>
       </Dialog>
-      <SmartAdBanner placement="sidebar" targetPage="recommendations" className="mx-auto max-w-7xl px-5 sm:px-6" />
+      </ContentWithSidebarAds>
     </>
   );
 };
