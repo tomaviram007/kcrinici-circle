@@ -701,12 +701,23 @@ const AdminAds = () => {
                   </Select>
                 </div>
                 <div>
-                  <FieldLabel label="סוג מיקום" tooltip="פרימיום, Hero, סרגל צד, בין תכנים, חוזר ברשימה." required />
+                  <FieldLabel label="סוג מיקום" tooltip="היכן הבאנר יוצג בעמוד: ראש העמוד, בתוך התוכן, או בסרגל הצד." required />
                   <Select value={campForm.placement} onValueChange={v => setCampForm(f => ({ ...f, placement: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {Object.entries(PLACEMENT_LABELS).map(([k, v]) => (
-                        <SelectItem key={k} value={k}>{v}</SelectItem>
+                      {PLACEMENT_GROUPS.map((group, gi) => (
+                        <div key={group.group}>
+                          {gi > 0 && <div className="h-px bg-border my-1" />}
+                          <p className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider">{group.group}</p>
+                          {group.items.map(item => (
+                            <SelectItem key={item.value} value={item.value}>
+                              <div className="flex flex-col">
+                                <span>{item.label}</span>
+                                <span className="text-[10px] text-muted-foreground leading-tight">{item.desc}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </div>
                       ))}
                     </SelectContent>
                   </Select>
