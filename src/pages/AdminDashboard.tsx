@@ -217,7 +217,7 @@ const AdminMobileNav = ({ activeTab, onTabChange, hasPermission }: { activeTab: 
           <Menu className="h-4 w-4 text-muted-foreground" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-72 p-4" dir="rtl">
+      <SheetContent side="right" className="w-72 p-4 overflow-y-auto" dir="rtl">
         <p className="font-serif text-lg font-bold text-foreground mb-4">ניווט מהיר</p>
         <nav className="space-y-3">
           {filteredGroups.map((group) => (
