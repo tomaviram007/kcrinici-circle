@@ -16,7 +16,6 @@ import PollPopup from "@/components/PollPopup";
 import ScrollReveal from "@/components/ScrollReveal";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
-import SidebarAdStack from "@/components/ads/SidebarAdStack";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 
 const Index = () => {
