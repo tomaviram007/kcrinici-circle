@@ -181,10 +181,10 @@ const AdminDeals = () => {
   if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-serif text-xl font-bold text-foreground flex items-center gap-2">
-         <Tag className="h-5 w-5 text-gold" /> ניהול הטבות ({deals.length})
+    <div className="space-y-4 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <h3 className="font-serif text-lg sm:text-xl font-bold text-foreground flex items-center gap-2 flex-wrap">
+         <Tag className="h-5 w-5 text-gold shrink-0" /> ניהול הטבות ({deals.length})
           {pendingDeals.length > 0 && (
             <Badge variant="destructive" className="font-body text-xs">{pendingDeals.length} ממתינות</Badge>
           )}
@@ -199,7 +199,7 @@ const AdminDeals = () => {
               setShowForm(true);
             }
           }}
-          className="gradient-gold text-primary-foreground font-body"
+          className="gradient-gold text-primary-foreground font-body w-full sm:w-auto"
           size="sm"
         >
           {showForm && !editingId ? (
