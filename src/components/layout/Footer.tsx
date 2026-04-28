@@ -103,7 +103,11 @@ const Footer = () => {
               href="https://tomaviram.co.il"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground/80 font-medium hover:text-gold transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open("https://tomaviram.co.il", "_blank", "noopener,noreferrer");
+              }}
+              className="relative z-10 cursor-pointer text-muted-foreground/80 font-medium hover:text-gold transition-colors underline-offset-4 hover:underline"
             >
               תום אבירם
             </a>
