@@ -99,7 +99,14 @@ const Footer = () => {
           </p>
           <p className="font-body text-xs text-muted-foreground/60">
             עוצב ופותח על ידי{" "}
-            <span className="text-muted-foreground/80 font-medium">תום אבירם</span>
+            <a
+              href="https://tomaviram.co.il"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground/80 font-medium hover:text-gold transition-colors"
+            >
+              תום אבירם
+            </a>
           </p>
         </div>
       </div>
