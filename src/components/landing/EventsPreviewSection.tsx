@@ -51,13 +51,13 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
           const eventIds = evts.map(e => e.id);
           const [{ data: myRsvps }, { data: allRsvps }] = await Promise.all([
             supabase.from("event_rsvps").select("event_id, status").eq("user_id", uid).in("event_id", eventIds),
-            supabase.from("event_rsvps").select("event_id").eq("status", "attending").in("event_id", eventIds),
+            supabase.rpc("get_event_attending_counts", { _event_ids: eventIds }),
           ]);
           const rsvpMap: Record<string, string> = {};
           myRsvps?.forEach((r: any) => { rsvpMap[r.event_id] = r.status; });
           setRsvps(rsvpMap);
           const counts: Record<string, number> = {};
-          allRsvps?.forEach((r: any) => { counts[r.event_id] = (counts[r.event_id] || 0) + 1; });
+          (allRsvps as any[] | null)?.forEach((r: any) => { counts[r.event_id] = Number(r.attending_count) || 0; });
           setRsvpCounts(counts);
         }
       }
