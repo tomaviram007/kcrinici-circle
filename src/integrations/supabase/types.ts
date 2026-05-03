@@ -995,6 +995,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_event_attending_counts: {
+        Args: { _event_ids: string[] }
+        Returns: {
+          attending_count: number
+          event_id: string
+        }[]
+      }
       get_public_stats: { Args: never; Returns: Json }
       has_permission: {
         Args: { _permission: string; _user_id: string }
