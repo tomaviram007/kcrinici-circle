@@ -78,11 +78,9 @@ const Events = () => {
         setRsvps(rsvpMap);
 
         const { data: allRsvps } = await supabase
-          .from("event_rsvps")
-          .select("event_id")
-          .eq("status", "attending");
+          .rpc("get_event_attending_counts", { _event_ids: eventsData.map((e: any) => e.id) });
         const counts: Record<string, number> = {};
-        allRsvps?.forEach((r: any) => { counts[r.event_id] = (counts[r.event_id] || 0) + 1; });
+        (allRsvps as any[] | null)?.forEach((r: any) => { counts[r.event_id] = Number(r.attending_count) || 0; });
         setRsvpCounts(counts);
       }
     };
