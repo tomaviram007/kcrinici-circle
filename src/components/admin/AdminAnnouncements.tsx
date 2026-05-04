@@ -1,48 +1,83 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
-import { Trash2, Check, Clock, Plus, X, Edit } from "lucide-react";
+import { Trash2, Check, Clock, Plus, Edit } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { fireConfetti } from "@/lib/confetti";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 
+type AuthorMode = "self" | "member" | "system";
+
 const AdminAnnouncements = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [items, setItems] = useState<any[]>([]);
+  const [members, setMembers] = useState<{ user_id: string; full_name: string }[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", content: "", category: "announcement" });
+  const [form, setForm] = useState({
+    title: "",
+    content: "",
+    category: "announcement",
+    authorMode: "self" as AuthorMode,
+    selectedMemberId: "",
+  });
 
   const fetchItems = async () => {
     const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
     setItems(data || []);
   };
 
-  useEffect(() => { fetchItems(); }, []);
+  const fetchMembers = async () => {
+    const { data } = await supabase.from("profiles").select("user_id, full_name").eq("is_approved", true).eq("is_removed", false).order("full_name");
+    setMembers(data || []);
+  };
+
+  useEffect(() => { fetchItems(); fetchMembers(); }, []);
 
   const resetForm = () => {
-    setForm({ title: "", content: "", category: "announcement" });
+    setForm({ title: "", content: "", category: "announcement", authorMode: "self", selectedMemberId: "" });
     setEditingId(null);
     setShowForm(false);
   };
 
   const openNew = () => {
     setEditingId(null);
-    setForm({ title: "", content: "", category: "announcement" });
+    setForm({ title: "", content: "", category: "announcement", authorMode: "self", selectedMemberId: "" });
     setShowForm(true);
   };
 
   const openEdit = (item: any) => {
     setEditingId(item.id);
-    setForm({ title: item.title, content: item.content, category: item.category || "announcement" });
+    let mode: AuthorMode = "system";
+    let memberId = "";
+    if (!item.created_by) mode = "system";
+    else if (item.created_by === user?.id) mode = "self";
+    else { mode = "member"; memberId = item.created_by; }
+    setForm({
+      title: item.title,
+      content: item.content,
+      category: item.category || "announcement",
+      authorMode: mode,
+      selectedMemberId: memberId,
+    });
     setShowForm(true);
+  };
+
+  const resolveCreatedBy = (): string | null => {
+    if (form.authorMode === "self") return user?.id || null;
+    if (form.authorMode === "member") return form.selectedMemberId || null;
+    return null; // system
   };
 
   const handleSubmit = async () => {
@@ -50,12 +85,19 @@ const AdminAnnouncements = () => {
       toast({ title: "שגיאה", description: "יש למלא כותרת ותוכן", variant: "destructive" });
       return;
     }
+    if (form.authorMode === "member" && !form.selectedMemberId) {
+      toast({ title: "שגיאה", description: "יש לבחור גולש", variant: "destructive" });
+      return;
+    }
     setSubmitting(true);
+    const created_by = resolveCreatedBy();
+
     if (editingId) {
       const { error } = await supabase.from("announcements").update({
         title: form.title.trim(),
         content: form.content.trim(),
         category: form.category,
+        created_by,
       }).eq("id", editingId);
       setSubmitting(false);
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
@@ -67,6 +109,7 @@ const AdminAnnouncements = () => {
         content: form.content.trim(),
         category: form.category,
         is_approved: true,
+        created_by,
       });
       setSubmitting(false);
       if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
@@ -100,7 +143,6 @@ const AdminAnnouncements = () => {
 
   return (
     <div className="space-y-8">
-      {/* Create button */}
       <div>
         <Button onClick={openNew} className="gradient-gold text-primary-foreground font-body">
           <Plus className="h-4 w-4 ml-1" /> פרסם מודעה חדשה
@@ -182,15 +224,55 @@ const AdminAnnouncements = () => {
               className="font-body min-h-[120px]"
               dir="rtl"
             />
-            <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-              <SelectTrigger className="font-body w-48">
-                <SelectValue placeholder="סוג מודעה" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="announcement">הודעה</SelectItem>
-                <SelectItem value="sale">מכירה</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <Label className="font-body text-sm">סוג מודעה</Label>
+              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                <SelectTrigger className="font-body w-48 mt-1">
+                  <SelectValue placeholder="סוג מודעה" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="announcement">הודעה</SelectItem>
+                  <SelectItem value="sale">מכירה</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Author / שיוך מפרסם */}
+            <div className="rounded-lg border border-border p-3 space-y-3">
+              <Label className="font-body text-sm font-bold">מי מפרסם?</Label>
+              <RadioGroup
+                value={form.authorMode}
+                onValueChange={(v: AuthorMode) => setForm({ ...form, authorMode: v, selectedMemberId: v === "member" ? form.selectedMemberId : "" })}
+                className="flex flex-col gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="self" id="ann-self" />
+                  <Label htmlFor="ann-self" className="font-body text-sm cursor-pointer">אני (מנהל)</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="member" id="ann-member" />
+                  <Label htmlFor="ann-member" className="font-body text-sm cursor-pointer">גולש אחר</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="system" id="ann-system" />
+                  <Label htmlFor="ann-system" className="font-body text-sm cursor-pointer">מודעת מערכת</Label>
+                </div>
+              </RadioGroup>
+
+              {form.authorMode === "member" && (
+                <Select value={form.selectedMemberId} onValueChange={(v) => setForm({ ...form, selectedMemberId: v })}>
+                  <SelectTrigger className="font-body">
+                    <SelectValue placeholder="בחר גולש..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {members.map((m) => (
+                      <SelectItem key={m.user_id} value={m.user_id}>{m.full_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" onClick={resetForm} className="font-body">ביטול</Button>
               <Button onClick={handleSubmit} disabled={submitting} className="gradient-gold text-primary-foreground font-body">
