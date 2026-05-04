@@ -341,7 +341,7 @@ const AdminRecommendations = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="sm:max-w-lg" dir="rtl">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="text-xl font-serif text-foreground">
               {editingId ? "עריכת המלצה" : "פרסום המלצה כמנהל"}
