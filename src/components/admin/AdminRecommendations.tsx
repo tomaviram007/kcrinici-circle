@@ -15,7 +15,7 @@ import { Check, X, Eye, EyeOff, Edit, Trash2, Plus, Star, Search, Award } from "
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const CATEGORIES = [
-  "שיפוצים", "חשמל ואינסטלציה", "פיננסיים", "רכב", "אירועים",
+  "שיפוצים", "חשמל ואינסטלציה", "הנדימן", "פיננסיים", "רכב", "אירועים",
   "בריאות", "משפטי", "טכנולוגיה", "חינוך", "עיצוב ואדריכלות",
   "ניקיון ותחזוקה", "הובלות", "אחר",
 ];
