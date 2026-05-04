@@ -21,6 +21,7 @@ import { usePageCover } from "@/hooks/usePageCover";
 const CATEGORIES = [
   "שיפוצים",
   "חשמל ואינסטלציה",
+  "הנדימן",
   "פיננסיים",
   "רכב",
   "אירועים",
