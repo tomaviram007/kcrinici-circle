@@ -94,14 +94,12 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin,
-        },
+      const { lovable } = await import("@/integrations/lovable/index");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
       });
-      if (error) throw error;
-      // Browser will redirect to Google — no need to reset loading
+      if (result.error) throw result.error;
+      if (result.redirected) return;
     } catch (error: any) {
       toast({ title: "שגיאה בחיבור עם Google", description: error.message, variant: "destructive" });
       setGoogleLoading(false);
