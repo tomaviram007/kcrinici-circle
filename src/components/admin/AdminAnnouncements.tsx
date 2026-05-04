@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
-import { Trash2, Check, Clock, Plus, X } from "lucide-react";
+import { Trash2, Check, Clock, Plus, X, Edit } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fireConfetti } from "@/lib/confetti";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
@@ -16,6 +17,7 @@ const AdminAnnouncements = () => {
   const [items, setItems] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", content: "", category: "announcement" });
 
   const fetchItems = async () => {
@@ -25,26 +27,55 @@ const AdminAnnouncements = () => {
 
   useEffect(() => { fetchItems(); }, []);
 
-  const handleCreate = async () => {
+  const resetForm = () => {
+    setForm({ title: "", content: "", category: "announcement" });
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const openNew = () => {
+    setEditingId(null);
+    setForm({ title: "", content: "", category: "announcement" });
+    setShowForm(true);
+  };
+
+  const openEdit = (item: any) => {
+    setEditingId(item.id);
+    setForm({ title: item.title, content: item.content, category: item.category || "announcement" });
+    setShowForm(true);
+  };
+
+  const handleSubmit = async () => {
     if (!form.title.trim() || !form.content.trim()) {
       toast({ title: "שגיאה", description: "יש למלא כותרת ותוכן", variant: "destructive" });
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("announcements").insert({
-      title: form.title.trim(),
-      content: form.content.trim(),
-      category: form.category,
-      is_approved: true,
-    });
-    setSubmitting(false);
-    if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
-    toast({ title: "פורסם!", description: "המודעה פורסמה בהצלחה." });
-    fireConfetti();
-    sendTelegramNotification("new_announcement", { title: form.title, content: form.content, category: form.category });
-    logAuditAction("create", "announcement", undefined, form.title);
-    setForm({ title: "", content: "", category: "announcement" });
-    setShowForm(false);
+    if (editingId) {
+      const { error } = await supabase.from("announcements").update({
+        title: form.title.trim(),
+        content: form.content.trim(),
+        category: form.category,
+      }).eq("id", editingId);
+      setSubmitting(false);
+      if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
+      toast({ title: "המודעה עודכנה!" });
+      logAuditAction("update", "announcement", editingId, form.title);
+    } else {
+      const { error } = await supabase.from("announcements").insert({
+        title: form.title.trim(),
+        content: form.content.trim(),
+        category: form.category,
+        is_approved: true,
+      });
+      setSubmitting(false);
+      if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
+      toast({ title: "פורסם!", description: "המודעה פורסמה בהצלחה." });
+      fireConfetti();
+      sendTelegramNotification("new_announcement", { title: form.title, content: form.content, category: form.category });
+      logAuditAction("create", "announcement", undefined, form.title);
+    }
+    resetForm();
     fetchItems();
   };
 
@@ -69,46 +100,11 @@ const AdminAnnouncements = () => {
 
   return (
     <div className="space-y-8">
-      {/* Create button / form */}
+      {/* Create button */}
       <div>
-        {!showForm ? (
-          <Button onClick={() => setShowForm(true)} className="gradient-gold text-primary-foreground font-body">
-            <Plus className="h-4 w-4 ml-1" /> פרסם מודעה חדשה
-          </Button>
-        ) : (
-          <div className="rounded-lg border border-gold/30 bg-card p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-serif text-lg font-bold text-foreground">מודעה חדשה</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}><X className="h-4 w-4" /></Button>
-            </div>
-            <Input
-              placeholder="כותרת המודעה"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="font-body"
-              dir="rtl"
-            />
-            <Textarea
-              placeholder="תוכן המודעה"
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-              className="font-body min-h-[100px]"
-              dir="rtl"
-            />
-            <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-              <SelectTrigger className="font-body w-48">
-                <SelectValue placeholder="סוג מודעה" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="announcement">הודעה</SelectItem>
-                <SelectItem value="sale">מכירה</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={handleCreate} disabled={submitting} className="gradient-gold text-primary-foreground font-body">
-              {submitting ? "מפרסם..." : "פרסם מודעה"}
-            </Button>
-          </div>
-        )}
+        <Button onClick={openNew} className="gradient-gold text-primary-foreground font-body">
+          <Plus className="h-4 w-4 ml-1" /> פרסם מודעה חדשה
+        </Button>
       </div>
 
       {/* Pending */}
@@ -131,6 +127,7 @@ const AdminAnnouncements = () => {
                   <Button size="sm" onClick={() => handleApprove(item.id)} className="gradient-gold text-primary-foreground font-body">
                     <Check className="h-3.5 w-3.5 ml-1" /> אשר
                   </Button>
+                  <Button variant="ghost" size="sm" onClick={() => openEdit(item)} title="ערוך"><Edit className="h-3.5 w-3.5 text-muted-foreground" /></Button>
                   <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </div>
@@ -154,12 +151,55 @@ const AdminAnnouncements = () => {
                 <CreatorBadge entityType="announcement" entityId={item.id} createdBy={item.created_by} />
               </div>
               <div className="flex gap-1 shrink-0 mr-3">
+                <Button variant="ghost" size="sm" onClick={() => openEdit(item)} title="ערוך"><Edit className="h-3.5 w-3.5 text-muted-foreground" /></Button>
                 <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={showForm} onOpenChange={(open) => { if (!open) resetForm(); else setShowForm(true); }}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-serif text-foreground">
+              {editingId ? "עריכת מודעה" : "מודעה חדשה"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <Input
+              placeholder="כותרת המודעה"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              className="font-body"
+              dir="rtl"
+            />
+            <Textarea
+              placeholder="תוכן המודעה"
+              value={form.content}
+              onChange={(e) => setForm({ ...form, content: e.target.value })}
+              className="font-body min-h-[120px]"
+              dir="rtl"
+            />
+            <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+              <SelectTrigger className="font-body w-48">
+                <SelectValue placeholder="סוג מודעה" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="announcement">הודעה</SelectItem>
+                <SelectItem value="sale">מכירה</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" onClick={resetForm} className="font-body">ביטול</Button>
+              <Button onClick={handleSubmit} disabled={submitting} className="gradient-gold text-primary-foreground font-body">
+                {submitting ? "שומר..." : editingId ? "עדכן מודעה" : "פרסם מודעה"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
