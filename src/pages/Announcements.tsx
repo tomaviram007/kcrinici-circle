@@ -123,6 +123,7 @@ const Announcements = () => {
   const [filterMonth, setFilterMonth] = useState("all");
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<BirthdayMember[]>([]);
   const [birthdayToastShown, setBirthdayToastShown] = useState(false);
+  const [copyingGroupMsg, setCopyingGroupMsg] = useState(false);
   const birthdayRef = useRef<HTMLDivElement>(null);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
