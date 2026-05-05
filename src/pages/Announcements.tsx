@@ -489,15 +489,20 @@ const Announcements = () => {
               </p>
             </div>
           </div>
-          <a
-            href={WHATSAPP_GROUP_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={async () => {
+              const message = "היום יום הפרסום הרשמי בקבוצת שלנו הגברים של קריניצי. מוזמנים לשתף מודעות והזדמנויות!";
+              try {
+                await navigator.clipboard.writeText(message);
+                toast({ title: "ההודעה הועתקה!", description: "הדביקו אותה בקבוצה (Ctrl/Cmd+V)" });
+              } catch {}
+              window.open(WHATSAPP_GROUP_LINK, "_blank", "noopener,noreferrer");
+            }}
             className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
           >
             <MessageCircle className="h-4 w-4" />
             <span className="hidden sm:inline">לקבוצה</span>
-          </a>
+          </button>
         </div>
       )}
 
