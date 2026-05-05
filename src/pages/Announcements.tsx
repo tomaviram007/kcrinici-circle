@@ -123,6 +123,7 @@ const Announcements = () => {
   const [filterMonth, setFilterMonth] = useState("all");
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<BirthdayMember[]>([]);
   const [birthdayToastShown, setBirthdayToastShown] = useState(false);
+  const [copyingGroupMsg, setCopyingGroupMsg] = useState(false);
   const birthdayRef = useRef<HTMLDivElement>(null);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -490,18 +491,56 @@ const Announcements = () => {
             </div>
           </div>
           <button
+            disabled={copyingGroupMsg}
             onClick={async () => {
               const message = "היום יום הפרסום הרשמי בקבוצת שלנו הגברים של קריניצי. מוזמנים לשתף מודעות והזדמנויות!";
+              setCopyingGroupMsg(true);
+              let copied = false;
               try {
-                await navigator.clipboard.writeText(message);
+                if (navigator.clipboard?.writeText) {
+                  await navigator.clipboard.writeText(message);
+                  copied = true;
+                } else {
+                  // Fallback: textarea + execCommand
+                  const ta = document.createElement("textarea");
+                  ta.value = message;
+                  ta.style.position = "fixed";
+                  ta.style.opacity = "0";
+                  document.body.appendChild(ta);
+                  ta.select();
+                  copied = document.execCommand("copy");
+                  document.body.removeChild(ta);
+                }
+              } catch {
+                copied = false;
+              }
+
+              if (copied) {
                 toast({ title: "ההודעה הועתקה!", description: "הדביקו אותה בקבוצה (Ctrl/Cmd+V)" });
-              } catch {}
-              window.open(WHATSAPP_GROUP_LINK, "_blank", "noopener,noreferrer");
+                window.open(WHATSAPP_GROUP_LINK, "_blank", "noopener,noreferrer");
+              } else {
+                // Offer download fallback
+                try {
+                  const blob = new Blob([message], { type: "text/plain;charset=utf-8" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "הודעה-לקבוצה.txt";
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  toast({ title: "אין הרשאת העתקה", description: "הקובץ ירד למחשב — פתחו והדביקו בקבוצה" });
+                } catch {
+                  toast({ title: "לא ניתן להעתיק", description: "העתיקו ידנית: " + message });
+                }
+              }
+              setCopyingGroupMsg(false);
             }}
-            className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <MessageCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">לקבוצה</span>
+            <MessageCircle className={`h-4 w-4 ${copyingGroupMsg ? "animate-pulse" : ""}`} />
+            <span className="hidden sm:inline">{copyingGroupMsg ? "מעתיק..." : "לקבוצה"}</span>
           </button>
         </div>
       )}
