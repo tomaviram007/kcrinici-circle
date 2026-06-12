@@ -77,7 +77,17 @@ serve(async (req) => {
       });
     }
 
-    // User is authenticated - proceed
+    // ── Authorization: only admins or team members can dispatch ──
+    const callerId = (claimsData.claims as any).sub;
+    const { data: rolesRows } = await supabase.from('user_roles').select('role').eq('user_id', callerId);
+    if (!rolesRows || rolesRows.length === 0) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // User is authenticated and authorized - proceed
     const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
     const chatId = Deno.env.get("TELEGRAM_CHAT_ID");
 
