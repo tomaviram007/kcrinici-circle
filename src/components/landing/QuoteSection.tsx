@@ -18,78 +18,67 @@ interface QuoteSectionProps {
   page?: string;
 }
 
+const ROTATE_INTERVAL_MS = 8000;
+
 const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
-  const [quote, setQuote] = useState<QuoteData | null>(null);
+  const [quotes, setQuotes] = useState<QuoteData[]>([]);
+  const [index, setIndex] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchQuote = async () => {
+    const fetchQuotes = async () => {
       const { data } = await supabase
         .from("quotes")
         .select("id, text, author, author_title, background_image_url, section_height, font_size, page_location")
         .eq("is_active", true)
         .eq("page_location", page);
-      if (data && data.length > 0) {
-        const dayOfYear = Math.floor(
-          (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-        );
-        setQuote(data[dayOfYear % data.length]);
-      }
+      setQuotes(data || []);
+      setIndex(0);
     };
-    fetchQuote();
+    fetchQuotes();
 
     const channel = supabase
       .channel(`quotes-realtime-${page}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "quotes" }, () => { fetchQuote(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "quotes" }, () => { fetchQuotes(); })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [page]);
 
+  // Rotate between active quotes like a text banner
   useEffect(() => {
-    const handleScroll = () => {
-      if (bgRef.current) {
-        bgRef.current.style.transform = `translateY(${window.scrollY * 0.15}px)`;
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    if (quotes.length < 2) return;
+    const interval = setInterval(() => {
+      setIndex((i) => (i + 1) % quotes.length);
+    }, ROTATE_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [quotes.length]);
 
   useEffect(() => {
-    if (!ref.current || !quote) return;
+    if (!ref.current || quotes.length === 0) return;
     const el = ref.current;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-          tl.fromTo(
-            el.querySelector("blockquote"),
-            { opacity: 0, y: 30, filter: "blur(8px)" },
-            { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.1 }
-          )
-            .fromTo(
-              el.querySelector(".quote-divider"),
-              { scaleX: 0, opacity: 0 },
-              { scaleX: 1, opacity: 1, duration: 0.7 },
-              "-=0.55"
-            )
-            .fromTo(
-              el.querySelector(".quote-author"),
-              { opacity: 0, y: 14 },
-              { opacity: 1, y: 0, duration: 0.9 },
-              "-=0.45"
-            );
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.25 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [quote]);
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    tl.fromTo(
+      el.querySelector("blockquote"),
+      { opacity: 0, y: 30, filter: "blur(8px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.1 }
+    )
+      .fromTo(
+        el.querySelector(".quote-divider"),
+        { scaleX: 0, opacity: 0 },
+        { scaleX: 1, opacity: 1, duration: 0.7 },
+        "-=0.55"
+      )
+      .fromTo(
+        el.querySelector(".quote-author"),
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.9 },
+        "-=0.45"
+      );
+    return () => { tl.kill(); };
+  }, [quotes, index]);
 
+  const quote = quotes.length > 0 ? quotes[index % quotes.length] : null;
   if (!quote) return null;
 
   const height = quote.section_height || 48;
@@ -102,8 +91,7 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
       style={{ minHeight: "260px", height: `clamp(260px, ${height}vw, 90vh)` }}
     >
       <div
-        ref={bgRef}
-        className="absolute inset-0 bg-cover bg-center scale-110"
+        className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${bgImage})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80" />
