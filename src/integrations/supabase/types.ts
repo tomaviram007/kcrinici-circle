@@ -458,7 +458,9 @@ export type Database = {
           event_date: string
           id: string
           image_url: string | null
+          is_admin_only: boolean
           location: string | null
+          max_participants: number | null
           payment_link: string | null
           price: number | null
           registration_required: boolean
@@ -472,7 +474,9 @@ export type Database = {
           event_date: string
           id?: string
           image_url?: string | null
+          is_admin_only?: boolean
           location?: string | null
+          max_participants?: number | null
           payment_link?: string | null
           price?: number | null
           registration_required?: boolean
@@ -486,7 +490,9 @@ export type Database = {
           event_date?: string
           id?: string
           image_url?: string | null
+          is_admin_only?: boolean
           location?: string | null
+          max_participants?: number | null
           payment_link?: string | null
           price?: number | null
           registration_required?: boolean
@@ -1110,6 +1116,13 @@ export type Database = {
         Returns: {
           attending_count: number
           event_id: string
+        }[]
+      }
+      get_event_participant_counts: {
+        Args: { _event_ids: string[] }
+        Returns: {
+          event_id: string
+          participant_count: number
         }[]
       }
       get_public_stats: { Args: never; Returns: Json }
