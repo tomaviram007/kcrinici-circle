@@ -548,7 +548,7 @@ const Events = () => {
                             
                             if (navigator.share) {
                               try {
-                                const shareData: ShareData = { title: selectedEvent.title, text, url: eventUrl };
+                                const shareData: ShareData = { title: selectedEvent.title, text };
                                 
                                 if (selectedEvent.image_url) {
                                   try {
