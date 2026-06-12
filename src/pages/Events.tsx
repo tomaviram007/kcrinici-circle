@@ -513,11 +513,16 @@ const Events = () => {
                         const date = new Date(selectedEvent.event_date);
                         const siteUrl = window.location.origin;
                         const eventUrl = `${siteUrl}/events`;
-                        
-                        let text = `🎉 ${selectedEvent.title}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`;
-                        if (selectedEvent.location) text += `\n📍 ${selectedEvent.location}`;
-                        if (selectedEvent.price) text += `\n💰 עלות: ₪${Number(selectedEvent.price).toLocaleString()}`;
-                        if (selectedEvent.description) text += `\n\n${selectedEvent.description}`;
+
+                        let text = "";
+                        if (selectedEvent.description) {
+                          // Description usually already contains all event details — use it as-is
+                          text = `🎉 ${selectedEvent.title}\n\n${selectedEvent.description}`;
+                        } else {
+                          text = `🎉 ${selectedEvent.title}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`;
+                          if (selectedEvent.location) text += `\n📍 ${selectedEvent.location}`;
+                          if (selectedEvent.price) text += `\n💰 עלות: ₪${Number(selectedEvent.price).toLocaleString()}`;
+                        }
                         text += `\n`;
                         if (selectedEvent.payment_link) text += `\n💳 לתשלום: ${selectedEvent.payment_link}`;
                         text += `\n✅ לאישור הגעה: ${eventUrl}`;
@@ -543,7 +548,7 @@ const Events = () => {
                             
                             if (navigator.share) {
                               try {
-                                const shareData: ShareData = { title: selectedEvent.title, text, url: eventUrl };
+                                const shareData: ShareData = { title: selectedEvent.title, text };
                                 
                                 if (selectedEvent.image_url) {
                                   try {
