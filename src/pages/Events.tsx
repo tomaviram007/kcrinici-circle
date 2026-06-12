@@ -70,6 +70,14 @@ const Events = () => {
         .order("event_date", { ascending: false });
       setEvents(eventsData || []);
 
+      if (eventsData?.length) {
+        const { data: allCounts } = await supabase
+          .rpc("get_event_participant_counts", { _event_ids: eventsData.map((e: any) => e.id) });
+        const counts: Record<string, number> = {};
+        (allCounts as any[] | null)?.forEach((r: any) => { counts[r.event_id] = Number(r.participant_count) || 0; });
+        setRsvpCounts(counts);
+      }
+
       if (uid && eventsData?.length) {
         const { data: myRsvps } = await supabase
           .from("event_rsvps")
@@ -78,12 +86,6 @@ const Events = () => {
         const rsvpMap: Record<string, string> = {};
         myRsvps?.forEach((r: any) => { rsvpMap[r.event_id] = r.status; });
         setRsvps(rsvpMap);
-
-        const { data: allRsvps } = await supabase
-          .rpc("get_event_attending_counts", { _event_ids: eventsData.map((e: any) => e.id) });
-        const counts: Record<string, number> = {};
-        (allRsvps as any[] | null)?.forEach((r: any) => { counts[r.event_id] = Number(r.attending_count) || 0; });
-        setRsvpCounts(counts);
       }
     };
     init();
@@ -104,7 +106,17 @@ const Events = () => {
     }
   }, [eventId, events]);
 
+  const spotsLeft = (event: any) => {
+    if (!event.max_participants) return null;
+    return Math.max(0, event.max_participants - (rsvpCounts[event.id] || 0));
+  };
+
   const attemptRsvp = (event: any) => {
+    const left = spotsLeft(event);
+    if (left === 0 && rsvps[event.id] !== "attending") {
+      toast({ title: "האירוע מלא", description: "לא נותרו מקומות פנויים", variant: "destructive" });
+      return;
+    }
     // Guests and paid events go through the full registration + payment flow
     if (!userId || event.price) {
       setRegistrationEvent(event);
@@ -286,6 +298,9 @@ const Events = () => {
               <div className={`p-3 sm:p-5 ${event.image_url ? '' : 'pt-14'}`}>
                 <h3 className="font-serif text-base sm:text-xl font-bold text-foreground group-hover:text-gold transition-colors duration-300">
                   {event.title}
+                  {event.is_admin_only && (
+                    <span className="mr-2 align-middle rounded-full bg-destructive/10 px-2 py-0.5 font-body text-[10px] text-destructive">אדמין בלבד</span>
+                  )}
                 </h3>
                 <p className="mt-1 font-body text-sm leading-relaxed text-muted-foreground line-clamp-2">
                   {event.description}
@@ -306,6 +321,16 @@ const Events = () => {
                   <div className="flex items-center gap-2">
                     {count > 0 && (
                       <span className="font-body text-xs text-muted-foreground">{count} מגיעים</span>
+                    )}
+                    {event.max_participants && (
+                      <span className={cn(
+                        "font-body text-xs rounded-full px-2 py-0.5",
+                        (event.max_participants - count) <= 0
+                          ? "bg-destructive/10 text-destructive"
+                          : "bg-gold/10 text-gold"
+                      )}>
+                        {(event.max_participants - count) <= 0 ? "האירוע מלא" : `נותרו ${event.max_participants - count} מקומות`}
+                      </span>
                     )}
                     {isAttending && (
                       <span className="font-body text-xs text-gold flex items-center gap-1">
@@ -453,6 +478,19 @@ const Events = () => {
                       <span>{count} מאשרים הגעה</span>
                     </div>
                   )}
+                  {selectedEvent.max_participants && (
+                    <div className={cn(
+                      "flex items-center gap-2 font-body text-sm",
+                      (selectedEvent.max_participants - count) <= 0 ? "text-destructive" : "text-gold"
+                    )}>
+                      <User className="h-4 w-4 shrink-0" />
+                      <span>
+                        {(selectedEvent.max_participants - count) <= 0
+                          ? "האירוע מלא — לא נותרו מקומות"
+                          : `נותרו ${selectedEvent.max_participants - count} מקומות מתוך ${selectedEvent.max_participants}`}
+                      </span>
+                    </div>
+                  )}
                   {selectedEvent.price && (
                     <div className="flex items-center gap-2 font-body text-sm text-gold">
                       <CreditCard className="h-4 w-4 shrink-0" />
@@ -498,6 +536,7 @@ const Events = () => {
                 <div className="mt-auto flex flex-col gap-2.5 pt-4 border-t border-border">
                   <Button
                     onClick={(e) => { e.stopPropagation(); attemptRsvp(selectedEvent); }}
+                    disabled={spotsLeft(selectedEvent) === 0 && !isAttending}
                     className={cn(
                       "w-full font-body",
                       isAttending
@@ -507,7 +546,7 @@ const Events = () => {
                     variant={isAttending ? "default" : "outline"}
                   >
                     <CheckCircle className="h-4 w-4 ml-2" />
-                    {isAttending ? "מגיע ✓ — לחץ לביטול" : "אישור הגעה"}
+                    {isAttending ? "מגיע ✓ — לחץ לביטול" : spotsLeft(selectedEvent) === 0 ? "האירוע מלא" : "אישור הגעה"}
                   </Button>
                   <div className="flex gap-2">
                     <a href={googleCalendarUrl(selectedEvent)} target="_blank" rel="noopener noreferrer" className="flex-1">

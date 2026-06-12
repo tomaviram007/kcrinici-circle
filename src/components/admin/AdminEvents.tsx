@@ -18,7 +18,7 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 
-const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "" };
+const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "", max_participants: "", is_admin_only: false };
 
 interface RsvpProfile {
   full_name: string;
@@ -167,6 +167,7 @@ const AdminEvents = () => {
       image_url: form.image_url || null,
       payment_link: form.payment_link || null,
       price: form.price ? parseFloat(form.price) : null,
+      max_participants: form.max_participants ? parseInt(form.max_participants) : null,
       created_by: session?.user?.id || null,
     };
     if (editId) {
@@ -219,6 +220,8 @@ const AdminEvents = () => {
       payment_link: event.payment_link || "",
       registration_required: event.registration_required || false,
       price: event.price ? String(event.price) : "",
+      max_participants: event.max_participants ? String(event.max_participants) : "",
+      is_admin_only: event.is_admin_only || false,
     });
     setEditId(event.id);
     setShowForm(true);
@@ -393,6 +396,29 @@ const AdminEvents = () => {
             </label>
           </div>
 
+          {/* Capacity & visibility */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Input
+              placeholder="מקסימום משתתפים (ריק = ללא הגבלה)"
+              type="number"
+              min="1"
+              step="1"
+              value={form.max_participants}
+              onChange={(e) => setForm({ ...form, max_participants: e.target.value })}
+              className="bg-background"
+              dir="ltr"
+            />
+            <label className="flex items-center gap-2 font-body text-sm text-foreground cursor-pointer sm:col-span-2">
+              <input
+                type="checkbox"
+                checked={form.is_admin_only}
+                onChange={(e) => setForm({ ...form, is_admin_only: e.target.checked })}
+                className="rounded border-border"
+              />
+              אירוע בדיקה — מוצג לאדמינים בלבד 🔒
+            </label>
+          </div>
+
           <Button type="submit" className="gradient-gold text-primary-foreground font-body">{editId ? "עדכן" : "הוסף"}</Button>
         </form>
       )}
@@ -463,6 +489,19 @@ const AdminEvents = () => {
                 )}
                 {event.registration_required && (
                   <span className="rounded-md bg-accent/50 px-2 py-1 font-body text-xs text-accent-foreground">📋 הרשמה נדרשת</span>
+                )}
+                {event.max_participants && (
+                  <span className={cn(
+                    "rounded-md px-2 py-1 font-body text-xs",
+                    (attending + (registrationData[event.id] || []).length) >= event.max_participants
+                      ? "bg-destructive/10 text-destructive"
+                      : "bg-secondary text-foreground"
+                  )}>
+                    👥 מוגבל ל-{event.max_participants} משתתפים
+                  </span>
+                )}
+                {event.is_admin_only && (
+                  <span className="rounded-md bg-destructive/10 px-2 py-1 font-body text-xs text-destructive">🔒 אדמין בלבד</span>
                 )}
               </div>
             </div>

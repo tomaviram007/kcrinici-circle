@@ -154,7 +154,7 @@ serve(async (req) => {
 
       const { data: event, error: eventError } = await admin
         .from("events")
-        .select("id, title, description, event_date, location, price, payment_link")
+        .select("id, title, description, event_date, location, price, payment_link, max_participants")
         .eq("id", event_id)
         .maybeSingle();
       if (eventError || !event) {
@@ -189,6 +189,9 @@ serve(async (req) => {
       if (insertError) {
         if (insertError.code === "23505") {
           return jsonResponse({ error: "כתובת המייל הזו כבר רשומה לאירוע" }, 409);
+        }
+        if (insertError.message?.includes("EVENT_FULL")) {
+          return jsonResponse({ error: "האירוע מלא — לא נותרו מקומות פנויים" }, 409);
         }
         console.error("Insert error:", insertError);
         return jsonResponse({ error: "שגיאה בשמירת ההרשמה" }, 500);
