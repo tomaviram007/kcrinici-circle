@@ -64,6 +64,8 @@ const SecondHand = () => {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [viewItem, setViewItem] = useState<Item | null>(null);
+  const [imageUrlInput, setImageUrlInput] = useState("");
+
 
   const fetchItems = async () => {
     setLoading(true);
