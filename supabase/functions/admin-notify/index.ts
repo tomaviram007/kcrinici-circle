@@ -1,9 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+// Escape HTML special characters to prevent injection in Telegram HTML / email
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 const EVENT_LABELS: Record<string, string> = {
   new_member: "🆕 בקשת הצטרפות חדשה למועדון",
@@ -54,10 +65,10 @@ function buildFields(data: Record<string, any>): Array<{ label: string; value: s
 
 // ── Telegram ──
 function formatTelegramHTML(eventType: string, data: Record<string, any>): string {
-  const title = EVENT_LABELS[eventType] || `📌 ${eventType}`;
+  const title = EVENT_LABELS[eventType] || `📌 ${escapeHtml(eventType)}`;
   const lines = [`<b>${title}</b>`, ""];
   for (const { label, value } of buildFields(data)) {
-    lines.push(`<b>${label}:</b> ${value}`);
+    lines.push(`<b>${escapeHtml(label)}:</b> ${escapeHtml(value)}`);
   }
   return lines.join("\n");
 }
@@ -95,9 +106,9 @@ async function sendTelegram(eventType: string, data: Record<string, any>): Promi
 
 // ── Email (Resend) ──
 function formatEmailHTML(eventType: string, data: Record<string, any>): string {
-  const title = EVENT_LABELS[eventType] || eventType;
+  const title = EVENT_LABELS[eventType] || escapeHtml(eventType);
   const rows = buildFields(data)
-    .map(({ label, value }) => `<tr><td style="padding:6px 12px;font-weight:bold;color:#D4AF37;">${label}</td><td style="padding:6px 12px;color:#d9c9a8;">${value}</td></tr>`)
+    .map(({ label, value }) => `<tr><td style="padding:6px 12px;font-weight:bold;color:#D4AF37;">${escapeHtml(label)}</td><td style="padding:6px 12px;color:#d9c9a8;">${escapeHtml(value)}</td></tr>`)
     .join("");
 
   return `
@@ -184,6 +195,25 @@ serve(async (req) => {
   }
 
   try {
+    // ── Authentication: require a valid Supabase JWT ──
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { event_type, data } = await req.json();
 
     if (!event_type || !data) {

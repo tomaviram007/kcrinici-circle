@@ -44,7 +44,8 @@ interface Profile {
   linkedin_url?: string | null;
 }
 
-const PROTECTED_ADMIN_ID = "6227d1da-8f99-4b82-bd30-a3dc2e3a3885";
+// Removal protection for admin accounts is enforced by a database trigger
+// (block_profile_approval_self_edit) — no client-side UUID required.
 
 const AdminMembers = () => {
   const { toast } = useToast();
@@ -226,11 +227,7 @@ const AdminMembers = () => {
   // Remove member (mark as removed)
   const handleDelete = async () => {
     if (!deleteUser) return;
-    if (deleteUser.user_id === PROTECTED_ADMIN_ID) {
-      toast({ title: "לא ניתן", description: "לא ניתן להסיר את האדמין הראשי.", variant: "destructive" });
-      setDeleteUser(null);
-      return;
-    }
+    // Admin accounts are protected at the database level — UPDATE will be rejected.
     setDeleting(true);
     const { error } = await supabase.from("profiles").update({ is_approved: false, is_removed: true }).eq("user_id", deleteUser.user_id);
     setDeleting(false);
@@ -713,11 +710,9 @@ const PendingMemberCard = ({
       <Button size="sm" variant="ghost" onClick={() => onResetPassword(p)} className="font-body text-xs h-8 text-muted-foreground hover:text-foreground">
         <KeyRound className="h-3.5 w-3.5 ml-1" /> סיסמה
       </Button>
-      {p.user_id !== PROTECTED_ADMIN_ID && (
-        <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
-          <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
-        </Button>
-      )}
+      <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
+        <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
+      </Button>
     </div>
   </div>
 );
@@ -781,11 +776,9 @@ const MemberCard = ({
       <Button size="sm" variant="ghost" onClick={() => onResetPassword(p)} className="font-body text-xs h-8 text-muted-foreground hover:text-foreground">
         <KeyRound className="h-3.5 w-3.5 ml-1" /> סיסמה
       </Button>
-      {p.user_id !== PROTECTED_ADMIN_ID && (
-        <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
-          <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
-        </Button>
-      )}
+      <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
+        <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
+      </Button>
     </div>
   </div>
 );
