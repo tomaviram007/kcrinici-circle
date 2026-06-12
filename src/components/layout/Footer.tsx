@@ -26,7 +26,7 @@ const Footer = () => {
 
   return (
     <footer className="border-t border-border bg-card/50 backdrop-blur-sm" dir="rtl">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 py-8 sm:py-14">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 py-8 sm:py-14 pb-24 sm:pb-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
           {/* About */}
           <div className="space-y-3">
@@ -94,7 +94,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="mt-10 pt-6 border-t border-border/50 flex flex-col items-center justify-center gap-2 text-center">
           <p className="font-body text-xs text-muted-foreground">
             © {currentYear} הגברים של ק. קריניצי — כל הזכויות שמורות
           </p>
