@@ -332,6 +332,56 @@ export type Database = {
         }
         Relationships: []
       }
+      event_participant_removals: {
+        Row: {
+          email: string | null
+          event_id: string | null
+          event_title: string
+          id: string
+          participant_name: string
+          payment_status: string | null
+          phone: string | null
+          reason: string
+          removed_at: string
+          removed_by: string | null
+          source: string
+        }
+        Insert: {
+          email?: string | null
+          event_id?: string | null
+          event_title: string
+          id?: string
+          participant_name: string
+          payment_status?: string | null
+          phone?: string | null
+          reason: string
+          removed_at?: string
+          removed_by?: string | null
+          source?: string
+        }
+        Update: {
+          email?: string | null
+          event_id?: string | null
+          event_title?: string
+          id?: string
+          participant_name?: string
+          payment_status?: string | null
+          phone?: string | null
+          reason?: string
+          removed_at?: string
+          removed_by?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_participant_removals_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_registrations: {
         Row: {
           amount_paid: number | null
@@ -384,56 +434,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "event_registrations_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      event_participant_removals: {
-        Row: {
-          email: string | null
-          event_id: string | null
-          event_title: string
-          id: string
-          participant_name: string
-          payment_status: string | null
-          phone: string | null
-          reason: string
-          removed_at: string
-          removed_by: string | null
-          source: string
-        }
-        Insert: {
-          email?: string | null
-          event_id?: string | null
-          event_title: string
-          id?: string
-          participant_name: string
-          payment_status?: string | null
-          phone?: string | null
-          reason: string
-          removed_at?: string
-          removed_by?: string | null
-          source?: string
-        }
-        Update: {
-          email?: string | null
-          event_id?: string | null
-          event_title?: string
-          id?: string
-          participant_name?: string
-          payment_status?: string | null
-          phone?: string | null
-          reason?: string
-          removed_at?: string
-          removed_by?: string | null
-          source?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_participant_removals_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
