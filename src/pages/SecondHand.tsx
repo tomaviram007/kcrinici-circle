@@ -64,6 +64,8 @@ const SecondHand = () => {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [viewItem, setViewItem] = useState<Item | null>(null);
+  const [imageUrlInput, setImageUrlInput] = useState("");
+
 
   const fetchItems = async () => {
     setLoading(true);
@@ -287,9 +289,9 @@ const SecondHand = () => {
               {editId ? "עריכת פריט" : "פרסום פריט יד שנייה"}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-            {/* Right column (first in RTL) */}
-            <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-2">
+            {/* Form fields */}
+            <div className="space-y-4 lg:col-span-1">
               <div>
                 <Label className="font-body text-xs">כותרת *</Label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" />
@@ -328,8 +330,8 @@ const SecondHand = () => {
               </div>
             </div>
 
-            {/* Left column - images */}
-            <div>
+            {/* Images column */}
+            <div className="space-y-3">
               <Label className="font-body text-xs">תמונות</Label>
               {user && (
                 <SaleImageUpload
@@ -346,8 +348,103 @@ const SecondHand = () => {
                   }}
                 />
               )}
+              <div className="pt-2 border-t border-border/40">
+                <Label className="font-body text-xs">הוספת תמונה מקישור (URL)</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    value={imageUrlInput}
+                    onChange={(e) => setImageUrlInput(e.target.value)}
+                    placeholder="https://..."
+                    className="bg-background"
+                    dir="ltr"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const url = imageUrlInput.trim();
+                      if (!url) return;
+                      if (!/^https?:\/\//i.test(url)) {
+                        toast({ title: "כתובת לא תקינה", description: "הקישור חייב להתחיל ב-http(s)://", variant: "destructive" });
+                        return;
+                      }
+                      setForm({ ...form, images: [...form.images, url] });
+                      setImageUrlInput("");
+                    }}
+                    className="font-body whitespace-nowrap"
+                  >
+                    <Plus className="h-4 w-4 ml-1" /> הוסף
+                  </Button>
+                </div>
+                {form.images.length > 0 && (
+                  <div className="grid grid-cols-4 gap-2 mt-3">
+                    {form.images.map((url, i) => (
+                      <div key={i} className="relative group aspect-square rounded-md overflow-hidden border border-border">
+                        <img src={url} alt={`img-${i}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, images: form.images.filter((_, idx) => idx !== i) })}
+                          className="absolute top-1 left-1 bg-background/80 hover:bg-destructive text-foreground hover:text-destructive-foreground rounded-full p-0.5 transition-colors"
+                          aria-label="מחק תמונה"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        {i === 0 && (
+                          <span className="absolute bottom-1 right-1 bg-gold text-primary-foreground text-[9px] font-body px-1.5 py-0.5 rounded">
+                            ראשית
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Live preview */}
+            <div className="space-y-2">
+              <Label className="font-body text-xs">תצוגה מקדימה</Label>
+              <article className="rounded-2xl border border-gold/40 bg-card overflow-hidden shadow-[0_0_30px_hsl(43_72%_52%/0.1)]">
+                <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
+                  {form.images[0] ? (
+                    <img src={form.images[0]} alt="preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="h-12 w-12 text-muted-foreground/30" />
+                    </div>
+                  )}
+                  <Badge className="absolute top-2 right-2 bg-background/80 text-foreground border-border backdrop-blur-sm">
+                    {form.category}
+                  </Badge>
+                </div>
+                <div className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-serif text-lg font-bold text-foreground line-clamp-1">
+                      {form.title || "כותרת הפריט"}
+                    </h3>
+                    {form.price && (
+                      <p className="font-serif text-lg font-bold text-gold whitespace-nowrap">
+                        ₪{parseFloat(form.price).toLocaleString("he-IL")}
+                      </p>
+                    )}
+                  </div>
+                  <p className="font-body text-sm text-muted-foreground line-clamp-3 min-h-[2.5rem]">
+                    {form.description || "תיאור הפריט יופיע כאן..."}
+                  </p>
+                  <Badge variant="outline" className="font-body text-[10px] border-border/60">
+                    <Tag className="h-3 w-3 ml-1" />
+                    {conditionLabel(form.condition)}
+                  </Badge>
+                  {form.contact_phone && (
+                    <p className="font-body text-xs text-muted-foreground pt-1 flex items-center gap-1">
+                      <Phone className="h-3 w-3" /> {form.contact_phone}
+                    </p>
+                  )}
+                </div>
+              </article>
             </div>
           </div>
+
           <div className="flex gap-2 pt-4 border-t border-border mt-4">
             <Button onClick={handleSubmit} disabled={saving} className="gradient-gold text-primary-foreground font-body flex-1">
               {saving ? "שומר..." : editId ? "שמירת שינויים" : "פרסום מיידי"}
