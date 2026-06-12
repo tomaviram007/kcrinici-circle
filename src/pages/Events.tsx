@@ -10,6 +10,7 @@ import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useNavigate, useParams } from "react-router-dom";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import EventRegistrationDialog from "@/components/events/EventRegistrationDialog";
 
 import QuoteSection from "@/components/landing/QuoteSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
@@ -43,7 +44,7 @@ const Events = () => {
   const [rsvpCounts, setRsvpCounts] = useState<Record<string, number>>({});
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
-  const [paymentPopupEvent, setPaymentPopupEvent] = useState<any | null>(null);
+  const [registrationEvent, setRegistrationEvent] = useState<any | null>(null);
   const [eventCreator, setEventCreator] = useState<any | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -104,16 +105,14 @@ const Events = () => {
   }, [eventId, events]);
 
   const attemptRsvp = (event: any) => {
-    if (!userId) {
-      toast({ title: "יש להתחבר כדי לאשר הגעה", description: "מעבירים אותך להתחברות..." });
-      setTimeout(() => navigate("/auth"), 800);
+    // Guests and paid events go through the full registration + payment flow
+    if (!userId || event.price) {
+      setRegistrationEvent(event);
       return;
     }
     const current = rsvps[event.id];
     if (current === "attending") {
       cancelRsvp(event.id);
-    } else if (event.price && event.payment_link) {
-      setPaymentPopupEvent(event);
     } else {
       confirmRsvp(event.id);
     }
@@ -126,7 +125,6 @@ const Events = () => {
     setRsvpCounts((prev) => ({ ...prev, [eventId]: (prev[eventId] || 0) + 1 }));
     fireRSVP();
     toast({ title: "אישרת הגעה! 🎉" });
-    setPaymentPopupEvent(null);
   };
 
   const cancelRsvp = async (eventId: string) => {
@@ -608,43 +606,18 @@ const Events = () => {
       </DialogContent>
     </Dialog>
 
-    {/* Payment Confirmation Popup */}
-    <Dialog open={!!paymentPopupEvent} onOpenChange={() => setPaymentPopupEvent(null)}>
-      <DialogContent dir="rtl" className="max-w-sm">
-        <DialogTitle className="font-serif text-xl text-center">אישור הגעה ותשלום</DialogTitle>
-        <DialogDescription className="sr-only">פרטי תשלום לאירוע</DialogDescription>
-        {paymentPopupEvent && (
-          <div className="space-y-4 pt-2">
-            <div className="rounded-lg bg-secondary p-4 text-center space-y-1">
-              <p className="font-body text-sm text-muted-foreground">ההשתתפות באירוע</p>
-              <p className="font-serif text-lg font-bold text-foreground">{paymentPopupEvent.title}</p>
-              <p className="font-body text-sm text-muted-foreground">כרוכה בתשלום של</p>
-              <p className="font-serif text-3xl font-bold text-gold">₪{Number(paymentPopupEvent.price).toLocaleString()}</p>
-            </div>
-            <p className="font-body text-xs text-center text-muted-foreground leading-relaxed">
-              לאחר אישור ההגעה, תועבר/י לדף התשלום. ההרשמה תושלם לאחר ביצוע התשלום.
-            </p>
-            <div className="flex flex-col gap-2">
-              <Button
-                onClick={() => {
-                  confirmRsvp(paymentPopupEvent.id);
-                  if (paymentPopupEvent.payment_link) {
-                    window.open(paymentPopupEvent.payment_link, "_blank");
-                  }
-                }}
-                className="gradient-gold text-primary-foreground font-body"
-              >
-                <CreditCard className="h-4 w-4 ml-1" />
-                אישור הגעה ומעבר לתשלום
-              </Button>
-              <Button variant="ghost" onClick={() => setPaymentPopupEvent(null)} className="font-body text-muted-foreground">
-                ביטול
-              </Button>
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+    {/* Registration + Payment Flow */}
+    <EventRegistrationDialog
+      event={registrationEvent}
+      onClose={() => setRegistrationEvent(null)}
+      onRegistered={(eid) => {
+        setRsvpCounts((prev) => ({ ...prev, [eid]: (prev[eid] || 0) + 1 }));
+        if (userId) {
+          supabase.from("event_rsvps").upsert({ event_id: eid, user_id: userId, status: "attending", payment_status: "pending" }, { onConflict: "event_id,user_id" });
+          setRsvps((prev) => ({ ...prev, [eid]: "attending" }));
+        }
+      }}
+    />
     </ContentWithSidebarAds>
     <QuoteSection page="events" />
     </>
