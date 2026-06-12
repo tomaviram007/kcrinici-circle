@@ -336,7 +336,7 @@ const Events = () => {
     </div>
 
     {/* Event Detail Popup */}
-    <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
+    <Dialog open={!!selectedEvent} onOpenChange={(open) => { if (!open) { setSelectedEvent(null); if (eventId) navigate("/events", { replace: true }); } }}>
       <DialogContent className="max-w-[95vw] sm:max-w-6xl max-h-[90vh] overflow-y-auto p-0 gap-0" dir="rtl">
         <DialogTitle className="sr-only">פרטי אירוע</DialogTitle>
         <DialogDescription className="sr-only">מידע מפורט על האירוע</DialogDescription>
