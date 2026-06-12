@@ -341,11 +341,11 @@ const Announcements = () => {
             <div key={lineIdx} className="border-b border-blue-200/30" style={{ height: "22px" }} />
           ))}
         </div>
-        <div className="relative z-[1] flex-1">
+        <div className="relative z-[1] flex-1 flex flex-col items-center justify-center text-center">
           <h3 className="font-serif text-lg font-bold text-gray-800 leading-tight mb-2">{item.title}</h3>
           <p className="font-body text-sm text-gray-600 leading-relaxed whitespace-pre-line">{item.content}</p>
         </div>
-        <div className="relative z-[1] mt-3">
+        <div className="relative z-[1] mt-3 text-center">
           <span className="font-body text-[11px] text-gray-400">
             {new Date(item.created_at).toLocaleDateString("he-IL")}
             {item.created_by && creatorProfiles[item.created_by] && (
@@ -681,12 +681,12 @@ const Announcements = () => {
       )}
 
       {/* ==================== SECTION 1: ANNOUNCEMENTS ==================== */}
-      <div className="mb-6 sm:mb-8">
-        <div className="flex items-baseline gap-3 mb-2">
+      <div className="mb-6 sm:mb-8 mx-auto max-w-md text-center flex flex-col items-center">
+        <div className="flex items-baseline justify-center gap-3 mb-2">
           <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">01</span>
           <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">הודעות</span>
         </div>
-        <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl flex items-center gap-2">
+        <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl flex items-center justify-center gap-2">
           <Megaphone className="h-6 w-6 text-gold" />
           לוח הודעות
         </h2>
@@ -717,12 +717,12 @@ const Announcements = () => {
       <Separator className="my-12" />
 
       {/* ==================== SECTION 2: SALES ==================== */}
-      <div className="mb-6 sm:mb-8">
-        <div className="flex items-baseline gap-3 mb-2">
+      <div className="mb-6 sm:mb-8 mx-auto max-w-md text-center flex flex-col items-center">
+        <div className="flex items-baseline justify-center gap-3 mb-2">
           <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">02</span>
           <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">שוק</span>
         </div>
-        <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl flex items-center gap-2">
+        <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl flex items-center justify-center gap-2">
           <ShoppingBag className="h-6 w-6 text-gold" />
           לוח מכירות
         </h2>
