@@ -54,6 +54,7 @@ const Events = () => {
   const { fireRSVP } = useConfetti();
   const { hasPermission } = useUserPermissions();
   const navigate = useNavigate();
+  const { id: eventId } = useParams();
   const canEditEvents = hasPermission("manage_events");
 
   useEffect(() => {
