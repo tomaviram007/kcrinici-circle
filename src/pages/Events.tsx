@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 
@@ -54,6 +54,7 @@ const Events = () => {
   const { fireRSVP } = useConfetti();
   const { hasPermission } = useUserPermissions();
   const navigate = useNavigate();
+  const { id: eventId } = useParams();
   const canEditEvents = hasPermission("manage_events");
 
   useEffect(() => {
@@ -93,6 +94,14 @@ const Events = () => {
       gsap.fromTo(cards, { opacity: 0, scale: 0.92, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.7, stagger: 0.1, ease: "power3.out" });
     }
   }, [events]);
+
+  // Deep-link: auto-open popup when URL contains /events/:id
+  useEffect(() => {
+    if (eventId && events.length > 0) {
+      const event = events.find((e) => e.id === eventId);
+      if (event) openEventPopup(event);
+    }
+  }, [eventId, events]);
 
   const attemptRsvp = (event: any) => {
     if (!userId) {
@@ -327,7 +336,7 @@ const Events = () => {
     </div>
 
     {/* Event Detail Popup */}
-    <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
+    <Dialog open={!!selectedEvent} onOpenChange={(open) => { if (!open) { setSelectedEvent(null); if (eventId) navigate("/events", { replace: true }); } }}>
       <DialogContent className="max-w-[95vw] sm:max-w-6xl max-h-[90vh] overflow-y-auto p-0 gap-0" dir="rtl">
         <DialogTitle className="sr-only">פרטי אירוע</DialogTitle>
         <DialogDescription className="sr-only">מידע מפורט על האירוע</DialogDescription>
@@ -513,7 +522,7 @@ const Events = () => {
                       const buildShareText = () => {
                         const date = new Date(selectedEvent.event_date);
                         const siteUrl = window.location.origin;
-                        const eventUrl = `${siteUrl}/events`;
+                        const eventUrl = `${siteUrl}/events/${selectedEvent.id}`;
 
                         let text = "";
                         if (selectedEvent.description) {
