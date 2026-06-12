@@ -84,7 +84,7 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
   return (
     <section
-      className="relative overflow-hidden flex items-center justify-center py-16 sm:py-0"
+      className="relative overflow-hidden"
       style={{ minHeight: "260px", height: `clamp(260px, ${height}vw, 90vh)` }}
     >
       <div
@@ -96,10 +96,10 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
       <div
         ref={ref}
-        className="relative z-10 flex flex-col items-center justify-center px-6 sm:px-12 text-center max-w-4xl mx-auto"
+        className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 sm:px-12 text-center"
       >
         <blockquote
-          className="font-serif font-bold text-white leading-snug opacity-0 drop-shadow-lg"
+          className="font-serif font-bold text-white leading-snug opacity-0 drop-shadow-lg max-w-4xl mx-auto"
           style={{ fontSize: `clamp(18px, 3vw, ${Math.min(fontSize, 48)}px)` }}
         >
           {quote.text}
@@ -109,6 +109,7 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
         </p>
       </div>
     </section>
+
   );
 };
 
