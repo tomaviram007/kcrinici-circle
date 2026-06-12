@@ -710,11 +710,9 @@ const PendingMemberCard = ({
       <Button size="sm" variant="ghost" onClick={() => onResetPassword(p)} className="font-body text-xs h-8 text-muted-foreground hover:text-foreground">
         <KeyRound className="h-3.5 w-3.5 ml-1" /> סיסמה
       </Button>
-      {(
-        <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
-          <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
-        </Button>
-      )}
+      <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
+        <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
+      </Button>
     </div>
   </div>
 );
@@ -778,11 +776,9 @@ const MemberCard = ({
       <Button size="sm" variant="ghost" onClick={() => onResetPassword(p)} className="font-body text-xs h-8 text-muted-foreground hover:text-foreground">
         <KeyRound className="h-3.5 w-3.5 ml-1" /> סיסמה
       </Button>
-      {(
-        <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
-          <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
-        </Button>
-      )}
+      <Button size="sm" variant="ghost" onClick={() => onDelete(p)} className="font-body text-xs h-8 text-destructive hover:text-destructive">
+        <Trash2 className="h-3.5 w-3.5 ml-1" /> הסר
+      </Button>
     </div>
   </div>
 );
