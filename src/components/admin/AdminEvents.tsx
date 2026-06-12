@@ -70,6 +70,11 @@ const AdminEvents = () => {
   const [sendingReminders, setSendingReminders] = useState(false);
   const [registrationData, setRegistrationData] = useState<Record<string, Registration[]>>({});
   const [regFilter, setRegFilter] = useState("all");
+  const [removalsData, setRemovalsData] = useState<Record<string, any[]>>({});
+  const [removeTarget, setRemoveTarget] = useState<{ type: "registration" | "rsvp"; name: string; data: any; event: any } | null>(null);
+  const [confirmName, setConfirmName] = useState("");
+  const [removeReason, setRemoveReason] = useState("לא שילם");
+  const [removeNote, setRemoveNote] = useState("");
 
   const fetchEvents = async () => {
     const { data } = await supabase.from("events").select("*").order("event_date", { ascending: true });
@@ -119,7 +124,58 @@ const AdminEvents = () => {
         regGrouped[reg.event_id].push(reg);
       }
       setRegistrationData(regGrouped);
+
+      const { data: removals } = await supabase
+        .from("event_participant_removals")
+        .select("*")
+        .in("event_id", eventIds)
+        .order("removed_at", { ascending: false });
+      const remGrouped: Record<string, any[]> = {};
+      for (const rem of removals || []) {
+        if (!remGrouped[rem.event_id!]) remGrouped[rem.event_id!] = [];
+        remGrouped[rem.event_id!].push(rem);
+      }
+      setRemovalsData(remGrouped);
     }
+  };
+
+  const handleRemoveParticipant = async () => {
+    if (!removeTarget) return;
+    if (confirmName.trim() !== removeTarget.name.trim()) {
+      toast({ title: "השם שהוקלד אינו תואם", description: "יש להקליד את שם המשתתף במדויק כדי לאשר מחיקה", variant: "destructive" });
+      return;
+    }
+    const reason = removeReason === "אחר" && removeNote.trim() ? `אחר: ${removeNote.trim()}` : removeReason;
+    const { data: { session } } = await supabase.auth.getSession();
+
+    const { error: logError } = await supabase.from("event_participant_removals").insert({
+      event_id: removeTarget.event.id,
+      event_title: removeTarget.event.title,
+      participant_name: removeTarget.name,
+      email: removeTarget.type === "registration" ? removeTarget.data.email : null,
+      phone: removeTarget.type === "registration" ? removeTarget.data.phone : null,
+      source: removeTarget.type,
+      payment_status: removeTarget.data.payment_status || null,
+      reason,
+      removed_by: session?.user?.id || null,
+    });
+    if (logError) {
+      toast({ title: "שגיאה בתיעוד ההסרה", description: logError.message, variant: "destructive" });
+      return;
+    }
+
+    if (removeTarget.type === "registration") {
+      await supabase.from("event_registrations").delete().eq("id", removeTarget.data.id);
+    } else {
+      await supabase.from("event_rsvps").delete().eq("event_id", removeTarget.event.id).eq("user_id", removeTarget.data.user_id);
+    }
+    logAuditAction("delete", "event", removeTarget.event.id, `הסרת משתתף: ${removeTarget.name} (${reason})`);
+    toast({ title: "המשתתף הוסר", description: `${removeTarget.name} — ${reason}` });
+    setRemoveTarget(null);
+    setConfirmName("");
+    setRemoveNote("");
+    setRemoveReason("לא שילם");
+    fetchEvents();
   };
 
   useEffect(() => { fetchEvents(); }, []);
@@ -566,9 +622,20 @@ const AdminEvents = () => {
               URL.revokeObjectURL(url);
             };
 
+            const eventDateStr = rsvpDialogEvent.event_date
+              ? new Date(rsvpDialogEvent.event_date).toLocaleString("he-IL", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
+              : "";
+
             const exportRegistrationsCsv = () => {
-              const headers = ["שם מלא", "מייל", "טלפון", "אישור הגעה", "סטטוס תשלום", "תאריך הרשמה", "סכום ששולם", "מספר עסקה"];
+              const headers = [
+                "שם האירוע", "תאריך האירוע", "מיקום", "מחיר האירוע",
+                "שם מלא", "מייל", "טלפון", "אישור הגעה", "סטטוס תשלום", "תאריך הרשמה", "סכום ששולם", "מספר עסקה",
+              ];
               const rows = filteredRegs.map(r => [
+                rsvpDialogEvent.title,
+                eventDateStr,
+                rsvpDialogEvent.location || "",
+                rsvpDialogEvent.price != null ? rsvpDialogEvent.price : "",
                 `${r.first_name} ${r.last_name}`,
                 r.email,
                 r.phone,
@@ -579,6 +646,21 @@ const AdminEvents = () => {
                 r.transaction_ref || "",
               ]);
               csvDownload(headers, rows, `הרשמות_${rsvpDialogEvent.title.replace(/\s+/g, "_")}.csv`);
+            };
+
+            const exportRemovalsCsv = () => {
+              const removals = removalsData[rsvpDialogEvent.id] || [];
+              const headers = ["שם האירוע", "שם המשתתף", "מייל", "טלפון", "סיבת הסרה", "סטטוס תשלום", "תאריך הסרה"];
+              const rows = removals.map((r: any) => [
+                r.event_title,
+                r.participant_name,
+                r.email || "",
+                r.phone || "",
+                r.reason,
+                r.payment_status ? (PAYMENT_LABELS[r.payment_status] || r.payment_status) : "",
+                new Date(r.removed_at).toLocaleString("he-IL"),
+              ]);
+              csvDownload(headers, rows, `הוסרו_${rsvpDialogEvent.title.replace(/\s+/g, "_")}.csv`);
             };
 
             const exportCsv = () => {
@@ -659,6 +741,14 @@ const AdminEvents = () => {
                         <div key={r.id} className="rounded-md border border-border bg-card p-2.5 space-y-1">
                           <div className="flex items-center justify-between gap-2">
                             <p className="font-body text-sm font-medium text-foreground">{r.first_name} {r.last_name}</p>
+                            <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setRemoveTarget({ type: "registration", name: `${r.first_name} ${r.last_name}`, data: r, event: rsvpDialogEvent })}
+                              className="rounded-full p-1 text-destructive hover:bg-destructive/10 transition-colors"
+                              title="הסרת משתתף"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
                             <button
                               onClick={() => toggleRegPayment(r)}
                               className={cn(
@@ -672,6 +762,7 @@ const AdminEvents = () => {
                               <CreditCard className="h-3 w-3" />
                               {PAYMENT_LABELS[r.payment_status] || r.payment_status}
                             </button>
+                            </div>
                           </div>
                           <p className="font-body text-xs text-muted-foreground" dir="ltr" style={{ textAlign: "right" }}>{r.email} · {r.phone}</p>
                           <div className="flex items-center gap-2 flex-wrap font-body text-[10px] text-muted-foreground/70">
@@ -725,12 +816,47 @@ const AdminEvents = () => {
                               </button>
                             )}
                             <span className="rounded-full bg-primary/10 px-2 py-0.5 font-body text-xs text-primary">מגיע/ה</span>
+                            <button
+                              onClick={() => setRemoveTarget({ type: "rsvp", name: r.full_name, data: r, event: rsvpDialogEvent })}
+                              className="rounded-full p-1 text-destructive hover:bg-destructive/10 transition-colors"
+                              title="הסרת משתתף"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
+
+                {/* Removed participants log */}
+                {(removalsData[rsvpDialogEvent.id] || []).length > 0 && (
+                  <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-body text-sm font-semibold text-foreground flex items-center gap-1">
+                        <XCircle className="h-4 w-4 text-destructive" /> משתתפים שהוסרו ({(removalsData[rsvpDialogEvent.id] || []).length})
+                      </h4>
+                      <Button variant="outline" size="sm" onClick={exportRemovalsCsv} className="h-7 font-body border-border text-foreground text-xs">
+                        <Download className="h-3 w-3 ml-1" /> ייצוא
+                      </Button>
+                    </div>
+                    <div className="space-y-1.5">
+                      {(removalsData[rsvpDialogEvent.id] || []).map((rem: any) => (
+                        <div key={rem.id} className="rounded-md border border-border bg-card p-2.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-body text-sm font-medium text-foreground">{rem.participant_name}</p>
+                            <span className="rounded-full bg-destructive/10 px-2 py-0.5 font-body text-xs text-destructive">{rem.reason}</span>
+                          </div>
+                          <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5">
+                            {rem.email && <span dir="ltr">{rem.email} · </span>}
+                            הוסר ב-{new Date(rem.removed_at).toLocaleString("he-IL")}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Declined */}
                 {declinedList.length > 0 && (
@@ -757,6 +883,66 @@ const AdminEvents = () => {
               </div>
             );
           })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove participant confirmation */}
+      <Dialog open={!!removeTarget} onOpenChange={(open) => { if (!open) { setRemoveTarget(null); setConfirmName(""); setRemoveNote(""); } }}>
+        <DialogContent dir="rtl" className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl text-destructive">הסרת משתתף</DialogTitle>
+            <DialogDescription className="font-body text-sm">
+              פעולה זו תסיר את <span className="font-bold text-foreground">{removeTarget?.name}</span> מהאירוע
+              "{removeTarget?.event?.title}" ותתועד ביומן ההסרות.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <div>
+              <label className="font-body text-xs text-muted-foreground mb-1 block">סיבת ההסרה</label>
+              <Select value={removeReason} onValueChange={setRemoveReason}>
+                <SelectTrigger className="bg-background font-body"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="לא שילם">לא שילם</SelectItem>
+                  <SelectItem value="הבריז">הבריז / לא הגיע</SelectItem>
+                  <SelectItem value="סיבה אישית">לא יכול מסיבה אישית</SelectItem>
+                  <SelectItem value="אחר">אחר</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {removeReason === "אחר" && (
+              <Input
+                placeholder="פרט את הסיבה"
+                value={removeNote}
+                onChange={(e) => setRemoveNote(e.target.value)}
+                className="bg-background font-body"
+              />
+            )}
+            <div>
+              <label className="font-body text-xs text-muted-foreground mb-1 block">
+                לאישור המחיקה, הקלד את שם המשתתף: <span className="font-bold text-foreground">{removeTarget?.name}</span>
+              </label>
+              <Input
+                placeholder="הקלד את השם במדויק"
+                value={confirmName}
+                onChange={(e) => setConfirmName(e.target.value)}
+                className="bg-background font-body"
+                autoComplete="off"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleRemoveParticipant}
+                disabled={confirmName.trim() !== (removeTarget?.name || "").trim()}
+                variant="destructive"
+                className="flex-1 font-body"
+              >
+                <Trash2 className="h-4 w-4 ml-1" /> הסר משתתף
+              </Button>
+              <Button variant="ghost" onClick={() => { setRemoveTarget(null); setConfirmName(""); setRemoveNote(""); }} className="font-body text-muted-foreground">
+                ביטול
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
