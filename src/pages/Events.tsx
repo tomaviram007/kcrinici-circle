@@ -522,7 +522,7 @@ const Events = () => {
                       const buildShareText = () => {
                         const date = new Date(selectedEvent.event_date);
                         const siteUrl = window.location.origin;
-                        const eventUrl = `${siteUrl}/events`;
+                        const eventUrl = `${siteUrl}/events/${selectedEvent.id}`;
 
                         let text = "";
                         if (selectedEvent.description) {
