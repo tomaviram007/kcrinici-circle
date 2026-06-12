@@ -96,6 +96,7 @@ const Header = () => {
     { to: "/gallery", label: "גלריה", protected: false },
     { to: "/recommendations", label: "אנשי מקצוע", protected: false },
     { to: "/deals", label: "הטבות", protected: false },
+    { to: "/secondhand", label: "יד שנייה", protected: false },
     ...((isAdmin || isTeamMember) ? [{ to: "/admin", label: "שולחן המנהל", protected: true }] : []),
   ];
 
