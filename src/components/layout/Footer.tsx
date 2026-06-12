@@ -94,7 +94,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="mt-10 pt-6 border-t border-border/50 flex flex-col items-center justify-center gap-2 text-center">
           <p className="font-body text-xs text-muted-foreground">
             © {currentYear} הגברים של ק. קריניצי — כל הזכויות שמורות
           </p>
