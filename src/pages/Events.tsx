@@ -95,6 +95,14 @@ const Events = () => {
     }
   }, [events]);
 
+  // Deep-link: auto-open popup when URL contains /events/:id
+  useEffect(() => {
+    if (eventId && events.length > 0) {
+      const event = events.find((e) => e.id === eventId);
+      if (event) openEventPopup(event);
+    }
+  }, [eventId, events]);
+
   const attemptRsvp = (event: any) => {
     if (!userId) {
       toast({ title: "יש להתחבר כדי לאשר הגעה", description: "מעבירים אותך להתחברות..." });
