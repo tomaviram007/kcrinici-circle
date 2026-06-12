@@ -96,7 +96,8 @@ const Events = () => {
 
   const attemptRsvp = (event: any) => {
     if (!userId) {
-      toast({ title: "יש להתחבר כדי לאשר הגעה", variant: "destructive" });
+      toast({ title: "יש להתחבר כדי לאשר הגעה", description: "מעבירים אותך להתחברות..." });
+      setTimeout(() => navigate("/auth"), 800);
       return;
     }
     const current = rsvps[event.id];
