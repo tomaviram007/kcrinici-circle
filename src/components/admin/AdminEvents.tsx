@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Edit2, CalendarIcon, ImageIcon, MapPin, Users, ChevronDown, ChevronUp, Bell, Send, Link2, CreditCard, CheckCircle2, XCircle, Clock, Download } from "lucide-react";
@@ -28,6 +29,34 @@ interface RsvpProfile {
   confirmed_at: string;
 }
 
+interface Registration {
+  id: string;
+  event_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  attendance_confirmed: boolean;
+  payment_status: string;
+  amount_paid: number | null;
+  transaction_ref: string | null;
+  created_at: string;
+}
+
+const PAYMENT_LABELS: Record<string, string> = {
+  paid: "שולם",
+  pending: "תשלום ממתין",
+  unpaid: "לא שולם",
+  not_required: "ללא תשלום",
+};
+
+const NEXT_PAYMENT_STATUS: Record<string, string> = {
+  pending: "paid",
+  unpaid: "paid",
+  not_required: "paid",
+  paid: "unpaid",
+};
+
 const AdminEvents = () => {
   const { toast } = useToast();
   const [events, setEvents] = useState<any[]>([]);
@@ -39,6 +68,8 @@ const AdminEvents = () => {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [rsvpDialogEvent, setRsvpDialogEvent] = useState<any | null>(null);
   const [sendingReminders, setSendingReminders] = useState(false);
+  const [registrationData, setRegistrationData] = useState<Record<string, Registration[]>>({});
+  const [regFilter, setRegFilter] = useState("all");
 
   const fetchEvents = async () => {
     const { data } = await supabase.from("events").select("*").order("event_date", { ascending: true });
@@ -76,6 +107,18 @@ const AdminEvents = () => {
         }
         setRsvpData(grouped);
       }
+
+      const { data: registrations } = await supabase
+        .from("event_registrations")
+        .select("*")
+        .in("event_id", eventIds)
+        .order("created_at", { ascending: false });
+      const regGrouped: Record<string, Registration[]> = {};
+      for (const reg of (registrations as Registration[] | null) || []) {
+        if (!regGrouped[reg.event_id]) regGrouped[reg.event_id] = [];
+        regGrouped[reg.event_id].push(reg);
+      }
+      setRegistrationData(regGrouped);
     }
   };
 
@@ -395,12 +438,12 @@ const AdminEvents = () => {
               {/* RSVP summary */}
               <div className="flex items-center gap-2 flex-wrap">
                 <button
-                  onClick={() => rsvps.length > 0 && setRsvpDialogEvent(event)}
+                  onClick={() => (rsvps.length > 0 || (registrationData[event.id] || []).length > 0) && setRsvpDialogEvent(event)}
                   className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 font-body text-xs text-foreground hover:bg-secondary/80 transition-colors"
                 >
                   <Users className="h-3.5 w-3.5 text-gold" />
-                  {attending} אישרו הגעה
-                  {rsvps.length > 0 && <ChevronDown className="h-3 w-3 text-muted-foreground" />}
+                  {attending} אישרו הגעה · {(registrationData[event.id] || []).length} נרשמו בטופס
+                  {(rsvps.length > 0 || (registrationData[event.id] || []).length > 0) && <ChevronDown className="h-3 w-3 text-muted-foreground" />}
                 </button>
                 {event.payment_link && (
                   <>
@@ -449,6 +492,54 @@ const AdminEvents = () => {
                 .eq("event_id", rsvpDialogEvent.id)
                 .eq("user_id", userId);
               fetchEvents();
+            };
+
+            const allRegs = registrationData[rsvpDialogEvent.id] || [];
+            const filteredRegs = allRegs.filter(r => {
+              if (regFilter === "paid") return r.payment_status === "paid";
+              if (regFilter === "unpaid") return r.payment_status === "unpaid" || r.payment_status === "pending";
+              if (regFilter === "confirmed") return r.attendance_confirmed;
+              return true;
+            });
+
+            const toggleRegPayment = async (reg: Registration) => {
+              const newStatus = NEXT_PAYMENT_STATUS[reg.payment_status] || "paid";
+              await supabase
+                .from("event_registrations")
+                .update({
+                  payment_status: newStatus,
+                  amount_paid: newStatus === "paid" ? (rsvpDialogEvent.price ?? reg.amount_paid) : null,
+                })
+                .eq("id", reg.id);
+              fetchEvents();
+            };
+
+            const csvDownload = (headers: string[], rows: (string | number)[][], filename: string) => {
+              const bom = "﻿";
+              const escapeCell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+              const csv = bom + [headers, ...rows].map(r => r.map(escapeCell).join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = filename;
+              a.click();
+              URL.revokeObjectURL(url);
+            };
+
+            const exportRegistrationsCsv = () => {
+              const headers = ["שם מלא", "מייל", "טלפון", "אישור הגעה", "סטטוס תשלום", "תאריך הרשמה", "סכום ששולם", "מספר עסקה"];
+              const rows = filteredRegs.map(r => [
+                `${r.first_name} ${r.last_name}`,
+                r.email,
+                r.phone,
+                r.attendance_confirmed ? "כן" : "לא",
+                PAYMENT_LABELS[r.payment_status] || r.payment_status,
+                new Date(r.created_at).toLocaleString("he-IL"),
+                r.amount_paid != null ? r.amount_paid : "",
+                r.transaction_ref || "",
+              ]);
+              csvDownload(headers, rows, `הרשמות_${rsvpDialogEvent.title.replace(/\s+/g, "_")}.csv`);
             };
 
             const exportCsv = () => {
@@ -501,6 +592,65 @@ const AdminEvents = () => {
                   <Download className="h-4 w-4 ml-1" />
                   ייצוא CSV
                 </Button>
+
+                {/* Form registrations (guests + members) */}
+                {allRegs.length > 0 && (
+                  <div className="rounded-lg border border-gold/20 bg-secondary/30 p-3 space-y-3">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <h4 className="font-body text-sm font-semibold text-foreground flex items-center gap-1">
+                        <Users className="h-4 w-4 text-gold" /> נרשמים בטופס ({filteredRegs.length}/{allRegs.length})
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <Select value={regFilter} onValueChange={setRegFilter}>
+                          <SelectTrigger className="bg-background font-body h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">הכל</SelectItem>
+                            <SelectItem value="paid">שילמו</SelectItem>
+                            <SelectItem value="unpaid">לא שילמו</SelectItem>
+                            <SelectItem value="confirmed">אישרו הגעה</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="sm" onClick={exportRegistrationsCsv} className="h-8 font-body border-border text-foreground text-xs">
+                          <Download className="h-3.5 w-3.5 ml-1" /> ייצוא
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      {filteredRegs.map((r) => (
+                        <div key={r.id} className="rounded-md border border-border bg-card p-2.5 space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-body text-sm font-medium text-foreground">{r.first_name} {r.last_name}</p>
+                            <button
+                              onClick={() => toggleRegPayment(r)}
+                              className={cn(
+                                "flex items-center gap-1 rounded-full px-2.5 py-1 font-body text-xs transition-colors cursor-pointer",
+                                r.payment_status === "paid" && "bg-primary/10 text-primary",
+                                r.payment_status === "pending" && "bg-gold/10 text-gold",
+                                (r.payment_status === "unpaid" || r.payment_status === "not_required") && "bg-destructive/10 text-destructive",
+                              )}
+                              title="לחיצה לשינוי סטטוס תשלום"
+                            >
+                              <CreditCard className="h-3 w-3" />
+                              {PAYMENT_LABELS[r.payment_status] || r.payment_status}
+                            </button>
+                          </div>
+                          <p className="font-body text-xs text-muted-foreground" dir="ltr" style={{ textAlign: "right" }}>{r.email} · {r.phone}</p>
+                          <div className="flex items-center gap-2 flex-wrap font-body text-[10px] text-muted-foreground/70">
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-2.5 w-2.5" /> {new Date(r.created_at).toLocaleString("he-IL")}
+                            </span>
+                            <span>{r.attendance_confirmed ? "✓ אישר/ה הגעה" : "✗ לא אישר/ה הגעה"}</span>
+                            {r.amount_paid != null && <span>שולם: ₪{Number(r.amount_paid).toLocaleString()}</span>}
+                            {r.transaction_ref && <span dir="ltr">אסמכתא: {r.transaction_ref}</span>}
+                          </div>
+                        </div>
+                      ))}
+                      {filteredRegs.length === 0 && (
+                        <p className="font-body text-xs text-muted-foreground text-center py-2">אין נרשמים בסינון הנוכחי</p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Attending */}
                 <div>
