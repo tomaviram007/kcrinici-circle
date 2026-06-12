@@ -415,65 +415,6 @@ export type Database = {
         }
         Relationships: []
       }
-      event_registrations: {
-        Row: {
-          amount_paid: number | null
-          attendance_confirmed: boolean
-          confirm_token: string
-          created_at: string
-          email: string
-          event_id: string
-          first_name: string
-          id: string
-          last_name: string
-          payment_status: string
-          phone: string
-          transaction_ref: string | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          amount_paid?: number | null
-          attendance_confirmed?: boolean
-          confirm_token?: string
-          created_at?: string
-          email: string
-          event_id: string
-          first_name: string
-          id?: string
-          last_name: string
-          payment_status?: string
-          phone: string
-          transaction_ref?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          amount_paid?: number | null
-          attendance_confirmed?: boolean
-          confirm_token?: string
-          created_at?: string
-          email?: string
-          event_id?: string
-          first_name?: string
-          id?: string
-          last_name?: string
-          payment_status?: string
-          phone?: string
-          transaction_ref?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_registrations_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       event_rsvps: {
         Row: {
           created_at: string
@@ -517,7 +458,9 @@ export type Database = {
           event_date: string
           id: string
           image_url: string | null
+          is_admin_only: boolean
           location: string | null
+          max_participants: number | null
           payment_link: string | null
           price: number | null
           registration_required: boolean
@@ -531,7 +474,9 @@ export type Database = {
           event_date: string
           id?: string
           image_url?: string | null
+          is_admin_only?: boolean
           location?: string | null
+          max_participants?: number | null
           payment_link?: string | null
           price?: number | null
           registration_required?: boolean
@@ -545,7 +490,9 @@ export type Database = {
           event_date?: string
           id?: string
           image_url?: string | null
+          is_admin_only?: boolean
           location?: string | null
+          max_participants?: number | null
           payment_link?: string | null
           price?: number | null
           registration_required?: boolean
@@ -1169,6 +1116,13 @@ export type Database = {
         Returns: {
           attending_count: number
           event_id: string
+        }[]
+      }
+      get_event_participant_counts: {
+        Args: { _event_ids: string[] }
+        Returns: {
+          event_id: string
+          participant_count: number
         }[]
       }
       get_public_stats: { Args: never; Returns: Json }
