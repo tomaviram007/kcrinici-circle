@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -18,6 +18,7 @@ import AdminRecommendations from "@/components/admin/AdminRecommendations";
 import AdminCovers from "@/components/admin/AdminCovers";
 import AdminDeals from "@/components/admin/AdminDeals";
 import AdminAds from "@/components/admin/AdminAds";
+import AdminSecondHand from "@/components/admin/AdminSecondHand";
 import AdminMembers from "@/components/admin/AdminMembers";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminBirthdayWidget from "@/components/admin/AdminBirthdayWidget";
@@ -45,6 +46,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   events: "manage_events",
   recommendations: "manage_recommendations",
   deals: "manage_deals",
+  secondhand: "manage_deals",
   gallery: "manage_gallery",
   polls: "manage_polls",
   quotes: "manage_quotes",
@@ -137,6 +139,7 @@ const AdminDashboard = () => {
             {activeTab === "logo" && hasPermission("manage_settings") && <AdminLogo />}
             {activeTab === "covers" && hasPermission("manage_quotes") && <AdminCovers />}
             {activeTab === "deals" && hasPermission("manage_deals") && <AdminDeals />}
+            {activeTab === "secondhand" && hasPermission("manage_deals") && <AdminSecondHand />}
             {activeTab === "ads" && hasPermission("manage_settings") && <AdminAds />}
             {activeTab === "team" && hasPermission("manage_team") && <AdminTeam />}
             {/* Show access denied message if no permission */}
@@ -173,6 +176,7 @@ const mobileNavGroups = [
       { id: "events", label: "אירועים", icon: Calendar },
       { id: "recommendations", label: "המלצות", icon: Award },
       { id: "deals", label: "הטבות", icon: Briefcase },
+      { id: "secondhand", label: "יד שנייה", icon: Package },
     ],
   },
   {
