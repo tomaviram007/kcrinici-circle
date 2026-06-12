@@ -332,30 +332,6 @@ export type Database = {
         }
         Relationships: []
       }
-      event_reminders_log: {
-        Row: {
-          channel: string
-          event_id: string
-          id: string
-          sent_at: string
-          user_id: string
-        }
-        Insert: {
-          channel: string
-          event_id: string
-          id?: string
-          sent_at?: string
-          user_id: string
-        }
-        Update: {
-          channel?: string
-          event_id?: string
-          id?: string
-          sent_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       event_registrations: {
         Row: {
           amount_paid: number | null
@@ -414,6 +390,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      event_reminders_log: {
+        Row: {
+          channel: string
+          event_id: string
+          id: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          event_id: string
+          id?: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          event_id?: string
+          id?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       event_rsvps: {
         Row: {
