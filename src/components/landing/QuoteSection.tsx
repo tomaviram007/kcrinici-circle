@@ -59,20 +59,34 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
   useEffect(() => {
     if (!ref.current || !quote) return;
+    const el = ref.current;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          gsap.fromTo(
-            ref.current!.children,
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, ease: "power3.out" }
-          );
+          const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+          tl.fromTo(
+            el.querySelector("blockquote"),
+            { opacity: 0, y: 30, filter: "blur(8px)" },
+            { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.1 }
+          )
+            .fromTo(
+              el.querySelector(".quote-divider"),
+              { scaleX: 0, opacity: 0 },
+              { scaleX: 1, opacity: 1, duration: 0.7 },
+              "-=0.55"
+            )
+            .fromTo(
+              el.querySelector(".quote-author"),
+              { opacity: 0, y: 14 },
+              { opacity: 1, y: 0, duration: 0.9 },
+              "-=0.45"
+            );
           observer.disconnect();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.25 }
     );
-    observer.observe(ref.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, [quote]);
 
@@ -96,15 +110,16 @@ const QuoteSection = ({ page = "home" }: QuoteSectionProps) => {
 
       <div
         ref={ref}
-        className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 sm:px-12 text-center"
+        className="absolute inset-0 z-10 flex flex-col items-center justify-center px-5 sm:px-10 md:px-12"
       >
         <blockquote
-          className="font-serif font-bold text-white leading-snug opacity-0 drop-shadow-lg max-w-4xl mx-auto"
-          style={{ fontSize: `clamp(18px, 3vw, ${Math.min(fontSize, 48)}px)` }}
+          className="font-serif font-bold text-white leading-snug drop-shadow-lg max-w-[92%] sm:max-w-3xl md:max-w-4xl mx-auto text-center [text-wrap:balance] opacity-0"
+          style={{ fontSize: `clamp(20px, 4.5vw, ${Math.min(fontSize, 48)}px)` }}
         >
           {quote.text}
         </blockquote>
-        <p className="mt-3 sm:mt-4 font-body text-xs sm:text-base text-gold/80 opacity-0 drop-shadow-md tracking-wide">
+        <span className="quote-divider block mt-4 sm:mt-5 h-px w-12 sm:w-16 bg-gold/60 origin-center opacity-0" />
+        <p className="quote-author mt-3 sm:mt-4 font-body text-[11px] sm:text-sm md:text-base text-gold/80 drop-shadow-md text-center tracking-[0.18em] opacity-0">
           {quote.author}{quote.author_title ? ` — ${quote.author_title}` : ""}
         </p>
       </div>
