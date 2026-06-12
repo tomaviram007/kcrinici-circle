@@ -281,49 +281,54 @@ const SecondHand = () => {
 
       {/* Form Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="font-serif text-xl">
               {editId ? "עריכת פריט" : "פרסום פריט יד שנייה"}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 mt-2">
-            <div>
-              <Label className="font-body text-xs">כותרת *</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" />
-            </div>
-            <div>
-              <Label className="font-body text-xs">תיאור</Label>
-              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-background" rows={3} />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            {/* Right column (first in RTL) */}
+            <div className="space-y-4">
               <div>
-                <Label className="font-body text-xs">מחיר (₪)</Label>
-                <Input type="number" inputMode="decimal" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="bg-background" />
+                <Label className="font-body text-xs">כותרת *</Label>
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" />
               </div>
               <div>
-                <Label className="font-body text-xs">מצב המוצר</Label>
-                <Select value={form.condition} onValueChange={(v) => setForm({ ...form, condition: v })}>
-                  <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {CONDITIONS.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Label className="font-body text-xs">תיאור</Label>
+                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-background" rows={5} />
               </div>
-              <div>
-                <Label className="font-body text-xs">קטגוריה</Label>
-                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                  <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="font-body text-xs">מחיר (₪)</Label>
+                  <Input type="number" inputMode="decimal" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="bg-background" />
+                </div>
+                <div>
+                  <Label className="font-body text-xs">טלפון ליצירת קשר</Label>
+                  <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className="bg-background" placeholder="0501234567" />
+                </div>
+                <div>
+                  <Label className="font-body text-xs">מצב המוצר</Label>
+                  <Select value={form.condition} onValueChange={(v) => setForm({ ...form, condition: v })}>
+                    <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {CONDITIONS.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="font-body text-xs">קטגוריה</Label>
+                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                    <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-            <div>
-              <Label className="font-body text-xs">טלפון ליצירת קשר</Label>
-              <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className="bg-background" placeholder="0501234567" />
-            </div>
+
+            {/* Left column - images */}
             <div>
               <Label className="font-body text-xs">תמונות</Label>
               {user && (
@@ -342,14 +347,15 @@ const SecondHand = () => {
                 />
               )}
             </div>
-            <div className="flex gap-2 pt-2">
-              <Button onClick={handleSubmit} disabled={saving} className="gradient-gold text-primary-foreground font-body flex-1">
-                {saving ? "שומר..." : editId ? "שמירת שינויים" : "פרסום מיידי"}
-              </Button>
-              <Button variant="ghost" onClick={() => setDialogOpen(false)} className="font-body">ביטול</Button>
-            </div>
+          </div>
+          <div className="flex gap-2 pt-4 border-t border-border mt-4">
+            <Button onClick={handleSubmit} disabled={saving} className="gradient-gold text-primary-foreground font-body flex-1">
+              {saving ? "שומר..." : editId ? "שמירת שינויים" : "פרסום מיידי"}
+            </Button>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="font-body">ביטול</Button>
           </div>
         </DialogContent>
+
       </Dialog>
 
       {/* View Dialog */}
