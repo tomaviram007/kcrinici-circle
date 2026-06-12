@@ -88,6 +88,10 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
       return;
     }
     const current = rsvps[event.id];
+    if (current !== "attending" && event.max_attendees && (rsvpCounts[event.id] || 0) >= event.max_attendees) {
+      toast({ title: "האירוע מלא", description: "מספר המשתתפים המקסימלי הושג", variant: "destructive" });
+      return;
+    }
     if (current === "attending") {
       // Already attending — cancel
       cancelRsvp(event.id);
@@ -171,8 +175,10 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
                 <p className={`mt-1 font-body text-xs text-muted-foreground ${!isApproved ? "blur-[4px]" : ""}`}>
                   {new Date(event.event_date).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })}
                 </p>
-                {isApproved && rsvpCounts[event.id] > 0 && (
-                  <p className="mt-2 font-body text-xs text-gold">{rsvpCounts[event.id]} מגיעים</p>
+                {isApproved && (rsvpCounts[event.id] > 0 || event.max_attendees) && (
+                  <p className="mt-2 font-body text-xs text-gold">
+                    {event.max_attendees ? `${rsvpCounts[event.id] || 0}/${event.max_attendees}` : rsvpCounts[event.id]} מגיעים
+                  </p>
                 )}
               </div>
             </div>

@@ -17,7 +17,7 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 
-const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "" };
+const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "", max_attendees: "" };
 
 interface RsvpProfile {
   full_name: string;
@@ -124,6 +124,7 @@ const AdminEvents = () => {
       image_url: form.image_url || null,
       payment_link: form.payment_link || null,
       price: form.price ? parseFloat(form.price) : null,
+      max_attendees: form.max_attendees ? parseInt(form.max_attendees, 10) : null,
       created_by: session?.user?.id || null,
     };
     if (editId) {
@@ -176,6 +177,7 @@ const AdminEvents = () => {
       payment_link: event.payment_link || "",
       registration_required: event.registration_required || false,
       price: event.price ? String(event.price) : "",
+      max_attendees: event.max_attendees ? String(event.max_attendees) : "",
     });
     setEditId(event.id);
     setShowForm(true);
@@ -336,6 +338,16 @@ const AdminEvents = () => {
               step="1"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
+              className="bg-background"
+              dir="ltr"
+            />
+            <Input
+              placeholder="מקסימום משתתפים (ריק = ללא הגבלה)"
+              type="number"
+              min="1"
+              step="1"
+              value={form.max_attendees}
+              onChange={(e) => setForm({ ...form, max_attendees: e.target.value })}
               className="bg-background"
               dir="ltr"
             />

@@ -77,7 +77,9 @@ const Events = () => {
         const rsvpMap: Record<string, string> = {};
         myRsvps?.forEach((r: any) => { rsvpMap[r.event_id] = r.status; });
         setRsvps(rsvpMap);
+      }
 
+      if (eventsData?.length) {
         const { data: allRsvps } = await supabase
           .rpc("get_event_attending_counts", { _event_ids: eventsData.map((e: any) => e.id) });
         const counts: Record<string, number> = {};
@@ -110,6 +112,10 @@ const Events = () => {
       return;
     }
     const current = rsvps[event.id];
+    if (current !== "attending" && event.max_attendees && (rsvpCounts[event.id] || 0) >= event.max_attendees) {
+      toast({ title: "האירוע מלא", description: "מספר המשתתפים המקסימלי הושג", variant: "destructive" });
+      return;
+    }
     if (current === "attending") {
       cancelRsvp(event.id);
     } else if (event.price && event.payment_link) {
@@ -306,8 +312,10 @@ const Events = () => {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    {count > 0 && (
-                      <span className="font-body text-xs text-muted-foreground">{count} מגיעים</span>
+                    {(count > 0 || event.max_attendees) && (
+                      <span className="font-body text-xs text-muted-foreground">
+                        {event.max_attendees ? `${count}/${event.max_attendees}` : count} מגיעים
+                      </span>
                     )}
                     {isAttending && (
                       <span className="font-body text-xs text-gold flex items-center gap-1">
@@ -449,10 +457,12 @@ const Events = () => {
                       {selectedEvent.location}
                     </a>
                   )}
-                  {count > 0 && (
+                  {(count > 0 || selectedEvent.max_attendees) && (
                     <div className="flex items-center gap-2 font-body text-sm text-muted-foreground">
                       <CheckCircle className="h-4 w-4 text-gold shrink-0" />
-                      <span>{count} מאשרים הגעה</span>
+                      <span>
+                        {selectedEvent.max_attendees ? `${count}/${selectedEvent.max_attendees}` : count} מאשרים הגעה
+                      </span>
                     </div>
                   )}
                   {selectedEvent.price && (

@@ -402,6 +402,7 @@ export type Database = {
           location: string | null
           payment_link: string | null
           price: number | null
+          max_attendees: number | null
           registration_required: boolean
           title: string
           updated_at: string
@@ -416,6 +417,7 @@ export type Database = {
           location?: string | null
           payment_link?: string | null
           price?: number | null
+          max_attendees?: number | null
           registration_required?: boolean
           title: string
           updated_at?: string
@@ -430,6 +432,7 @@ export type Database = {
           location?: string | null
           payment_link?: string | null
           price?: number | null
+          max_attendees?: number | null
           registration_required?: boolean
           title?: string
           updated_at?: string
