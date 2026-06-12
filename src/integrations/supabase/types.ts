@@ -906,6 +906,57 @@ export type Database = {
         }
         Relationships: []
       }
+      secondhand_items: {
+        Row: {
+          category: string
+          condition: string
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          id: string
+          images: string[]
+          is_active: boolean
+          is_sold: boolean
+          price: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          condition?: string
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          is_sold?: boolean
+          price?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          condition?: string
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          is_sold?: boolean
+          price?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string
