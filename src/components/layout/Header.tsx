@@ -258,14 +258,7 @@ const Header = () => {
           </nav>
 
           <div className="px-6 pb-10 flex flex-col items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setLang(lang === "he" ? "en" : "he")}
-              className="w-full max-w-xs font-body gap-2 border-gold/30 text-gold hover:bg-gold/10"
-            >
-              <Languages className="h-4 w-4" />
-              {t("lang.switch")}
-            </Button>
+
             {canAccess ? (
               <>
                 <Link to="/profile" onClick={() => setMenuOpen(false)} className="w-full max-w-xs">
