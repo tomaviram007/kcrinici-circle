@@ -100,7 +100,7 @@ const SmartAdBanner = ({
           return pages.includes("all") || pages.includes(targetPage);
         });
 
-        if (cancelled || error) continue;
+        if (cancelled) continue;
 
         const filtered = pageFiltered.filter((ad: AdCampaign) => slotIndex < (ad.max_appearances || 1));
         if (filtered.length > 0) {
