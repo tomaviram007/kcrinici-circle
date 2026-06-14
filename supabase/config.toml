@@ -2,3 +2,6 @@ project_id = "wzbvdpgoyetmgluvhygf"
 
 [functions.register-event]
 verify_jwt = false
+
+[functions.event-share]
+verify_jwt = false
