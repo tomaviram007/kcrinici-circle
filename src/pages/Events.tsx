@@ -587,54 +587,67 @@ const Events = () => {
                         }
                       };
 
+                      const { text, eventUrl } = buildShareText();
+                      const encodedText = encodeURIComponent(text);
+                      const encodedUrl = encodeURIComponent(eventUrl);
+                      const encodedTitle = encodeURIComponent(selectedEvent.title);
+
+                      const shareTargets = [
+                        { label: "WhatsApp", icon: MessageCircle, color: "text-[#25D366]", url: `https://wa.me/?text=${encodedText}` },
+                        { label: "Facebook", icon: Facebook, color: "text-[#1877F2]", url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedTitle}` },
+                        { label: "LinkedIn", icon: Linkedin, color: "text-[#0A66C2]", url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}` },
+                        { label: "Telegram", icon: Send, color: "text-[#229ED9]", url: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}` },
+                        { label: "X / Twitter", icon: Twitter, color: "text-foreground", url: `https://twitter.com/intent/tweet?text=${encodedText}` },
+                      ];
+
                       return (
-                        <Button
-                          variant="outline"
-                          className="font-body border-border text-muted-foreground hover:text-foreground"
-                          onClick={async () => {
-                            const { text, eventUrl } = buildShareText();
-                            
-                            if (navigator.share) {
-                              try {
-                                const shareData: ShareData = { title: selectedEvent.title, text };
-                                
-                                if (selectedEvent.image_url) {
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="font-body border-border text-muted-foreground hover:text-foreground"
+                            >
+                              <Share2 className="h-4 w-4" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent dir="rtl" className="w-56 p-2" align="end">
+                            <div className="flex flex-col">
+                              {shareTargets.map(({ label, icon: Icon, color, url }) => (
+                                <a
+                                  key={label}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-3 rounded-md px-3 py-2 font-body text-sm text-foreground hover:bg-secondary transition-colors"
+                                >
+                                  <Icon className={`h-4 w-4 ${color}`} />
+                                  <span>{label}</span>
+                                </a>
+                              ))}
+                              <button
+                                onClick={copyToClipboard}
+                                className="flex items-center gap-3 rounded-md px-3 py-2 font-body text-sm text-foreground hover:bg-secondary transition-colors text-right"
+                              >
+                                <Copy className="h-4 w-4 text-gold" />
+                                <span>העתקת טקסט</span>
+                              </button>
+                              <button
+                                onClick={async () => {
                                   try {
-                                    const response = await fetch(selectedEvent.image_url);
-                                    const blob = await response.blob();
-                                    const ext = blob.type.includes("png") ? "png" : "jpg";
-                                    const file = new File([blob], `${selectedEvent.title}.${ext}`, { type: blob.type });
-                                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                                      shareData.files = [file];
-                                    }
-                                  } catch {}
-                                }
-                                
-                                await navigator.share(shareData);
-                              } catch {}
-                            } else {
-                              await copyToClipboard();
-                              const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                              window.open(waUrl, "_blank");
-                            }
-                          }}
-                          onContextMenu={async (e) => {
-                            e.preventDefault();
-                            await copyToClipboard();
-                          }}
-                          onTouchStart={(e) => {
-                            const timer = setTimeout(() => copyToClipboard(), 600);
-                            (e.currentTarget as any)._longPressTimer = timer;
-                          }}
-                          onTouchEnd={(e) => {
-                            clearTimeout((e.currentTarget as any)._longPressTimer);
-                          }}
-                          onTouchMove={(e) => {
-                            clearTimeout((e.currentTarget as any)._longPressTimer);
-                          }}
-                        >
-                          <Share2 className="h-4 w-4" />
-                        </Button>
+                                    await navigator.clipboard.writeText(eventUrl);
+                                    toast({ title: "הקישור הועתק! 🔗" });
+                                  } catch {
+                                    toast({ title: "לא ניתן להעתיק", variant: "destructive" });
+                                  }
+                                }}
+                                className="flex items-center gap-3 rounded-md px-3 py-2 font-body text-sm text-foreground hover:bg-secondary transition-colors text-right"
+                              >
+                                <Copy className="h-4 w-4 text-muted-foreground" />
+                                <span>העתקת קישור</span>
+                              </button>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       );
                     })()}
                   </div>
