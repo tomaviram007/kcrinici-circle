@@ -84,17 +84,15 @@ const SmartAdBanner = ({
       const now = new Date().toISOString();
       const placementsToTry = [placement, ...fallbackKey.split("|").filter((item) => item && item !== placement)];
 
-      for (const placementOption of placementsToTry) {
-        const { data, error } = await supabase
-          .from("ad_campaigns")
-          .select("id, title, media_type, media_url, target_url, alt_text, priority, max_appearances, target_page")
-          .eq("placement", placementOption)
-          .eq("is_active", true)
-          .lte("start_date", now)
-          .or(`end_date.is.null,end_date.gte.${now}`)
-          .order("priority", { ascending: false });
+      const { data: allActive, error: rpcError } = await supabase.rpc("get_active_ad_campaigns" as any);
+      if (cancelled || rpcError) return;
 
-        if (cancelled || error) continue;
+      for (const placementOption of placementsToTry) {
+        const data = ((allActive as any[]) || [])
+          .filter((c) => c.placement === placementOption)
+          .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        if (cancelled) continue;
 
         // Filter ads that target this page (supports comma-separated pages)
         const pageFiltered = (data || []).filter((ad: any) => {
@@ -102,7 +100,7 @@ const SmartAdBanner = ({
           return pages.includes("all") || pages.includes(targetPage);
         });
 
-        if (cancelled || error) continue;
+        if (cancelled) continue;
 
         const filtered = pageFiltered.filter((ad: AdCampaign) => slotIndex < (ad.max_appearances || 1));
         if (filtered.length > 0) {

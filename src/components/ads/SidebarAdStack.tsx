@@ -35,16 +35,13 @@ const SidebarAdStack = ({ targetPage = "all", maxSlots = 3, className, side }: S
         ? [`sidebar_${side}`, "sidebar"] // specific side + fallback to generic sidebar
         : ["sidebar"];
 
-      const { data, error } = await supabase
-        .from("ad_campaigns")
-        .select("id, title, media_type, media_url, target_url, alt_text, priority, max_appearances, target_page, placement")
-        .in("placement", placements)
-        .eq("is_active", true)
-        .lte("start_date", now)
-        .or(`end_date.is.null,end_date.gte.${now}`)
-        .order("priority", { ascending: false });
+      const { data: allActive, error } = await supabase.rpc("get_active_ad_campaigns" as any);
 
       if (cancelled || error) return;
+
+      const data = ((allActive as any[]) || [])
+        .filter((c) => placements.includes(c.placement))
+        .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
       // Filter by target page
       const filtered = (data || []).filter((ad: any) => {

@@ -1161,6 +1161,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_active_ad_campaigns: {
+        Args: never
+        Returns: {
+          advertiser_id: string
+          alt_text: string
+          created_at: string
+          end_date: string
+          id: string
+          is_active: boolean
+          max_appearances: number
+          media_type: string
+          media_url: string
+          placement: string
+          priority: number
+          start_date: string
+          target_page: string
+          target_url: string
+          title: string
+          updated_at: string
+        }[]
+      }
       get_event_attending_counts: {
         Args: { _event_ids: string[] }
         Returns: {
