@@ -197,16 +197,7 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center justify-center gap-2" style={{ width: "10%" }}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLang(lang === "he" ? "en" : "he")}
-              className="text-muted-foreground hover:text-gold font-body text-xs gap-1 px-2"
-              title={t("lang.switch")}
-            >
-              <Languages className="h-3.5 w-3.5" />
-              {t("lang.switch")}
-            </Button>
+
             {canAccess ? (
               <div className="flex items-center gap-1">
                 <Link to="/profile">
