@@ -281,6 +281,7 @@ const AdminEvents = () => {
     });
     setEditId(event.id);
     setShowForm(true);
+    setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
   };
 
   const googleMapsUrl = (location: string) =>
