@@ -557,6 +557,20 @@ const Events = () => {
                       </Button>
                     </a>
                     {(() => {
+                      // Remove Apple/iOS private-use-area emojis and other invalid chars
+                      // that appear as � on WhatsApp Web, Android, Facebook, etc.
+                      const sanitizeForSharing = (s: string) =>
+                        (s || "")
+                          // Private Use Areas (Apple private emojis, etc.)
+                          .replace(/[\uE000-\uF8FF]/g, "")
+                          .replace(/[\u{F0000}-\u{FFFFD}\u{100000}-\u{10FFFD}]/gu, "")
+                          // Unicode replacement char + BOM/zero-width junk
+                          .replace(/\uFFFD/g, "")
+                          .replace(/[\u200B-\u200F\uFEFF]/g, "")
+                          // Collapse 3+ blank lines
+                          .replace(/\n{3,}/g, "\n\n")
+                          .trim();
+
                       const buildShareText = () => {
                         const date = new Date(selectedEvent.event_date);
                         const siteUrl = window.location.origin;
@@ -564,13 +578,15 @@ const Events = () => {
                         const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || "https://wzbvdpgoyetmgluvhygf.supabase.co";
                         const eventShareUrl = `${supabaseUrl}/functions/v1/event-share?id=${selectedEvent.id}`;
 
+                        const cleanTitle = sanitizeForSharing(selectedEvent.title);
+                        const cleanDescription = sanitizeForSharing(selectedEvent.description || "");
+
                         let text = "";
-                        if (selectedEvent.description) {
-                          // Description usually already contains all event details — use it as-is
-                          text = `🎉 ${selectedEvent.title}\n\n${selectedEvent.description}`;
+                        if (cleanDescription) {
+                          text = `🎉 ${cleanTitle}\n\n${cleanDescription}`;
                         } else {
-                          text = `🎉 ${selectedEvent.title}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`;
-                          if (selectedEvent.location) text += `\n📍 ${selectedEvent.location}`;
+                          text = `🎉 ${cleanTitle}\n📅 ${date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" })} בשעה ${date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`;
+                          if (selectedEvent.location) text += `\n📍 ${sanitizeForSharing(selectedEvent.location)}`;
                           if (selectedEvent.price) text += `\n💰 עלות: ₪${Number(selectedEvent.price).toLocaleString()}`;
                         }
                         text += `\n`;
