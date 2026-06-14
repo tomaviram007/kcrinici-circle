@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Search, Plus, Star, Phone, User, Briefcase, MessageCircle } from "lucide-react";
+import { Search, Plus, Star, Phone, User, Briefcase, MessageCircle, Pencil } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
@@ -86,6 +88,9 @@ const buildWhatsAppUrl = (rec: Recommendation): string => {
 };
 
 const Recommendations = () => {
+  const navigate = useNavigate();
+  const { hasPermission } = useUserPermissions();
+  const canEditRecommendations = hasPermission("manage_recommendations");
   const { user, isApproved } = useAuth();
   const queryClient = useQueryClient();
   const coverImage = usePageCover("recommendations", recommendationsHero);
@@ -225,7 +230,17 @@ const Recommendations = () => {
 
   return (
     <>
-      <PageHero image={coverImage} title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים" />
+      <PageHero image={coverImage} title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים">
+        {canEditRecommendations && (
+          <button
+            onClick={() => navigate("/admin?tab=recommendations")}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
+            title="ערוך המלצות"
+          >
+            <Pencil className="h-3 w-3" /> ערוך המלצות
+          </button>
+        )}
+      </PageHero>
       
       <ContentWithSidebarAds targetPage="recommendations">
       <div className="max-w-7xl mx-auto px-5 py-4 sm:px-6 sm:py-8" dir="rtl">

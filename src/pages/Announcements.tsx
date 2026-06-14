@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, MessageCircle, Gift, Megaphone, ShoppingBag, Calendar, Share2, Car, Smartphone, Sofa, Shirt, Home, Package, Banknote, CheckCircle2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Plus, MessageCircle, Gift, Megaphone, ShoppingBag, Calendar, Share2, Car, Smartphone, Sofa, Shirt, Home, Package, Banknote, CheckCircle2, ChevronLeft, ChevronRight, X, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -109,6 +111,9 @@ const EMPTY_SALE_DATA: Record<string, string> = {};
 const Announcements = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { hasPermission } = useUserPermissions();
+  const canEditAnnouncements = hasPermission("manage_announcements");
   const coverImage = usePageCover("announcements", heroImg);
   const [items, setItems] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -474,7 +479,17 @@ const Announcements = () => {
 
   return (
     <>
-    <PageHero image={coverImage} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון" />
+    <PageHero image={coverImage} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון">
+      {canEditAnnouncements && (
+        <button
+          onClick={() => navigate("/admin?tab=announcements")}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
+          title="ערוך מודעות"
+        >
+          <Pencil className="h-3 w-3" /> ערוך מודעות
+        </button>
+      )}
+    </PageHero>
     <ContentWithSidebarAds targetPage="announcements">
     <div className="mx-auto max-w-6xl px-5 py-4 sm:px-6 sm:py-8 md:py-12">
 

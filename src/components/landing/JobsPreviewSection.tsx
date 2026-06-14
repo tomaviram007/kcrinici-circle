@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Lock, MapPin, Banknote, Building2, MessageCircle, FileText, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Briefcase, Lock, MapPin, Banknote, Building2, MessageCircle, FileText, User, Pencil } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import gsap from "gsap";
 
@@ -15,6 +16,9 @@ const JOB_TYPES_MAP: Record<string, string> = {
 };
 
 const JobsPreviewSection = ({ isApproved }: Props) => {
+  const navigate = useNavigate();
+  const { hasPermission } = useUserPermissions();
+  const canEditJobs = hasPermission("manage_jobs");
   const [jobs, setJobs] = useState<any[]>([]);
   const [selected, setSelected] = useState<any | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -64,6 +68,14 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
             דרושים <span className="text-gold">בשכונה</span>
           </h2>
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
+          {canEditJobs && (
+            <button
+              onClick={() => navigate("/admin?tab=jobs")}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
+            >
+              <Pencil className="h-3 w-3" /> ערוך משרות
+            </button>
+          )}
         </div>
 
         {displayItems.length > 0 ? (

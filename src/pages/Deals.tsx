@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Tag, Search, Copy, MessageCircle, Clock, Store, ExternalLink, Plus } from "lucide-react";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { Tag, Search, Copy, MessageCircle, Clock, Store, ExternalLink, Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +44,9 @@ interface Deal {
 }
 
 const Deals = () => {
+  const navigate = useNavigate();
+  const { hasPermission } = useUserPermissions();
+  const canEditDeals = hasPermission("manage_deals");
   const [deals, setDeals] = useState<Deal[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [searchText, setSearchText] = useState("");
@@ -151,6 +156,15 @@ const Deals = () => {
             הצע הטבה חדשה
             <Plus className="h-5 w-5 mr-2" />
           </Button>
+        )}
+        {canEditDeals && (
+          <button
+            onClick={() => navigate("/admin?tab=deals")}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
+            title="ערוך הטבות"
+          >
+            <Pencil className="h-3 w-3" /> ערוך הטבות
+          </button>
         )}
       </PageHero>
 

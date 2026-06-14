@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, Menu, X, Cake, User } from "lucide-react";
+import { LogOut, Shield, Menu, X, Cake, User, Languages } from "lucide-react";
 import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
 import { usePendingCount } from "@/hooks/usePendingCount";
 
@@ -25,6 +26,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isApproved, isAdmin, isTeamMember, loading } = useAuth();
+  const { lang, setLang, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMemberDialog, setShowMemberDialog] = useState(false);
   const { birthdays } = useBirthdaysThisWeek();
@@ -88,16 +90,16 @@ const Header = () => {
   const hasBirthdays = birthdays.length > 0;
 
   const navLinks = [
-    { to: "/", label: "דף הבית", protected: false },
-    { to: "/announcements", label: "לוח מודעות", protected: false },
-    { to: "/jobs", label: "דרושים", protected: false },
-    { to: "/members", label: "חברי המועדון", protected: false },
-    { to: "/events", label: "לוח אירועים", protected: false },
-    { to: "/gallery", label: "גלריה", protected: false },
-    { to: "/recommendations", label: "אנשי מקצוע", protected: false },
-    { to: "/deals", label: "הטבות", protected: false },
-    { to: "/secondhand", label: "יד שנייה", protected: false },
-    ...((isAdmin || isTeamMember) ? [{ to: "/admin", label: "שולחן המנהל", protected: true }] : []),
+    { to: "/", label: t("nav.home"), protected: false },
+    { to: "/announcements", label: t("nav.announcements"), protected: false },
+    { to: "/jobs", label: t("nav.jobs"), protected: false },
+    { to: "/members", label: t("nav.members"), protected: false },
+    { to: "/events", label: t("nav.events"), protected: false },
+    { to: "/gallery", label: t("nav.gallery"), protected: false },
+    { to: "/recommendations", label: t("nav.recommendations"), protected: false },
+    { to: "/deals", label: t("nav.deals"), protected: false },
+    { to: "/secondhand", label: t("nav.secondhand"), protected: false },
+    ...((isAdmin || isTeamMember) ? [{ to: "/admin", label: t("nav.admin"), protected: true }] : []),
   ];
 
   const handleNavClick = (e: React.MouseEvent, link: { to: string; protected: boolean }) => {
@@ -195,6 +197,16 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center justify-center gap-2" style={{ width: "10%" }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLang(lang === "he" ? "en" : "he")}
+              className="text-muted-foreground hover:text-gold font-body text-xs gap-1 px-2"
+              title={t("lang.switch")}
+            >
+              <Languages className="h-3.5 w-3.5" />
+              {t("lang.switch")}
+            </Button>
             {canAccess ? (
               <div className="flex items-center gap-1">
                 <Link to="/profile">
@@ -204,16 +216,16 @@ const Header = () => {
                 </Link>
                 <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground font-body text-sm gap-1">
                   <LogOut className="h-4 w-4" />
-                  התנתקות
+                  {t("auth.logout")}
                 </Button>
               </div>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="ghost" size="sm" className="text-muted-foreground font-body text-sm">כניסה</Button>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground font-body text-sm">{t("auth.login")}</Button>
                 </Link>
                 <Link to="/register">
-                  <Button size="sm" className="gradient-gold text-primary-foreground font-body text-sm">הצטרפות</Button>
+                  <Button size="sm" className="gradient-gold text-primary-foreground font-body text-sm">{t("auth.register")}</Button>
                 </Link>
               </>
             )}
@@ -255,12 +267,20 @@ const Header = () => {
           </nav>
 
           <div className="px-6 pb-10 flex flex-col items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setLang(lang === "he" ? "en" : "he")}
+              className="w-full max-w-xs font-body gap-2 border-gold/30 text-gold hover:bg-gold/10"
+            >
+              <Languages className="h-4 w-4" />
+              {t("lang.switch")}
+            </Button>
             {canAccess ? (
               <>
                 <Link to="/profile" onClick={() => setMenuOpen(false)} className="w-full max-w-xs">
                   <Button variant="outline" className="w-full font-body gap-2">
                     <User className="h-4 w-4" />
-                    הפרופיל שלי
+                    {t("auth.myProfile")}
                   </Button>
                 </Link>
                 <Button
@@ -269,16 +289,16 @@ const Header = () => {
                   className="w-full max-w-xs text-muted-foreground font-body gap-2"
                 >
                   <LogOut className="h-4 w-4" />
-                  התנתקות
+                  {t("auth.logout")}
                 </Button>
               </>
             ) : (
               <>
                 <Link to="/register" onClick={() => setMenuOpen(false)} className="w-full max-w-xs">
-                  <Button className="w-full gradient-gold text-primary-foreground font-body text-base py-6">הצטרפות</Button>
+                  <Button className="w-full gradient-gold text-primary-foreground font-body text-base py-6">{t("auth.register")}</Button>
                 </Link>
                 <Link to="/login" onClick={() => setMenuOpen(false)} className="w-full max-w-xs text-center">
-                  <span className="font-body text-sm text-muted-foreground hover:text-gold transition-colors">כניסה</span>
+                  <span className="font-body text-sm text-muted-foreground hover:text-gold transition-colors">{t("auth.login")}</span>
                 </Link>
               </>
             )}
