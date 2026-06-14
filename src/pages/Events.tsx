@@ -17,6 +17,7 @@ import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import heroImg from "@/assets/hero-events.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Dialog,
   DialogContent,
@@ -57,6 +58,7 @@ const Events = () => {
   const navigate = useNavigate();
   const { id: eventId } = useParams();
   const canEditEvents = hasPermission("manage_events");
+  const { t } = useLanguage();
 
   useEffect(() => {
     const init = async () => {
@@ -114,7 +116,7 @@ const Events = () => {
   const attemptRsvp = (event: any) => {
     const left = spotsLeft(event);
     if (left === 0 && rsvps[event.id] !== "attending") {
-      toast({ title: "האירוע מלא", description: "לא נותרו מקומות פנויים", variant: "destructive" });
+      toast({ title: t("events.full"), description: "לא נותרו מקומות פנויים", variant: "destructive" });
       return;
     }
     // Guests and paid events go through the full registration + payment flow
@@ -211,23 +213,23 @@ const Events = () => {
 
   return (
     <>
-    <PageHero image={coverImage} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
+    <PageHero image={coverImage} title={t("hero.events.title")} highlight={t("hero.events.highlight")} subtitle={t("hero.events.subtitle")} />
     
     <ContentWithSidebarAds targetPage="events">
     <div className="mx-auto max-w-6xl px-5 py-4 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-10">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
-          אירועים <span className="text-gold">ומפגשים</span>
+          {t("hero.events.title")} <span className="text-gold">{t("hero.events.highlight")}</span>
         </h1>
-        <p className="mt-1 font-body text-sm text-muted-foreground">מפגשים קרובים לחברי המועדון</p>
+        <p className="mt-1 font-body text-sm text-muted-foreground">{t("hero.events.subtitle")}</p>
         <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
       </div>
       <div className="mb-5 flex flex-wrap items-center gap-2">
-        <Input placeholder="חיפוש אירוע..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
+        <Input placeholder={t("events.searchPlaceholder")} value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
         <Select value={filterMonth} onValueChange={setFilterMonth}>
-          <SelectTrigger className="bg-background font-body w-32 h-9 text-sm"><SelectValue placeholder="חודש" /></SelectTrigger>
+          <SelectTrigger className="bg-background font-body w-32 h-9 text-sm"><SelectValue placeholder={t("common.month")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">כל החודשים</SelectItem>
+            <SelectItem value="all">{t("common.allMonths")}</SelectItem>
             {Array.from({ length: 12 }, (_, i) => (
               <SelectItem key={i} value={i.toString()}>{new Date(2000, i).toLocaleDateString("he-IL", { month: "long" })}</SelectItem>
             ))}
@@ -299,7 +301,7 @@ const Events = () => {
                 <h3 className="font-serif text-base sm:text-xl font-bold text-foreground group-hover:text-gold transition-colors duration-300">
                   {event.title}
                   {event.is_admin_only && (
-                    <span className="mr-2 align-middle rounded-full bg-destructive/10 px-2 py-0.5 font-body text-[10px] text-destructive">אדמין בלבד</span>
+                    <span className="mr-2 align-middle rounded-full bg-destructive/10 px-2 py-0.5 font-body text-[10px] text-destructive">{t("events.adminOnly")}</span>
                   )}
                 </h3>
                 <p className="mt-1 font-body text-sm leading-relaxed text-muted-foreground line-clamp-2">
@@ -320,7 +322,7 @@ const Events = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {count > 0 && (
-                      <span className="font-body text-xs text-muted-foreground">{count} מגיעים</span>
+                      <span className="font-body text-xs text-muted-foreground">{count} {t("events.attendees")}</span>
                     )}
                     {event.max_participants && (
                       <span className={cn(
@@ -329,12 +331,12 @@ const Events = () => {
                           ? "bg-destructive/10 text-destructive"
                           : "bg-gold/10 text-gold"
                       )}>
-                        {(event.max_participants - count) <= 0 ? "האירוע מלא" : `נותרו ${event.max_participants - count} מקומות`}
+                        {(event.max_participants - count) <= 0 ? t("events.full") : t("events.spotsLeft").replace("{n}", String(event.max_participants - count))}
                       </span>
                     )}
                     {isAttending && (
                       <span className="font-body text-xs text-gold flex items-center gap-1">
-                        <CheckCircle className="h-3 w-3" /> מגיע ✓
+                        <CheckCircle className="h-3 w-3" /> {t("events.attending")}
                       </span>
                     )}
                   </div>
@@ -354,15 +356,15 @@ const Events = () => {
       })()}
 
       {events.length === 0 && (
-        <p className="font-body text-muted-foreground text-center py-16">אין אירועים קרובים כרגע.</p>
+        <p className="font-body text-muted-foreground text-center py-16">{t("events.emptyState")}</p>
       )}
     </div>
 
     {/* Event Detail Popup */}
     <Dialog open={!!selectedEvent} onOpenChange={(open) => { if (!open) { setSelectedEvent(null); if (eventId) navigate("/events", { replace: true }); } }}>
       <DialogContent className="max-w-[95vw] sm:max-w-6xl max-h-[90vh] overflow-y-auto p-0 gap-0" dir="rtl">
-        <DialogTitle className="sr-only">פרטי אירוע</DialogTitle>
-        <DialogDescription className="sr-only">מידע מפורט על האירוע</DialogDescription>
+        <DialogTitle className="sr-only">{t("events.detailsTitle")}</DialogTitle>
+        <DialogDescription className="sr-only">{t("events.detailsDesc")}</DialogDescription>
         <button
           onClick={() => setSelectedEvent(null)}
           className="absolute left-4 top-4 z-20 rounded-full bg-background/80 backdrop-blur-sm p-1.5 border border-border hover:bg-background transition-colors"
@@ -374,7 +376,7 @@ const Events = () => {
           <button
             onClick={() => navigate("/admin?tab=events")}
             className="absolute left-14 top-4 z-20 rounded-full bg-gold/20 backdrop-blur-sm p-1.5 border border-gold/30 hover:bg-gold/30 transition-colors"
-            title="עריכת אירוע"
+            title={t("events.editEvent")}
           >
             <Pencil className="h-4 w-4 text-gold" />
           </button>
@@ -475,7 +477,7 @@ const Events = () => {
                   {count > 0 && (
                     <div className="flex items-center gap-2 font-body text-sm text-muted-foreground">
                       <CheckCircle className="h-4 w-4 text-gold shrink-0" />
-                      <span>{count} מאשרים הגעה</span>
+                      <span>{count} {t("events.confirmedAttendees")}</span>
                     </div>
                   )}
                   {selectedEvent.max_participants && (
@@ -486,15 +488,15 @@ const Events = () => {
                       <User className="h-4 w-4 shrink-0" />
                       <span>
                         {(selectedEvent.max_participants - count) <= 0
-                          ? "האירוע מלא — לא נותרו מקומות"
-                          : `נותרו ${selectedEvent.max_participants - count} מקומות מתוך ${selectedEvent.max_participants}`}
+                          ? t("events.eventFull")
+                          : `${t("events.spotsLeftOf").replace("{n}", String(selectedEvent.max_participants - count))} ${selectedEvent.max_participants}`}
                       </span>
                     </div>
                   )}
                   {selectedEvent.price && (
                     <div className="flex items-center gap-2 font-body text-sm text-gold">
                       <CreditCard className="h-4 w-4 shrink-0" />
-                      <span>עלות השתתפות: ₪{Number(selectedEvent.price).toLocaleString()}</span>
+                      <span>{t("events.cost")}₪{Number(selectedEvent.price).toLocaleString()}</span>
                     </div>
                   )}
                   {selectedEvent.payment_link && (
@@ -505,7 +507,7 @@ const Events = () => {
                       className="flex items-center gap-2 font-body text-sm text-gold hover:underline"
                     >
                       <CreditCard className="h-4 w-4 shrink-0" />
-                      קישור לתשלום
+                      {t("events.paymentLink")}
                     </a>
                   )}
                 </div>
@@ -513,7 +515,7 @@ const Events = () => {
                 {/* Creator info */}
                 {eventCreator && (
                   <div className="rounded-lg border border-border bg-secondary/50 p-3 mb-5">
-                    <p className="font-body text-xs text-muted-foreground mb-2">פורסם על ידי</p>
+                    <p className="font-body text-xs text-muted-foreground mb-2">{t("events.postedBy")}</p>
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-secondary border border-gold/20 flex items-center justify-center shrink-0 overflow-hidden">
                         {eventCreator.avatar_url ? (
@@ -546,13 +548,13 @@ const Events = () => {
                     variant={isAttending ? "default" : "outline"}
                   >
                     <CheckCircle className="h-4 w-4 ml-2" />
-                    {isAttending ? "מגיע ✓ — לחץ לביטול" : spotsLeft(selectedEvent) === 0 ? "האירוע מלא" : "אישור הגעה"}
+                    {isAttending ? t("events.attendingCancel") : spotsLeft(selectedEvent) === 0 ? t("events.full") : t("events.confirmBtn")}
                   </Button>
                   <div className="flex gap-2">
                     <a href={googleCalendarUrl(selectedEvent)} target="_blank" rel="noopener noreferrer" className="flex-1">
                       <Button variant="outline" className="w-full font-body border-border text-muted-foreground hover:text-foreground">
                         <CalendarPlus className="h-4 w-4 ml-2" />
-                        הוסף ליומן
+                        {t("events.addCalendar")}
                       </Button>
                     </a>
                     {(() => {
@@ -580,9 +582,9 @@ const Events = () => {
                         const { text } = buildShareText();
                         try {
                           await navigator.clipboard.writeText(text);
-                          toast({ title: "הטקסט הועתק ללוח! 📋" });
+                          toast({ title: t("events.textCopied") });
                         } catch {
-                          toast({ title: "לא ניתן להעתיק", variant: "destructive" });
+                          toast({ title: t("events.cantCopy"), variant: "destructive" });
                         }
                       };
 

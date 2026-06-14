@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast as sonnerToast } from "sonner";
 import PageHero from "@/components/PageHero";
 import { fireConfetti } from "@/lib/confetti";
@@ -111,6 +112,7 @@ const EMPTY_SALE_DATA: Record<string, string> = {};
 const Announcements = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { hasPermission } = useUserPermissions();
   const canEditAnnouncements = hasPermission("manage_announcements");
@@ -220,13 +222,13 @@ const Announcements = () => {
     e.preventDefault();
     if (!formTitle.trim() || !formContent.trim()) return;
     if (formCategory === "sale" && !saleType) {
-      toast({ title: "שגיאה", description: "יש לבחור סוג מוצר", variant: "destructive" });
+      toast({ title: t("common.error"), description: "יש לבחור סוג מוצר", variant: "destructive" });
       return;
     }
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      toast({ title: "שגיאה", description: "יש להתחבר כדי לפרסם מודעה", variant: "destructive" });
+      toast({ title: t("common.error"), description: "יש להתחבר כדי לפרסם מודעה", variant: "destructive" });
       return;
     }
 
@@ -248,7 +250,7 @@ const Announcements = () => {
 
     const { error } = await supabase.from("announcements").insert(insertData);
     if (error) {
-      toast({ title: "שגיאה", description: error.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
       return;
     }
     toast({ title: "המודעה נשלחה לאישור!", description: "המודעה תפורסם לאחר אישור מנהל המערכת." });
@@ -479,14 +481,14 @@ const Announcements = () => {
 
   return (
     <>
-    <PageHero image={coverImage} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון">
+    <PageHero image={coverImage} title={t("hero.announcements.title")} highlight={t("hero.announcements.highlight")} subtitle={t("hero.announcements.subtitle")}>
       {canEditAnnouncements && (
         <button
           onClick={() => navigate("/admin?tab=announcements")}
           className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
-          title="ערוך מודעות"
+          title={t("announcements.editBtn")}
         >
-          <Pencil className="h-3 w-3" /> ערוך מודעות
+          <Pencil className="h-3 w-3" /> {t("announcements.editBtn")}
         </button>
       )}
     </PageHero>
@@ -499,9 +501,9 @@ const Announcements = () => {
           <div className="flex items-center gap-3">
             <Calendar className="h-6 w-6 text-gold shrink-0" />
             <div>
-              <p className="font-serif text-base font-bold text-gold">📢 היום יום שלישי — יום פרסומים!</p>
+              <p className="font-serif text-base font-bold text-gold">{t("announcements.tuesdayBanner")}</p>
               <p className="font-body text-sm text-muted-foreground">
-                היום יום הפרסום הרשמי בקבוצת הוואטסאפ של הגברים של קריניצי. שתפו מודעות והזדמנויות!
+                {t("announcements.tuesdayDesc1")}
               </p>
             </div>
           </div>
@@ -531,7 +533,7 @@ const Announcements = () => {
               }
 
               if (copied) {
-                toast({ title: "ההודעה הועתקה!", description: "הדביקו אותה בקבוצה (Ctrl/Cmd+V)" });
+                toast({ title: t("announcements.copied"), description: t("announcements.copiedPaste") });
                 window.open(WHATSAPP_GROUP_LINK, "_blank", "noopener,noreferrer");
               } else {
                 // Offer download fallback
@@ -545,9 +547,9 @@ const Announcements = () => {
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                  toast({ title: "אין הרשאת העתקה", description: "הקובץ ירד למחשב — פתחו והדביקו בקבוצה" });
+                  toast({ title: t("announcements.noPermission"), description: t("announcements.fileDownloaded") });
                 } catch {
-                  toast({ title: "לא ניתן להעתיק", description: "העתיקו ידנית: " + message });
+                  toast({ title: t("announcements.cantCopy"), description: t("announcements.copyManual") + " " + message });
                 }
               }
               setCopyingGroupMsg(false);
@@ -565,7 +567,7 @@ const Announcements = () => {
         <div ref={birthdayRef} className="mb-8 rounded-lg border border-gold/20 bg-card p-5 sm:p-6">
           <div className="flex items-center gap-2 mb-4">
             <Gift className="h-5 w-5 text-gold" />
-            <h2 className="font-serif text-lg font-bold text-foreground">🎂 ימי הולדת קרובים</h2>
+            <h2 className="font-serif text-lg font-bold text-foreground">{t("announcements.birthdays")}</h2>
           </div>
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {upcomingBirthdays.map((person, i) => (
@@ -595,18 +597,18 @@ const Announcements = () => {
 
       {/* Shared filters */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
-        <Input placeholder="חיפוש חופשי..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
+        <Input placeholder={t("announcements.searchPlaceholder")} value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
         <Select value={filterMonth} onValueChange={setFilterMonth}>
-          <SelectTrigger className="bg-background font-body w-32 h-9 text-sm"><SelectValue placeholder="חודש" /></SelectTrigger>
+          <SelectTrigger className="bg-background font-body w-32 h-9 text-sm"><SelectValue placeholder={t("common.month")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">כל החודשים</SelectItem>
+            <SelectItem value="all">{t("common.allMonths")}</SelectItem>
             {Array.from({ length: 12 }, (_, i) => (
               <SelectItem key={i} value={i.toString()}>{new Date(2000, i).toLocaleDateString("he-IL", { month: "long" })}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Button size="sm" onClick={() => { setShowForm(!showForm); resetForm(); }} className="gradient-gold text-primary-foreground font-body mr-auto">
-          <Plus className="h-4 w-4 ml-1" /> פרסם מודעה
+          <Plus className="h-4 w-4 ml-1" /> {t("announcements.postBtn")}
         </Button>
       </div>
 
@@ -618,21 +620,21 @@ const Announcements = () => {
               <SelectValue placeholder="סוג מודעה" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="announcement">הודעה</SelectItem>
-              <SelectItem value="sale">מכירה</SelectItem>
+              <SelectItem value="announcement">{t("announcements.typeNotice")}</SelectItem>
+              <SelectItem value="sale">{t("announcements.typeSale")}</SelectItem>
             </SelectContent>
           </Select>
 
-          <Input placeholder="כותרת המודעה" value={formTitle} onChange={(e) => setFormTitle(e.target.value)} required className="bg-background" autoComplete="off" />
-          <Textarea placeholder={formCategory === "sale" ? "תיאור המוצר / הפריט" : "תוכן המודעה"} value={formContent} onChange={(e) => setFormContent(e.target.value)} required className="bg-background min-h-[100px]" autoComplete="off" />
+          <Input placeholder={t("announcements.titleLabel")} value={formTitle} onChange={(e) => setFormTitle(e.target.value)} required className="bg-background" autoComplete="off" />
+          <Textarea placeholder={formCategory === "sale" ? t("announcements.saleDescLabel") : t("announcements.descLabel")} value={formContent} onChange={(e) => setFormContent(e.target.value)} required className="bg-background min-h-[100px]" autoComplete="off" />
 
           {/* Sale-specific fields */}
           {formCategory === "sale" && (
             <div className="space-y-3 rounded-lg border border-gold/20 bg-secondary/30 p-4">
-              <p className="font-body text-sm font-medium text-gold">📦 פרטי המכירה</p>
+              <p className="font-body text-sm font-medium text-gold">{t("announcements.saleDetails")}</p>
               <Select value={saleType} onValueChange={(v) => { setSaleType(v); setSaleData(EMPTY_SALE_DATA); }}>
                 <SelectTrigger className="bg-background font-body">
-                  <SelectValue placeholder="סוג מוצר" />
+                  <SelectValue placeholder={t("announcements.saleTypeLabel")} />
                 </SelectTrigger>
                 <SelectContent>
                   {SALE_TYPES.map((t) => (
@@ -687,10 +689,10 @@ const Announcements = () => {
             </div>
           )}
 
-          <p className="font-body text-xs text-muted-foreground">* המודעה תפורסם לאחר אישור מנהל המערכת</p>
+          <p className="font-body text-xs text-muted-foreground">{t("announcements.approvalNote")}</p>
           <div className="flex gap-2">
-            <Button type="submit" className="gradient-gold text-primary-foreground font-body">שלח לאישור</Button>
-            <Button type="button" variant="ghost" onClick={() => { setShowForm(false); resetForm(); }} className="font-body">ביטול</Button>
+            <Button type="submit" className="gradient-gold text-primary-foreground font-body">{t("common.submit")}</Button>
+            <Button type="button" variant="ghost" onClick={() => { setShowForm(false); resetForm(); }} className="font-body">{t("common.cancel")}</Button>
           </div>
         </form>
       )}
@@ -699,19 +701,19 @@ const Announcements = () => {
       <div className="mb-6 sm:mb-8 mx-auto max-w-md text-center flex flex-col items-center">
         <div className="flex items-baseline justify-center gap-3 mb-2">
           <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">01</span>
-          <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">הודעות</span>
+          <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">{t("announcements.section01Title")}</span>
         </div>
         <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl flex items-center justify-center gap-2">
           <Megaphone className="h-6 w-6 text-gold" />
-          לוח הודעות
+          {t("announcements.section01Sub")}
         </h2>
         <p className="mt-2 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
-          עדכונים, הודעות והודעות חשובות לחברי המועדון
+          {t("announcements.section01Desc")}
         </p>
       </div>
 
       {filteredAnnouncements.length === 0 ? (
-        <p className="font-body text-muted-foreground text-center py-12">אין הודעות כרגע.</p>
+        <p className="font-body text-muted-foreground text-center py-12">{t("announcements.section01Empty")}</p>
       ) : (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredAnnouncements.map((item, i) => renderAnnouncementCard(item, i))}
@@ -735,19 +737,19 @@ const Announcements = () => {
       <div className="mb-6 sm:mb-8 mx-auto max-w-md text-center flex flex-col items-center">
         <div className="flex items-baseline justify-center gap-3 mb-2">
           <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">02</span>
-          <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">שוק</span>
+          <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">{t("announcements.section02Title")}</span>
         </div>
         <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl flex items-center justify-center gap-2">
           <ShoppingBag className="h-6 w-6 text-gold" />
-          לוח מכירות
+          {t("announcements.section02Sub")}
         </h2>
         <p className="mt-2 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
-          מוצרים, שירותים ופריטים למכירה מחברי המועדון
+          {t("announcements.section02Desc")}
         </p>
       </div>
 
       {filteredSales.length === 0 ? (
-        <p className="font-body text-muted-foreground text-center py-12">אין מודעות מכירה כרגע.</p>
+        <p className="font-body text-muted-foreground text-center py-12">{t("announcements.section02Empty")}</p>
       ) : (
         <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredSales.map((item) => renderSaleCard(item))}
@@ -759,7 +761,7 @@ const Announcements = () => {
     <Dialog open={lightboxImages.length > 0} onOpenChange={() => setLightboxImages([])}>
       <DialogContent className="max-w-3xl p-0 bg-black/95 border-0">
         <DialogHeader className="sr-only">
-          <DialogTitle>תמונות</DialogTitle>
+          <DialogTitle>{t("announcements.imagesLabel")}</DialogTitle>
         </DialogHeader>
         <div className="relative flex items-center justify-center min-h-[50vh]">
           <button

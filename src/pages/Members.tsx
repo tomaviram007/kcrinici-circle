@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const isBirthdayToday = (birthDate: string | null): boolean => {
   if (!birthDate) return false;
@@ -56,6 +57,7 @@ const Members = () => {
   const [filterProfession, setFilterProfession] = useState("all");
   const [filterHobby, setFilterHobby] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   const fetchMembers = async () => {
     const { data } = await supabase.from("profiles").select("*").eq("is_approved", true).order("full_name");
@@ -124,7 +126,7 @@ const Members = () => {
     setSaving(false);
 
     if (error) {
-      toast({ title: "שגיאה", description: "לא הצלחנו לעדכן את הפרופיל", variant: "destructive" });
+      toast({ title: t("common.error"), description: "לא הצלחנו לעדכן את הפרופיל", variant: "destructive" });
     } else {
       toast({ title: "עודכן בהצלחה!" });
       setEditMember(null);
@@ -171,25 +173,25 @@ const Members = () => {
 
   return (
     <>
-    <PageHero image={coverImage} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
+    <PageHero image={coverImage} title={t("hero.members.title")} highlight={t("hero.members.highlight")} subtitle={t("hero.members.subtitle")} />
     <ContentWithSidebarAds targetPage="members">
     <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
-          אינדקס <span className="text-gold">החברים</span>
+          {t("members.pageTitle")}
         </h1>
-        <p className="mt-1 font-body text-sm text-muted-foreground">אנשי המקצוע של השכונה</p>
+        <p className="mt-1 font-body text-sm text-muted-foreground">{t("members.pageSubtitle")}</p>
         <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
       </div>
 
       {/* Filters */}
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <Input placeholder="חיפוש לפי שם, מקצוע, תחביב..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-full sm:w-64 h-9 font-body text-sm" autoComplete="off" />
+        <Input placeholder={t("members.searchPlaceholder")} value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-full sm:w-64 h-9 font-body text-sm" autoComplete="off" />
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Select value={filterProfession} onValueChange={setFilterProfession}>
-            <SelectTrigger className="bg-background font-body flex-1 sm:w-36 h-9 text-sm"><SelectValue placeholder="מקצוע" /></SelectTrigger>
+            <SelectTrigger className="bg-background font-body flex-1 sm:w-36 h-9 text-sm"><SelectValue placeholder={t("members.professionFilter")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">כל המקצועות</SelectItem>
+              <SelectItem value="all">{t("members.allProfessions")}</SelectItem>
               {[...new Set(members.map(m => m.profession).filter(Boolean))].sort().map(p => (
                 <SelectItem key={p} value={p}>{p}</SelectItem>
               ))}
@@ -197,9 +199,9 @@ const Members = () => {
           </Select>
           {allHobbies.length > 0 && (
             <Select value={filterHobby} onValueChange={setFilterHobby}>
-              <SelectTrigger className="bg-background font-body flex-1 sm:w-36 h-9 text-sm"><SelectValue placeholder="תחביב" /></SelectTrigger>
+              <SelectTrigger className="bg-background font-body flex-1 sm:w-36 h-9 text-sm"><SelectValue placeholder={t("members.hobbyFilter")} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">כל התחביבים</SelectItem>
+                <SelectItem value="all">{t("members.allHobbies")}</SelectItem>
                 {allHobbies.map(h => (
                   <SelectItem key={h} value={h}>{h}</SelectItem>
                 ))}
@@ -242,7 +244,7 @@ const Members = () => {
               <div className="flex flex-col items-center text-center gap-3">
                 {isOwnCard(member) && (
                   <span className="self-start inline-flex items-center gap-1 text-xs text-gold font-body">
-                    <Pencil className="h-3 w-3" /> לחץ לעריכה
+                    <Pencil className="h-3 w-3" /> {t("members.editCard")}
                   </span>
                 )}
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20 overflow-hidden">
@@ -263,13 +265,13 @@ const Members = () => {
                 {member.birth_date && (
                   <div className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-body ${birthdayToday ? "bg-gold/15 text-gold border border-gold/30 animate-pulse" : "bg-secondary text-muted-foreground"}`}>
                     <Cake className={`h-3 w-3 ${birthdayToday ? "text-gold" : ""}`} />
-                    {birthdayToday ? "🎂 חוגג היום!" : formatHebrewDate(member.birth_date)}
+                    {birthdayToday ? t("members.birthday") : formatHebrewDate(member.birth_date)}
                   </div>
                 )}
 
                 {!isOwnCard(member) && (
                   <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 inline-flex items-center gap-1 text-xs text-gold/70 font-body">
-                    לחץ לפרטים ←
+                    {t("members.viewProfile")}
                   </span>
                 )}
               </div>
@@ -306,7 +308,7 @@ const Members = () => {
         ))}
       </div>
       )}
-      {members.length === 0 && <p className="font-body text-muted-foreground">אין חברים מאושרים עדיין.</p>}
+      {members.length === 0 && <p className="font-body text-muted-foreground">{t("members.emptyState")}</p>}
     </div>
 
 
@@ -314,56 +316,56 @@ const Members = () => {
     <Dialog open={!!editMember} onOpenChange={(open) => !open && setEditMember(null)}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">עריכת <span className="text-gold">הכרטיסיה שלך</span></DialogTitle>
-          <DialogDescription className="sr-only">עריכת פרטי הכרטיסיה שלך</DialogDescription>
+          <DialogTitle className="font-serif text-xl">{t("members.editCardTitle")}</DialogTitle>
+          <DialogDescription className="sr-only">{t("members.editCardSubtitle")}</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
           {/* Right column — Form */}
           <div className="space-y-4 order-2 sm:order-1">
             <div>
-              <Label className="font-body text-sm">שם מלא</Label>
+              <Label className="font-body text-sm">{t("members.nameLabel")}</Label>
               <Input value={editForm.full_name} onChange={(e) => setEditForm(f => ({ ...f, full_name: e.target.value }))} autoComplete="off" />
             </div>
             <div>
-              <Label className="font-body text-sm">מקצוע</Label>
+              <Label className="font-body text-sm">{t("members.professionLabel")}</Label>
               <Input value={editForm.profession} onChange={(e) => setEditForm(f => ({ ...f, profession: e.target.value }))} autoComplete="off" />
             </div>
             <div>
-              <Label className="font-body text-sm">מומחיות</Label>
+              <Label className="font-body text-sm">{t("members.expertiseLabel")}</Label>
               <Input value={editForm.expertise} onChange={(e) => setEditForm(f => ({ ...f, expertise: e.target.value }))} autoComplete="off" />
             </div>
             <div>
-              <Label className="font-body text-sm">ביוגרפיה קצרה</Label>
+              <Label className="font-body text-sm">{t("members.bioLabel")}</Label>
               <Textarea value={editForm.bio} onChange={(e) => setEditForm(f => ({ ...f, bio: e.target.value }))} rows={3} autoComplete="off" />
             </div>
             <div>
-              <Label className="font-body text-sm">תחביבים</Label>
-              <Input value={editForm.hobbies} onChange={(e) => setEditForm(f => ({ ...f, hobbies: e.target.value }))} placeholder="למשל: ספורט, בישול, טכנולוגיה..." autoComplete="off" />
+              <Label className="font-body text-sm">{t("members.hobbiesLabel")}</Label>
+              <Input value={editForm.hobbies} onChange={(e) => setEditForm(f => ({ ...f, hobbies: e.target.value }))} placeholder={t("members.hobbiesPlaceholder")} autoComplete="off" />
             </div>
             <div>
-              <Label className="font-body text-sm">טלפון</Label>
+              <Label className="font-body text-sm">{t("members.phoneLabel")}</Label>
               <Input value={editForm.phone} onChange={(e) => setEditForm(f => ({ ...f, phone: e.target.value }))} dir="ltr" autoComplete="off" />
             </div>
             <div>
-              <Label className="font-body text-sm">כתובת</Label>
+              <Label className="font-body text-sm">{t("members.addressLabel")}</Label>
               <Input value={editForm.address} onChange={(e) => setEditForm(f => ({ ...f, address: e.target.value }))} autoComplete="off" />
             </div>
             <div>
-              <Label className="font-body text-sm">תאריך לידה</Label>
+              <Label className="font-body text-sm">{t("members.birthdayLabel")}</Label>
               <HebrewDatePicker value={editForm.birth_date} onChange={(val) => setEditForm(f => ({ ...f, birth_date: val }))} />
             </div>
             <div className="border-t border-border pt-3 mt-2">
-              <p className="font-body text-xs text-muted-foreground mb-2">קישורים חברתיים</p>
+              <p className="font-body text-xs text-muted-foreground mb-2">{t("members.socialLinks")}</p>
               <div className="space-y-2">
-                <Input value={editForm.website_url} onChange={(e) => setEditForm(f => ({ ...f, website_url: e.target.value }))} placeholder="אתר אישי (https://...)" dir="ltr" autoComplete="off" />
-                <Input value={editForm.facebook_url} onChange={(e) => setEditForm(f => ({ ...f, facebook_url: e.target.value }))} placeholder="פייסבוק (https://...)" dir="ltr" autoComplete="off" />
-                <Input value={editForm.instagram_url} onChange={(e) => setEditForm(f => ({ ...f, instagram_url: e.target.value }))} placeholder="אינסטגרם (https://...)" dir="ltr" autoComplete="off" />
-                <Input value={editForm.linkedin_url} onChange={(e) => setEditForm(f => ({ ...f, linkedin_url: e.target.value }))} placeholder="לינקדאין (https://...)" dir="ltr" autoComplete="off" />
+                <Input value={editForm.website_url} onChange={(e) => setEditForm(f => ({ ...f, website_url: e.target.value }))} placeholder={t("members.websiteLabel")} dir="ltr" autoComplete="off" />
+                <Input value={editForm.facebook_url} onChange={(e) => setEditForm(f => ({ ...f, facebook_url: e.target.value }))} placeholder={t("members.facebookLabel")} dir="ltr" autoComplete="off" />
+                <Input value={editForm.instagram_url} onChange={(e) => setEditForm(f => ({ ...f, instagram_url: e.target.value }))} placeholder={t("members.instagramLabel")} dir="ltr" autoComplete="off" />
+                <Input value={editForm.linkedin_url} onChange={(e) => setEditForm(f => ({ ...f, linkedin_url: e.target.value }))} placeholder={t("members.linkedinLabel")} dir="ltr" autoComplete="off" />
               </div>
             </div>
             <Button onClick={handleSave} disabled={saving} className="w-full gradient-gold text-primary-foreground font-body">
-              {saving ? "שומר..." : "עדכן כרטיסיה"}
+              {saving ? t("common.loading") : t("members.updateBtn")}
             </Button>
           </div>
 
@@ -380,11 +382,11 @@ const Members = () => {
                 size="lg"
               />
             )}
-            <span className="text-xs text-muted-foreground font-body">לחץ על התמונה כדי לשנות</span>
+            <span className="text-xs text-muted-foreground font-body">{t("members.photoHint")}</span>
 
             {/* Live preview card */}
             <div className="w-full rounded-lg border border-gold/20 bg-card p-5 glow-gold">
-              <p className="font-body text-xs text-gold/70 mb-3 text-center">תצוגה מקדימה</p>
+              <p className="font-body text-xs text-gold/70 mb-3 text-center">{t("common.preview")}</p>
               <div className="flex items-center gap-4 mb-3">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20 overflow-hidden">
                   {liveAvatarUrl ? (
@@ -394,16 +396,16 @@ const Members = () => {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-serif text-base font-bold text-foreground">{editForm.full_name || "שם מלא"}</h3>
+                  <h3 className="font-serif text-base font-bold text-foreground">{editForm.full_name || t("members.nameLabel")}</h3>
                   <div className="flex items-center gap-1 mt-0.5">
                     <Briefcase className="h-3 w-3 text-gold" />
-                    <span className="font-body text-sm text-gold">{editForm.profession || "מקצוע"}</span>
+                    <span className="font-body text-sm text-gold">{editForm.profession || t("members.professionLabel")}</span>
                   </div>
                 </div>
               </div>
               {editForm.expertise && (
                 <p className="font-body text-xs text-muted-foreground mb-2">
-                  <span className="text-gold">מומחיות:</span> {editForm.expertise}
+                  <span className="text-gold">{t("members.expertiseTitle")}</span> {editForm.expertise}
                 </p>
               )}
               {editForm.bio && (
