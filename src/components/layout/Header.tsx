@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, Menu, X, Cake, User, Languages } from "lucide-react";
+import { LogOut, Shield, Menu, X, Cake, User } from "lucide-react";
 import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
 import { usePendingCount } from "@/hooks/usePendingCount";
 
@@ -197,16 +197,7 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center justify-center gap-2" style={{ width: "10%" }}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLang(lang === "he" ? "en" : "he")}
-              className="text-muted-foreground hover:text-gold font-body text-xs gap-1 px-2"
-              title={t("lang.switch")}
-            >
-              <Languages className="h-3.5 w-3.5" />
-              {t("lang.switch")}
-            </Button>
+
             {canAccess ? (
               <div className="flex items-center gap-1">
                 <Link to="/profile">
@@ -267,14 +258,7 @@ const Header = () => {
           </nav>
 
           <div className="px-6 pb-10 flex flex-col items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setLang(lang === "he" ? "en" : "he")}
-              className="w-full max-w-xs font-body gap-2 border-gold/30 text-gold hover:bg-gold/10"
-            >
-              <Languages className="h-4 w-4" />
-              {t("lang.switch")}
-            </Button>
+
             {canAccess ? (
               <>
                 <Link to="/profile" onClick={() => setMenuOpen(false)} className="w-full max-w-xs">
