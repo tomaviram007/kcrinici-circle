@@ -115,13 +115,6 @@ export type Database = {
             referencedRelation: "ad_campaigns"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "ad_clicks_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "ad_campaigns_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       ad_impressions: {
@@ -149,13 +142,6 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "ad_campaigns"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ad_impressions_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "ad_campaigns_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1172,73 +1158,30 @@ export type Database = {
       }
     }
     Views: {
-      ad_campaigns_public: {
-        Row: {
-          advertiser_id: string | null
-          alt_text: string | null
-          created_at: string | null
-          end_date: string | null
-          id: string | null
-          is_active: boolean | null
-          max_appearances: number | null
-          media_type: string | null
-          media_url: string | null
-          placement: string | null
-          priority: number | null
-          start_date: string | null
-          target_page: string | null
-          target_url: string | null
-          title: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          advertiser_id?: string | null
-          alt_text?: string | null
-          created_at?: string | null
-          end_date?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          max_appearances?: number | null
-          media_type?: string | null
-          media_url?: string | null
-          placement?: string | null
-          priority?: number | null
-          start_date?: string | null
-          target_page?: string | null
-          target_url?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          advertiser_id?: string | null
-          alt_text?: string | null
-          created_at?: string | null
-          end_date?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          max_appearances?: number | null
-          media_type?: string | null
-          media_url?: string | null
-          placement?: string | null
-          priority?: number | null
-          start_date?: string | null
-          target_page?: string | null
-          target_url?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ad_campaigns_advertiser_id_fkey"
-            columns: ["advertiser_id"]
-            isOneToOne: false
-            referencedRelation: "advertisers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
+      get_active_ad_campaigns: {
+        Args: never
+        Returns: {
+          advertiser_id: string
+          alt_text: string
+          created_at: string
+          end_date: string
+          id: string
+          is_active: boolean
+          max_appearances: number
+          media_type: string
+          media_url: string
+          placement: string
+          priority: number
+          start_date: string
+          target_page: string
+          target_url: string
+          title: string
+          updated_at: string
+        }[]
+      }
       get_event_attending_counts: {
         Args: { _event_ids: string[] }
         Returns: {
