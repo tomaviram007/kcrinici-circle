@@ -489,22 +489,22 @@ const AdminEvents = () => {
             <div key={event.id} className="rounded-lg border border-border bg-card p-4 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 {event.image_url && (
-                  <img src={event.image_url} alt={event.title} className="w-16 h-16 rounded-md object-cover shrink-0 border border-border" />
+                  <img src={event.image_url} alt={event.title} onClick={() => startEdit(event)} className="w-16 h-16 rounded-md object-cover shrink-0 border border-border cursor-pointer hover:opacity-80 transition-opacity" />
                 )}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-serif text-base font-bold text-foreground">{event.title}</h4>
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => startEdit(event)} title="לחצו לעריכת האירוע">
+                  <h4 className="font-serif text-base font-bold text-foreground hover:text-gold transition-colors">{event.title}</h4>
                   <p className="font-body text-sm text-muted-foreground truncate">{event.description}</p>
                   <div className="mt-1 flex items-center gap-2 flex-wrap">
                     <span className="font-body text-xs text-gold">
                       {event.event_date && new Date(event.event_date).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </span>
                     {event.location && (
-                      <a href={googleMapsUrl(event.location)} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-gold hover:underline flex items-center gap-0.5">
+                      <a href={googleMapsUrl(event.location)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="font-body text-xs text-gold hover:underline flex items-center gap-0.5">
                         <MapPin className="h-3 w-3" /> {event.location}
                       </a>
                     )}
                   </div>
-                  <div className="mt-1 flex items-center gap-2 flex-wrap">
+                  <div className="mt-1 flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                     <p className="font-body text-xs text-muted-foreground">
                       נוצר: {new Date(event.created_at).toLocaleDateString("he-IL")}
                       {event.updated_at !== event.created_at && ` · עודכן: ${new Date(event.updated_at).toLocaleDateString("he-IL")}`}
