@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ShoppingBag, Lock, Banknote, User, Share2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ShoppingBag, Lock, Banknote, User, Share2, Pencil } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import gsap from "gsap";
 
@@ -15,6 +16,9 @@ const SALE_TYPES_MAP: Record<string, string> = {
 };
 
 const SalesPreviewSection = ({ isApproved }: Props) => {
+  const navigate = useNavigate();
+  const { hasPermission } = useUserPermissions();
+  const canEditAnnouncements = hasPermission("manage_announcements");
   const [sales, setSales] = useState<any[]>([]);
   const [creators, setCreators] = useState<Record<string, any>>({});
   const [selected, setSelected] = useState<any | null>(null);
@@ -94,6 +98,14 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
             מכירות <span className="text-gold">במועדון</span>
           </h2>
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
+          {canEditAnnouncements && (
+            <button
+              onClick={() => navigate("/admin?tab=announcements")}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
+            >
+              <Pencil className="h-3 w-3" /> ערוך מודעות
+            </button>
+          )}
         </div>
 
         {displayItems.length > 0 ? (

@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search } from "lucide-react";
+import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search, Pencil } from "lucide-react";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +32,9 @@ const EMPTY_FORM = { title: "", description: "", contact: "", contact_name: "", 
 type ViewMode = "grid" | "list";
 
 const Jobs = () => {
+  const navigate = useNavigate();
+  const { hasPermission } = useUserPermissions();
+  const canEditJobs = hasPermission("manage_jobs");
   const { toast } = useToast();
   const [jobs, setJobs] = useState<any[]>([]);
   const coverImage = usePageCover("jobs", heroImg);
@@ -86,7 +91,17 @@ const Jobs = () => {
 
   return (
     <>
-    <PageHero image={coverImage} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה" />
+    <PageHero image={coverImage} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה">
+      {canEditJobs && (
+        <button
+          onClick={() => navigate("/admin?tab=jobs")}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
+          title="ערוך משרות"
+        >
+          <Pencil className="h-3 w-3" /> ערוך משרות
+        </button>
+      )}
+    </PageHero>
     <ContentWithSidebarAds targetPage="jobs">
     <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex flex-col gap-4">
