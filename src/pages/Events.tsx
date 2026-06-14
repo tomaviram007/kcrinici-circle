@@ -560,7 +560,9 @@ const Events = () => {
                       const buildShareText = () => {
                         const date = new Date(selectedEvent.event_date);
                         const siteUrl = window.location.origin;
-                        const eventUrl = `${siteUrl}/events/${selectedEvent.id}`;
+                        const eventPageUrl = `${siteUrl}/events/${selectedEvent.id}`;
+                        const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || "https://wzbvdpgoyetmgluvhygf.supabase.co";
+                        const eventShareUrl = `${supabaseUrl}/functions/v1/event-share?id=${selectedEvent.id}`;
 
                         let text = "";
                         if (selectedEvent.description) {
@@ -573,8 +575,8 @@ const Events = () => {
                         }
                         text += `\n`;
                         if (selectedEvent.payment_link) text += `\n💳 לתשלום: ${selectedEvent.payment_link}`;
-                        text += `\n✅ לאישור הגעה: ${eventUrl}`;
-                        return { text, eventUrl };
+                        text += `\n✅ לאישור הגעה: ${eventShareUrl}`;
+                        return { text, eventUrl: eventShareUrl, eventPageUrl };
                       };
 
                       const copyToClipboard = async () => {
