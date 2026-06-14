@@ -6,6 +6,7 @@ import { useBirthdaysThisWeek } from "@/hooks/useBirthdaysThisWeek";
 import gsap from "gsap";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   isApproved?: boolean;
@@ -34,6 +35,7 @@ const BirthdaysSection = ({ isApproved = false }: Props) => {
   const confettiTriggered = useRef(false);
   const { birthdays, loading } = useBirthdaysThisWeek();
   const [sending, setSending] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (birthdays.length === 0 || !sectionRef.current) return;
@@ -61,13 +63,12 @@ const BirthdaysSection = ({ isApproved = false }: Props) => {
     supabase.from("profiles").select("phone").eq("user_id", userId).maybeSingle().then(({ data }) => {
       setSending(false);
       if (!data?.phone) {
-        toast.error("לא נמצא מספר טלפון לחבר זה");
+        toast.error(t("landing.birthdays.noPhone"));
         return;
       }
       const cleanPhone = data.phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
-      const msg = encodeURIComponent(`היי ${name}, המון מזל טוב ליום הולדתך 🎂`);
+      const msg = encodeURIComponent(t("landing.birthdays.wishMsg").replace("{name}", name));
       window.open(`https://wa.me/${cleanPhone}?text=${msg}`, "_blank");
-      toast.success("מועבר לוואטסאפ! 🎉");
     });
   };
 
@@ -78,9 +79,9 @@ const BirthdaysSection = ({ isApproved = false }: Props) => {
     <section className="relative py-8 px-5 sm:py-24 sm:px-6 overflow-hidden" ref={sectionRef}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 sm:mb-16 text-center">
-          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">חוגגים השבוע</p>
+          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">{t("landing.birthdays.label")}</p>
           <h2 className="font-serif text-2xl font-bold text-foreground sm:text-4xl md:text-5xl">
-            ימי הולדת <span className="text-gold">במועדון</span>
+            {t("landing.birthdays.title1")} <span className="text-gold">{t("landing.birthdays.title2")}</span>
           </h2>
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
@@ -105,9 +106,10 @@ const BirthdaysSection = ({ isApproved = false }: Props) => {
                   size="sm"
                   className="mt-4 border-gold/30 text-gold hover:bg-gold/10 font-body gap-1.5"
                   onClick={() => handleSendGreeting(person.full_name, person.user_id)}
+                  disabled={sending}
                 >
                   <Send className="h-3.5 w-3.5" />
-                  שלח ברכה
+                  {t("landing.birthdays.sendWish")}
                 </Button>
               )}
             </div>
@@ -117,7 +119,7 @@ const BirthdaysSection = ({ isApproved = false }: Props) => {
             <div className="absolute inset-0 flex items-center justify-center">
               <Link to="/register" className="flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur-sm px-6 py-3 font-body text-sm text-gold hover:bg-gold/10 transition-colors">
                 <Lock className="h-4 w-4" />
-                הצטרף כדי לראות
+                {t("landing.bulletin.joinBtn")}
               </Link>
             </div>
           )}

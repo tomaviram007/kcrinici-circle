@@ -15,6 +15,7 @@ import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import heroImg from "@/assets/hero-gallery.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { validateImageFile } from "@/lib/file-validation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -23,6 +24,7 @@ type Photo = Tables<"gallery_photos">;
 
 const Gallery = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const coverImage = usePageCover("gallery", heroImg);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [albumCreators, setAlbumCreators] = useState<Record<string, any>>({});
@@ -118,13 +120,13 @@ const Gallery = () => {
         created_by: userId,
       });
       if (error) throw error;
-      toast({ title: "אלבום נוצר בהצלחה!" });
+      toast({ title: t("gallery.toastAlbumCreated") });
       setNewTitle("");
       setNewDesc("");
       setShowCreate(false);
       await fetchAlbums();
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
     } finally {
       setCreating(false);
     }
@@ -175,10 +177,10 @@ const Gallery = () => {
         });
         if (insertErr) throw insertErr;
       }
-      toast({ title: "התמונות הועלו בהצלחה!" });
+      toast({ title: t("gallery.toastPhotosUploaded") });
       await openAlbum(selectedAlbum);
     } catch (err: any) {
-      toast({ title: "שגיאה בהעלאה", description: err.message, variant: "destructive" });
+      toast({ title: t("gallery.toastUploadError"), description: err.message, variant: "destructive" });
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -195,12 +197,12 @@ const Gallery = () => {
         uploaded_by: userId,
       });
       if (error) throw error;
-      toast({ title: "התמונה נוספה!" });
+      toast({ title: t("gallery.toastPhotoAdded") });
       setLinkUrl("");
       setShowAddByLink(false);
       await openAlbum(selectedAlbum);
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
     } finally {
       setAddingLink(false);
     }
@@ -211,9 +213,9 @@ const Gallery = () => {
       const { error } = await supabase.from("gallery_photos").delete().eq("id", photo.id);
       if (error) throw error;
       setPhotos((prev) => prev.filter((p) => p.id !== photo.id));
-      toast({ title: "התמונה נמחקה" });
+      toast({ title: t("gallery.toastPhotoDeleted") });
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -223,10 +225,10 @@ const Gallery = () => {
       const { error } = await supabase.from("gallery_albums").update({ cover_image_url: photoUrl }).eq("id", selectedAlbum.id);
       if (error) throw error;
       setSelectedAlbum({ ...selectedAlbum, cover_image_url: photoUrl });
-      toast({ title: "תמונה ראשית עודכנה!" });
+      toast({ title: t("gallery.toastCoverUpdated") });
       await fetchAlbums();
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -246,11 +248,11 @@ const Gallery = () => {
       }
       const { error } = await supabase.from("gallery_photos").update(updates).eq("id", editingPhoto.id);
       if (error) throw error;
-      toast({ title: "התמונה עודכנה!" });
+      toast({ title: t("gallery.toastPhotoUpdated") });
       setEditingPhoto(null);
       if (selectedAlbum) await openAlbum(selectedAlbum);
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
     } finally {
       setSavingPhoto(false);
     }
@@ -273,11 +275,11 @@ const Gallery = () => {
       const { data: { publicUrl } } = supabase.storage.from("gallery").getPublicUrl(path);
       const { error } = await supabase.from("gallery_photos").update({ image_url: publicUrl }).eq("id", editingPhoto.id);
       if (error) throw error;
-      toast({ title: "התמונה הוחלפה!" });
+      toast({ title: t("gallery.toastPhotoUpdated") });
       setEditingPhoto(null);
       if (selectedAlbum) await openAlbum(selectedAlbum);
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
     } finally {
       setSavingPhoto(false);
       if (photoFileRef.current) photoFileRef.current.value = "";
@@ -290,9 +292,9 @@ const Gallery = () => {
       if (error) throw error;
       setAlbums((prev) => prev.filter((a) => a.id !== albumId));
       if (selectedAlbum?.id === albumId) setSelectedAlbum(null);
-      toast({ title: "האלבום נמחק" });
+      toast({ title: t("gallery.toastAlbumDeleted") });
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -315,14 +317,14 @@ const Gallery = () => {
       if (error) throw error;
       setSelectedAlbum({ ...selectedAlbum, title: editAlbumTitle.trim(), description: editAlbumDesc.trim() || null });
       if (!isAdmin) {
-        toast({ title: "השינויים נשלחו לאישור", description: "האלבום יוצג מחדש לאחר אישור מנהל המערכת." });
+        toast({ title: t("gallery.toastAlbumEditedPending"), description: t("gallery.toastAlbumEditedPendingDesc") });
       } else {
-        toast({ title: "פרטי האלבום עודכנו!" });
+        toast({ title: t("gallery.toastAlbumUpdated") });
       }
       setShowEditAlbum(false);
       await fetchAlbums();
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
     } finally {
       setSavingAlbum(false);
     }
@@ -331,7 +333,7 @@ const Gallery = () => {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="font-body text-muted-foreground">טוען...</p>
+        <p className="font-body text-muted-foreground">{t("gallery.loading")}</p>
       </div>
     );
   }
@@ -373,7 +375,7 @@ const Gallery = () => {
       <div className="mx-auto max-w-5xl px-5 py-4 sm:px-6 sm:py-8 md:py-12">
         <button onClick={() => setSelectedAlbum(null)} className="inline-flex items-center gap-1 font-body text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
           <ArrowRight className="h-4 w-4" />
-          חזרה לגלריה
+          {t("gallery.back")}
         </button>
 
         {/* Album header with info */}
@@ -392,7 +394,7 @@ const Gallery = () => {
                       setShowEditAlbum(true);
                     }}
                     className="text-muted-foreground hover:text-gold transition-colors"
-                    title="עריכת פרטי אלבום"
+                    title={t("gallery.editAlbumTitle")}
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
@@ -408,7 +410,7 @@ const Gallery = () => {
                 </span>
                 <span className="flex items-center gap-1">
                   <Image className="h-3.5 w-3.5 text-gold" />
-                  {photos.length} תמונות
+                  {photos.length} {t("gallery.photos")}
                 </span>
               </div>
               {/* Creator */}
@@ -476,10 +478,10 @@ const Gallery = () => {
                     const { error } = await supabase.from("gallery_albums").update({ cover_image_url: coverUrl }).eq("id", selectedAlbum.id);
                     if (error) throw error;
                     setSelectedAlbum({ ...selectedAlbum, cover_image_url: coverUrl });
-                    toast({ title: "תמונת קאבר עודכנה!" });
+                    toast({ title: t("gallery.toastCoverImageUpdated") });
                     await fetchAlbums();
                   } catch (err: any) {
-                    toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+                    toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
                   } finally {
                     setUploadingCover(false);
                     if (coverInputRef.current) coverInputRef.current.value = "";
@@ -493,24 +495,24 @@ const Gallery = () => {
           <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border">
             <Button onClick={() => fileInputRef.current?.click()} disabled={uploading} size="sm" className="gradient-gold text-primary-foreground font-body gap-1">
               <Upload className="h-3.5 w-3.5" />
-              {uploading ? "מעלה..." : "העלאת תמונות"}
+              {uploading ? t("gallery.uploading") : t("gallery.uploadPhotos")}
             </Button>
             <Button onClick={() => setShowAddByLink(true)} size="sm" variant="outline" className="font-body gap-1 border-gold/40 text-gold hover:bg-gold/10">
               <Link2 className="h-3.5 w-3.5" />
-              הוסף מלינק
+              {t("gallery.addFromLink")}
             </Button>
             <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleUploadPhoto} />
           </div>
         </div>
 
         {loadingPhotos ? (
-          <p className="font-body text-muted-foreground text-center py-12">טוען תמונות...</p>
+          <p className="font-body text-muted-foreground text-center py-12">{t("gallery.loadingPhotos")}</p>
         ) : photos.length === 0 ? (
           <div className="text-center py-16">
             <Image className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="font-body text-muted-foreground">עדיין אין תמונות באלבום הזה</p>
+            <p className="font-body text-muted-foreground">{t("gallery.noPhotos")}</p>
             <Button onClick={() => fileInputRef.current?.click()} className="mt-4 gradient-gold text-primary-foreground font-body">
-              העלה תמונה ראשונה
+              {t("gallery.uploadFirst")}
             </Button>
           </div>
         ) : (
@@ -541,7 +543,7 @@ const Gallery = () => {
                     <button
                       onClick={(e) => { e.stopPropagation(); handleSetCover(photo.image_url); }}
                       className="bg-background/80 backdrop-blur-sm text-gold rounded-full p-1.5 hover:bg-background transition-colors"
-                      title="הגדר כתמונה ראשית"
+                      title={t("gallery.setAsCover")}
                     >
                       <Star className="h-3 w-3" />
                     </button>
@@ -562,12 +564,12 @@ const Gallery = () => {
         <Dialog open={showAddByLink} onOpenChange={setShowAddByLink}>
           <DialogContent dir="rtl">
             <DialogHeader>
-              <DialogTitle className="font-serif text-xl">הוספת תמונה <span className="text-gold">מלינק</span></DialogTitle>
-              <DialogDescription className="sr-only">הוסף תמונה חדשה מקישור</DialogDescription>
+              <DialogTitle className="font-serif text-xl">{t("gallery.addPhotoByLinkTitle")} <span className="text-gold">{t("gallery.addPhotoByLinkHighlight")}</span></DialogTitle>
+              <DialogDescription className="sr-only">{t("gallery.addPhotoByLinkDesc")}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-2">
               <div>
-                <Label className="font-body text-sm">קישור לתמונה</Label>
+                <Label className="font-body text-sm">{t("gallery.photoLink")}</Label>
                 <Input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://example.com/image.jpg" dir="ltr" autoComplete="off" />
               </div>
               {linkUrl && (
@@ -576,7 +578,7 @@ const Gallery = () => {
                 </div>
               )}
               <Button onClick={handleAddPhotoByLink} disabled={addingLink || !linkUrl.trim()} className="w-full gradient-gold text-primary-foreground font-body">
-                {addingLink ? "מוסיף..." : "הוסף תמונה"}
+                {addingLink ? t("gallery.adding") : t("gallery.addPhoto")}
               </Button>
             </div>
           </DialogContent>
@@ -586,8 +588,8 @@ const Gallery = () => {
         <Dialog open={!!editingPhoto} onOpenChange={(open) => !open && setEditingPhoto(null)}>
           <DialogContent dir="rtl">
             <DialogHeader>
-              <DialogTitle className="font-serif text-xl">עריכת <span className="text-gold">תמונה</span></DialogTitle>
-              <DialogDescription className="sr-only">עריכת פרטי התמונה</DialogDescription>
+              <DialogTitle className="font-serif text-xl">{t("gallery.editPhotoTitle")} <span className="text-gold">{t("gallery.editPhotoHighlight")}</span></DialogTitle>
+              <DialogDescription className="sr-only">{t("gallery.editPhotoDesc")}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-2">
               {editingPhoto && (
@@ -596,19 +598,19 @@ const Gallery = () => {
                 </div>
               )}
               <div>
-                <Label className="font-body text-sm">כיתוב</Label>
+                <Label className="font-body text-sm">{t("gallery.caption")}</Label>
                 <Input value={photoCaption} onChange={(e) => setPhotoCaption(e.target.value)} placeholder="תיאור קצר..." autoComplete="off" />
               </div>
               <div>
-                <Label className="font-body text-sm">החלף מלינק (אופציונלי)</Label>
+                <Label className="font-body text-sm">{t("gallery.replaceFromLink")}</Label>
                 <Input value={photoLinkUrl} onChange={(e) => setPhotoLinkUrl(e.target.value)} placeholder="https://..." dir="ltr" autoComplete="off" />
               </div>
               <div>
-                <Label className="font-body text-sm">או העלה קובץ חדש</Label>
+                <Label className="font-body text-sm">{t("gallery.uploadNewFile")}</Label>
                 <input ref={photoFileRef} type="file" accept="image/*" className="block w-full font-body text-sm text-muted-foreground file:mr-2 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:text-foreground mt-1" onChange={handleReplacePhotoFile} />
               </div>
               <Button onClick={handleSavePhotoEdit} disabled={savingPhoto} className="w-full gradient-gold text-primary-foreground font-body">
-                {savingPhoto ? "שומר..." : "שמור שינויים"}
+                {savingPhoto ? t("gallery.saving") : t("gallery.saveChanges")}
               </Button>
             </div>
           </DialogContent>
@@ -618,20 +620,20 @@ const Gallery = () => {
         <Dialog open={showEditAlbum} onOpenChange={setShowEditAlbum}>
           <DialogContent dir="rtl">
             <DialogHeader>
-              <DialogTitle className="font-serif text-xl">עריכת <span className="text-gold">אלבום</span></DialogTitle>
-              <DialogDescription className="sr-only">עריכת שם ותיאור האלבום</DialogDescription>
+              <DialogTitle className="font-serif text-xl">{t("gallery.editAlbumTitleDialog")} <span className="text-gold">{t("gallery.editAlbumHighlight")}</span></DialogTitle>
+              <DialogDescription className="sr-only">{t("gallery.editAlbumDesc")}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-2">
               <div>
-                <Label className="font-body text-sm">שם האלבום <span className="text-gold">*</span></Label>
+                <Label className="font-body text-sm">{t("gallery.albumName")} <span className="text-gold">*</span></Label>
                 <Input value={editAlbumTitle} onChange={(e) => setEditAlbumTitle(e.target.value)} className="bg-card border-border" autoComplete="off" />
               </div>
               <div>
-                <Label className="font-body text-sm">תיאור</Label>
+                <Label className="font-body text-sm">{t("gallery.description")}</Label>
                 <Textarea value={editAlbumDesc} onChange={(e) => setEditAlbumDesc(e.target.value)} className="bg-card border-border" placeholder="תיאור קצר של האלבום..." autoComplete="off" />
               </div>
               <Button onClick={handleSaveAlbumEdit} disabled={savingAlbum || !editAlbumTitle.trim()} className="w-full gradient-gold text-primary-foreground font-body py-5">
-                {savingAlbum ? "שומר..." : "שמור שינויים"}
+                {savingAlbum ? t("gallery.saving") : t("gallery.saveChanges")}
               </Button>
             </div>
           </DialogContent>
@@ -643,17 +645,17 @@ const Gallery = () => {
   // Albums list
   return (
     <>
-    <PageHero image={coverImage} title="גלריית" highlight="תמונות" subtitle="רגעים מיוחדים מאירועי ומפגשי המועדון" />
+    <PageHero image={coverImage} title={t("gallery.heroTitle")} highlight={t("gallery.heroHighlight")} subtitle={t("gallery.heroSubtitle")} />
     <ContentWithSidebarAds targetPage="gallery">
     <div className="mx-auto max-w-5xl px-5 py-4 sm:px-6 sm:py-8 md:py-12">
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="font-serif text-2xl font-bold text-foreground md:text-3xl">
-          גלריית <span className="text-gold">תמונות</span>
+          {t("gallery.heading")} <span className="text-gold">{t("gallery.headingHighlight")}</span>
         </h1>
         <Button onClick={() => setShowCreate(true)} className="gradient-gold text-primary-foreground font-body gap-1">
           <Plus className="h-4 w-4" />
-          אלבום חדש
+          {t("gallery.newAlbum")}
         </Button>
       </div>
 
@@ -661,10 +663,10 @@ const Gallery = () => {
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Filter className="h-4 w-4" />
-          <span className="font-body text-sm">סינון:</span>
+          <span className="font-body text-sm">{t("gallery.filter")}</span>
         </div>
         <Input
-          placeholder="חיפוש לפי שם / נושא..."
+          placeholder={t("gallery.searchPlaceholder")}
           value={filterSearch}
           onChange={(e) => setFilterSearch(e.target.value)}
           className="bg-card border-border w-48 sm:w-56"
@@ -672,10 +674,10 @@ const Gallery = () => {
         />
         <Select value={filterMonth} onValueChange={setFilterMonth}>
           <SelectTrigger className="w-40 font-body bg-card border-border">
-            <SelectValue placeholder="חודש" />
+            <SelectValue placeholder={t("gallery.monthPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">כל החודשים</SelectItem>
+            <SelectItem value="all">{t("gallery.allMonths")}</SelectItem>
             {Array.from({ length: 12 }, (_, i) => {
               const d = new Date(2026, i);
               return (
@@ -688,7 +690,7 @@ const Gallery = () => {
         </Select>
         {(filterSearch || filterMonth) && (
           <button onClick={() => { setFilterSearch(""); setFilterMonth(""); }} className="font-body text-xs text-gold hover:underline">
-            נקה פילטרים
+            {t("gallery.clearFilters")}
           </button>
         )}
       </div>
@@ -706,9 +708,9 @@ const Gallery = () => {
           <div className="text-center py-16">
             <Image className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <p className="font-body text-lg text-muted-foreground">
-              {albums.length === 0 ? "עדיין אין אלבומים" : "לא נמצאו אלבומים לפי הסינון"}
+              {albums.length === 0 ? t("gallery.noAlbums") : t("gallery.noAlbumsFiltered")}
             </p>
-            {albums.length === 0 && <p className="font-body text-sm text-muted-foreground mt-1">צרו אלבום חדש ושתפו תמונות מהמועדון</p>}
+            {albums.length === 0 && <p className="font-body text-sm text-muted-foreground mt-1">{t("gallery.createAlbumHint")}</p>}
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -732,7 +734,7 @@ const Gallery = () => {
                 >
                   {isPending && (
                     <div className="absolute top-2 right-2 z-10 flex items-center gap-1 rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-body text-white">
-                      <AlertTriangle className="h-3 w-3" /> ממתין לאישור
+                      <AlertTriangle className="h-3 w-3" /> {t("gallery.pendingApproval")}
                     </div>
                   )}
                   <div className="aspect-[4/3] bg-muted flex items-center justify-center overflow-hidden">
@@ -775,20 +777,20 @@ const Gallery = () => {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent dir="rtl">
           <DialogHeader>
-            <DialogTitle className="font-serif text-xl">אלבום חדש</DialogTitle>
-            <DialogDescription className="sr-only">יצירת אלבום תמונות חדש</DialogDescription>
+            <DialogTitle className="font-serif text-xl">{t("gallery.newAlbumDialogTitle")}</DialogTitle>
+            <DialogDescription className="sr-only">{t("gallery.newAlbumDialogDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
-              <Label className="font-body text-sm">שם האלבום <span className="text-gold">*</span></Label>
-              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="bg-card border-border" placeholder="למשל: מפגש ינואר 2026" autoComplete="off" />
+              <Label className="font-body text-sm">{t("gallery.albumNameLabel")} <span className="text-gold">*</span></Label>
+              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="bg-card border-border" placeholder={t("gallery.albumPlaceholder")} autoComplete="off" />
             </div>
             <div>
-              <Label className="font-body text-sm">תיאור</Label>
-              <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className="bg-card border-border" placeholder="תיאור קצר של האלבום..." autoComplete="off" />
+              <Label className="font-body text-sm">{t("gallery.albumDescLabel")}</Label>
+              <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className="bg-card border-border" placeholder={t("gallery.albumDescPlaceholder")} autoComplete="off" />
             </div>
             <Button onClick={handleCreateAlbum} disabled={creating || !newTitle.trim()} className="w-full gradient-gold text-primary-foreground font-body py-5">
-              {creating ? "יוצר..." : "צור אלבום"}
+              {creating ? t("gallery.creating") : t("gallery.createAlbum")}
             </Button>
           </div>
         </DialogContent>

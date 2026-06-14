@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ShoppingBag, Lock, Banknote, User, Share2, Pencil } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import gsap from "gsap";
 
@@ -19,6 +20,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
   const navigate = useNavigate();
   const { hasPermission } = useUserPermissions();
   const canEditAnnouncements = hasPermission("manage_announcements");
+  const { t } = useLanguage();
   const [sales, setSales] = useState<any[]>([]);
   const [creators, setCreators] = useState<Record<string, any>>({});
   const [selected, setSelected] = useState<any | null>(null);
@@ -93,9 +95,9 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
     <section className="py-8 px-5 sm:py-24 sm:px-6 bg-card/50" ref={sectionRef}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 sm:mb-16 text-center">
-          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">לוח מכירות</p>
+          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">{t("landing.sales.label")}</p>
           <h2 className="font-serif text-2xl font-bold text-foreground sm:text-4xl md:text-5xl">
-            מכירות <span className="text-gold">במועדון</span>
+            {t("landing.sales.title1")} <span className="text-gold">{t("landing.sales.title2")}</span>
           </h2>
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
           {canEditAnnouncements && (
@@ -103,7 +105,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
               onClick={() => navigate("/admin?tab=announcements")}
               className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
             >
-              <Pencil className="h-3 w-3" /> ערוך מודעות
+              <Pencil className="h-3 w-3" /> {t("announcements.editBtn")}
             </button>
           )}
         </div>
@@ -149,7 +151,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
               <div className="absolute inset-0 flex items-end justify-center pb-4 pointer-events-none">
                 <Link to="/register" className="pointer-events-auto flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur-sm px-6 py-3 font-body text-sm text-gold hover:bg-gold/10 transition-colors">
                   <Lock className="h-4 w-4" />
-                  הצטרף כדי לראות
+                  {t("landing.bulletin.joinBtn")}
                 </Link>
               </div>
             )}
@@ -157,15 +159,15 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
         ) : (
           <div className="text-center py-8 rounded-lg border border-border bg-card">
             <ShoppingBag className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="font-body text-sm text-muted-foreground">אין מכירות פעילות כרגע</p>
-            <Link to="/announcements" className="font-body text-xs text-gold hover:underline mt-1 inline-block">פרסם מכירה ←</Link>
+            <p className="font-body text-sm text-muted-foreground">{t("landing.sales.noSales")}</p>
+            <Link to="/announcements" className="font-body text-xs text-gold hover:underline mt-1 inline-block">{t("landing.sales.postSale")}</Link>
           </div>
         )}
 
         {isApproved && (
           <div className="mt-8 text-center">
             <Link to="/announcements" className="font-body text-sm text-gold hover:underline">
-              לכל המודעות ←
+              {t("landing.sales.allSales")}
             </Link>
           </div>
         )}
@@ -174,7 +176,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
       {/* Sale Detail Modal */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogContent dir="rtl" className="max-w-lg max-h-[85vh] overflow-y-auto">
-          <DialogTitle className="sr-only">פרטי מכירה</DialogTitle>
+          <DialogTitle className="sr-only">{t("landing.sales.detailsTitle")}</DialogTitle>
           <DialogDescription className="sr-only">פרטי המודעה</DialogDescription>
           {selected && (
             <div className="space-y-4">
@@ -190,7 +192,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
               <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{selected.content}</p>
               {Object.entries(saleData(selected)).filter(([, v]) => v).length > 0 && (
                 <div className="space-y-1.5">
-                  <p className="font-body text-sm font-medium text-foreground">📋 פרטים</p>
+                  <p className="font-body text-sm font-medium text-foreground">{t("landing.sales.details")}</p>
                   {Object.entries(saleData(selected)).filter(([, v]) => v).map(([k, v]) => (
                     <p key={k} className="font-body text-sm text-muted-foreground">• {k}: {v}</p>
                   ))}
@@ -213,7 +215,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
                 >
-                  <Share2 className="h-4 w-4" /> שתף בוואטסאפ
+                  <Share2 className="h-4 w-4" /> {t("landing.sales.whatsapp")}
                 </a>
               </div>
               <p className="font-body text-xs text-muted-foreground">

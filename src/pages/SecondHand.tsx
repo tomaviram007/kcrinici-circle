@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Phone, Tag, Trash2, Pencil, CheckCircle2, X, Package } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { usePageCover } from "@/hooks/usePageCover";
+import { useLanguage } from "@/contexts/LanguageContext";
 import SaleImageUpload from "@/components/announcements/SaleImageUpload";
 import heroImg from "@/assets/hero-secondhand.jpg";
 
@@ -53,6 +54,7 @@ const emptyForm = {
 
 const SecondHand = () => {
   const { user, isApproved } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const cover = usePageCover("secondhand", heroImg);
   const [items, setItems] = useState<Item[]>([]);
@@ -113,7 +115,7 @@ const SecondHand = () => {
 
   const handleSubmit = async () => {
     if (!form.title.trim()) {
-      toast({ title: "נא למלא כותרת", variant: "destructive" });
+      toast({ title: t("secondhand.toastTitleRequired"), variant: "destructive" });
       return;
     }
     if (!user) return;
@@ -137,9 +139,9 @@ const SecondHand = () => {
     }
 
     if (error) {
-      toast({ title: "שגיאה", description: error.message, variant: "destructive" });
+      toast({ title: t("secondhand.toastError"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: editId ? "הפריט עודכן" : "הפריט פורסם!" });
+      toast({ title: editId ? t("secondhand.toastUpdated") : t("secondhand.toastPublished") });
       setDialogOpen(false);
       setForm(emptyForm);
       setEditId(null);
@@ -149,12 +151,12 @@ const SecondHand = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("למחוק את הפריט?")) return;
+    if (!confirm(t("secondhand.deleteConfirm"))) return;
     const { error } = await supabase.from("secondhand_items").delete().eq("id", id);
     if (error) {
-      toast({ title: "שגיאה", description: error.message, variant: "destructive" });
+      toast({ title: t("secondhand.toastError"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "הפריט נמחק" });
+      toast({ title: t("secondhand.toastDeleted") });
       fetchItems();
     }
   };
@@ -168,26 +170,26 @@ const SecondHand = () => {
     <>
       <PageHero
         image={cover}
-        title="יד"
-        highlight="שנייה"
-        subtitle="מכירות והעברה של פריטים בין חברי המועדון"
+        title={t("secondhand.heroTitle")}
+        highlight={t("secondhand.heroHighlight")}
+        subtitle={t("secondhand.heroSubtitle")}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12" dir="rtl">
         {/* Toolbar */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center gap-3">
           <Input
-            placeholder="חיפוש פריט..."
+            placeholder={t("secondhand.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="md:max-w-xs bg-card border-border"
           />
           <Select value={catFilter} onValueChange={setCatFilter}>
             <SelectTrigger className="md:max-w-[180px] bg-card border-border">
-              <SelectValue placeholder="כל הקטגוריות" />
+              <SelectValue placeholder={t("secondhand.allCategories")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">כל הקטגוריות</SelectItem>
+              <SelectItem value="all">{t("secondhand.allCategories")}</SelectItem>
               {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -195,11 +197,11 @@ const SecondHand = () => {
             {user && isApproved ? (
               <Button onClick={openNew} className="gradient-gold text-primary-foreground font-body w-full md:w-auto">
                 <Plus className="h-4 w-4 ml-1" />
-                פרסום פריט
+                {t("secondhand.postItem")}
               </Button>
             ) : (
               <p className="font-body text-xs text-muted-foreground">
-                רק חברים מאושרים יכולים לפרסם פריטים
+                {t("secondhand.membersOnly")}
               </p>
             )}
           </div>
@@ -207,11 +209,11 @@ const SecondHand = () => {
 
         {/* Grid */}
         {loading ? (
-          <p className="text-center text-muted-foreground font-body py-12">טוען...</p>
+          <p className="text-center text-muted-foreground font-body py-12">{t("secondhand.loading")}</p>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
             <Package className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-            <p className="font-body text-muted-foreground">אין פריטים להצגה כרגע</p>
+            <p className="font-body text-muted-foreground">{t("secondhand.noItems")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -234,7 +236,7 @@ const SecondHand = () => {
                     {it.is_sold && (
                       <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
                         <span className="rotate-[-12deg] border-4 border-destructive text-destructive font-serif font-bold text-3xl px-6 py-1 rounded">
-                          נמכר
+                          {t("secondhand.sold")}
                         </span>
                       </div>
                     )}
@@ -263,10 +265,10 @@ const SecondHand = () => {
                     {isOwner && (
                       <div className="flex gap-1.5 pt-2 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
                         <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => openEdit(it)}>
-                          <Pencil className="h-3 w-3 ml-1" /> ערוך
+                          <Pencil className="h-3 w-3 ml-1" /> {t("secondhand.edit")}
                         </Button>
                         <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => toggleSold(it)}>
-                          <CheckCircle2 className="h-3 w-3 ml-1" /> {it.is_sold ? "החזר למכירה" : "סמן כנמכר"}
+                          <CheckCircle2 className="h-3 w-3 ml-1" /> {it.is_sold ? t("secondhand.returnToSale") : t("secondhand.markSold")}
                         </Button>
                         <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => handleDelete(it.id)}>
                           <Trash2 className="h-3 w-3" />
@@ -286,31 +288,31 @@ const SecondHand = () => {
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="font-serif text-xl">
-              {editId ? "עריכת פריט" : "פרסום פריט יד שנייה"}
+              {editId ? t("secondhand.dialogEditTitle") : t("secondhand.dialogNewTitle")}
             </DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-2">
             {/* Form fields */}
             <div className="space-y-4 lg:col-span-1">
               <div>
-                <Label className="font-body text-xs">כותרת *</Label>
+                <Label className="font-body text-xs">{t("secondhand.fieldTitle")}</Label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" />
               </div>
               <div>
-                <Label className="font-body text-xs">תיאור</Label>
+                <Label className="font-body text-xs">{t("secondhand.fieldDescription")}</Label>
                 <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-background" rows={5} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="font-body text-xs">מחיר (₪)</Label>
+                  <Label className="font-body text-xs">{t("secondhand.fieldPrice")}</Label>
                   <Input type="number" inputMode="decimal" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="bg-background" />
                 </div>
                 <div>
-                  <Label className="font-body text-xs">טלפון ליצירת קשר</Label>
+                  <Label className="font-body text-xs">{t("secondhand.fieldPhone")}</Label>
                   <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className="bg-background" placeholder="0501234567" />
                 </div>
                 <div>
-                  <Label className="font-body text-xs">מצב המוצר</Label>
+                  <Label className="font-body text-xs">{t("secondhand.fieldCondition")}</Label>
                   <Select value={form.condition} onValueChange={(v) => setForm({ ...form, condition: v })}>
                     <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -319,7 +321,7 @@ const SecondHand = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label className="font-body text-xs">קטגוריה</Label>
+                  <Label className="font-body text-xs">{t("secondhand.fieldCategory")}</Label>
                   <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
                     <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -332,7 +334,7 @@ const SecondHand = () => {
 
             {/* Images column */}
             <div className="space-y-3">
-              <Label className="font-body text-xs">תמונות</Label>
+              <Label className="font-body text-xs">{t("secondhand.fieldImages")}</Label>
               {user && (
                 <SaleImageUpload
                   userId={user.id}
@@ -349,7 +351,7 @@ const SecondHand = () => {
                 />
               )}
               <div className="pt-2 border-t border-border/40">
-                <Label className="font-body text-xs">הוספת תמונה מקישור (URL)</Label>
+                <Label className="font-body text-xs">{t("secondhand.addFromUrl")}</Label>
                 <div className="flex gap-2 mt-1">
                   <Input
                     value={imageUrlInput}
@@ -365,7 +367,7 @@ const SecondHand = () => {
                       const url = imageUrlInput.trim();
                       if (!url) return;
                       if (!/^https?:\/\//i.test(url)) {
-                        toast({ title: "כתובת לא תקינה", description: "הקישור חייב להתחיל ב-http(s)://", variant: "destructive" });
+                        toast({ title: t("secondhand.toastInvalidUrl"), description: t("secondhand.toastInvalidUrlDesc"), variant: "destructive" });
                         return;
                       }
                       setForm({ ...form, images: [...form.images, url] });
@@ -373,7 +375,7 @@ const SecondHand = () => {
                     }}
                     className="font-body whitespace-nowrap"
                   >
-                    <Plus className="h-4 w-4 ml-1" /> הוסף
+                    <Plus className="h-4 w-4 ml-1" /> {t("secondhand.addButton")}
                   </Button>
                 </div>
                 {form.images.length > 0 && (
@@ -391,7 +393,7 @@ const SecondHand = () => {
                         </button>
                         {i === 0 && (
                           <span className="absolute bottom-1 right-1 bg-gold text-primary-foreground text-[9px] font-body px-1.5 py-0.5 rounded">
-                            ראשית
+                            {t("secondhand.mainImage")}
                           </span>
                         )}
                       </div>
@@ -403,7 +405,7 @@ const SecondHand = () => {
 
             {/* Live preview */}
             <div className="space-y-2">
-              <Label className="font-body text-xs">תצוגה מקדימה</Label>
+              <Label className="font-body text-xs">{t("secondhand.preview")}</Label>
               <article className="rounded-2xl border border-gold/40 bg-card overflow-hidden shadow-[0_0_30px_hsl(43_72%_52%/0.1)]">
                 <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
                   {form.images[0] ? (
@@ -420,7 +422,7 @@ const SecondHand = () => {
                 <div className="p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-serif text-lg font-bold text-foreground line-clamp-1">
-                      {form.title || "כותרת הפריט"}
+                      {form.title || t("secondhand.previewTitle")}
                     </h3>
                     {form.price && (
                       <p className="font-serif text-lg font-bold text-gold whitespace-nowrap">
@@ -429,7 +431,7 @@ const SecondHand = () => {
                     )}
                   </div>
                   <p className="font-body text-sm text-muted-foreground line-clamp-3 min-h-[2.5rem]">
-                    {form.description || "תיאור הפריט יופיע כאן..."}
+                    {form.description || t("secondhand.previewDesc")}
                   </p>
                   <Badge variant="outline" className="font-body text-[10px] border-border/60">
                     <Tag className="h-3 w-3 ml-1" />
@@ -447,9 +449,9 @@ const SecondHand = () => {
 
           <div className="flex gap-2 pt-4 border-t border-border mt-4">
             <Button onClick={handleSubmit} disabled={saving} className="gradient-gold text-primary-foreground font-body flex-1">
-              {saving ? "שומר..." : editId ? "שמירת שינויים" : "פרסום מיידי"}
+              {saving ? t("secondhand.saving") : editId ? t("secondhand.saveChanges") : t("secondhand.publish")}
             </Button>
-            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="font-body">ביטול</Button>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="font-body">{t("secondhand.cancel")}</Button>
           </div>
         </DialogContent>
 
@@ -474,7 +476,7 @@ const SecondHand = () => {
                 <div className="flex flex-wrap gap-2">
                   <Badge className="bg-gold/20 text-gold border-gold/40">{viewItem.category}</Badge>
                   <Badge variant="outline">{conditionLabel(viewItem.condition)}</Badge>
-                  {viewItem.is_sold && <Badge variant="destructive">נמכר</Badge>}
+                  {viewItem.is_sold && <Badge variant="destructive">{t("secondhand.sold")}</Badge>}
                 </div>
                 {viewItem.price !== null && (
                   <p className="font-serif text-3xl font-bold text-gold">₪{viewItem.price.toLocaleString("he-IL")}</p>

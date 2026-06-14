@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useLanguage } from "@/contexts/LanguageContext";
 import gsap from "gsap";
 
 interface Props {
@@ -30,6 +31,7 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
   const { hasPermission } = useUserPermissions();
   const navigate = useNavigate();
   const canEditEvents = hasPermission("manage_events");
+  const { t } = useLanguage();
 
   useEffect(() => {
     const init = async () => {
@@ -144,9 +146,9 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
     <section className="py-8 px-5 sm:py-24 sm:px-6" ref={sectionRef}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 sm:mb-16 text-center">
-          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">אירועים קרובים</p>
+          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">{t("landing.events.label")}</p>
           <h2 className="font-serif text-2xl font-bold text-foreground sm:text-4xl md:text-5xl">
-            מה <span className="text-gold">בתוכנית</span>
+            {t("landing.events.title1")} <span className="text-gold">{t("landing.events.title2")}</span>
           </h2>
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
         </div>
@@ -182,7 +184,7 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
             <div className="absolute inset-0 flex items-center justify-center">
               <Link to="/register" className="flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur-sm px-6 py-3 font-body text-sm text-gold hover:bg-gold/10 transition-colors">
                 <Lock className="h-4 w-4" />
-                הצטרף כדי לראות
+                {t("landing.bulletin.joinBtn")}
               </Link>
             </div>
           )}
@@ -190,15 +192,15 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
         ) : (
           <div className="text-center py-8 rounded-lg border border-border bg-card">
             <Calendar className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="font-body text-sm text-muted-foreground">אין אירועים קרובים כרגע</p>
-            <Link to="/events" className="font-body text-xs text-gold hover:underline mt-1 inline-block">לכל האירועים ←</Link>
+            <p className="font-body text-sm text-muted-foreground">{t("landing.events.noEvents")}</p>
+            <Link to="/events" className="font-body text-xs text-gold hover:underline mt-1 inline-block">{t("landing.events.allEvents")}</Link>
           </div>
         )}
 
         {isApproved && (
           <div className="mt-8 text-center">
             <Link to="/events" className="font-body text-sm text-gold hover:underline">
-              לכל האירועים ←
+              {t("landing.events.allEvents")}
             </Link>
           </div>
         )}
@@ -207,8 +209,8 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
       {/* Event Detail Popup */}
       <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
         <DialogContent dir="rtl" className="p-0 overflow-hidden max-w-lg">
-          <DialogTitle className="sr-only">פרטי אירוע</DialogTitle>
-          <DialogDescription className="sr-only">מידע על האירוע</DialogDescription>
+          <DialogTitle className="sr-only">{t("landing.events.detailsTitle")}</DialogTitle>
+          <DialogDescription className="sr-only">{t("landing.events.detailsDesc")}</DialogDescription>
           {selectedEvent && (() => {
             const date = new Date(selectedEvent.event_date);
             const isAttending = rsvps[selectedEvent.id] === "attending";
@@ -266,7 +268,7 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
                       </a>
                     )}
                     {count > 0 && (
-                      <p className="font-body text-xs text-muted-foreground">{count} חברים אישרו הגעה</p>
+                      <p className="font-body text-xs text-muted-foreground">{count} {t("landing.events.attendees")}</p>
                     )}
                   </div>
 
@@ -280,7 +282,7 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
                       variant={isAttending ? "default" : "outline"}
                     >
                       <CheckCircle className="h-4 w-4 ml-1" />
-                      {isAttending ? "מגיע/ה ✓" : "אישור הגעה"}
+                      {isAttending ? t("landing.events.attending") : t("landing.events.confirmBtn")}
                     </Button>
 
                     {isAttending && (
@@ -292,7 +294,7 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
                       >
                         <Button variant="outline" className="w-full border-border text-foreground hover:bg-secondary font-body">
                           <CalendarPlus className="h-4 w-4 ml-1" />
-                          הוסף ליומן Google
+                          {t("landing.events.addCalendar")}
                         </Button>
                       </a>
                     )}
@@ -307,19 +309,19 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
       {/* Payment Confirmation Popup */}
       <Dialog open={!!paymentPopupEvent} onOpenChange={() => setPaymentPopupEvent(null)}>
         <DialogContent dir="rtl" className="max-w-sm">
-          <DialogTitle className="font-serif text-xl text-center">אישור הגעה ותשלום</DialogTitle>
+          <DialogTitle className="font-serif text-xl text-center">{t("landing.events.payConfirm")}</DialogTitle>
           <DialogDescription className="sr-only">פרטי תשלום לאירוע</DialogDescription>
           {paymentPopupEvent && (
             <div className="space-y-4 pt-2">
               <div className="rounded-lg bg-secondary p-4 text-center space-y-1">
-                <p className="font-body text-sm text-muted-foreground">ההשתתפות באירוע</p>
+                <p className="font-body text-sm text-muted-foreground">{t("landing.events.payNote")}</p>
                 <p className="font-serif text-lg font-bold text-foreground">{paymentPopupEvent.title}</p>
-                <p className="font-body text-sm text-muted-foreground">כרוכה בתשלום של</p>
+                <p className="font-body text-sm text-muted-foreground">{t("landing.events.payNote2")}</p>
                 <p className="font-serif text-3xl font-bold text-gold">₪{Number(paymentPopupEvent.price).toLocaleString()}</p>
               </div>
 
               <p className="font-body text-xs text-center text-muted-foreground leading-relaxed">
-                לאחר אישור ההגעה, תועבר/י לדף התשלום. ההרשמה תושלם לאחר ביצוע התשלום.
+                {t("landing.events.payRedirect")}
               </p>
 
               <div className="flex flex-col gap-2">
@@ -333,14 +335,14 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
                   className="gradient-gold text-primary-foreground font-body"
                 >
                   <CreditCard className="h-4 w-4 ml-1" />
-                  אישור הגעה ומעבר לתשלום
+                  {t("landing.events.payBtn")}
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => setPaymentPopupEvent(null)}
                   className="font-body text-muted-foreground"
                 >
-                  ביטול
+                  {t("common.cancel")}
                 </Button>
               </div>
             </div>
