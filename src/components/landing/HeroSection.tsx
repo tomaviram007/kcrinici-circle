@@ -3,6 +3,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import gsap from "gsap";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HeroSectionProps {
   isLoggedIn?: boolean;
@@ -12,6 +13,7 @@ interface HeroSectionProps {
 const HeroSection = ({ isLoggedIn = false, isApproved = false }: HeroSectionProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,41 +43,41 @@ const HeroSection = ({ isLoggedIn = false, isApproved = false }: HeroSectionProp
       <div ref={contentRef} className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center py-0">
         <div className="mb-4 h-px w-24 gradient-gold opacity-60" />
         <p className="mb-4 font-body text-sm tracking-[0.3em] text-gold uppercase">
-          מועדון חברים אקסקלוסיבי
+          {t("landing.hero.badge")}
         </p>
         <h1 className="font-serif font-bold leading-tight text-foreground sm:text-5xl md:text-7xl lg:text-8xl text-shadow-luxury text-center text-5xl">
-          הגברים של
+          {t("landing.hero.title1")}
           <br />
-          <span className="text-gold">ק. קריניצי</span>
+          <span className="text-gold">{t("landing.hero.title2")}</span>
         </h1>
         <p className="mt-4 max-w-md font-body text-sm sm:text-base md:text-lg text-muted-foreground px-4">
-          קהילה סגורה של שכנים, מקצוענים ואנשי עשייה.
+          {t("landing.hero.subtitle")}
           <br />
-          ברוכים הבאים למועדון.
+          {t("landing.hero.welcome")}
         </p>
         <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full px-8 sm:w-auto sm:px-0">
           {isLoggedIn && isApproved ?
           <Link to="/announcements">
               <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
-                לוח מודעות
+                {t("landing.hero.bulletinBtn")}
               </Button>
             </Link> :
           isLoggedIn ?
           <Link to="/pending">
               <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
-                בדוק סטטוס בקשה
+                {t("landing.hero.statusBtn")}
               </Button>
             </Link> :
 
           <>
               <Link to="/register">
                 <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
-                  הצטרף למועדון
+                  {t("landing.hero.joinBtn")}
                 </Button>
               </Link>
               <Link to="/login">
                 <Button variant="outline" size="lg" className="border-gold text-gold font-body text-base px-8 py-6 hover:bg-gold/10">
-                  כניסת חברים
+                  {t("landing.hero.loginBtn")}
                 </Button>
               </Link>
             </>

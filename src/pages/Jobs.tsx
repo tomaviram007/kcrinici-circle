@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search, Pencil } from "lucide-react";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,6 +36,7 @@ const Jobs = () => {
   const navigate = useNavigate();
   const { hasPermission } = useUserPermissions();
   const canEditJobs = hasPermission("manage_jobs");
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<any[]>([]);
   const coverImage = usePageCover("jobs", heroImg);
@@ -81,7 +83,7 @@ const Jobs = () => {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "המשרה נשלחה לאישור!", description: "המשרה תפורסם לאחר אישור מנהל המערכת." });
+    toast({ title: t("jobs.successTitle"), description: t("jobs.successDesc") });
     fireConfetti();
     setForm(EMPTY_FORM);
     setShowForm(false);
@@ -91,14 +93,14 @@ const Jobs = () => {
 
   return (
     <>
-    <PageHero image={coverImage} title="הזדמנויות" highlight="בשכונה" subtitle="לוח דרושים אקסקלוסיבי לחברי המועדון — מצאו עבודה או פרסמו משרה">
+    <PageHero image={coverImage} title={t("hero.jobs.title")} highlight={t("hero.jobs.highlight")} subtitle={t("hero.jobs.subtitle")}>
       {canEditJobs && (
         <button
           onClick={() => navigate("/admin?tab=jobs")}
           className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
           title="ערוך משרות"
         >
-          <Pencil className="h-3 w-3" /> ערוך משרות
+          <Pencil className="h-3 w-3" /> {t("jobs.editBtn")}
         </button>
       )}
     </PageHero>
@@ -119,23 +121,23 @@ const Jobs = () => {
               <button onClick={() => setViewMode("list")} className={`p-2 transition-colors ${viewMode === "list" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`} title="תצוגת רשימה"><List className="h-4 w-4" /></button>
             </div>
             <Button size="sm" onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
-              <Plus className="h-4 w-4 ml-1" /> פרסם משרה
+              <Plus className="h-4 w-4 ml-1" /> {t("jobs.postBtn")}
             </Button>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Input placeholder="חיפוש חופשי..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
+          <Input placeholder={t("jobs.searchPlaceholder")} value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
           <Select value={filterJobType} onValueChange={setFilterJobType}>
             <SelectTrigger className="bg-background font-body w-36 h-9 text-sm"><SelectValue placeholder="סוג משרה" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">כל הסוגים</SelectItem>
+              <SelectItem value="all">{t("jobs.allTypes")}</SelectItem>
               {JOB_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={filterMonth} onValueChange={setFilterMonth}>
             <SelectTrigger className="bg-background font-body w-32 h-9 text-sm"><SelectValue placeholder="חודש" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">כל החודשים</SelectItem>
+              <SelectItem value="all">{t("common.allMonths")}</SelectItem>
               {Array.from({ length: 12 }, (_, i) => (
                 <SelectItem key={i} value={i.toString()}>{new Date(2000, i).toLocaleDateString("he-IL", { month: "long" })}</SelectItem>
               ))}
@@ -169,8 +171,8 @@ const Jobs = () => {
           </div>
           <p className="font-body text-xs text-muted-foreground">* המשרה תפורסם לאחר אישור מנהל המערכת</p>
           <div className="flex gap-2">
-            <Button type="submit" className="gradient-gold text-primary-foreground font-body">שלח לאישור</Button>
-            <Button type="button" variant="ghost" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }} className="font-body">ביטול</Button>
+            <Button type="submit" className="gradient-gold text-primary-foreground font-body">{t("common.submit")}</Button>
+            <Button type="button" variant="ghost" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }} className="font-body">{t("common.cancel")}</Button>
           </div>
         </form>
       )}
@@ -238,7 +240,7 @@ const Jobs = () => {
       </div>
         );
       })()}
-      {jobs.length === 0 && <p className="font-body text-muted-foreground">אין משרות פעילות כרגע.</p>}
+      {jobs.length === 0 && <p className="font-body text-muted-foreground">{t("jobs.emptyState")}</p>}
 
       {/* Job Detail Dialog */}
       <Dialog open={!!selectedJob} onOpenChange={(open) => !open && setSelectedJob(null)}>
@@ -259,13 +261,13 @@ const Jobs = () => {
                   {selectedJob.category && <span className="inline-block rounded bg-secondary px-2.5 py-1 font-body text-xs text-gold">{selectedJob.category}</span>}
                 </div>
                 <div>
-                  <p className="font-body text-sm font-medium text-foreground mb-1">תיאור המשרה</p>
+                  <p className="font-body text-sm font-medium text-foreground mb-1">{t("jobs.detailsTitle")}</p>
                   <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{selectedJob.description}</p>
                 </div>
                 {selectedJob.requirements && (
                   <div>
                     <p className="font-body text-sm font-medium text-foreground flex items-center gap-1 mb-1">
-                      <FileText className="h-3.5 w-3.5 text-gold" /> דרישות
+                      <FileText className="h-3.5 w-3.5 text-gold" /> {t("jobs.requirementsTitle")}
                     </p>
                     <p className="font-body text-sm text-muted-foreground whitespace-pre-line">{selectedJob.requirements}</p>
                   </div>
@@ -284,7 +286,7 @@ const Jobs = () => {
                 </div>
                 {(selectedJob.contact_name || selectedJob.contact) && (
                   <div className="border-t border-border pt-4 space-y-2">
-                    <p className="font-body text-sm font-medium text-foreground">פרטי יצירת קשר</p>
+                    <p className="font-body text-sm font-medium text-foreground">{t("jobs.contactTitle")}</p>
                     {selectedJob.contact_name && (
                       <span className="font-body text-sm text-gold flex items-center gap-1.5">
                         <User className="h-4 w-4" /> {selectedJob.contact_name}

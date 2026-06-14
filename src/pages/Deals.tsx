@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Tag, Search, Copy, MessageCircle, Clock, Store, ExternalLink, Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +48,7 @@ const Deals = () => {
   const navigate = useNavigate();
   const { hasPermission } = useUserPermissions();
   const canEditDeals = hasPermission("manage_deals");
+  const { t } = useLanguage();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [searchText, setSearchText] = useState("");
@@ -109,7 +111,7 @@ const Deals = () => {
   const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopied(true);
-    toast({ title: "הקוד הועתק!" });
+    toast({ title: t("common.copied") });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -143,9 +145,9 @@ const Deals = () => {
     <>
       <PageHero
         image={coverImage}
-        title="הטבות"
-        highlight="בלעדיות"
-        subtitle="מבצעים והנחות מיוחדות לחברי המועדון בלבד"
+        title={t("hero.deals.title")}
+        highlight={t("hero.deals.highlight")}
+        subtitle={t("hero.deals.subtitle")}
       >
         {user && isApproved && (
           <Button
@@ -153,7 +155,7 @@ const Deals = () => {
             size="lg"
             className="mt-6 font-body text-lg px-8 py-6 bg-primary/90 hover:bg-primary text-primary-foreground border border-primary/50 rounded-xl shadow-lg"
           >
-            הצע הטבה חדשה
+            {t("deals.submitBtn")}
             <Plus className="h-5 w-5 mr-2" />
           </Button>
         )}
@@ -163,7 +165,7 @@ const Deals = () => {
             className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
             title="ערוך הטבות"
           >
-            <Pencil className="h-3 w-3" /> ערוך הטבות
+            <Pencil className="h-3 w-3" /> {t("deals.editBtn")}
           </button>
         )}
       </PageHero>
@@ -178,7 +180,7 @@ const Deals = () => {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
-              placeholder="חיפוש הטבה או עסק..."
+              placeholder={t("deals.searchPlaceholder")}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="pr-9 bg-card border-border/50"
@@ -205,7 +207,7 @@ const Deals = () => {
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             <Tag className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
-            <p className="font-body text-muted-foreground">אין הטבות זמינות כרגע</p>
+            <p className="font-body text-muted-foreground">{t("deals.emptyState")}</p>
           </div>
         ) : (
           <div
@@ -261,7 +263,7 @@ const Deals = () => {
                   <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground font-body">
                     <Clock className="h-3 w-3" />
                     <span>
-                      בתוקף עד{" "}
+                      {t("deals.expiresAt")}{" "}
                       {new Date(deal.expires_at).toLocaleDateString("he-IL")}
                     </span>
                   </div>
@@ -277,7 +279,7 @@ const Deals = () => {
                   }}
                 >
                   <Tag className="h-4 w-4 ml-1" />
-                  קבל הטבה
+                  {t("deals.getBtn")}
                 </Button>
               </div>
             ))}
@@ -340,7 +342,7 @@ const Deals = () => {
                     </div>
                     {copied && (
                       <p className="mt-1 text-xs text-primary font-body">
-                        הועתק!
+                        {t("common.copied")}
                       </p>
                     )}
                   </div>
@@ -352,7 +354,7 @@ const Deals = () => {
                     onClick={() => handleWhatsApp(selectedDeal)}
                   >
                     <MessageCircle className="h-4 w-4 ml-2" />
-                    שלח הודעה בוואטסאפ
+                    {t("deals.whatsappBtn")}
                   </Button>
                 )}
 
@@ -363,13 +365,13 @@ const Deals = () => {
                     onClick={() => handleWebsiteClick(selectedDeal)}
                   >
                     <ExternalLink className="h-4 w-4 ml-2" />
-                    עבור לאתר ההטבה
+                    {t("deals.websiteBtn")}
                   </Button>
                 )}
 
                 {(!user || !isApproved) && (
                   <p className="text-center font-body text-sm text-muted-foreground">
-                    רק חברים מאושרים יכולים לממש הטבות. הצטרף למועדון כדי ליהנות!
+                    {t("deals.memberOnly")}
                   </p>
                 )}
               </div>

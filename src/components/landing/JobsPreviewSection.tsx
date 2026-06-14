@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Briefcase, Lock, MapPin, Banknote, Building2, MessageCircle, FileText, User, Pencil } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import gsap from "gsap";
 
@@ -19,6 +20,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
   const navigate = useNavigate();
   const { hasPermission } = useUserPermissions();
   const canEditJobs = hasPermission("manage_jobs");
+  const { t } = useLanguage();
   const [jobs, setJobs] = useState<any[]>([]);
   const [selected, setSelected] = useState<any | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -63,9 +65,9 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
     <section className="py-8 px-5 sm:py-24 sm:px-6" ref={sectionRef}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 sm:mb-16 text-center">
-          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">הזדמנויות</p>
+          <p className="mb-2 font-body text-xs sm:text-sm tracking-[0.3em] text-gold/70 uppercase">{t("landing.jobs.label")}</p>
           <h2 className="font-serif text-2xl font-bold text-foreground sm:text-4xl md:text-5xl">
-            דרושים <span className="text-gold">בשכונה</span>
+            {t("landing.jobs.title1")} <span className="text-gold">{t("landing.jobs.title2")}</span>
           </h2>
           <div className="mt-4 mx-auto h-px w-16 gradient-gold opacity-40" />
           {canEditJobs && (
@@ -73,7 +75,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
               onClick={() => navigate("/admin?tab=jobs")}
               className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
             >
-              <Pencil className="h-3 w-3" /> ערוך משרות
+              <Pencil className="h-3 w-3" /> {t("jobs.editBtn")}
             </button>
           )}
         </div>
@@ -125,7 +127,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <Link to="/register" className="pointer-events-auto flex items-center gap-2 rounded-full border border-gold/30 bg-background/80 backdrop-blur-sm px-6 py-3 font-body text-sm text-gold hover:bg-gold/10 transition-colors">
                   <Lock className="h-4 w-4" />
-                  הצטרף כדי לראות
+                  {t("landing.bulletin.joinBtn")}
                 </Link>
               </div>
             )}
@@ -133,15 +135,15 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
         ) : (
           <div className="text-center py-8 rounded-lg border border-border bg-card">
             <Briefcase className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="font-body text-sm text-muted-foreground">אין משרות פעילות כרגע</p>
-            <Link to="/jobs" className="font-body text-xs text-gold hover:underline mt-1 inline-block">לכל הדרושים ←</Link>
+            <p className="font-body text-sm text-muted-foreground">{t("landing.jobs.noJobs")}</p>
+            <Link to="/jobs" className="font-body text-xs text-gold hover:underline mt-1 inline-block">{t("landing.jobs.allJobs")}</Link>
           </div>
         )}
 
         {isApproved && (
           <div className="mt-8 text-center">
             <Link to="/jobs" className="font-body text-sm text-gold hover:underline">
-              לכל הדרושים ←
+              {t("landing.jobs.allJobs")}
             </Link>
           </div>
         )}
@@ -150,7 +152,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
       {/* Job Detail Modal */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogContent dir="rtl" className="max-w-lg max-h-[85vh] overflow-y-auto">
-          <DialogTitle className="sr-only">פרטי משרה</DialogTitle>
+          <DialogTitle className="sr-only">{t("landing.jobs.detailsTitle")}</DialogTitle>
           <DialogDescription className="sr-only">פרטי המשרה</DialogDescription>
           {selected && (
             <div className="space-y-4">
@@ -167,13 +169,13 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
                 {selected.category && <span className="inline-block rounded bg-secondary px-2.5 py-1 font-body text-xs text-gold">{selected.category}</span>}
               </div>
               <div>
-                <p className="font-body text-sm font-medium text-foreground mb-1">תיאור המשרה</p>
+                <p className="font-body text-sm font-medium text-foreground mb-1">{t("landing.jobs.jobDesc")}</p>
                 <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{selected.description}</p>
               </div>
               {selected.requirements && (
                 <div>
                   <p className="font-body text-sm font-medium text-foreground flex items-center gap-1 mb-1">
-                    <FileText className="h-3.5 w-3.5 text-gold" /> דרישות
+                    <FileText className="h-3.5 w-3.5 text-gold" /> {t("landing.jobs.requirements")}
                   </p>
                   <p className="font-body text-sm text-muted-foreground whitespace-pre-line">{selected.requirements}</p>
                 </div>
@@ -184,7 +186,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
               </div>
               {(selected.contact_name || selected.contact) && (
                 <div className="border-t border-border pt-4 space-y-2">
-                  <p className="font-body text-sm font-medium text-foreground">פרטי יצירת קשר</p>
+                  <p className="font-body text-sm font-medium text-foreground">{t("landing.jobs.contact")}</p>
                   {selected.contact_name && (
                     <span className="font-body text-sm text-gold flex items-center gap-1.5">
                       <User className="h-4 w-4" /> {selected.contact_name}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,6 +92,7 @@ const Recommendations = () => {
   const navigate = useNavigate();
   const { hasPermission } = useUserPermissions();
   const canEditRecommendations = hasPermission("manage_recommendations");
+  const { t } = useLanguage();
   const { user, isApproved } = useAuth();
   const queryClient = useQueryClient();
   const coverImage = usePageCover("recommendations", recommendationsHero);
@@ -230,14 +232,14 @@ const Recommendations = () => {
 
   return (
     <>
-      <PageHero image={coverImage} title="נבחרת אנשי המקצוע" highlight="של קרניצי" subtitle="המלצות אמיתיות מחברי המועדון על נותני שירות מומלצים">
+      <PageHero image={coverImage} title={t("hero.recommendations.title")} highlight={t("hero.recommendations.highlight")} subtitle={t("hero.recommendations.subtitle")}>
         {canEditRecommendations && (
           <button
             onClick={() => navigate("/admin?tab=recommendations")}
             className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
             title="ערוך המלצות"
           >
-            <Pencil className="h-3 w-3" /> ערוך המלצות
+            <Pencil className="h-3 w-3" /> {t("recommendations.editBtn")}
           </button>
         )}
       </PageHero>
@@ -249,13 +251,13 @@ const Recommendations = () => {
           {user && isApproved && (
             <Button onClick={() => setShowForm(true)} className="gradient-gold text-primary-foreground font-body gap-2 shrink-0">
               <Plus className="h-4 w-4" />
-              הוסף המלצה על בעל מקצוע
+              {t("recommendations.addBtn")}
             </Button>
           )}
           <div className="relative flex-1 w-full">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="חיפוש לפי שם, תיאור או ממליץ..."
+              placeholder={t("recommendations.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pr-10 bg-card/70 backdrop-blur-sm border-border/50 font-body"
@@ -295,14 +297,14 @@ const Recommendations = () => {
 
         {/* Cards Grid */}
         {isLoading ? (
-          <div className="text-center py-20 text-muted-foreground font-body">טוען המלצות...</div>
+          <div className="text-center py-20 text-muted-foreground font-body">{t("recommendations.loading")}</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <Briefcase className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground font-body text-lg">אין עדיין המלצות{selectedCategory !== "all" ? " בקטגוריה זו" : ""}</p>
+            <p className="text-muted-foreground font-body text-lg">{t("recommendations.emptyState")}{selectedCategory !== "all" ? ` ${t("recommendations.emptyCategory")}` : ""}</p>
             {user && isApproved && (
               <Button onClick={() => setShowForm(true)} variant="outline" className="mt-4 font-body">
-                היה הראשון להמליץ!
+                {t("recommendations.beFirst")}
               </Button>
             )}
           </div>
@@ -383,7 +385,7 @@ const Recommendations = () => {
               <span className="font-body text-sm text-muted-foreground">ממליץ: <strong className="text-foreground">{profile?.full_name || "חבר מועדון"}</strong></span>
             </div>
             <Button type="submit" className="w-full gradient-gold text-primary-foreground font-body" disabled={submitMutation.isPending}>
-              {submitMutation.isPending ? "שולח..." : "שלח המלצה"}
+              {submitMutation.isPending ? t("common.loading") : t("recommendations.submitBtn")}
             </Button>
           </form>
         </DialogContent>
@@ -395,6 +397,7 @@ const Recommendations = () => {
 
 const RecommendationCard = ({ rec, isLoggedIn = true }: { rec: Recommendation; isLoggedIn?: boolean }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   const handleMouseEnter = () => {
     if (!cardRef.current) return;
@@ -443,7 +446,7 @@ const RecommendationCard = ({ rec, isLoggedIn = true }: { rec: Recommendation; i
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-600 hover:bg-green-700 text-white text-xs font-body transition-colors"
           >
             <MessageCircle className="h-3.5 w-3.5" />
-            וואטסאפ
+            {t("recommendations.whatsapp")}
           </a>
         </div>
       ) : (
@@ -452,17 +455,17 @@ const RecommendationCard = ({ rec, isLoggedIn = true }: { rec: Recommendation; i
           className="flex items-center gap-2 text-sm font-body text-primary hover:underline"
         >
           <Phone className="h-4 w-4" />
-          התחבר לצפייה בטלפון
+          {t("recommendations.loginToSeePhone")}
         </a>
       )}
 
       <div className="mt-2 pt-3 border-t border-border/50 flex items-center gap-2">
         <User className="h-3.5 w-3.5 text-primary" />
         <span className="text-xs font-body text-muted-foreground">
-          הומלץ על ידי:{" "}
+          {t("recommendations.recommendedBy")}{" "}
           {rec.is_admin_post ? (
             <strong className="admin-badge inline-flex items-center gap-1 text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/30">
-              ⭐ מומלץ קרניצי
+              ⭐ {t("recommendations.badge")}
             </strong>
           ) : (
             <strong className="text-foreground">{rec.recommender_name}</strong>
