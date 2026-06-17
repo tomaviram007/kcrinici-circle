@@ -540,6 +540,11 @@ const Gallery = () => {
                     <Star className="h-3 w-3" />
                   </div>
                 )}
+                {!(photo as any).is_approved && (
+                  <div className="absolute top-2 left-2 z-10 flex items-center gap-1 rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-body text-white">
+                    <AlertTriangle className="h-3 w-3" /> ממתין לאישור
+                  </div>
+                )}
                 {/* Action buttons */}
                 {canManagePhoto(photo) && (
                   <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
