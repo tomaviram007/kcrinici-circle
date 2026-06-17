@@ -19,7 +19,7 @@ import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 import { isEventEnded } from "@/lib/event-status";
 
-const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "", max_participants: "", is_admin_only: false };
+const EMPTY_FORM = { title: "", description: "", event_date: "", end_date: "", location: "", waze_url: "", image_url: "", payment_link: "", registration_required: true, price: "", max_participants: "", is_admin_only: false };
 
 interface RsvpProfile {
   full_name: string;
@@ -212,17 +212,20 @@ const AdminEvents = () => {
     const { data: { session } } = await supabase.auth.getSession();
     
     // Convert local datetime to ISO with timezone offset so the DB stores it correctly
-    let eventDateISO = form.event_date;
-    if (form.event_date && !form.event_date.includes('+') && !form.event_date.includes('Z')) {
-      const localDate = new Date(form.event_date);
-      eventDateISO = localDate.toISOString();
-    }
-    
+    const toISO = (val: string) => {
+      if (!val) return null;
+      if (val.includes('+') || val.includes('Z')) return val;
+      return new Date(val).toISOString();
+    };
+
     const payload = {
       ...form,
-      event_date: eventDateISO,
+      event_date: toISO(form.event_date)!,
+      end_date: toISO(form.end_date),
       image_url: form.image_url || null,
       payment_link: form.payment_link || null,
+      waze_url: form.waze_url || null,
+      location: form.location || null,
       price: form.price ? parseFloat(form.price) : null,
       max_participants: form.max_participants ? parseInt(form.max_participants) : null,
       created_by: session?.user?.id || null,
@@ -261,21 +264,22 @@ const AdminEvents = () => {
   };
 
   const startEdit = (event: any) => {
-    // Convert stored UTC date to local datetime-local format for the form
-    let localDateStr = "";
-    if (event.event_date) {
-      const d = new Date(event.event_date);
+    const toLocal = (iso: string | null) => {
+      if (!iso) return "";
+      const d = new Date(iso);
       const pad = (n: number) => n.toString().padStart(2, '0');
-      localDateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    }
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
     setForm({
       title: event.title,
       description: event.description,
-      event_date: localDateStr,
+      event_date: toLocal(event.event_date),
+      end_date: toLocal(event.end_date),
       location: event.location || "",
+      waze_url: event.waze_url || "",
       image_url: event.image_url || "",
       payment_link: event.payment_link || "",
-      registration_required: event.registration_required || false,
+      registration_required: event.registration_required ?? true,
       price: event.price ? String(event.price) : "",
       max_participants: event.max_participants ? String(event.max_participants) : "",
       is_admin_only: event.is_admin_only || false,
@@ -375,53 +379,128 @@ const AdminEvents = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal bg-background border-border", !form.event_date && "text-muted-foreground")} dir="ltr">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {form.event_date ? format(new Date(form.event_date), "dd/MM/yyyy", { locale: he }) : "בחר תאריך"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={form.event_date ? new Date(form.event_date) : undefined}
-                    onSelect={(date) => {
-                      if (date) {
-                        const existing = form.event_date ? new Date(form.event_date) : new Date();
-                        date.setHours(existing.getHours(), existing.getMinutes());
-                        setForm({ ...form, event_date: format(date, "yyyy-MM-dd'T'HH:mm") });
-                      }
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Start date + time */}
+              <div className="space-y-1.5">
+                <label className="font-body text-xs text-muted-foreground">תאריך ושעת התחלה</label>
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal bg-background border-border", !form.event_date && "text-muted-foreground")} dir="ltr">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {form.event_date ? format(new Date(form.event_date), "dd/MM/yyyy", { locale: he }) : "בחר תאריך"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={form.event_date ? new Date(form.event_date) : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            const existing = form.event_date ? new Date(form.event_date) : null;
+                            const hh = existing ? existing.getHours() : 17;
+                            const mm = existing ? existing.getMinutes() : 0;
+                            date.setHours(hh, mm);
+                            setForm({ ...form, event_date: format(date, "yyyy-MM-dd'T'HH:mm") });
+                          }
+                        }}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Input
+                    type="time"
+                    value={form.event_date ? form.event_date.slice(11, 16) : "17:00"}
+                    onChange={(e) => {
+                      const dateStr = form.event_date ? form.event_date.slice(0, 10) : format(new Date(), "yyyy-MM-dd");
+                      setForm({ ...form, event_date: `${dateStr}T${e.target.value}` });
                     }}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
+                    className="bg-background w-28"
+                    dir="ltr"
                   />
-                </PopoverContent>
-              </Popover>
+                </div>
+              </div>
+
+              {/* End date + time (optional) */}
+              <div className="space-y-1.5">
+                <label className="font-body text-xs text-muted-foreground">תאריך ושעת סיום (אופציונלי)</label>
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal bg-background border-border", !form.end_date && "text-muted-foreground")} dir="ltr">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {form.end_date ? format(new Date(form.end_date), "dd/MM/yyyy", { locale: he }) : "בחר תאריך סיום"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={form.end_date ? new Date(form.end_date) : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            const existing = form.end_date ? new Date(form.end_date) : null;
+                            const startD = form.event_date ? new Date(form.event_date) : null;
+                            const hh = existing ? existing.getHours() : (startD ? Math.min(23, startD.getHours() + 2) : 22);
+                            const mm = existing ? existing.getMinutes() : (startD ? startD.getMinutes() : 0);
+                            date.setHours(hh, mm);
+                            setForm({ ...form, end_date: format(date, "yyyy-MM-dd'T'HH:mm") });
+                          }
+                        }}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Input
+                    type="time"
+                    value={form.end_date ? form.end_date.slice(11, 16) : ""}
+                    onChange={(e) => {
+                      const dateStr = form.end_date
+                        ? form.end_date.slice(0, 10)
+                        : (form.event_date ? form.event_date.slice(0, 10) : format(new Date(), "yyyy-MM-dd"));
+                      setForm({ ...form, end_date: `${dateStr}T${e.target.value}` });
+                    }}
+                    className="bg-background w-28"
+                    dir="ltr"
+                  />
+                  {form.end_date && (
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, end_date: "" })} className="text-muted-foreground" title="נקה שעת סיום">
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
-                type="time"
-                value={form.event_date ? form.event_date.slice(11, 16) : ""}
-                onChange={(e) => {
-                  const dateStr = form.event_date ? form.event_date.slice(0, 10) : format(new Date(), "yyyy-MM-dd");
-                  setForm({ ...form, event_date: `${dateStr}T${e.target.value}` });
-                }}
-                className="bg-background w-28"
+                placeholder="מיקום (כתובת למפה)"
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                className="bg-background"
+              />
+              <Input
+                placeholder="קישור Waze לניווט (אופציונלי)"
+                value={form.waze_url}
+                onChange={(e) => setForm({ ...form, waze_url: e.target.value })}
+                className="bg-background"
                 dir="ltr"
               />
             </div>
-            <Input
-              placeholder="מיקום (כתובת למפה)"
-              value={form.location}
-              onChange={(e) => setForm({ ...form, location: e.target.value })}
-              className="bg-background"
-            />
           </div>
           {form.location && (
-            <a href={googleMapsUrl(form.location)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-body text-xs text-gold hover:underline">
-              <MapPin className="h-3 w-3" /> צפה במפה
-            </a>
+            <div className="flex flex-wrap gap-3">
+              <a href={googleMapsUrl(form.location)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-body text-xs text-gold hover:underline">
+                <MapPin className="h-3 w-3" /> צפה במפה (Google)
+              </a>
+              {form.waze_url && (
+                <a href={form.waze_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-body text-xs text-gold hover:underline">
+                  <MapPin className="h-3 w-3" /> פתח ב-Waze
+                </a>
+              )}
+            </div>
           )}
 
           {/* Payment & Registration */}
@@ -450,7 +529,7 @@ const AdminEvents = () => {
                 onChange={(e) => setForm({ ...form, registration_required: e.target.checked })}
                 className="rounded border-border"
               />
-              נדרשת הרשמה מראש
+              נדרש אישור הגעה (RSVP)
             </label>
           </div>
 

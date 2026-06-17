@@ -490,18 +490,35 @@ const Events = () => {
                       {date.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                       {" • "}
                       {date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+                      {selectedEvent.end_date && (() => {
+                        const ed = new Date(selectedEvent.end_date);
+                        if (isNaN(ed.getTime())) return null;
+                        return <> – {ed.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}</>;
+                      })()}
                     </span>
                   </div>
                   {selectedEvent.location && (
-                    <a
-                      href={googleMapsUrl(selectedEvent.location)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-gold transition-colors"
-                    >
-                      <MapPin className="h-4 w-4 text-gold shrink-0" />
-                      {selectedEvent.location}
-                    </a>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <a
+                        href={googleMapsUrl(selectedEvent.location)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-gold transition-colors"
+                      >
+                        <MapPin className="h-4 w-4 text-gold shrink-0" />
+                        {selectedEvent.location}
+                      </a>
+                      {selectedEvent.waze_url && (
+                        <a
+                          href={selectedEvent.waze_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 px-3 py-1 font-body text-xs text-gold hover:bg-gold/10 transition-colors"
+                        >
+                          <MapPin className="h-3 w-3" /> נווט ב-Waze
+                        </a>
+                      )}
+                    </div>
                   )}
                   {count > 0 && (
                     <div className="flex items-center gap-2 font-body text-sm text-muted-foreground">
@@ -586,20 +603,22 @@ const Events = () => {
                     </>
                   ) : (
                   <>
-                  <Button
-                    onClick={(e) => { e.stopPropagation(); attemptRsvp(selectedEvent); }}
-                    disabled={spotsLeft(selectedEvent) === 0 && !isAttending}
-                    className={cn(
-                      "w-full font-body",
-                      isAttending
-                        ? "gradient-gold text-primary-foreground"
-                        : "border-gold/40 text-gold hover:bg-gold/10"
-                    )}
-                    variant={isAttending ? "default" : "outline"}
-                  >
-                    <CheckCircle className="h-4 w-4 ml-2" />
-                    {isAttending ? "מגיע ✓ — לחץ לביטול" : spotsLeft(selectedEvent) === 0 ? "האירוע מלא" : "אישור הגעה"}
-                  </Button>
+                  {selectedEvent.registration_required !== false && (
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); attemptRsvp(selectedEvent); }}
+                      disabled={spotsLeft(selectedEvent) === 0 && !isAttending}
+                      className={cn(
+                        "w-full font-body",
+                        isAttending
+                          ? "gradient-gold text-primary-foreground"
+                          : "border-gold/40 text-gold hover:bg-gold/10"
+                      )}
+                      variant={isAttending ? "default" : "outline"}
+                    >
+                      <CheckCircle className="h-4 w-4 ml-2" />
+                      {isAttending ? "מגיע ✓ — לחץ לביטול" : spotsLeft(selectedEvent) === 0 ? "האירוע מלא" : "אישור הגעה"}
+                    </Button>
+                  )}
                   <div className="flex gap-2">
                     <a href={googleCalendarUrl(selectedEvent)} target="_blank" rel="noopener noreferrer" className="flex-1">
                       <Button variant="outline" className="w-full font-body border-border text-muted-foreground hover:text-foreground">
