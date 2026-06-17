@@ -719,6 +719,32 @@ const Events = () => {
       </DialogContent>
     </Dialog>
 
+    {/* Ended event notice */}
+    <Dialog open={endedNoticeOpen} onOpenChange={setEndedNoticeOpen}>
+      <DialogContent dir="rtl" className="max-w-sm">
+        <DialogTitle className="font-serif text-xl text-center">וואלה, נזכרת מאוחר 😅</DialogTitle>
+        <DialogDescription className="sr-only">האירוע כבר הסתיים</DialogDescription>
+        <div className="space-y-4 pt-2 text-center">
+          <p className="font-body text-sm text-muted-foreground leading-relaxed">
+            האירוע הזה כבר עבר — אבל אל דאגה, יש לנו עוד הרבה בדרך.
+            <br />
+            הצטרף לקבוצת הוואטסאפ שלנו כדי להתעדכן באירועים הבאים.
+          </p>
+          <div className="flex flex-col gap-2">
+            <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer">
+              <Button className="w-full gradient-gold text-primary-foreground font-body">
+                <MessageCircle className="h-4 w-4 ml-2" />
+                הצטרפו לקבוצת הוואטסאפ
+              </Button>
+            </a>
+            <Button variant="ghost" onClick={() => setEndedNoticeOpen(false)} className="font-body text-muted-foreground">
+              סגירה
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
     {/* Registration + Payment Flow */}
     <EventRegistrationDialog
       event={registrationEvent}
