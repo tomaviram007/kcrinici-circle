@@ -410,15 +410,13 @@ const AdminEvents = () => {
                       />
                     </PopoverContent>
                   </Popover>
-                  <Input
-                    type="time"
+                  <Time24Input
                     value={form.event_date ? form.event_date.slice(11, 16) : "17:00"}
-                    onChange={(e) => {
+                    onChange={(time) => {
                       const dateStr = form.event_date ? form.event_date.slice(0, 10) : format(new Date(), "yyyy-MM-dd");
-                      setForm({ ...form, event_date: `${dateStr}T${e.target.value}` });
+                      setForm({ ...form, event_date: `${dateStr}T${time || "17:00"}` });
                     }}
-                    className="bg-background w-28"
-                    dir="ltr"
+                    className="w-28"
                   />
                 </div>
               </div>
