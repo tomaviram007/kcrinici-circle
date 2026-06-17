@@ -327,6 +327,7 @@ const Gallery = () => {
       const updates: any = {
         title: editAlbumTitle.trim(),
         description: editAlbumDesc.trim() || null,
+        event_id: editAlbumEventId && editAlbumEventId !== "none" ? editAlbumEventId : null,
       };
       // Non-admin edits require re-approval
       if (!isAdmin) {
@@ -334,7 +335,7 @@ const Gallery = () => {
       }
       const { error } = await supabase.from("gallery_albums").update(updates).eq("id", selectedAlbum.id);
       if (error) throw error;
-      setSelectedAlbum({ ...selectedAlbum, title: editAlbumTitle.trim(), description: editAlbumDesc.trim() || null });
+      setSelectedAlbum({ ...selectedAlbum, title: editAlbumTitle.trim(), description: editAlbumDesc.trim() || null, event_id: updates.event_id });
       if (!isAdmin) {
         toast({ title: t("gallery.toastAlbumEditedPending"), description: t("gallery.toastAlbumEditedPendingDesc") });
       } else {
