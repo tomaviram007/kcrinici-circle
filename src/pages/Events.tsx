@@ -401,6 +401,13 @@ const Events = () => {
             <div className="flex flex-col md:flex-row min-h-[400px]">
               {/* Left side - Image / Gallery */}
               <div className="md:w-1/2 relative bg-secondary flex items-center justify-center min-h-[200px] md:min-h-full">
+                {isEventEnded(selectedEvent) && (
+                  <div className="absolute top-3 left-3 z-30">
+                    <span className="inline-flex items-center rounded-full bg-destructive/90 backdrop-blur-sm px-3 py-1 font-body text-xs font-semibold text-destructive-foreground border border-destructive/40 shadow-md">
+                      האירוע הסתיים
+                    </span>
+                  </div>
+                )}
                 {images.length > 0 ? (
                   <>
                     <img
