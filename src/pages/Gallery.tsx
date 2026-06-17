@@ -671,6 +671,22 @@ const Gallery = () => {
                 <Label className="font-body text-sm">{t("gallery.description")}</Label>
                 <Textarea value={editAlbumDesc} onChange={(e) => setEditAlbumDesc(e.target.value)} className="bg-card border-border" placeholder="תיאור קצר של האלבום..." autoComplete="off" />
               </div>
+              <div>
+                <Label className="font-body text-sm">קישור לאירוע (אופציונלי)</Label>
+                <Select value={editAlbumEventId} onValueChange={setEditAlbumEventId}>
+                  <SelectTrigger className="bg-card border-border font-body">
+                    <SelectValue placeholder="ללא קישור לאירוע" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">ללא קישור לאירוע</SelectItem>
+                    {events.map(ev => (
+                      <SelectItem key={ev.id} value={ev.id}>
+                        {ev.title} • {new Date(ev.event_date).toLocaleDateString("he-IL")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button onClick={handleSaveAlbumEdit} disabled={savingAlbum || !editAlbumTitle.trim()} className="w-full gradient-gold text-primary-foreground font-body py-5">
                 {savingAlbum ? t("gallery.saving") : t("gallery.saveChanges")}
               </Button>
