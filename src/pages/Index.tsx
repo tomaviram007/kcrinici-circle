@@ -69,6 +69,14 @@ const Index = () => {
         <SmartAdBanner placement="premium" targetPage="home" slotIndex={0} />
       </div>
 
+      <ScrollReveal>
+        <EventsPreviewSection isApproved={isApproved} />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <GalleryPreviewSection isApproved={isApproved} />
+      </ScrollReveal>
+
       {!isApproved && (
         <ScrollReveal>
           <CTASection isLoggedIn={isLoggedIn} />
@@ -89,10 +97,6 @@ const Index = () => {
           <div className="py-4">
             <SmartAdBanner placement="inline" targetPage="home" />
           </div>
-
-          <ScrollReveal delay={0.05}>
-            <EventsPreviewSection isApproved={isApproved} />
-          </ScrollReveal>
 
           <ScrollReveal delay={0.05}>
             <JobsPreviewSection isApproved={isApproved} />
