@@ -8,6 +8,7 @@ gsap.registerPlugin(ScrollToPlugin);
 import HeroSection from "@/components/landing/HeroSection";
 import SalesPreviewSection from "@/components/landing/SalesPreviewSection";
 import EventsPreviewSection from "@/components/landing/EventsPreviewSection";
+import GalleryPreviewSection from "@/components/landing/GalleryPreviewSection";
 import JobsPreviewSection from "@/components/landing/JobsPreviewSection";
 import BirthdaysPreviewSection from "@/components/landing/BirthdaysPreviewSection";
 import QuoteSection from "@/components/landing/QuoteSection";
@@ -68,6 +69,14 @@ const Index = () => {
         <SmartAdBanner placement="premium" targetPage="home" slotIndex={0} />
       </div>
 
+      <ScrollReveal>
+        <EventsPreviewSection isApproved={isApproved} />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <GalleryPreviewSection isApproved={isApproved} />
+      </ScrollReveal>
+
       {!isApproved && (
         <ScrollReveal>
           <CTASection isLoggedIn={isLoggedIn} />
@@ -88,10 +97,6 @@ const Index = () => {
           <div className="py-4">
             <SmartAdBanner placement="inline" targetPage="home" />
           </div>
-
-          <ScrollReveal delay={0.05}>
-            <EventsPreviewSection isApproved={isApproved} />
-          </ScrollReveal>
 
           <ScrollReveal delay={0.05}>
             <JobsPreviewSection isApproved={isApproved} />
