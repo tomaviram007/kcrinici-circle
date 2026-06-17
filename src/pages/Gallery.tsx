@@ -792,6 +792,11 @@ const Gallery = () => {
                       <AlertTriangle className="h-3 w-3" /> {t("gallery.pendingApproval")}
                     </div>
                   )}
+                  {(album as any).event_id && (
+                    <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-md bg-background/80 backdrop-blur-sm border border-gold/30 px-2 py-1 text-[10px] font-body text-gold">
+                      <Calendar className="h-3 w-3" /> אירוע
+                    </div>
+                  )}
                   <div className="aspect-[4/3] bg-muted flex items-center justify-center overflow-hidden">
                     {album.cover_image_url ? (
                       <img src={album.cover_image_url} alt={album.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
