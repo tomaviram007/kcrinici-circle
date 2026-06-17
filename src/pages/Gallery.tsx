@@ -96,11 +96,13 @@ const Gallery = () => {
   }, []);
 
   const fetchAlbums = async () => {
-    const { data } = await supabase
-      .from("gallery_albums")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [albumsRes, eventsRes] = await Promise.all([
+      supabase.from("gallery_albums").select("*").order("created_at", { ascending: false }),
+      supabase.from("events").select("id, title, event_date").order("event_date", { ascending: false }),
+    ]);
+    const data = albumsRes.data;
     setAlbums(data || []);
+    setEvents(eventsRes.data || []);
 
     // Fetch creators for all albums
     const creatorIds = [...new Set((data || []).map(a => a.created_by).filter(Boolean))];
@@ -112,6 +114,33 @@ const Gallery = () => {
       const map: Record<string, any> = {};
       profiles?.forEach(p => { map[p.user_id] = p; });
       setAlbumCreators(map);
+    }
+  };
+
+  const handleCreateAlbum = async () => {
+    if (!newTitle.trim()) return;
+    setCreating(true);
+    try {
+      const { error } = await supabase.from("gallery_albums").insert({
+        title: newTitle.trim(),
+        description: newDesc.trim() || null,
+        created_by: userId,
+        event_id: newEventId && newEventId !== "none" ? newEventId : null,
+        is_approved: isAdmin,
+      });
+      if (error) throw error;
+      toast({
+        title: isAdmin ? t("gallery.toastAlbumCreated") : "האלבום נוצר וממתין לאישור מנהל",
+      });
+      setNewTitle("");
+      setNewDesc("");
+      setNewEventId("none");
+      setShowCreate(false);
+      await fetchAlbums();
+    } catch (err: any) {
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
+    } finally {
+      setCreating(false);
     }
   };
 
