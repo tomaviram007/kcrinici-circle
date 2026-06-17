@@ -266,10 +266,17 @@ const AdminGalleryApproval = () => {
   const fetchPending = async () => {
     const [albumsRes, photosRes] = await Promise.all([
       supabase.from("gallery_albums").select("*").eq("is_approved", false).order("updated_at", { ascending: false }),
-      supabase.from("gallery_photos").select("*, gallery_albums(title)").eq("is_approved" as any, false as any).order("created_at", { ascending: false }),
+      (supabase.from("gallery_photos") as any).select("*").eq("is_approved", false).order("created_at", { ascending: false }),
     ]);
+    const pendingPhotos = (photosRes.data as any[]) || [];
+    const albumIds = [...new Set(pendingPhotos.map((p) => p.album_id))];
+    let albumTitles: Record<string, string> = {};
+    if (albumIds.length > 0) {
+      const { data: albumsData } = await supabase.from("gallery_albums").select("id, title").in("id", albumIds);
+      albumsData?.forEach((a: any) => { albumTitles[a.id] = a.title; });
+    }
     setAlbums(albumsRes.data || []);
-    setPhotos((photosRes.data as any[]) || []);
+    setPhotos(pendingPhotos.map((p) => ({ ...p, album_title: albumTitles[p.album_id] })));
     setLoading(false);
   };
 
