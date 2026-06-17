@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search, Pencil, CreditCard, Share2, Copy, MessageCircle, Facebook, Linkedin, Send, Twitter } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, CalendarPlus, User, X, ChevronLeft, ChevronRight, Search, Pencil, CreditCard, Share2, Copy, MessageCircle, Facebook, Linkedin, Send, Twitter, Plus } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useConfetti } from "@/hooks/useConfetti";
 import { Button } from "@/components/ui/button";
