@@ -451,17 +451,15 @@ const AdminEvents = () => {
                       />
                     </PopoverContent>
                   </Popover>
-                  <Input
-                    type="time"
+                  <Time24Input
                     value={form.end_date ? form.end_date.slice(11, 16) : ""}
-                    onChange={(e) => {
+                    onChange={(time) => {
                       const dateStr = form.end_date
                         ? form.end_date.slice(0, 10)
                         : (form.event_date ? form.event_date.slice(0, 10) : format(new Date(), "yyyy-MM-dd"));
-                      setForm({ ...form, end_date: `${dateStr}T${e.target.value}` });
+                      setForm({ ...form, end_date: time ? `${dateStr}T${time}` : "" });
                     }}
-                    className="bg-background w-28"
-                    dir="ltr"
+                    className="w-28"
                   />
                   {form.end_date && (
                     <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, end_date: "" })} className="text-muted-foreground" title="נקה שעת סיום">
