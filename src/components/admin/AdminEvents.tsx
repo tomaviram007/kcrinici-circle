@@ -261,21 +261,22 @@ const AdminEvents = () => {
   };
 
   const startEdit = (event: any) => {
-    // Convert stored UTC date to local datetime-local format for the form
-    let localDateStr = "";
-    if (event.event_date) {
-      const d = new Date(event.event_date);
+    const toLocal = (iso: string | null) => {
+      if (!iso) return "";
+      const d = new Date(iso);
       const pad = (n: number) => n.toString().padStart(2, '0');
-      localDateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    }
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
     setForm({
       title: event.title,
       description: event.description,
-      event_date: localDateStr,
+      event_date: toLocal(event.event_date),
+      end_date: toLocal(event.end_date),
       location: event.location || "",
+      waze_url: event.waze_url || "",
       image_url: event.image_url || "",
       payment_link: event.payment_link || "",
-      registration_required: event.registration_required || false,
+      registration_required: event.registration_required ?? true,
       price: event.price ? String(event.price) : "",
       max_participants: event.max_participants ? String(event.max_participants) : "",
       is_admin_only: event.is_admin_only || false,
