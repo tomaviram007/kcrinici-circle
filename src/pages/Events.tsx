@@ -140,7 +140,8 @@ const Events = () => {
     setRsvps((prev) => ({ ...prev, [eventId]: "attending" }));
     setRsvpCounts((prev) => ({ ...prev, [eventId]: (prev[eventId] || 0) + 1 }));
     fireRSVP();
-    toast({ title: "אישרת הגעה! 🎉" });
+    toast({ title: "אישרת הגעה! 🎉", description: "אישור נשלח אליך במייל" });
+    supabase.functions.invoke("notify-rsvp", { body: { event_id: eventId, action: "confirmed" } }).catch((e) => console.error("notify-rsvp:", e));
   };
 
   const cancelRsvp = async (eventId: string) => {
@@ -149,6 +150,7 @@ const Events = () => {
     setRsvps((prev) => { const n = { ...prev }; delete n[eventId]; return n; });
     setRsvpCounts((prev) => ({ ...prev, [eventId]: Math.max(0, (prev[eventId] || 1) - 1) }));
     toast({ title: "ביטלת את אישור ההגעה" });
+    supabase.functions.invoke("notify-rsvp", { body: { event_id: eventId, action: "cancelled" } }).catch((e) => console.error("notify-rsvp:", e));
   };
 
   const handleRsvp = async (eventId: string) => {
