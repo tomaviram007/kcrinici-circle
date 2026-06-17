@@ -602,6 +602,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string
+          is_approved: boolean
           uploaded_by: string | null
         }
         Insert: {
@@ -610,6 +611,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url: string
+          is_approved?: boolean
           uploaded_by?: string | null
         }
         Update: {
@@ -618,6 +620,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string
+          is_approved?: boolean
           uploaded_by?: string | null
         }
         Relationships: [
