@@ -144,30 +144,6 @@ const Gallery = () => {
     }
   };
 
-  const handleCreateAlbum = async () => {
-    if (!newTitle.trim()) return;
-    setCreating(true);
-    try {
-      const { error } = await supabase.from("gallery_albums").insert({
-        title: newTitle.trim(),
-        description: newDesc.trim() || null,
-        created_by: userId,
-        is_approved: isAdmin,
-      });
-      if (error) throw error;
-      toast({
-        title: isAdmin ? t("gallery.toastAlbumCreated") : "האלבום נוצר וממתין לאישור מנהל",
-      });
-      setNewTitle("");
-      setNewDesc("");
-      setShowCreate(false);
-      await fetchAlbums();
-    } catch (err: any) {
-      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
-    } finally {
-      setCreating(false);
-    }
-  };
 
   const openAlbum = async (album: Album) => {
     setSelectedAlbum(album);
