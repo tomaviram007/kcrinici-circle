@@ -52,6 +52,8 @@ const Events = () => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [searchText, setSearchText] = useState("");
   const [filterMonth, setFilterMonth] = useState("all");
+  const [endedNoticeOpen, setEndedNoticeOpen] = useState(false);
+  const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/FXW1XKYxhMrDfkaVcJHZBl";
   const gridRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { fireRSVP } = useConfetti();
