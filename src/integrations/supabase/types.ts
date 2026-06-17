@@ -505,6 +505,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string
+          end_date: string | null
           event_date: string
           id: string
           image_url: string | null
@@ -516,11 +517,13 @@ export type Database = {
           registration_required: boolean
           title: string
           updated_at: string
+          waze_url: string | null
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           description: string
+          end_date?: string | null
           event_date: string
           id?: string
           image_url?: string | null
@@ -532,11 +535,13 @@ export type Database = {
           registration_required?: boolean
           title: string
           updated_at?: string
+          waze_url?: string | null
         }
         Update: {
           created_at?: string
           created_by?: string | null
           description?: string
+          end_date?: string | null
           event_date?: string
           id?: string
           image_url?: string | null
@@ -548,6 +553,7 @@ export type Database = {
           registration_required?: boolean
           title?: string
           updated_at?: string
+          waze_url?: string | null
         }
         Relationships: []
       }
