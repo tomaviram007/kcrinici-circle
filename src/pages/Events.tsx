@@ -554,6 +554,27 @@ const Events = () => {
 
                 {/* Action buttons */}
                 <div className="mt-auto flex flex-col gap-2.5 pt-4 border-t border-border">
+                  {isEventEnded(selectedEvent) ? (
+                    <>
+                      <Button
+                        onClick={(e) => { e.stopPropagation(); setEndedNoticeOpen(true); }}
+                        variant="outline"
+                        className="w-full font-body border-destructive/40 text-destructive hover:bg-destructive/10 cursor-pointer"
+                      >
+                        <CheckCircle className="h-4 w-4 ml-2" />
+                        האירוע הסתיים
+                      </Button>
+                      <Button
+                        onClick={(e) => { e.stopPropagation(); setEndedNoticeOpen(true); }}
+                        variant="outline"
+                        className="w-full font-body border-border text-muted-foreground hover:text-foreground"
+                      >
+                        <CalendarPlus className="h-4 w-4 ml-2" />
+                        הוסף ליומן
+                      </Button>
+                    </>
+                  ) : (
+                  <>
                   <Button
                     onClick={(e) => { e.stopPropagation(); attemptRsvp(selectedEvent); }}
                     disabled={spotsLeft(selectedEvent) === 0 && !isAttending}
