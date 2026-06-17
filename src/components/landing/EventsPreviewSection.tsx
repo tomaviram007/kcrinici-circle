@@ -161,23 +161,33 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
             <div key={event.id || i} className="event-card opacity-0">
               <div
                 onClick={() => isApproved && setSelectedEvent(event)}
-                className={`rounded-lg border border-border bg-card p-5 sm:p-8 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)] ${!isApproved ? "select-none" : "cursor-pointer"}`}
+                className={`overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)] ${!isApproved ? "select-none" : "cursor-pointer"}`}
               >
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-secondary">
-                  <Calendar className="h-6 w-6 text-gold" />
+                {event.image_url ? (
+                  <div className={`relative w-full h-40 overflow-hidden ${!isApproved ? "blur-[4px]" : ""}`}>
+                    <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" loading="lazy" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+                  </div>
+                ) : null}
+                <div className="p-5 sm:p-8">
+                  {!event.image_url && (
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-secondary">
+                      <Calendar className="h-6 w-6 text-gold" />
+                    </div>
+                  )}
+                  <h3 className={`font-serif text-xl font-bold text-foreground ${!isApproved ? "blur-[3px]" : ""}`}>{event.title}</h3>
+                  <p className={`mt-2 font-body text-sm leading-relaxed text-muted-foreground ${!isApproved ? "blur-[4px]" : ""}`}>{event.description}</p>
+                  <div className={`mt-4 flex items-center gap-2 text-xs text-gold/70 font-body ${!isApproved ? "blur-[4px]" : ""}`}>
+                    <MapPin className="h-3 w-3" />
+                    <span>{event.location}</span>
+                  </div>
+                  <p className={`mt-1 font-body text-xs text-muted-foreground ${!isApproved ? "blur-[4px]" : ""}`}>
+                    {new Date(event.event_date).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                  {isApproved && rsvpCounts[event.id] > 0 && (
+                    <p className="mt-2 font-body text-xs text-gold">{rsvpCounts[event.id]} מגיעים</p>
+                  )}
                 </div>
-                <h3 className={`font-serif text-xl font-bold text-foreground ${!isApproved ? "blur-[3px]" : ""}`}>{event.title}</h3>
-                <p className={`mt-2 font-body text-sm leading-relaxed text-muted-foreground ${!isApproved ? "blur-[4px]" : ""}`}>{event.description}</p>
-                <div className={`mt-4 flex items-center gap-2 text-xs text-gold/70 font-body ${!isApproved ? "blur-[4px]" : ""}`}>
-                  <MapPin className="h-3 w-3" />
-                  <span>{event.location}</span>
-                </div>
-                <p className={`mt-1 font-body text-xs text-muted-foreground ${!isApproved ? "blur-[4px]" : ""}`}>
-                  {new Date(event.event_date).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })}
-                </p>
-                {isApproved && rsvpCounts[event.id] > 0 && (
-                  <p className="mt-2 font-body text-xs text-gold">{rsvpCounts[event.id]} מגיעים</p>
-                )}
               </div>
             </div>
           ))}
