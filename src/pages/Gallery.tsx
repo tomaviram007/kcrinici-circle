@@ -36,7 +36,11 @@ const Gallery = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [newEventId, setNewEventId] = useState<string>("none");
   const [creating, setCreating] = useState(false);
+
+  // Events for linking
+  const [events, setEvents] = useState<{ id: string; title: string; event_date: string }[]>([]);
 
   // Album detail view
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
@@ -55,6 +59,7 @@ const Gallery = () => {
   const [showEditAlbum, setShowEditAlbum] = useState(false);
   const [editAlbumTitle, setEditAlbumTitle] = useState("");
   const [editAlbumDesc, setEditAlbumDesc] = useState("");
+  const [editAlbumEventId, setEditAlbumEventId] = useState<string>("none");
   const [savingAlbum, setSavingAlbum] = useState(false);
 
   // Photo edit dialog
@@ -91,11 +96,13 @@ const Gallery = () => {
   }, []);
 
   const fetchAlbums = async () => {
-    const { data } = await supabase
-      .from("gallery_albums")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [albumsRes, eventsRes] = await Promise.all([
+      supabase.from("gallery_albums").select("*").order("created_at", { ascending: false }),
+      supabase.from("events").select("id, title, event_date").order("event_date", { ascending: false }),
+    ]);
+    const data = albumsRes.data;
     setAlbums(data || []);
+    setEvents(eventsRes.data || []);
 
     // Fetch creators for all albums
     const creatorIds = [...new Set((data || []).map(a => a.created_by).filter(Boolean))];
@@ -118,6 +125,7 @@ const Gallery = () => {
         title: newTitle.trim(),
         description: newDesc.trim() || null,
         created_by: userId,
+        event_id: newEventId && newEventId !== "none" ? newEventId : null,
         is_approved: isAdmin,
       });
       if (error) throw error;
@@ -126,6 +134,7 @@ const Gallery = () => {
       });
       setNewTitle("");
       setNewDesc("");
+      setNewEventId("none");
       setShowCreate(false);
       await fetchAlbums();
     } catch (err: any) {
@@ -134,6 +143,7 @@ const Gallery = () => {
       setCreating(false);
     }
   };
+
 
   const openAlbum = async (album: Album) => {
     setSelectedAlbum(album);
@@ -317,6 +327,7 @@ const Gallery = () => {
       const updates: any = {
         title: editAlbumTitle.trim(),
         description: editAlbumDesc.trim() || null,
+        event_id: editAlbumEventId && editAlbumEventId !== "none" ? editAlbumEventId : null,
       };
       // Non-admin edits require re-approval
       if (!isAdmin) {
@@ -324,7 +335,7 @@ const Gallery = () => {
       }
       const { error } = await supabase.from("gallery_albums").update(updates).eq("id", selectedAlbum.id);
       if (error) throw error;
-      setSelectedAlbum({ ...selectedAlbum, title: editAlbumTitle.trim(), description: editAlbumDesc.trim() || null });
+      setSelectedAlbum({ ...selectedAlbum, title: editAlbumTitle.trim(), description: editAlbumDesc.trim() || null, event_id: updates.event_id });
       if (!isAdmin) {
         toast({ title: t("gallery.toastAlbumEditedPending"), description: t("gallery.toastAlbumEditedPendingDesc") });
       } else {
@@ -400,6 +411,7 @@ const Gallery = () => {
                     onClick={() => {
                       setEditAlbumTitle(selectedAlbum.title);
                       setEditAlbumDesc(selectedAlbum.description || "");
+                      setEditAlbumEventId((selectedAlbum as any).event_id || "none");
                       setShowEditAlbum(true);
                     }}
                     className="text-muted-foreground hover:text-gold transition-colors"
@@ -421,6 +433,19 @@ const Gallery = () => {
                   <Image className="h-3.5 w-3.5 text-gold" />
                   {photos.length} {t("gallery.photos")}
                 </span>
+                {(() => {
+                  const linkedEvent = events.find(e => e.id === (selectedAlbum as any).event_id);
+                  if (!linkedEvent) return null;
+                  return (
+                    <a
+                      href={`/events/${linkedEvent.id}`}
+                      className="flex items-center gap-1 rounded-md border border-gold/30 bg-gold/10 px-2 py-0.5 text-gold hover:bg-gold/20 transition-colors"
+                    >
+                      <Calendar className="h-3.5 w-3.5" />
+                      קשור לאירוע: {linkedEvent.title}
+                    </a>
+                  );
+                })()}
               </div>
               {/* Creator */}
               {albumCreator && (
@@ -646,6 +671,22 @@ const Gallery = () => {
                 <Label className="font-body text-sm">{t("gallery.description")}</Label>
                 <Textarea value={editAlbumDesc} onChange={(e) => setEditAlbumDesc(e.target.value)} className="bg-card border-border" placeholder="תיאור קצר של האלבום..." autoComplete="off" />
               </div>
+              <div>
+                <Label className="font-body text-sm">קישור לאירוע (אופציונלי)</Label>
+                <Select value={editAlbumEventId} onValueChange={setEditAlbumEventId}>
+                  <SelectTrigger className="bg-card border-border font-body">
+                    <SelectValue placeholder="ללא קישור לאירוע" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">ללא קישור לאירוע</SelectItem>
+                    {events.map(ev => (
+                      <SelectItem key={ev.id} value={ev.id}>
+                        {ev.title} • {new Date(ev.event_date).toLocaleDateString("he-IL")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button onClick={handleSaveAlbumEdit} disabled={savingAlbum || !editAlbumTitle.trim()} className="w-full gradient-gold text-primary-foreground font-body py-5">
                 {savingAlbum ? t("gallery.saving") : t("gallery.saveChanges")}
               </Button>
@@ -751,6 +792,11 @@ const Gallery = () => {
                       <AlertTriangle className="h-3 w-3" /> {t("gallery.pendingApproval")}
                     </div>
                   )}
+                  {(album as any).event_id && (
+                    <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-md bg-background/80 backdrop-blur-sm border border-gold/30 px-2 py-1 text-[10px] font-body text-gold">
+                      <Calendar className="h-3 w-3" /> אירוע
+                    </div>
+                  )}
                   <div className="aspect-[4/3] bg-muted flex items-center justify-center overflow-hidden">
                     {album.cover_image_url ? (
                       <img src={album.cover_image_url} alt={album.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
@@ -802,6 +848,22 @@ const Gallery = () => {
             <div>
               <Label className="font-body text-sm">{t("gallery.albumDescLabel")}</Label>
               <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className="bg-card border-border" placeholder={t("gallery.albumDescPlaceholder")} autoComplete="off" />
+            </div>
+            <div>
+              <Label className="font-body text-sm">קישור לאירוע (אופציונלי)</Label>
+              <Select value={newEventId} onValueChange={setNewEventId}>
+                <SelectTrigger className="bg-card border-border font-body">
+                  <SelectValue placeholder="ללא קישור לאירוע" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">ללא קישור לאירוע</SelectItem>
+                  {events.map(ev => (
+                    <SelectItem key={ev.id} value={ev.id}>
+                      {ev.title} • {new Date(ev.event_date).toLocaleDateString("he-IL")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button onClick={handleCreateAlbum} disabled={creating || !newTitle.trim()} className="w-full gradient-gold text-primary-foreground font-body py-5">
               {creating ? t("gallery.creating") : t("gallery.createAlbum")}
