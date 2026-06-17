@@ -219,12 +219,23 @@ const Events = () => {
     
     <ContentWithSidebarAds targetPage="events">
     <div className="mx-auto max-w-6xl px-5 py-4 sm:px-6 sm:py-8">
-      <div className="mb-6 sm:mb-10">
-        <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
-          אירועים <span className="text-gold">ומפגשים</span>
-        </h1>
-        <p className="mt-1 font-body text-sm text-muted-foreground">מפגשים קרובים לחברי המועדון</p>
-        <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
+      <div className="mb-6 sm:mb-10 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
+            אירועים <span className="text-gold">ומפגשים</span>
+          </h1>
+          <p className="mt-1 font-body text-sm text-muted-foreground">מפגשים קרובים לחברי המועדון</p>
+          <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
+        </div>
+        {canEditEvents && (
+          <Button
+            onClick={() => navigate("/admin?tab=events")}
+            className="gradient-gold text-primary-foreground font-body shrink-0"
+            size="sm"
+          >
+            <Plus className="h-4 w-4 ml-1" /> הוסף אירוע
+          </Button>
+        )}
       </div>
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <Input placeholder="חיפוש אירוע..." value={searchText} onChange={(e) => setSearchText(e.target.value)} className="bg-background w-40 sm:w-52 h-9 font-body text-sm" autoComplete="off" />
