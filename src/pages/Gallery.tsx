@@ -36,7 +36,11 @@ const Gallery = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [newEventId, setNewEventId] = useState<string>("none");
   const [creating, setCreating] = useState(false);
+
+  // Events for linking
+  const [events, setEvents] = useState<{ id: string; title: string; event_date: string }[]>([]);
 
   // Album detail view
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
@@ -55,6 +59,7 @@ const Gallery = () => {
   const [showEditAlbum, setShowEditAlbum] = useState(false);
   const [editAlbumTitle, setEditAlbumTitle] = useState("");
   const [editAlbumDesc, setEditAlbumDesc] = useState("");
+  const [editAlbumEventId, setEditAlbumEventId] = useState<string>("none");
   const [savingAlbum, setSavingAlbum] = useState(false);
 
   // Photo edit dialog
