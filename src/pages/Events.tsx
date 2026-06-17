@@ -603,20 +603,22 @@ const Events = () => {
                     </>
                   ) : (
                   <>
-                  <Button
-                    onClick={(e) => { e.stopPropagation(); attemptRsvp(selectedEvent); }}
-                    disabled={spotsLeft(selectedEvent) === 0 && !isAttending}
-                    className={cn(
-                      "w-full font-body",
-                      isAttending
-                        ? "gradient-gold text-primary-foreground"
-                        : "border-gold/40 text-gold hover:bg-gold/10"
-                    )}
-                    variant={isAttending ? "default" : "outline"}
-                  >
-                    <CheckCircle className="h-4 w-4 ml-2" />
-                    {isAttending ? "מגיע ✓ — לחץ לביטול" : spotsLeft(selectedEvent) === 0 ? "האירוע מלא" : "אישור הגעה"}
-                  </Button>
+                  {selectedEvent.registration_required !== false && (
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); attemptRsvp(selectedEvent); }}
+                      disabled={spotsLeft(selectedEvent) === 0 && !isAttending}
+                      className={cn(
+                        "w-full font-body",
+                        isAttending
+                          ? "gradient-gold text-primary-foreground"
+                          : "border-gold/40 text-gold hover:bg-gold/10"
+                      )}
+                      variant={isAttending ? "default" : "outline"}
+                    >
+                      <CheckCircle className="h-4 w-4 ml-2" />
+                      {isAttending ? "מגיע ✓ — לחץ לביטול" : spotsLeft(selectedEvent) === 0 ? "האירוע מלא" : "אישור הגעה"}
+                    </Button>
+                  )}
                   <div className="flex gap-2">
                     <a href={googleCalendarUrl(selectedEvent)} target="_blank" rel="noopener noreferrer" className="flex-1">
                       <Button variant="outline" className="w-full font-body border-border text-muted-foreground hover:text-foreground">
