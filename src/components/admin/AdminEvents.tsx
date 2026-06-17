@@ -529,7 +529,7 @@ const AdminEvents = () => {
                 onChange={(e) => setForm({ ...form, registration_required: e.target.checked })}
                 className="rounded border-border"
               />
-              נדרשת הרשמה מראש
+              נדרש אישור הגעה (RSVP)
             </label>
           </div>
 
