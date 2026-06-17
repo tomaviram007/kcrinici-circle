@@ -8,6 +8,7 @@ gsap.registerPlugin(ScrollToPlugin);
 import HeroSection from "@/components/landing/HeroSection";
 import SalesPreviewSection from "@/components/landing/SalesPreviewSection";
 import EventsPreviewSection from "@/components/landing/EventsPreviewSection";
+import GalleryPreviewSection from "@/components/landing/GalleryPreviewSection";
 import JobsPreviewSection from "@/components/landing/JobsPreviewSection";
 import BirthdaysPreviewSection from "@/components/landing/BirthdaysPreviewSection";
 import QuoteSection from "@/components/landing/QuoteSection";
