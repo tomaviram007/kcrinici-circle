@@ -19,7 +19,7 @@ import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 import { isEventEnded } from "@/lib/event-status";
 
-const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "", max_participants: "", is_admin_only: false };
+const EMPTY_FORM = { title: "", description: "", event_date: "", end_date: "", location: "", waze_url: "", image_url: "", payment_link: "", registration_required: true, price: "", max_participants: "", is_admin_only: false };
 
 interface RsvpProfile {
   full_name: string;
