@@ -212,17 +212,20 @@ const AdminEvents = () => {
     const { data: { session } } = await supabase.auth.getSession();
     
     // Convert local datetime to ISO with timezone offset so the DB stores it correctly
-    let eventDateISO = form.event_date;
-    if (form.event_date && !form.event_date.includes('+') && !form.event_date.includes('Z')) {
-      const localDate = new Date(form.event_date);
-      eventDateISO = localDate.toISOString();
-    }
-    
+    const toISO = (val: string) => {
+      if (!val) return null;
+      if (val.includes('+') || val.includes('Z')) return val;
+      return new Date(val).toISOString();
+    };
+
     const payload = {
       ...form,
-      event_date: eventDateISO,
+      event_date: toISO(form.event_date)!,
+      end_date: toISO(form.end_date),
       image_url: form.image_url || null,
       payment_link: form.payment_link || null,
+      waze_url: form.waze_url || null,
+      location: form.location || null,
       price: form.price ? parseFloat(form.price) : null,
       max_participants: form.max_participants ? parseInt(form.max_participants) : null,
       created_by: session?.user?.id || null,
