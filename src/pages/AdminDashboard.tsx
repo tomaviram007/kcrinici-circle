@@ -358,7 +358,8 @@ const AdminGalleryApproval = () => {
                 </div>
                 <div className="p-3 space-y-2">
                   {photo.gallery_albums?.title && (
-                    <p className="font-body text-xs text-muted-foreground truncate">אלבום: {photo.gallery_albums.title}</p>
+                  {photo.album_title && (
+                    <p className="font-body text-xs text-muted-foreground truncate">אלבום: {photo.album_title}</p>
                   )}
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleApprovePhoto(photo.id)} className="flex-1 gradient-gold text-primary-foreground font-body">
