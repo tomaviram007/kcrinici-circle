@@ -433,6 +433,19 @@ const Gallery = () => {
                   <Image className="h-3.5 w-3.5 text-gold" />
                   {photos.length} {t("gallery.photos")}
                 </span>
+                {(() => {
+                  const linkedEvent = events.find(e => e.id === (selectedAlbum as any).event_id);
+                  if (!linkedEvent) return null;
+                  return (
+                    <a
+                      href={`/events/${linkedEvent.id}`}
+                      className="flex items-center gap-1 rounded-md border border-gold/30 bg-gold/10 px-2 py-0.5 text-gold hover:bg-gold/20 transition-colors"
+                    >
+                      <Calendar className="h-3.5 w-3.5" />
+                      קשור לאירוע: {linkedEvent.title}
+                    </a>
+                  );
+                })()}
               </div>
               {/* Creator */}
               {albumCreator && (
