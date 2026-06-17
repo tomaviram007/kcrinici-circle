@@ -17,6 +17,7 @@ import { validateImageFile } from "@/lib/file-validation";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
+import { isEventEnded } from "@/lib/event-status";
 
 const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "", max_participants: "", is_admin_only: false };
 
