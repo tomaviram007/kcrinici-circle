@@ -357,7 +357,6 @@ const AdminGalleryApproval = () => {
                   <img src={photo.image_url} alt={photo.caption || ""} className="h-full w-full object-cover" />
                 </div>
                 <div className="p-3 space-y-2">
-                  {photo.gallery_albums?.title && (
                   {photo.album_title && (
                     <p className="font-body text-xs text-muted-foreground truncate">אלבום: {photo.album_title}</p>
                   )}
