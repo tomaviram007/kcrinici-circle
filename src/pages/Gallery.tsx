@@ -411,6 +411,7 @@ const Gallery = () => {
                     onClick={() => {
                       setEditAlbumTitle(selectedAlbum.title);
                       setEditAlbumDesc(selectedAlbum.description || "");
+                      setEditAlbumEventId((selectedAlbum as any).event_id || "none");
                       setShowEditAlbum(true);
                     }}
                     className="text-muted-foreground hover:text-gold transition-colors"
