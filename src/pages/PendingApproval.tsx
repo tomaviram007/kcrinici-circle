@@ -18,7 +18,7 @@ const PendingApproval = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   if (loading) {

@@ -118,9 +118,12 @@ const Gallery = () => {
         title: newTitle.trim(),
         description: newDesc.trim() || null,
         created_by: userId,
+        is_approved: isAdmin,
       });
       if (error) throw error;
-      toast({ title: t("gallery.toastAlbumCreated") });
+      toast({
+        title: isAdmin ? t("gallery.toastAlbumCreated") : "האלבום נוצר וממתין לאישור מנהל",
+      });
       setNewTitle("");
       setNewDesc("");
       setShowCreate(false);
@@ -174,10 +177,13 @@ const Gallery = () => {
           album_id: selectedAlbum.id,
           image_url: publicUrl,
           uploaded_by: userId,
-        });
+          is_approved: isAdmin,
+        } as any);
         if (insertErr) throw insertErr;
       }
-      toast({ title: t("gallery.toastPhotosUploaded") });
+      toast({
+        title: isAdmin ? t("gallery.toastPhotosUploaded") : "התמונות הועלו וממתינות לאישור מנהל",
+      });
       await openAlbum(selectedAlbum);
     } catch (err: any) {
       toast({ title: t("gallery.toastUploadError"), description: err.message, variant: "destructive" });
@@ -195,9 +201,12 @@ const Gallery = () => {
         album_id: selectedAlbum.id,
         image_url: linkUrl.trim(),
         uploaded_by: userId,
-      });
+        is_approved: isAdmin,
+      } as any);
       if (error) throw error;
-      toast({ title: t("gallery.toastPhotoAdded") });
+      toast({
+        title: isAdmin ? t("gallery.toastPhotoAdded") : "התמונה נוספה וממתינה לאישור מנהל",
+      });
       setLinkUrl("");
       setShowAddByLink(false);
       await openAlbum(selectedAlbum);
@@ -529,6 +538,11 @@ const Gallery = () => {
                 {selectedAlbum.cover_image_url === photo.image_url && (
                   <div className="absolute top-2 right-2 bg-gold/90 text-primary-foreground rounded-full p-1">
                     <Star className="h-3 w-3" />
+                  </div>
+                )}
+                {!(photo as any).is_approved && (
+                  <div className="absolute top-2 left-2 z-10 flex items-center gap-1 rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-body text-white">
+                    <AlertTriangle className="h-3 w-3" /> ממתין לאישור
                   </div>
                 )}
                 {/* Action buttons */}

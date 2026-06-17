@@ -150,16 +150,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!alive) return;
 
       if (event === "SIGNED_OUT") {
-        const wasLoggedIn = hadUserRef.current;
+        // Intentional logout — clear state and go home, no "session expired" toast/redirect.
         clearRetry();
         currentUserIdRef.current = null;
         setUser(null);
         resetAccessState();
         setLoading(false);
         hadUserRef.current = false;
-        if (wasLoggedIn) {
-          setSessionExpired(true);
-        }
+        setSessionExpired(false);
         return;
       }
 
