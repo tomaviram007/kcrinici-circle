@@ -260,48 +260,113 @@ const AdminMobileNav = ({ activeTab, onTabChange, hasPermission }: { activeTab: 
 const AdminGalleryApproval = () => {
   const { toast } = useToast();
   const [albums, setAlbums] = useState<any[]>([]);
+  const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchPending = async () => {
-    const { data } = await supabase.from("gallery_albums").select("*").eq("is_approved", false).order("updated_at", { ascending: false });
-    setAlbums(data || []);
+    const [albumsRes, photosRes] = await Promise.all([
+      supabase.from("gallery_albums").select("*").eq("is_approved", false).order("updated_at", { ascending: false }),
+      supabase.from("gallery_photos").select("*, gallery_albums(title)").eq("is_approved" as any, false as any).order("created_at", { ascending: false }),
+    ]);
+    setAlbums(albumsRes.data || []);
+    setPhotos((photosRes.data as any[]) || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchPending(); }, []);
 
-  const handleApprove = async (id: string) => {
+  const handleApproveAlbum = async (id: string) => {
     const { error } = await supabase.from("gallery_albums").update({ is_approved: true }).eq("id", id);
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     toast({ title: "אלבום אושר!" });
     fetchPending();
   };
 
+  const handleDeleteAlbum = async (id: string) => {
+    if (!confirm("למחוק את האלבום וכל התמונות שבו?")) return;
+    const { error } = await supabase.from("gallery_albums").delete().eq("id", id);
+    if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "האלבום נמחק" });
+    fetchPending();
+  };
+
+  const handleApprovePhoto = async (id: string) => {
+    const { error } = await (supabase.from("gallery_photos") as any).update({ is_approved: true }).eq("id", id);
+    if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "התמונה אושרה!" });
+    fetchPending();
+  };
+
+  const handleDeletePhoto = async (id: string) => {
+    if (!confirm("למחוק את התמונה?")) return;
+    const { error } = await supabase.from("gallery_photos").delete().eq("id", id);
+    if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "התמונה נמחקה" });
+    fetchPending();
+  };
+
   if (loading) return <p className="text-muted-foreground font-body">טוען...</p>;
 
   return (
-    <div>
-      <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
-        <Image className="h-5 w-5 text-gold" /> גלריות ממתינות לאישור ({albums.length})
-      </h3>
-      {albums.length === 0 ? (
-        <p className="font-body text-sm text-muted-foreground">אין גלריות ממתינות לאישור.</p>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {albums.map((album) => (
-            <div key={album.id} className="rounded-lg border border-border bg-card p-5">
-              <h4 className="font-serif text-lg font-bold text-foreground">{album.title}</h4>
-              {album.description && <p className="font-body text-sm text-muted-foreground mt-1">{album.description}</p>}
-              <p className="font-body text-xs text-muted-foreground mt-2">{new Date(album.updated_at).toLocaleDateString("he-IL")}</p>
-              <div className="mt-3 flex gap-2">
-                <Button size="sm" onClick={() => handleApprove(album.id)} className="gradient-gold text-primary-foreground font-body">
-                  <Check className="h-4 w-4 ml-1" /> אשר
-                </Button>
+    <div className="space-y-8">
+      <div>
+        <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
+          <Image className="h-5 w-5 text-gold" /> גלריות ממתינות לאישור ({albums.length})
+        </h3>
+        {albums.length === 0 ? (
+          <p className="font-body text-sm text-muted-foreground">אין גלריות ממתינות לאישור.</p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {albums.map((album) => (
+              <div key={album.id} className="rounded-lg border border-border bg-card p-5">
+                <h4 className="font-serif text-lg font-bold text-foreground">{album.title}</h4>
+                {album.description && <p className="font-body text-sm text-muted-foreground mt-1">{album.description}</p>}
+                <p className="font-body text-xs text-muted-foreground mt-2">{new Date(album.updated_at).toLocaleDateString("he-IL")}</p>
+                <div className="mt-3 flex gap-2">
+                  <Button size="sm" onClick={() => handleApproveAlbum(album.id)} className="gradient-gold text-primary-foreground font-body">
+                    <Check className="h-4 w-4 ml-1" /> אשר
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => handleDeleteAlbum(album.id)} className="font-body">
+                    <X className="h-4 w-4 ml-1" /> מחק
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <h3 className="mb-4 font-serif text-xl font-bold text-foreground flex items-center gap-2">
+          <Image className="h-5 w-5 text-gold" /> תמונות ממתינות לאישור ({photos.length})
+        </h3>
+        {photos.length === 0 ? (
+          <p className="font-body text-sm text-muted-foreground">אין תמונות ממתינות לאישור.</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {photos.map((photo) => (
+              <div key={photo.id} className="rounded-lg border border-border bg-card overflow-hidden">
+                <div className="aspect-square bg-muted">
+                  <img src={photo.image_url} alt={photo.caption || ""} className="h-full w-full object-cover" />
+                </div>
+                <div className="p-3 space-y-2">
+                  {photo.gallery_albums?.title && (
+                    <p className="font-body text-xs text-muted-foreground truncate">אלבום: {photo.gallery_albums.title}</p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => handleApprovePhoto(photo.id)} className="flex-1 gradient-gold text-primary-foreground font-body">
+                      <Check className="h-3.5 w-3.5 ml-1" /> אשר
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDeletePhoto(photo.id)} className="font-body">
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
