@@ -17,6 +17,7 @@ import { validateImageFile } from "@/lib/file-validation";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { logAuditAction } from "@/lib/audit-log";
 import CreatorBadge from "@/components/admin/CreatorBadge";
+import { isEventEnded } from "@/lib/event-status";
 
 const EMPTY_FORM = { title: "", description: "", event_date: "", location: "", image_url: "", payment_link: "", registration_required: false, price: "", max_participants: "", is_admin_only: false };
 
@@ -486,13 +487,20 @@ const AdminEvents = () => {
           const rsvps = rsvpData[event.id] || [];
 
           return (
-            <div key={event.id} className="rounded-lg border border-border bg-card p-4 space-y-3">
+            <div key={event.id} className={`rounded-lg border border-border bg-card p-4 space-y-3 ${isEventEnded(event) ? "opacity-75" : ""}`}>
               <div className="flex items-start justify-between gap-3">
                 {event.image_url && (
-                  <img src={event.image_url} alt={event.title} onClick={() => startEdit(event)} className="w-16 h-16 rounded-md object-cover shrink-0 border border-border cursor-pointer hover:opacity-80 transition-opacity" />
+                  <img src={event.image_url} alt={event.title} onClick={() => startEdit(event)} className={`w-16 h-16 rounded-md object-cover shrink-0 border border-border cursor-pointer hover:opacity-80 transition-opacity ${isEventEnded(event) ? "grayscale opacity-70" : ""}`} />
                 )}
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => startEdit(event)} title="לחצו לעריכת האירוע">
-                  <h4 className="font-serif text-base font-bold text-foreground hover:text-gold transition-colors">{event.title}</h4>
+                  <h4 className="font-serif text-base font-bold text-foreground hover:text-gold transition-colors inline-flex items-center gap-2 flex-wrap">
+                    {event.title}
+                    {isEventEnded(event) && (
+                      <span className="inline-flex items-center rounded-full bg-destructive/15 text-destructive border border-destructive/30 px-2 py-0.5 font-body text-[10px] font-semibold">
+                        האירוע הסתיים
+                      </span>
+                    )}
+                  </h4>
                   <p className="font-body text-sm text-muted-foreground truncate">{event.description}</p>
                   <div className="mt-1 flex items-center gap-2 flex-wrap">
                     <span className="font-body text-xs text-gold">
