@@ -272,20 +272,29 @@ const Events = () => {
           const bgClass = BG_VARIANTS[i % BG_VARIANTS.length];
           const isAttending = rsvps[event.id] === "attending";
           const count = rsvpCounts[event.id] || 0;
+          const ended = isEventEnded(event);
 
           elements.push(
             <div
               key={event.id}
               onClick={() => openEventPopup(event)}
-              className={`event-card group relative overflow-hidden rounded-xl border border-border cursor-pointer break-inside-avoid flex flex-col justify-between transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)]`}
+              className={`event-card group relative overflow-hidden rounded-xl border border-border cursor-pointer break-inside-avoid flex flex-col justify-between transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)] ${ended ? "grayscale-[30%]" : ""}`}
             >
               {event.image_url ? (
-                <div className="relative w-full">
+                <div className={`relative w-full ${ended ? "opacity-60" : ""}`}>
                   <img src={event.image_url} alt={event.title} className="w-full h-auto object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                 </div>
               ) : (
-                <div className={`w-full h-40 ${bgClass}`} />
+                <div className={`w-full h-40 ${bgClass} ${ended ? "opacity-60" : ""}`} />
+              )}
+
+              {ended && (
+                <div className="absolute top-3 left-3 z-20">
+                  <span className="inline-flex items-center rounded-full bg-destructive/85 backdrop-blur-sm px-3 py-1 font-body text-[11px] font-semibold text-destructive-foreground border border-destructive/40 shadow-md">
+                    האירוע הסתיים
+                  </span>
+                </div>
               )}
 
               <div className="absolute top-3 right-3 z-10">
