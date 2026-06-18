@@ -1313,6 +1313,14 @@ export type Database = {
           participant_count: number
         }[]
       }
+      get_poll_results: {
+        Args: { _poll_id: string }
+        Returns: {
+          option_id: string
+          total_votes: number
+          vote_count: number
+        }[]
+      }
       get_public_stats: { Args: never; Returns: Json }
       has_permission: {
         Args: { _permission: string; _user_id: string }
