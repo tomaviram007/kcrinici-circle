@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.event-share]
 verify_jwt = false
+
+[functions.send-birthday-emails]
+verify_jwt = false
