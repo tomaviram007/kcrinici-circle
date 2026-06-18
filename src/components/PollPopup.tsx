@@ -62,24 +62,27 @@ const PollPopup = () => {
 
       if (!eligiblePoll) return;
 
-      // Fetch options and votes
-      const [{ data: optionsData }, { data: votesData }] = await Promise.all([
+      // Fetch options, aggregate vote counts, and the current user's own votes
+      const [{ data: optionsData }, { data: resultsData }, { data: myVotesData }] = await Promise.all([
         supabase.from("poll_options").select("*").eq("poll_id", eligiblePoll.id),
-        supabase.from("poll_votes").select("*").eq("poll_id", eligiblePoll.id),
+        supabase.rpc("get_poll_results", { _poll_id: eligiblePoll.id }),
+        supabase.from("poll_votes").select("option_id").eq("poll_id", eligiblePoll.id).eq("user_id", uid),
       ]);
 
-      const votes = votesData || [];
+      const results = (resultsData || []) as Array<{ option_id: string; vote_count: number; total_votes: number }>;
+      const myVoteOptionIds = new Set((myVotesData || []).map((v: any) => v.option_id));
+      const totalVotes = results[0]?.total_votes ? Number(results[0].total_votes) : 0;
       const enrichedPoll: PopupPoll = {
         id: eligiblePoll.id,
         title: eligiblePoll.title,
         description: eligiblePoll.description,
         allow_multiple: eligiblePoll.allow_multiple,
-        totalVotes: votes.length,
+        totalVotes,
         options: (optionsData || []).map(o => ({
           id: o.id,
           option_text: o.option_text,
-          votes: votes.filter(v => v.option_id === o.id).length,
-          votedByMe: votes.some(v => v.option_id === o.id && v.user_id === uid),
+          votes: Number(results.find(r => r.option_id === o.id)?.vote_count || 0),
+          votedByMe: myVoteOptionIds.has(o.id),
         })),
       };
 
