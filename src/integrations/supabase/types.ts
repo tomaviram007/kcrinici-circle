@@ -263,6 +263,66 @@ export type Database = {
         }
         Relationships: []
       }
+      birthday_email_log: {
+        Row: {
+          error_message: string | null
+          id: string
+          recipient_email: string
+          resend_id: string | null
+          sent_at: string
+          sent_year: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          recipient_email: string
+          resend_id?: string | null
+          sent_at?: string
+          sent_year: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          recipient_email?: string
+          resend_id?: string | null
+          sent_at?: string
+          sent_year?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      birthday_email_template: {
+        Row: {
+          body_html: string
+          id: string
+          is_active: boolean
+          subject: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body_html?: string
+          id?: string
+          is_active?: boolean
+          subject?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body_html?: string
+          id?: string
+          is_active?: boolean
+          subject?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           benefit_type: string | null
@@ -902,17 +962,23 @@ export type Database = {
           bio: string | null
           birth_date: string | null
           created_at: string
+          display_name: string | null
+          email_opt_in: boolean
           expertise: string | null
           facebook_url: string | null
+          first_name: string | null
           full_name: string
           hobbies: string | null
           id: string
           instagram_url: string | null
           is_approved: boolean
           is_removed: boolean
+          last_name: string | null
           linkedin_url: string | null
           phone: string
           profession: string
+          send_birthday_email: boolean
+          show_in_birthday_list: boolean
           updated_at: string
           user_id: string
           website_url: string | null
@@ -923,17 +989,23 @@ export type Database = {
           bio?: string | null
           birth_date?: string | null
           created_at?: string
+          display_name?: string | null
+          email_opt_in?: boolean
           expertise?: string | null
           facebook_url?: string | null
+          first_name?: string | null
           full_name: string
           hobbies?: string | null
           id?: string
           instagram_url?: string | null
           is_approved?: boolean
           is_removed?: boolean
+          last_name?: string | null
           linkedin_url?: string | null
           phone: string
           profession: string
+          send_birthday_email?: boolean
+          show_in_birthday_list?: boolean
           updated_at?: string
           user_id: string
           website_url?: string | null
@@ -944,17 +1016,23 @@ export type Database = {
           bio?: string | null
           birth_date?: string | null
           created_at?: string
+          display_name?: string | null
+          email_opt_in?: boolean
           expertise?: string | null
           facebook_url?: string | null
+          first_name?: string | null
           full_name?: string
           hobbies?: string | null
           id?: string
           instagram_url?: string | null
           is_approved?: boolean
           is_removed?: boolean
+          last_name?: string | null
           linkedin_url?: string | null
           phone?: string
           profession?: string
+          send_birthday_email?: boolean
+          show_in_birthday_list?: boolean
           updated_at?: string
           user_id?: string
           website_url?: string | null
@@ -1189,6 +1267,36 @@ export type Database = {
           target_url: string
           title: string
           updated_at: string
+        }[]
+      }
+      get_birthdays_for_date: {
+        Args: { _day: number; _month: number }
+        Returns: {
+          display_name: string
+          email: string
+          email_opt_in: boolean
+          first_name: string
+          full_name: string
+          is_approved: boolean
+          phone: string
+          send_birthday_email: boolean
+          user_id: string
+        }[]
+      }
+      get_birthdays_in_month: {
+        Args: { _month: number }
+        Returns: {
+          birth_date: string
+          display_name: string
+          email: string
+          email_opt_in: boolean
+          first_name: string
+          full_name: string
+          is_approved: boolean
+          phone: string
+          send_birthday_email: boolean
+          show_in_birthday_list: boolean
+          user_id: string
         }[]
       }
       get_event_attending_counts: {
