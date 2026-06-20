@@ -7,11 +7,13 @@ interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
   whatsappGroupUrl?: string
+  unsubscribeUrl?: string
 }
 
-export const MagicLinkEmail = ({ confirmationUrl, whatsappGroupUrl }: MagicLinkEmailProps) => (
+export const MagicLinkEmail = ({ confirmationUrl, whatsappGroupUrl, unsubscribeUrl }: MagicLinkEmailProps) => (
   <BrandLayout
     whatsappGroupUrl={whatsappGroupUrl}
+    unsubscribeUrl={unsubscribeUrl}
     preview="קישור כניסה למועדון"
     heading="הכניסה שלכם מחכה"
     intro="לחיצה אחת על הכפתור — וכבר אתם בפנים. אין צורך בסיסמה."
