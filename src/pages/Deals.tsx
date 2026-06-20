@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Tag, Search, Copy, MessageCircle, Clock, Store, ExternalLink, Plus, Pencil } from "lucide-react";
+import { Tag, Search, Copy, MessageCircle, Clock, Store, ExternalLink, Plus, Pencil, Lock } from "lucide-react";
+import MembersOnlyNotice from "@/components/MembersOnlyNotice";
+import { useContentAccess } from "@/hooks/useContentAccess";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -59,24 +61,30 @@ const Deals = () => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user, isApproved } = useAuth();
+  const { isMember, canSeeContact, canAct } = useContentAccess("deals");
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase
-        .from("deals")
-        .select("*")
-        .eq("is_active", true)
-        .eq("is_approved", true)
-        .order("created_at", { ascending: false });
-      const now = new Date();
-      setDeals(
-        (data || []).filter(
-          (d: any) => !d.expires_at || new Date(d.expires_at) > now
-        )
-      );
+      if (isMember) {
+        const { data } = await supabase
+          .from("deals")
+          .select("*")
+          .eq("is_active", true)
+          .eq("is_approved", true)
+          .order("created_at", { ascending: false });
+        const now = new Date();
+        setDeals(
+          (data || []).filter(
+            (d: any) => !d.expires_at || new Date(d.expires_at) > now
+          )
+        );
+      } else {
+        const { data } = await (supabase as any).rpc("get_public_deals");
+        setDeals((data || []) as Deal[]);
+      }
     };
     fetch();
-  }, []);
+  }, [isMember]);
 
   useEffect(() => {
     if (!gridRef.current) return;
@@ -370,9 +378,7 @@ const Deals = () => {
                 )}
 
                 {(!user || !isApproved) && (
-                  <p className="text-center font-body text-sm text-muted-foreground">
-                    {t("deals.memberOnly")}
-                  </p>
+                  <MembersOnlyNotice variant="deals" compact />
                 )}
               </div>
             </>
