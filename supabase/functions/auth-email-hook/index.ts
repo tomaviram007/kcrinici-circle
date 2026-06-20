@@ -263,6 +263,13 @@ async function handleWebhook(req: Request): Promise<Response> {
     console.warn('unsubscribe token generation failed', e)
   }
 
+  // Load admin copy override (subject + body strings)
+  const copyOverride = await loadCopyOverride(supabase, emailType as EmailTemplateId)
+  const effectiveSubject =
+    (copyOverride?.subject?.trim()) ||
+    EMAIL_COPY_DEFAULTS[emailType as EmailTemplateId]?.subject ||
+    'Notification'
+
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
@@ -275,6 +282,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     newEmail: payload.data.new_email,
     whatsappGroupUrl,
     unsubscribeUrl,
+    copy: copyOverride || undefined,
   }
 
   // Render React Email to HTML and plain text
