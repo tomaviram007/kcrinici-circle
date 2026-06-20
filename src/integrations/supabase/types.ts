@@ -392,6 +392,21 @@ export type Database = {
         }
         Relationships: []
       }
+      email_alert_state: {
+        Row: {
+          id: boolean
+          last_alerted_at: string
+        }
+        Insert: {
+          id?: boolean
+          last_alerted_at?: string
+        }
+        Update: {
+          id?: boolean
+          last_alerted_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1359,6 +1374,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_email_logs: {
+        Args: {
+          _end?: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+          _start?: string
+          _status?: string
+          _template?: string
+        }
+        Returns: {
+          created_at: string
+          error_message: string
+          message_id: string
+          metadata: Json
+          recipient_email: string
+          status: string
+          template_name: string
+          total_count: number
+        }[]
+      }
+      admin_get_email_stats: {
+        Args: { _end?: string; _start?: string }
+        Returns: Json
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
