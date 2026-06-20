@@ -146,7 +146,7 @@ const AdminCommunication = () => {
       </div>
 
       <Tabs defaultValue="send" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-md">
+        <TabsList className="grid w-full grid-cols-3 max-w-md mr-0 ml-auto">
           <TabsTrigger value="send"><Mail className="h-4 w-4 ml-1" />מייל</TabsTrigger>
           <TabsTrigger value="whatsapp"><MessageCircle className="h-4 w-4 ml-1" />ואטסאפ</TabsTrigger>
           <TabsTrigger value="logs">לוגים</TabsTrigger>
