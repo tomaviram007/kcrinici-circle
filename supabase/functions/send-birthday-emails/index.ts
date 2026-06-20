@@ -40,14 +40,6 @@ function renderTemplate(tpl: string, vars: Record<string, string>) {
   return (tpl || "").replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => vars[k] ?? "");
 }
 
-function escapeHtml(s: string) {
-  return (s || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
 interface TemplateRow {
   subject: string;
   body_html: string;
@@ -58,69 +50,30 @@ interface TemplateRow {
   from_name?: string | null;
   reply_to?: string | null;
   logo_url?: string | null;
-  bg_color?: string | null;
-  text_color?: string | null;
-  button_color?: string | null;
 }
 
-function buildHtml(tpl: TemplateRow, vars: Record<string, string>) {
-  const bg = tpl.bg_color || "#16110e";
-  const text = tpl.text_color || "#f6f0e6";
-  const btn = tpl.button_color || "#D4AF37";
-  const heading = renderTemplate(tpl.heading || "", vars);
-  const body = renderTemplate(tpl.body_html || "", vars);
-  const signature = renderTemplate(tpl.signature || "", vars);
-  const preview = renderTemplate(tpl.preview_text || "", vars);
-  const logo = tpl.logo_url || "";
-
-  return `<!DOCTYPE html>
-<html dir="rtl" lang="he">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${escapeHtml(renderTemplate(tpl.subject || "", vars))}</title>
-</head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif;">
-${preview ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(preview)}</div>` : ""}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:24px 12px;">
-  <tr><td align="center">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:${bg};color:${text};border-radius:16px;overflow:hidden;border:1px solid ${btn}33;">
-      ${logo ? `<tr><td align="center" style="padding:28px 24px 0;"><img src="${escapeHtml(logo)}" alt="" style="max-width:140px;height:auto;display:block;" /></td></tr>` : ""}
-      ${heading ? `<tr><td align="center" style="padding:24px 24px 8px;font-size:26px;font-weight:700;line-height:1.3;color:${text};">${escapeHtml(heading)}</td></tr>` : ""}
-      <tr><td style="padding:16px 28px 24px;font-size:16px;line-height:1.7;color:${text};">${body}</td></tr>
-      ${signature ? `<tr><td style="padding:0 28px 28px;font-size:14px;line-height:1.6;color:${text};opacity:.85;border-top:1px solid ${btn}33;padding-top:18px;">${escapeHtml(signature).replace(/\n/g, "<br/>")}</td></tr>` : ""}
-    </table>
-    <div style="max-width:600px;margin:12px auto 0;font-size:11px;color:#888;text-align:center;">
-      ${escapeHtml(vars.club_name || "")} · ${vars.current_year || ""}
-    </div>
-  </td></tr>
-</table>
-</body>
-</html>`;
-}
-
-async function sendViaResend(opts: {
-  resendKey: string;
-  from: string;
-  replyTo?: string;
+async function sendOne(opts: {
+  supabaseUrl: string;
+  serviceRoleKey: string;
   to: string;
   subject: string;
-  html: string;
-}) {
-  const payload: Record<string, unknown> = {
-    from: opts.from,
-    to: [opts.to],
-    subject: opts.subject,
-    html: opts.html,
-  };
-  if (opts.replyTo) payload.reply_to = opts.replyTo;
-  const resp = await fetch("https://api.resend.com/emails", {
+  templateData: Record<string, unknown>;
+  idempotencyKey: string;
+}): Promise<{ ok: boolean; status: number; body: any }> {
+  const resp = await fetch(`${opts.supabaseUrl}/functions/v1/send-transactional-email`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${opts.resendKey}`,
+      Authorization: `Bearer ${opts.serviceRoleKey}`,
+      apikey: opts.serviceRoleKey,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      templateName: "birthday-greeting",
+      recipientEmail: opts.to,
+      idempotencyKey: opts.idempotencyKey,
+      purpose: "transactional",
+      templateData: opts.templateData,
+    }),
   });
   const body = await resp.json().catch(() => ({}));
   return { ok: resp.ok, status: resp.status, body };
@@ -136,14 +89,12 @@ serve(async (req) => {
   const onlyUserId = url.searchParams.get("user_id");
   const testTo = url.searchParams.get("to");
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   // Auth: cron secret OR service-role bearer OR authenticated admin
   const cronSecret = Deno.env.get("CRON_SECRET");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const provided = req.headers.get("x-cron-secret");
   const authHeader = req.headers.get("authorization") || "";
   const token = authHeader.replace(/^Bearer\s+/i, "");
@@ -169,17 +120,6 @@ serve(async (req) => {
     });
   }
 
-  const resendKey = Deno.env.get("RESEND_API_KEY");
-  if (!resendKey) {
-    return new Response(
-      JSON.stringify({
-        error: "email_service_not_configured",
-        message: "RESEND_API_KEY חסר. נדרש להגדיר את שירות המיילים לפני הפעלת השליחה.",
-      }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
   // Load settings
   const { data: settingsRows } = await supabase
     .from("site_settings")
@@ -188,7 +128,7 @@ serve(async (req) => {
   const settings: Record<string, string> = {};
   for (const r of settingsRows ?? []) settings[(r as any).key] = (r as any).value ?? "";
   const sendHour = parseInt(settings.birthday_send_hour || "8", 10);
-  const leapMode = settings.birthday_leap_mode || "feb_28"; // feb_28 | mar_1 | skip
+  const leapMode = settings.birthday_leap_mode || "feb_28";
   const clubName = settings.club_name || "מועדון הגברים";
 
   // Load template
@@ -198,7 +138,7 @@ serve(async (req) => {
     .limit(1)
     .maybeSingle();
 
-  if (!tplRow || !tplRow.is_active) {
+  if (!tplRow || !(tplRow as any).is_active) {
     return new Response(
       JSON.stringify({ ok: true, skipped: true, reason: "template_inactive" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -206,11 +146,8 @@ serve(async (req) => {
   }
 
   const tpl = tplRow as unknown as TemplateRow;
-  const fromName = tpl.from_name?.trim() || clubName;
-  const senderAddress = Deno.env.get("BIRTHDAY_FROM_EMAIL") || "onboarding@resend.dev";
-  const fromAddress = `${fromName} <${senderAddress}>`;
 
-  // TEST MODE: render with dummy data, send to provided address, no log
+  // TEST MODE
   if (isTest) {
     if (!testTo) {
       return new Response(JSON.stringify({ error: "missing_to" }), {
@@ -219,7 +156,7 @@ serve(async (req) => {
       });
     }
     const { year, month, day } = jerusalemDateParts();
-    const vars = {
+    const vars: Record<string, string> = {
       first_name: "ישראל",
       last_name: "ישראלי",
       full_name: "ישראל ישראלי",
@@ -227,32 +164,40 @@ serve(async (req) => {
       club_name: clubName,
       current_year: String(year),
     };
-    const subject = "[בדיקה] " + renderTemplate(tpl.subject, vars);
-    const html = buildHtml(tpl, vars);
-    const res = await sendViaResend({
-      resendKey,
-      from: fromAddress,
-      replyTo: tpl.reply_to || undefined,
+    const subject = "[בדיקה] " + renderTemplate(tpl.subject || "", vars);
+    const res = await sendOne({
+      supabaseUrl,
+      serviceRoleKey,
       to: testTo,
       subject,
-      html,
+      idempotencyKey: `bday-test-${Date.now()}`,
+      templateData: {
+        subject,
+        heading: renderTemplate(tpl.heading || "", vars),
+        bodyHtml: renderTemplate(tpl.body_html || "", vars),
+        signature: renderTemplate(tpl.signature || "", vars),
+        clubName,
+        logoUrl: tpl.logo_url || "",
+      },
     });
-    if (!res.ok) {
-      return new Response(
-        JSON.stringify({ ok: false, error: (res.body as any)?.message || `HTTP ${res.status}` }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-    return new Response(JSON.stringify({ ok: true, test: true, to: testTo }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ ok: res.ok, test: true, to: testTo, status: res.status, body: res.body }),
+      {
+        status: res.ok ? 200 : 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 
-  // Real run
+  // Real run — hour gate
   const hour = jerusalemHour();
   if (!force && hour !== sendHour) {
     return new Response(
-      JSON.stringify({ ok: true, skipped: true, reason: `not configured send hour (now=${hour}, configured=${sendHour})` }),
+      JSON.stringify({
+        ok: true,
+        skipped: true,
+        reason: `not configured send hour (now=${hour}, configured=${sendHour})`,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
@@ -267,10 +212,8 @@ serve(async (req) => {
     } else if (leapMode === "mar_1" && month === 3 && day === 1) {
       targets.push({ m: 2, d: 29 });
     }
-    // "skip" -> never include Feb 29
   }
 
-  // Collect recipients
   const recipients: Array<{
     user_id: string;
     first_name: string;
@@ -296,7 +239,6 @@ serve(async (req) => {
       if (!r.email_opt_in) continue;
       if (!r.email) continue;
       if (onlyUserId && r.user_id !== onlyUserId) continue;
-      // Fetch last_name from profile
       recipients.push({
         user_id: r.user_id,
         first_name: r.first_name || "",
@@ -309,7 +251,7 @@ serve(async (req) => {
     }
   }
 
-  // If manual targeting a user and not found by today's birthdays, fetch them anyway (force/manual override path)
+  // Manual force for a specific user even if not matching today
   if (onlyUserId && force && recipients.length === 0) {
     const { data: prof } = await supabase
       .from("profiles")
@@ -334,7 +276,6 @@ serve(async (req) => {
     }
   }
 
-  // Fill last_name from profiles for the collected user_ids
   if (recipients.length > 0) {
     const ids = recipients.map((r) => r.user_id);
     const { data: profs } = await supabase
@@ -346,7 +287,6 @@ serve(async (req) => {
     for (const r of recipients) if (!r.last_name) r.last_name = lastNameMap[r.user_id] || "";
   }
 
-  // If resend=1, clear existing log row(s) for this year for the targeted user(s)
   if (resend && onlyUserId) {
     await supabase
       .from("birthday_email_log")
@@ -361,6 +301,7 @@ serve(async (req) => {
   const errors: Array<{ email: string; error: string }> = [];
 
   for (const r of recipients) {
+    // Dedupe via unique log insert
     const { error: insertErr } = await supabase.from("birthday_email_log").insert({
       user_id: r.user_id,
       recipient_email: r.email,
@@ -378,7 +319,7 @@ serve(async (req) => {
       continue;
     }
 
-    const vars = {
+    const vars: Record<string, string> = {
       first_name: r.first_name,
       last_name: r.last_name,
       full_name: r.full_name,
@@ -387,20 +328,27 @@ serve(async (req) => {
       current_year: String(year),
     };
 
-    const subject = renderTemplate(tpl.subject, vars);
-    const html = buildHtml(tpl, vars);
+    const subject = renderTemplate(tpl.subject || "", vars);
 
     try {
-      const res = await sendViaResend({
-        resendKey,
-        from: fromAddress,
-        replyTo: tpl.reply_to || undefined,
+      const res = await sendOne({
+        supabaseUrl,
+        serviceRoleKey,
         to: r.email,
         subject,
-        html,
+        idempotencyKey: `bday-${r.user_id}-${year}`,
+        templateData: {
+          subject,
+          heading: renderTemplate(tpl.heading || "", vars),
+          bodyHtml: renderTemplate(tpl.body_html || "", vars),
+          signature: renderTemplate(tpl.signature || "", vars),
+          clubName,
+          logoUrl: tpl.logo_url || "",
+        },
       });
+
       if (!res.ok) {
-        const msg = ((res.body as any)?.message || `HTTP ${res.status}`).toString().slice(0, 500);
+        const msg = (res.body?.error || res.body?.message || `HTTP ${res.status}`).toString().slice(0, 500);
         await supabase
           .from("birthday_email_log")
           .update({ status: "failed", error_message: msg })
@@ -411,7 +359,7 @@ serve(async (req) => {
       } else {
         await supabase
           .from("birthday_email_log")
-          .update({ status: "sent", resend_id: (res.body as any)?.id ?? null })
+          .update({ status: "sent", resend_id: res.body?.messageId ?? res.body?.id ?? null })
           .eq("user_id", r.user_id)
           .eq("sent_year", year);
         sent++;
