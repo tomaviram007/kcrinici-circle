@@ -198,7 +198,7 @@ const AdminCommunication = () => {
         </TabsContent>
 
         <TabsContent value="whatsapp" className="mt-6">
-          <div className="rounded-xl border border-border bg-card p-6 space-y-4 max-w-2xl">
+          <div className="rounded-xl border border-border bg-card p-6 space-y-4 max-w-2xl ml-auto mr-0">
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <Label>מספרי טלפון</Label>
