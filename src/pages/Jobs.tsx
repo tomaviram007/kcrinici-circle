@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search, Pencil } from "lucide-react";
+import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search, Pencil, Lock } from "lucide-react";
+import MembersOnlyNotice from "@/components/MembersOnlyNotice";
+import { useContentAccess } from "@/hooks/useContentAccess";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -38,6 +40,7 @@ const Jobs = () => {
   const canEditJobs = hasPermission("manage_jobs");
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { isMember, canOpenCard, canSeeContact, canAct } = useContentAccess("jobs");
   const [jobs, setJobs] = useState<any[]>([]);
   const coverImage = usePageCover("jobs", heroImg);
   const [showForm, setShowForm] = useState(false);
@@ -50,11 +53,16 @@ const Jobs = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   const fetchJobs = async () => {
-    const { data } = await supabase.from("jobs").select("*").eq("is_approved", true).eq("is_active", true).order("created_at", { ascending: false });
-    setJobs(data || []);
+    if (isMember) {
+      const { data } = await supabase.from("jobs").select("*").eq("is_approved", true).eq("is_active", true).order("created_at", { ascending: false });
+      setJobs(data || []);
+    } else {
+      const { data } = await (supabase as any).rpc("get_public_jobs");
+      setJobs((data || []).map((j: any) => ({ ...j, description: j.summary })));
+    }
   };
 
-  useEffect(() => { fetchJobs(); }, []);
+  useEffect(() => { fetchJobs(); }, [isMember]);
 
   useEffect(() => {
     if (jobs.length > 0 && cardsRef.current) {
