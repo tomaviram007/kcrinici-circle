@@ -48,20 +48,25 @@ Deno.serve(async (req) => {
       })
     }
 
-    const supabase = createClient(
+    // User-context client (anon key + caller's JWT) for identity check
+    const userClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
       { global: { headers: { Authorization: authHeader } } }
     )
-
-    // Verify caller identity & admin role
-    const { data: claims } = await supabase.auth.getClaims()
-    const userId = claims?.claims?.sub
-    if (!userId) {
+    const { data: userData, error: userErr } = await userClient.auth.getUser()
+    const userId = userData?.user?.id
+    if (userErr || !userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+
+    // Service-role client for privileged reads (has_role, site_settings)
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    )
     const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: userId, _role: 'admin' })
     if (!isAdmin) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
