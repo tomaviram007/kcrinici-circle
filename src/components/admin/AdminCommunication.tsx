@@ -188,7 +188,7 @@ const AdminCommunication = () => {
             </div>
             <div>
               <Label>גוף ההודעה</Label>
-              <Textarea value={body} onChange={e => setBody(e.target.value)} rows={8} placeholder="תוכן ההודעה..." />
+              <Textarea value={body} onChange={e => setBody(e.target.value)} rows={8} placeholder="תוכן ההודעה..." className="text-right" />
               <p className="text-xs text-muted-foreground mt-1">שורות חדשות יהפכו ל-&lt;br/&gt; אוטומטית</p>
             </div>
             <Button onClick={handleSend} disabled={sending} className="bg-gold text-charcoal hover:bg-gold/90">
@@ -228,7 +228,7 @@ const AdminCommunication = () => {
             </div>
             <div>
               <Label>הודעה</Label>
-              <Textarea value={waMsg} onChange={e => setWaMsg(e.target.value)} rows={5} placeholder="תוכן ההודעה..." />
+              <Textarea value={waMsg} onChange={e => setWaMsg(e.target.value)} rows={5} placeholder="תוכן ההודעה..." className="text-right" />
             </div>
             <Button onClick={handleWhatsApp} className="bg-green-600 text-white hover:bg-green-700">
               <MessageCircle className="h-4 w-4 ml-2" />
@@ -289,7 +289,8 @@ const AdminCommunication = () => {
               <Label className="text-xs">חיפוש (מייל/שגיאה)</Label>
               <Input value={search} onChange={e => setSearch(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && (setPage(0), loadLogs())}
-                placeholder="חפש..." />
+                placeholder="חפש..."
+                className="text-right" />
             </div>
             <Button variant="outline" onClick={() => { setPage(0); loadLogs(); }} disabled={loading}>
               <RefreshCw className={`h-4 w-4 ml-1 ${loading ? "animate-spin" : ""}`} />רענן
