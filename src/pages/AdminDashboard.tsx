@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package, Mail, Cake } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package, Mail, Cake, Lock } from "lucide-react";
 import AdminCommunicationHub from "@/components/admin/AdminCommunicationHub";
 import AdminBirthdays from "@/components/admin/AdminBirthdays";
+import AdminContentAccess from "@/components/admin/AdminContentAccess";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -57,6 +58,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   ads: "manage_settings",
   communication: "manage_settings",
   birthdays: "manage_members",
+  content_access: "manage_settings",
 };
 
 const AdminDashboard = () => {
@@ -147,6 +149,7 @@ const AdminDashboard = () => {
             {activeTab === "ads" && hasPermission("manage_settings") && <AdminAds />}
             {activeTab === "communication" && hasPermission("manage_settings") && <AdminCommunicationHub />}
             {activeTab === "birthdays" && hasPermission("manage_members") && <AdminBirthdays />}
+            {activeTab === "content_access" && hasPermission("manage_settings") && <AdminContentAccess />}
             {activeTab === "team" && hasPermission("manage_team") && <AdminTeam />}
             {/* Show access denied message if no permission */}
             {TAB_PERMISSION_MAP[activeTab] && !hasPermission(TAB_PERMISSION_MAP[activeTab]) && (
@@ -201,6 +204,7 @@ const mobileNavGroups = [
       { id: "quotes", label: "ציטוטים", icon: Quote },
       { id: "ads", label: "פרסום", icon: Tv },
       { id: "communication", label: "תקשורת", icon: Mail },
+      { id: "content_access", label: "הרשאות תוכן", icon: Lock },
     ],
   },
 ];

@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search, Pencil } from "lucide-react";
+import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search, Pencil, Lock } from "lucide-react";
+import MembersOnlyNotice from "@/components/MembersOnlyNotice";
+import { useContentAccess } from "@/hooks/useContentAccess";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -38,6 +40,7 @@ const Jobs = () => {
   const canEditJobs = hasPermission("manage_jobs");
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { isMember, canOpenCard, canSeeContact, canAct } = useContentAccess("jobs");
   const [jobs, setJobs] = useState<any[]>([]);
   const coverImage = usePageCover("jobs", heroImg);
   const [showForm, setShowForm] = useState(false);
@@ -50,11 +53,16 @@ const Jobs = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   const fetchJobs = async () => {
-    const { data } = await supabase.from("jobs").select("*").eq("is_approved", true).eq("is_active", true).order("created_at", { ascending: false });
-    setJobs(data || []);
+    if (isMember) {
+      const { data } = await supabase.from("jobs").select("*").eq("is_approved", true).eq("is_active", true).order("created_at", { ascending: false });
+      setJobs(data || []);
+    } else {
+      const { data } = await (supabase as any).rpc("get_public_jobs");
+      setJobs((data || []).map((j: any) => ({ ...j, description: j.summary })));
+    }
   };
 
-  useEffect(() => { fetchJobs(); }, []);
+  useEffect(() => { fetchJobs(); }, [isMember]);
 
   useEffect(() => {
     if (jobs.length > 0 && cardsRef.current) {
@@ -120,9 +128,11 @@ const Jobs = () => {
               <button onClick={() => setViewMode("grid")} className={`p-2 transition-colors ${viewMode === "grid" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`} title="תצוגת רשת"><LayoutGrid className="h-4 w-4" /></button>
               <button onClick={() => setViewMode("list")} className={`p-2 transition-colors ${viewMode === "list" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`} title="תצוגת רשימה"><List className="h-4 w-4" /></button>
             </div>
-            <Button size="sm" onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
-              <Plus className="h-4 w-4 ml-1" /> {t("jobs.postBtn")}
-            </Button>
+            {isMember && (
+              <Button size="sm" onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
+                <Plus className="h-4 w-4 ml-1" /> {t("jobs.postBtn")}
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -202,7 +212,7 @@ const Jobs = () => {
         {filtered.map((job) => (
           <div
             key={job.id}
-            onClick={() => setSelectedJob(job)}
+            onClick={() => canOpenCard ? setSelectedJob(job) : setSelectedJob({ __locked: true, title: job.title })}
             className="job-card cursor-pointer rounded-lg border border-border bg-card p-4 transition-all hover:shadow-[0_0_30px_hsl(43_72%_52%/0.1)] hover:border-gold/30"
           >
             <div className="flex items-start gap-3">
@@ -245,7 +255,9 @@ const Jobs = () => {
       {/* Job Detail Dialog */}
       <Dialog open={!!selectedJob} onOpenChange={(open) => !open && setSelectedJob(null)}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          {selectedJob && (
+          {selectedJob?.__locked ? (
+            <MembersOnlyNotice variant="jobs" />
+          ) : selectedJob && (
             <>
               <DialogHeader>
                 <DialogTitle className="font-serif text-xl font-bold text-foreground">{selectedJob.title}</DialogTitle>
@@ -284,25 +296,31 @@ const Jobs = () => {
                     </span>
                   )}
                 </div>
-                {(selectedJob.contact_name || selectedJob.contact) && (
-                  <div className="border-t border-border pt-4 space-y-2">
-                    <p className="font-body text-sm font-medium text-foreground">{t("jobs.contactTitle")}</p>
-                    {selectedJob.contact_name && (
-                      <span className="font-body text-sm text-gold flex items-center gap-1.5">
-                        <User className="h-4 w-4" /> {selectedJob.contact_name}
-                      </span>
-                    )}
-                    {selectedJob.contact && (
-                      <a
-                        href={`https://wa.me/${selectedJob.contact.replace(/[^0-9]/g, '').replace(/^0/, '972')}?text=${encodeURIComponent(`היי ${selectedJob.contact_name || ''} ראיתי את הפרסום של המשרה "${selectedJob.title}" שלך, אשמח לשמוע עוד פרטים`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        {selectedJob.contact}
-                      </a>
-                    )}
+                {canSeeContact ? (
+                  (selectedJob.contact_name || selectedJob.contact) && (
+                    <div className="border-t border-border pt-4 space-y-2">
+                      <p className="font-body text-sm font-medium text-foreground">{t("jobs.contactTitle")}</p>
+                      {selectedJob.contact_name && (
+                        <span className="font-body text-sm text-gold flex items-center gap-1.5">
+                          <User className="h-4 w-4" /> {selectedJob.contact_name}
+                        </span>
+                      )}
+                      {canAct && selectedJob.contact && (
+                        <a
+                          href={`https://wa.me/${selectedJob.contact.replace(/[^0-9]/g, '').replace(/^0/, '972')}?text=${encodeURIComponent(`היי ${selectedJob.contact_name || ''} ראיתי את הפרסום של המשרה "${selectedJob.title}" שלך, אשמח לשמוע עוד פרטים`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          {selectedJob.contact}
+                        </a>
+                      )}
+                    </div>
+                  )
+                ) : (
+                  <div className="border-t border-border pt-4">
+                    <MembersOnlyNotice variant="jobs" compact />
                   </div>
                 )}
               </div>

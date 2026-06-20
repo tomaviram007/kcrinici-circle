@@ -1,111 +1,111 @@
+## מנגנון הרשאות תוכן: גולש לעומת חבר מחובר
 
-## מה כבר קיים ולא נוגעים בו
-- בפרופיל החבר כבר יש את כל השדות הדרושים: `first_name`, `last_name`, `display_name`, `birth_date`, `phone`, אימייל, `is_approved`, `is_removed`, `email_opt_in`, `send_birthday_email`, `show_in_birthday_list`.
-- קיים `birthday_email_log` עם אילוץ ייחודיות `(user_id, sent_year)` שמונע שליחה כפולה באותה שנה.
-- קיים `send-birthday-emails` Edge Function ששולח ב-08:00 שעון ישראל, מטפל כבר ב-29/2 (נופל ל-28/2), בודק opt-in/אישור, ומסמן סטטוס אמת (`sent`/`failed`) לפי תשובת הספק (Resend) — לא נסמן "נשלח" אם לא נשלח באמת.
-- שירות שליחת המייל הוא Resend עם המפתח שכבר מוגדר. לא משנים ספק.
+### מטרה
+לאפשר לגולשים לא מחוברים לראות תצוגה חלקית של כל סוגי התוכן באתר, תוך חסימה אמיתית (גם בצד השרת) של פרטי קשר, פעולות פנייה ופרטים מלאים – שיהיו זמינים רק לחברים מאושרים ומחוברים.
 
-## מה נבנה (חדש)
-
-### 1. אזור "חוגגי החודש" בפאנל הניהול
-טאב חדש בתוך פאנל האדמין → "ימי הולדת", שמרכז הכול במקום אחד:
-- **בחירת חודש** (ינואר–דצמבר, ברירת מחדל: החודש הנוכחי בשעון ישראל).
-- כותרת עם **מספר החוגגים** באותו חודש.
-- **רשימת חוגגים ממוינת לפי יום**: שם מלא (או display name), תאריך לידה כ-DD/MM, טלפון, אימייל, סטטוס שליחת מייל לשנה הנוכחית (נשלח/נכשל/ממתין/לא נשלח), צ׳קבוקס לבחירה/ביטול לפני יצירת הברכה.
-- כפתורים: "בחר את כולם", "נקה בחירה".
-- **בדיקות תקינות**: אם אין חוגגים בחודש — הודעה "לא נמצאו חוגגים בחודש זה". אם חבר מסומן ל"שלוח מייל" אך אין לו אימייל — תווית אזהרה ליד שמו.
-
-### 2. תבנית ההודעה ל-WhatsApp + יצירת ברכה חודשית
-- כפתור ראשי: **"יצירת ברכה לחוגגי החודש"** → פותח דיאלוג עריכה.
-- בדיאלוג: textarea עם הברכה שנוצרה אוטומטית מתבנית שמורה, עם פתיחה לעריכה ידנית לפני שליחה.
-- **תבנית ניתנת לעריכה** (נשמרת ב-`site_settings` בכניסה אחת בשם `birthday_whatsapp_template`), תומכת במשתנים: `{{month_name}}`, `{{birthday_names}}` (מחרוזת עם פסיקים ו-"ו" לפני האחרון), `{{birthday_count}}`, `{{club_name}}`.
-- ברירת מחדל לתבנית:
-  > מזל טוב לחוגגי חודש {{month_name}} 🎉  
-  > {{birthday_names}},  
-  > מאחלים לכם המון בריאות, שמחה, הצלחה ורגעים טובים.  
-  > באהבה, {{club_name}} ❤️
-- כפתורים בדיאלוג: **פתח ב-WhatsApp**, **העתק ברכה**, **שמור תבנית כברירת מחדל**, **ביטול**.
-- **יעד ההודעה** — בחירה נשמרת ב-`site_settings`:
-  - מספר טלפון של מנהל המועדון
-  - קישור לקבוצת WhatsApp (פותח רק אם זה קישור הזמנה)
-  - "ללא יעד קבוע" (פתיחת WhatsApp Web בלי נמען)
-  - "העתקה ללוח בלבד" (לא פותח WhatsApp)
-- הבהרה ב-UI: WhatsApp לא מאפשר אזכור אמיתי (@) לחברי קבוצה אוטומטית — השמות מופיעים כטקסט בלבד. אין יומרה ל-mention אמיתי.
-
-### 3. תבנית מייל יום הולדת — הרחבה
-מרחיבים את `birthday_email_template` כדי לתמוך בכל מה שביקשת. עורך תבנית מלא בפאנל ניהול עם תצוגה מקדימה חיה (iframe):
-- **שדות טקסט**: נושא, טקסט תצוגה מקדימה (preview), כותרת ראשית, גוף הברכה, חתימה, שם השולח, כתובת תשובה.
-- **שדות עיצוב**: כתובת לוגו/תמונה (URL), צבע רקע, צבע טקסט, צבע כפתורים.
-- **משתנים נתמכים**: `{{first_name}}`, `{{last_name}}`, `{{full_name}}`, `{{birthday_date}}` (DD/MM), `{{club_name}}`, `{{current_year}}`.
-- **כפתור "שליחת מייל בדיקה"** — שולח את התבנית הנוכחית לאימייל של האדמין המחובר, ללא יצירת רשומה ב-log (כדי לא לבלבל סטטיסטיקות), עם תווית "[בדיקה]" בנושא.
-
-### 4. הגדרות תזמון ו-29/2 (גלובלי)
-פאנל הגדרות קטן באותו טאב:
-- **שעת שליחה** (0–23, 24h בלבד; ברירת מחדל 08:00). נשמר ב-`site_settings.birthday_send_hour`.
-- **התנהגות 29/2 בשנה שאינה מעוברת**: שלח ב-28/2 / שלח ב-1/3 / אל תשלח השנה. נשמר ב-`site_settings.birthday_leap_mode` (ברירת מחדל: 28/2 — תואם להתנהגות הקיימת).
-- ה-Edge Function יקרא את ההגדרות בכל ריצה (לא דורש פריסה מחודשת בכל שינוי).
-
-### 5. תזמון אוטומטי אמיתי
-- ב-DB אין כרגע cron ל-`send-birthday-emails`. **נוסיף `pg_cron` שירוץ בראש כל שעה** ויקרא ל-Edge Function עם הכותרת `x-cron-secret`. ה-Function עצמה ממשיכה את ההגנה: רצה רק כששעת ישראל === `birthday_send_hour`.
-- מבטיח שמייל יישלח פעם אחת בלבד בשנה לכל חבר (האילוץ `UNIQUE(user_id, sent_year)` כבר קיים — כל ניסיון שני יפיל violation ויסומן כ-"דולג").
-
-### 6. "היסטוריית ברכות יום הולדת"
-טאב פנימי באזור ימי הולדת:
-- טבלה מ-`birthday_email_log` מצורפת ל-`profiles`: שם חבר, תאריך לידה (DD/MM), תאריך+שעת שליחה, אימייל יעד, סטטוס (Badge ירוק/אדום/צהוב), סיבת כישלון, שנת שליחה.
-- מסננים: שנה, סטטוס, חיפוש חופשי בשם/אימייל.
-- כפתור **"שלח עכשיו"** ליד כל רשומה כושלת או חבר שטרם נשלח לו → פותח Modal אישור → קורא ל-Edge Function במצב manual override (מוסיף `?force=1&user_id=...&resend=1` — מוחק את הרשומה הקיימת לאותה שנה ושולח מחדש).
-- כפתור **"הפעל בדיקה ידנית עכשיו"** — מריץ את כל הסבב להיום (בלי לוותר על דדופ).
-
-### 7. פרטיות והרשאות
-- כל הטאב מאחורי `manage_settings`/`manage_members` באותו דפוס שיש לטאבים אחרים בפאנל. אין חשיפה ציבורית של טלפון/אימייל.
-- RLS: הטבלאות החדשות ירשו את אותו דפוס — קריאה/כתיבה לאדמין בלבד, ולחבר עצמו רק לקריאת הלוג שלו.
-- ההגנות הקיימות נשמרות: לא שולחים למייל למי שאין לו `email_opt_in`, `send_birthday_email`, או שאינו מאושר.
-
-### 8. UX והודעות
-כל פעולה מציגה Toast ברור: "הברכה הועתקה בהצלחה", "WhatsApp נפתח", "המייל נשלח בהצלחה", "לא נמצאו חוגגים בחודש זה", "חסרה כתובת אימייל", "השליחה נכשלה: <סיבה>", "המייל כבר נשלח השנה — לחץ על 'שליחה חוזרת' כדי לאלץ". RTL מלא, תואם מובייל, תואם לעיצוב הקיים של הפאנל (כרטיסים עם `border-gold/30 bg-gold/5`, פונט Tel Aviv).
+כיום `ProtectedRoute` חוסם את כל הדפים `/jobs`, `/members`, `/deals`, `/secondhand`, `/recommendations` למשתמשים לא מחוברים עם Teaser Overlay מלא. נשנה את ההתנהגות לכל סוג תוכן כך שהדף יהיה ציבורי-חלקי.
 
 ---
 
-## פרטים טכניים
+### 1. שכבת מסד נתונים (אמת אחת)
 
-### שינויי DB (מיגרציה אחת)
-- `ALTER TABLE public.birthday_email_template ADD COLUMN`:
-  `preview_text text`, `heading text`, `signature text`, `from_name text`, `reply_to text`, `logo_url text`, `bg_color text DEFAULT '#16110e'`, `text_color text DEFAULT '#f6f0e6'`, `button_color text DEFAULT '#D4AF37'`.
-- `INSERT` ל-`site_settings` של מפתחות ברירת מחדל אם חסרים:
-  `birthday_send_hour` (`'8'`), `birthday_leap_mode` (`'feb_28'`), `birthday_whatsapp_template` (טקסט ברירת המחדל), `birthday_whatsapp_target_type` (`'clipboard'`), `birthday_whatsapp_target_value` (`''`), `club_name` (אם לא קיים — "מועדון הגברים של קריית כריניצי").
-- בלי שינויי schema ב-`profiles` (כל השדות כבר קיימים).
-- בלי שינויים ב-`birthday_email_log` (האילוץ הייחודי כבר מספיק לדדופ).
+**טבלה חדשה `public.content_access_settings`** – הגדרות אדמין לכל סוג תוכן:
+- `content_type` (jobs / members / professionals / deals / secondhand / events) – PK
+- `public_list_enabled` (bool, default true) – הצגת רשימה לגולש
+- `public_card_open_enabled` (bool, default false)
+- `public_contact_enabled` (bool, default false)
+- `public_action_enabled` (bool, default false)
+- `public_images_enabled` (bool, default true)
+- `public_price_enabled` (bool, default true)
 
-### שינויים ב-Edge Function `send-birthday-emails`
-- קריאת `birthday_send_hour` ו-`birthday_leap_mode` מ-`site_settings`.
-- שדרוג `renderTemplate` לתמוך במשתנים החדשים: `birthday_date`, `club_name`, `current_year`, `last_name`.
-- שימוש בשדות העיצוב מהתבנית לבניית גוף HTML מלא (header עם לוגו/תמונה, כותרת, גוף, חתימה, צבעי רקע/טקסט/כפתור).
-- שימוש ב-`from_name` ו-`reply_to` כשמוגדרים.
-- מצב `force=1&user_id=<uuid>&resend=1`: מוחק רשומת `birthday_email_log` של אותה שנה לחבר זה ושולח שוב; משמש מהפאנל בלבד עם בדיקת אדמין.
-- מצב "מייל בדיקה": פרמטר `test=1&to=<email>` — מרנדר עם נתוני דמה (`first_name=ישראל`, `full_name=ישראל ישראלי`, וכו'), שולח ל-`to` בלבד, ולא כותב ל-log.
+RLS: קריאה לכולם (anon+authenticated), עדכון רק לאדמינים.
 
-### תזמון
-מיגרציה (insert tool, כי מכיל service URL) שמוסיפה job ב-`pg_cron` שרץ בראש כל שעה ומפעיל את ה-Edge Function עם `x-cron-secret`. אם יש כבר job בשם זה — מבצעים `cron.unschedule` ואז `cron.schedule` מחדש, כדי שזה יהיה idempotent.
+**RPCs ציבוריות (SECURITY DEFINER) שמחזירות תצוגה מסוננת לגולשים:**
+- `get_public_jobs()` – id, title, category, area, summary, published_at בלבד. ללא טלפון/אימייל/שם מלא/תיאור מלא.
+- `get_public_members()` – first_name, last_name (אם מאושר), avatar, profession בלבד.
+- `get_public_recommendations()` – business_name, category, area, logo, short_desc.
+- `get_public_deals()` – title, business_name, category, image, short_desc. ללא קוד קופון/קישור.
+- `get_public_secondhand()` – title, category, image, price, area, short_desc. ללא פרטי מוכר.
 
-### UI חדש (React/Tailwind, בעברית RTL)
-- `src/components/admin/AdminBirthdays.tsx` — מארגן עם תתי-טאבים פנימיים: **חוגגי החודש** · **תבנית מייל** · **תבנית WhatsApp ויעדים** · **הגדרות תזמון** · **היסטוריה**.
-- `src/components/admin/birthdays/MonthCelebrants.tsx` — בחירת חודש + טבלה עם צ׳קבוקסים + יצירת ברכה.
-- `src/components/admin/birthdays/WhatsappGreetingDialog.tsx` — דיאלוג עריכה + פתיחה/העתקה.
-- `src/components/admin/birthdays/BirthdayEmailEditor.tsx` — עורך תבנית + תצוגה מקדימה + כפתור שליחת מייל בדיקה.
-- `src/components/admin/birthdays/BirthdayScheduleSettings.tsx` — שעת שליחה + מצב 29/2 + יעד WhatsApp.
-- `src/components/admin/birthdays/BirthdayHistory.tsx` — טבלה עם מסננים, "שלח עכשיו" עם דיאלוג אישור.
-- חיווט בסיידבר וב-`AdminDashboard.tsx`: הוספת פריט "ימי הולדת" עם אייקון Cake, מתחת ל"ניהול חברים".
+הפונקציות בודקות `auth.uid()` – אם null מחזירות תצוגה חלקית, אם מחובר ומאושר מחזירות את כל השדות.
 
-### בדיקות לפני סיום
-- מריצים `?test=1&to=<my-admin-email>` — מוודאים שמייל בדיקה מגיע עם שם דינמי.
-- בוחרים חודש עם חוגגים, מסמנים שניים, יוצרים ברכה — מוודאים שהטקסט כולל את שני השמות בפורמט "X ו-Y" ושהקישור ל-wa.me נפתח עם המלל.
-- מריצים `?force=1` בידני — מוודאים שלא נשלחת כפילות (החזרה `skipped_already_sent` עולה ב-1).
-- בודקים ב-`birthday_email_log` שהסטטוס משקף את התשובה האמיתית של Resend.
-- מוודאים שב-`cron.job` קיים `birthday-emails-hourly` עם schedule `'0 * * * *'`.
+**עדכון מדיניות RLS לטבלאות הקיימות** – להבטיח שטבלאות `jobs`, `profiles`, `professional_recommendations`, `deals`, `secondhand_items` לא חושפות שדות רגישים ל-anon. אם כיום יש policy שמאפשרת לאנונימי לקרוא את כל השורה – נצמצם אותה ונפנה לפונקציות.
 
 ---
 
-## מה לא נעשה (במכוון)
-- לא משלבים WhatsApp Business API — אין connector פעיל לזה בפרויקט וזה ידרוש חשבון מאושר, מספר עסקי, ותבניות מאושרות. אם תרצה לקח את זה לתשלום ישירות לקבוצה — נוסיף את זה כשלב 2 נפרד.
-- לא משנים את `AdminBirthdayWidget` (היומי) — הוא נשאר כפי שהוא במסך הראשי של האדמין.
-- לא משנים את `profiles` (כל השדות שביקשת כבר שם).
+### 2. שכבת קוד צד-לקוח
+
+**רכיב משותף חדש `src/components/MembersOnlyNotice.tsx`:**
+- props: `variant` ("jobs" | "members" | "professionals" | "deals" | "secondhand" | "generic"), `compact?`
+- מציג כותרת "תוכן זה זמין לחברי המועדון בלבד", טקסט מותאם לפי variant, כפתורי "התחברות" + "הרשמה למועדון".
+- עיצוב: עוטף כרטיס gold/border בסגנון האתר, אייקון Lock.
+
+**Hook חדש `src/hooks/useContentAccess.ts`:**
+- שולף `content_access_settings` עם React Query (staleTime ארוך).
+- מחזיר `canOpenCard(type)`, `canSeeContact(type)`, `canAct(type)`, `canSeeImages(type)`, `canSeePrice(type)` – משלב את ההגדרה עם מצב `useAuth` (`user && isApproved`).
+
+**עדכון `ProtectedRoute`:**
+- prop חדש `publicPartial?: boolean`. כאשר true, אם אין משתמש מאושר – ה-child עדיין נטען (ללא overlay/blur), והדף עצמו אחראי לסנן ולחסום.
+- ב-`App.tsx` נסמן את `/jobs`, `/members`, `/deals`, `/secondhand`, `/recommendations` כ-`publicPartial`.
+- `/profile`, `/admin`, `/announcements`, `/gallery`, `/members/:id` יישארו עם החסימה הקיימת.
+
+**עדכון עמודי תוכן:**
+לכל עמוד (`Jobs`, `Members`, `Recommendations`, `Deals`, `SecondHand`):
+1. אם המשתמש לא מחובר/מאושר – לטעון מה-RPC הציבורית במקום מה-Select הרגיל.
+2. כפתורי "פתח", "צור קשר", "וואטסאפ", "מימוש", "טלפון", "אימייל" → מוחלפים ברכיב נעילה קטן (`<LockedAction>`) כשאין הרשאה.
+3. דיאלוגים/popups של פרטים מלאים – ייפתחו רק אם יש הרשאה. אחרת `MembersOnlyNotice`.
+4. עמוד `/members/:id` – הפניה ל-Login עם הודעה למשתמש לא מחובר (כבר מוגן).
+
+**רכיב משותף `src/components/LockedAction.tsx`** – כפתור עם אייקון Lock + tooltip; בלחיצה פותח `MembersOnlyNotice` כדיאלוג.
+
+---
+
+### 3. פאנל ניהול
+
+**רכיב חדש `src/components/admin/AdminContentAccess.tsx`:**
+- טופס עם טאב/אקורדיון לכל סוג תוכן.
+- כל סוג תוכן עם Switches לכל הגדרה (רשימה / פתיחת כרטיס / פרטי קשר / פעולה / תמונות / מחיר).
+- שמירה ל-`content_access_settings` עם optimistic update.
+- כפתור "ברירת מחדל מומלצת" – רשימה לכולם, שאר ההגדרות סגורות.
+
+**הוספה ל-`AdminSidebar` + `AdminDashboard`:**
+- טאב חדש "הרשאות תוכן" (אייקון Shield) תחת קטגוריית הגדרות מערכת.
+
+---
+
+### 4. עיצוב
+
+- שמירה על Charcoal/gold/cream של האתר.
+- אייקון `Lock` קטן בגווני gold (`text-gold/70`).
+- תגית "לחברי מועדון בלבד" כ-Badge עם רקע gold/10 ובורדר gold/30.
+- טשטוש עדין (`blur-sm`) רק לטקסט פרטי קשר חסומים (כאסטטיקה – הנתונים עצמם לא נשלחים).
+- כל הטקסטים בעברית RTL.
+
+---
+
+### 5. בדיקות
+
+לאחר הבנייה אריץ Playwright כדי לוודא:
+1. ב-`/jobs` ללא משתמש – המשרות מופיעות, אך פרטי קשר וכפתור פנייה מוחלפים ב-`MembersOnlyNotice`.
+2. בקריאה ישירה ל-PostgREST של `jobs` כ-anon – לא מוחזרים שדות טלפון/אימייל.
+3. עם משתמש מחובר ומאושר – הכל זמין.
+4. אדמין מכבה "public_list_enabled" לסוג מסוים – הדף מציג רק `MembersOnlyNotice`.
+
+---
+
+### פרטים טכניים (לאדמין/למפתח)
+
+**קבצים חדשים:**
+- `src/components/MembersOnlyNotice.tsx`
+- `src/components/LockedAction.tsx`
+- `src/hooks/useContentAccess.ts`
+- `src/components/admin/AdminContentAccess.tsx`
+- מיגרציה: `content_access_settings` + 5 RPCs ציבוריות + עדכוני RLS.
+
+**קבצים שיתעדכנו:**
+- `src/components/auth/ProtectedRoute.tsx` – הוספת `publicPartial`.
+- `src/App.tsx` – סימון הדפים הציבוריים-חלקיים.
+- `src/pages/Jobs.tsx`, `Members.tsx`, `Recommendations.tsx`, `Deals.tsx`, `SecondHand.tsx` – שימוש ב-`useContentAccess` ו-RPCs.
+- `src/components/admin/AdminSidebar.tsx`, `src/pages/AdminDashboard.tsx` – הוספת הטאב.
+
+**הערה חשובה:** ייתכן שחלק מ-RLS הקיימות צריכות צמצום. אבדוק קודם את ה-policies הנוכחיות של כל טבלה רלוונטית לפני הגדרת ה-RPCs, ואדווח אם נדרשת חסימה אקטיבית של גישה ישירה ל-PostgREST עבור anon.

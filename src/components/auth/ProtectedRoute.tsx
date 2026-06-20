@@ -7,6 +7,8 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requireApproval?: boolean;
   requireAdmin?: boolean;
+  /** If true, the page renders for anyone — even non-members — and the page itself filters content. */
+  publicPartial?: boolean;
 }
 
 const TeaserOverlay = ({ type }: { type: "no-session" | "not-approved" }) => (
@@ -52,7 +54,7 @@ const TeaserOverlay = ({ type }: { type: "no-session" | "not-approved" }) => (
   </div>
 );
 
-const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false, publicPartial = false }: ProtectedRouteProps) => {
   const { user, isApproved, isAdmin, isTeamMember, loading } = useAuth();
 
   if (loading) return (
@@ -63,6 +65,23 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
       </div>
     </div>
   );
+
+  // Admin & approval gates always apply regardless of publicPartial
+  if (requireAdmin) {
+    if (!user) {
+      return (
+        <div className="relative min-h-[60vh]">
+          <div className="pointer-events-none select-none" style={{ filter: "blur(8px)" }}>{children}</div>
+          <TeaserOverlay type="no-session" />
+        </div>
+      );
+    }
+    if (!isAdmin && !isTeamMember) return <Navigate to="/dashboard" replace />;
+    return <>{children}</>;
+  }
+
+  // Public-partial routes render for everyone; the page decides what to hide.
+  if (publicPartial) return <>{children}</>;
 
   if (!user) {
     return (
@@ -81,8 +100,6 @@ const ProtectedRoute = ({ children, requireApproval = true, requireAdmin = false
       </div>
     );
   }
-
-  if (requireAdmin && !isAdmin && !isTeamMember) return <Navigate to="/dashboard" replace />;
 
   return <>{children}</>;
 };
