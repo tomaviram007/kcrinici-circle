@@ -11,7 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Search, Plus, Star, Phone, User, Briefcase, MessageCircle, Pencil } from "lucide-react";
+import { Search, Plus, Star, Phone, User, Briefcase, MessageCircle, Pencil, Lock } from "lucide-react";
+import MembersOnlyNotice from "@/components/MembersOnlyNotice";
+import { useContentAccess } from "@/hooks/useContentAccess";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
@@ -111,17 +113,29 @@ const Recommendations = () => {
     rating: 5,
   });
 
+  const { isMember, canSeeContact } = useContentAccess("professionals");
+
   const { data: recommendations = [], isLoading } = useQuery({
-    queryKey: ["recommendations"],
+    queryKey: ["recommendations", isMember],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("professional_recommendations")
-        .select("*")
-        .eq("is_approved", true)
-        .eq("is_hidden", false)
-        .order("created_at", { ascending: false });
+      if (isMember) {
+        const { data, error } = await (supabase as any)
+          .from("professional_recommendations")
+          .select("*")
+          .eq("is_approved", true)
+          .eq("is_hidden", false)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data as Recommendation[];
+      }
+      const { data, error } = await (supabase as any).rpc("get_public_recommendations");
       if (error) throw error;
-      return data as Recommendation[];
+      return (data || []).map((r: any) => ({
+        ...r,
+        professional_name: r.professional_first_name,
+        professional_last_name: null,
+        phone: "",
+      })) as Recommendation[];
     },
   });
 
@@ -311,7 +325,7 @@ const Recommendations = () => {
         ) : (
           <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((rec) => (
-              <RecommendationCard key={rec.id} rec={rec} isLoggedIn={!!user} />
+              <RecommendationCard key={rec.id} rec={rec} isLoggedIn={canSeeContact} />
             ))}
           </div>
         )}
@@ -450,13 +464,7 @@ const RecommendationCard = ({ rec, isLoggedIn = true }: { rec: Recommendation; i
           </a>
         </div>
       ) : (
-        <a
-          href="/login"
-          className="flex items-center gap-2 text-sm font-body text-primary hover:underline"
-        >
-          <Phone className="h-4 w-4" />
-          {t("recommendations.loginToSeePhone")}
-        </a>
+        <MembersOnlyNotice variant="professionals" compact />
       )}
 
       <div className="mt-2 pt-3 border-t border-border/50 flex items-center gap-2">
