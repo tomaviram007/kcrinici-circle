@@ -27,31 +27,31 @@ export const SignupEmail = ({
   recipient,
   confirmationUrl,
 }: SignupEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="he" dir="rtl">
     <Head />
-    <Preview>Confirm your email for {siteName}</Preview>
+    <Preview>אשר את כתובת האימייל שלך — {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Confirm your email</Heading>
+        <Heading style={h1}>ברוך הבא למועדון</Heading>
         <Text style={text}>
-          Thanks for signing up for{' '}
+          תודה שנרשמת ל
           <Link href={siteUrl} style={link}>
             <strong>{siteName}</strong>
           </Link>
-          !
+          .
         </Text>
         <Text style={text}>
-          Please confirm your email address (
+          נא לאשר את כתובת האימייל שלך (
           <Link href={`mailto:${recipient}`} style={link}>
             {recipient}
           </Link>
-          ) by clicking the button below:
+          ) על ידי לחיצה על הכפתור:
         </Text>
         <Button style={button} href={confirmationUrl}>
-          Verify Email
+          אשר אימייל
         </Button>
         <Text style={footer}>
-          If you didn't create an account, you can safely ignore this email.
+          אם לא ביצעת רישום, ניתן להתעלם מהודעה זו.
         </Text>
       </Container>
     </Body>
@@ -65,22 +65,23 @@ const container = { padding: '20px 25px' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#000000',
+  color: '#16110e',
   margin: '0 0 20px',
 }
 const text = {
   fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
+  color: '#968c7e',
+  lineHeight: '1.6',
   margin: '0 0 25px',
 }
-const link = { color: 'inherit', textDecoration: 'underline' }
+const link = { color: '#D4AF37', textDecoration: 'none' }
 const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
+  backgroundColor: '#D4AF37',
+  color: '#16110e',
   fontSize: '14px',
+  fontWeight: 'bold' as const,
   borderRadius: '8px',
-  padding: '12px 20px',
+  padding: '12px 24px',
   textDecoration: 'none',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const footer = { fontSize: '12px', color: '#968c7e', margin: '30px 0 0' }
