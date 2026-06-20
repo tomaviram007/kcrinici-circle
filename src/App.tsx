@@ -78,15 +78,15 @@ const AppLayout = () => {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
         <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
-        <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
-        <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
+        <Route path="/jobs" element={<ProtectedRoute publicPartial><Jobs /></ProtectedRoute>} />
+        <Route path="/members" element={<ProtectedRoute publicPartial><Members /></ProtectedRoute>} />
         <Route path="/members/:id" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
         <Route path="/events" element={<Events />} />
         <Route path="/events/:id" element={<Events />} />
         <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
         <Route path="/recommendations" element={<Recommendations />} />
-        <Route path="/deals" element={<ProtectedRoute><Deals /></ProtectedRoute>} />
-        <Route path="/secondhand" element={<ProtectedRoute><SecondHand /></ProtectedRoute>} />
+        <Route path="/deals" element={<ProtectedRoute publicPartial><Deals /></ProtectedRoute>} />
+        <Route path="/secondhand" element={<ProtectedRoute publicPartial><SecondHand /></ProtectedRoute>} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/regulations" element={<Regulations />} />
