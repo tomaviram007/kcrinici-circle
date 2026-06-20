@@ -307,10 +307,13 @@ const Members = () => {
             </div>
             <span className="font-serif text-sm font-bold text-foreground flex-1 min-w-0 truncate">{member.full_name}</span>
             <span className="font-body text-xs text-gold hidden sm:block truncate max-w-[120px]">{member.profession}</span>
-            {member.phone && (
+            {canSeeContact && member.phone && (
               <a href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '').replace(/^0/, '972')}`} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-muted-foreground hover:text-gold transition-colors hidden sm:block" dir="ltr" onClick={(e) => e.stopPropagation()}>
                 {member.phone}
               </a>
+            )}
+            {!canSeeContact && !isOwnCard(member) && (
+              <Lock className="h-3 w-3 text-gold/60 hidden sm:block" />
             )}
             {isOwnCard(member) && <Pencil className="h-3 w-3 text-gold flex-shrink-0" />}
           </div>
