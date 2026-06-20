@@ -186,7 +186,7 @@ const Register = () => {
         <div className="mb-6 sm:mb-10 text-center">
           <Link to="/" className="inline-block">
             <h1 className="font-serif text-2xl sm:text-4xl font-bold text-foreground drop-shadow-md">
-              הגברים של <span className="text-gold">ק. קריניצי</span>
+              הגברים של <span className="text-gold">ק.קרניצי</span>
             </h1>
           </Link>
           <p className="mt-2 sm:mt-3 font-body text-base sm:text-lg text-muted-foreground">בקשת הצטרפות למועדון</p>

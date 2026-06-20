@@ -60,10 +60,10 @@ Deno.serve(async () => {
           if (u?.user?.email) emails.push(u.user.email);
         }
         if (emails.length) {
-          const html = `<div dir="rtl" style="font-family:Arial;line-height:1.6">
+          const html = `<div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif;line-height:1.6">
             <h2 style="color:#b91c1c">🚨 כשלי שליחת מייל</h2>
             <p>${rows.length} כשלים מאז ${new Date(since).toLocaleString("he-IL")}.</p>
-            ${authIssues.length ? `<p style="color:#b91c1c"><strong>⚠️ ${authIssues.length} כשלי SPF/DKIM/DMARC/Bounce — בדוק את הגדרות הדומיין notify.kcrinici.com ב-Cloud → Emails.</strong></p>` : ""}
+            ${authIssues.length ? `<p style="color:#b91c1c"><strong>⚠️ ${authIssues.length} כשלי SPF/DKIM/DMARC/Bounce, בדוק את הגדרות הדומיין notify.kcrinici.com ב-Cloud → Emails.</strong></p>` : ""}
             <pre style="background:#f5f5f5;padding:12px;border-radius:8px;white-space:pre-wrap;font-size:12px">${escapeHtml(lines)}</pre>
             <p style="color:#888;font-size:12px">לוגים מלאים: שולחן המנהל → תקשורת.</p>
           </div>`;
@@ -76,7 +76,7 @@ Deno.serve(async () => {
             body: JSON.stringify({
               from: Deno.env.get("BIRTHDAY_FROM_EMAIL") || "K.Krinici Alerts <onboarding@resend.dev>",
               to: emails,
-              subject: `🚨 ${rows.length} כשלי שליחת מייל${authIssues.length ? " — כולל בעיות אימות דומיין" : ""}`,
+              subject: `🚨 ${rows.length} כשלי שליחת מייל${authIssues.length ? ", כולל בעיות אימות דומיין" : ""}`,
               html,
             }),
           }).catch(e => console.error("email alert", e));

@@ -64,7 +64,7 @@ serve(async (req: Request) => {
   const eventPageUrl = `${siteUrl}/events/${eventId}`;
   const defaultImage = "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3ffff879-a382-491e-b29e-e3225becb155/id-preview-a286eb4f--0e09a19a-a6ae-4d83-80d0-40261c28a438.lovable.app-1771330703249.png";
   const ogImage = event.image_url || defaultImage;
-  const title = event.title || "אירוע במועדון ק. קריניצי";
+  const title = event.title || "אירוע במועדון ק.קרניצי";
   const description = event.description || "מפגש בלעדי לחברי המועדון";
   const dateStr = formatEventDate(event.event_date);
   const locationStr = event.location || "";
@@ -74,7 +74,7 @@ serve(async (req: Request) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(title)} | הגברים של ק. קריניצי</title>
+  <title>${escapeHtml(title)} | הגברים של ק.קרניצי</title>
   <meta name="description" content="${escapeHtml(description)}">
 
   <meta property="og:type" content="article">
@@ -170,7 +170,7 @@ serve(async (req: Request) => {
   </style>
 </head>
 <body>
-  <div class="logo">הגברים של ק. קריניצי</div>
+  <div class="logo">הגברים של ק.קרניצי</div>
   <div class="card">
     ${ogImage ? `<img src="${escapeHtml(ogImage)}" alt="${escapeHtml(title)}">` : ""}
     <div class="content">

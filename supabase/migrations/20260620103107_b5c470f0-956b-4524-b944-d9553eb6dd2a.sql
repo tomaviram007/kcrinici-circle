@@ -1,0 +1,2 @@
+UPDATE site_settings SET value = to_jsonb('ק.קרניצי'::text) WHERE key='club_name';
+UPDATE birthday_email_template SET body_html = REPLACE(REPLACE(REPLACE(body_html, 'קריית קריניצי', 'ק.קרניצי'), 'קריית כריניצי', 'ק.קרניצי'), ' - ', ', ');

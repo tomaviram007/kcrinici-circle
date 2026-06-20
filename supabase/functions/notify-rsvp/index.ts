@@ -23,11 +23,11 @@ function formatDate(value: string): string {
 
 function shell(title: string, rows: Array<[string, string]>, intro?: string): string {
   const r = rows.map(([l, v]) => `<tr><td style="padding:6px 12px;font-weight:bold;color:#D4AF37;">${escapeHtml(l)}</td><td style="padding:6px 12px;color:#d9c9a8;">${escapeHtml(v)}</td></tr>`).join("");
-  return `<div dir="rtl" style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:30px 20px;background:#1a1410;color:#d9c9a8;border-radius:12px;">
+  return `<div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif;max-width:520px;margin:0 auto;padding:30px 20px;background:#1a1410;color:#d9c9a8;border-radius:12px;">
     <h2 style="color:#D4AF37;text-align:center;margin-bottom:20px;">${escapeHtml(title)}</h2>
     ${intro ? `<p style="text-align:center;margin-bottom:20px;">${escapeHtml(intro)}</p>` : ""}
     <table style="width:100%;border-collapse:collapse;">${r}</table>
-    <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק. קריניצי</p>
+    <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק.קרניצי</p>
   </div>`;
 }
 
@@ -37,7 +37,7 @@ async function sendEmail(to: string, subject: string, html: string) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: "מועדון ק. קריניצי <onboarding@resend.dev>", to: [to], subject, html }),
+    body: JSON.stringify({ from: "מועדון ק.קרניצי <onboarding@resend.dev>", to: [to], subject, html }),
   });
   if (!res.ok) console.error("Resend error:", await res.text());
 }
@@ -107,7 +107,7 @@ serve(async (req) => {
     const adminRows: Array<[string, string]> = [
       ["שם החבר", memberName],
       ["אימייל", memberEmail],
-      ["טלפון", memberPhone || "—"],
+      ["טלפון", memberPhone || ","],
       ["אירוע", event.title],
       ["תאריך", formatDate(event.event_date)],
     ];

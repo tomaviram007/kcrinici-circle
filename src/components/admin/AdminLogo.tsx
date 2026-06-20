@@ -132,7 +132,7 @@ const AdminLogo = () => {
         {/* Text */}
         <div className="space-y-2">
           <Label className="font-body text-sm">טקסט ליד הלוגו (אופציונלי)</Label>
-          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="למשל: הגברים של ק. קריניצי" className="bg-background" autoComplete="off" />
+          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="למשל: הגברים של ק.קרניצי" className="bg-background" autoComplete="off" />
         </div>
 
         {/* Position */}

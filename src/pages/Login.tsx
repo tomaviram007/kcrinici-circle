@@ -112,7 +112,7 @@ const Login = () => {
         <div className="mb-10 text-center">
           <Link to="/" className="inline-block">
             <h1 className="font-serif text-3xl font-bold text-foreground">
-              הגברים של <span className="text-gold">ק. קריניצי</span>
+              הגברים של <span className="text-gold">ק.קרניצי</span>
             </h1>
           </Link>
           <p className="mt-3 font-body text-muted-foreground">כניסה למועדון</p>

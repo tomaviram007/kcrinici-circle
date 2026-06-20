@@ -16,7 +16,7 @@ self.addEventListener('push', function(event) {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'מועדון ק. קריניצי', options)
+    self.registration.showNotification(data.title || 'מועדון ק.קרניצי', options)
   );
 });
 

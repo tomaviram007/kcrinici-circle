@@ -30,7 +30,7 @@ const DEFAULTS: Template = {
   preview_text: "מזל טוב מ-{{club_name}}",
   heading: "{{first_name}}, יום הולדת שמח! 🎉",
   signature: "באהבה,\n{{club_name}}",
-  from_name: "מועדון הגברים של קריית קריניצי",
+  from_name: "מועדון הגברים של ק.קרניצי",
   reply_to: "",
   logo_url: "",
   bg_color: "#16110e",
@@ -69,7 +69,7 @@ const BirthdayEmailEditor = () => {
     last_name: "כהן",
     full_name: "רונן כהן",
     birthday_date: "08/06",
-    club_name: "מועדון הגברים של קריית קריניצי",
+    club_name: "מועדון הגברים של ק.קרניצי",
     current_year: String(new Date().getFullYear()),
   }), []);
 

@@ -80,7 +80,7 @@ function buildHtml(tpl: TemplateRow, vars: Record<string, string>) {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escapeHtml(renderTemplate(tpl.subject || "", vars))}</title>
 </head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background:#ffffff;font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif;">
 ${preview ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(preview)}</div>` : ""}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:24px 12px;">
   <tr><td align="center">
@@ -346,7 +346,7 @@ serve(async (req) => {
     for (const r of recipients) if (!r.last_name) r.last_name = lastNameMap[r.user_id] || "";
   }
 
-  // If resend=1 — clear existing log row(s) for this year for the targeted user(s)
+  // If resend=1, clear existing log row(s) for this year for the targeted user(s)
   if (resend && onlyUserId) {
     await supabase
       .from("birthday_email_log")

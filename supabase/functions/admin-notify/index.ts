@@ -112,10 +112,10 @@ function formatEmailHTML(eventType: string, data: Record<string, any>): string {
     .join("");
 
   return `
-    <div dir="rtl" style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:30px 20px;background:#1a1410;color:#d9c9a8;border-radius:12px;">
+    <div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif;max-width:520px;margin:0 auto;padding:30px 20px;background:#1a1410;color:#d9c9a8;border-radius:12px;">
       <h2 style="color:#D4AF37;text-align:center;margin-bottom:20px;">${title}</h2>
       <table style="width:100%;border-collapse:collapse;">${rows}</table>
-      <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק. קריניצי</p>
+      <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק.קרניצי</p>
     </div>
   `;
 }
@@ -137,7 +137,7 @@ async function sendEmail(eventType: string, data: Record<string, any>): Promise<
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "מועדון ק. קריניצי <onboarding@resend.dev>",
+      from: "מועדון ק.קרניצי <onboarding@resend.dev>",
       to: ["tomaviram2187@gmail.com"],
       subject: `🔔 ${title}`,
       html,

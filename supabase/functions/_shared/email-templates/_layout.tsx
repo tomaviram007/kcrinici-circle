@@ -15,13 +15,13 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
-// Brand constants — mirrors the site (Dark Charcoal + Dim Gold)
+// Brand constants, mirrors the site (Dark Charcoal + Dim Gold)
 export const BRAND = {
   logoUrl:
     'https://wzbvdpgoyetmgluvhygf.supabase.co/storage/v1/object/public/site-assets/logo-1771366653000.png',
   siteUrl: 'https://kcrinici.com',
   whatsappGroupUrl: 'https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo',
-  siteTitle: 'הגברים של ק. כריניצי',
+  siteTitle: 'הגברים של ק.קרניצי',
   charcoal: '#16110e',
   wood: '#4B2C20',
   gold: '#D4AF37',
@@ -56,15 +56,29 @@ export const BrandLayout = ({
   const unsubUrl = unsubscribeUrl || `${BRAND.siteUrl}/unsubscribe`
   return (
   <Html lang="he" dir="rtl">
-    <Head />
+    <Head>
+      <style>{`
+        @font-face {
+          font-family: 'Tel Aviv';
+          src: url('${BRAND.siteUrl}/fonts/TelAviv-ModernistRegular.ttf') format('truetype');
+          font-weight: 400; font-style: normal; font-display: swap;
+        }
+        @font-face {
+          font-family: 'Tel Aviv';
+          src: url('${BRAND.siteUrl}/fonts/TelAviv-ModernistBold.ttf') format('truetype');
+          font-weight: 700; font-style: normal; font-display: swap;
+        }
+        body, table, td, p, a, h1, h2, h3, h4, span, div { font-family: 'Tel Aviv', 'Assistant', 'Heebo', 'Helvetica Neue', Arial, sans-serif !important; }
+      `}</style>
+    </Head>
     <Preview>{preview}</Preview>
     <Body style={main}>
       <Container style={container}>
-        {/* Hero — dark band with logo & site title */}
+        {/* Hero, dark band with logo & site title */}
         <Section style={hero}>
           <Img src={BRAND.logoUrl} alt={BRAND.siteTitle} width="76" height="76" style={logo} />
           <Text style={brandTitle}>{BRAND.siteTitle}</Text>
-          <Text style={brandTagline}>מועדון הגברים של קריית כריניצי</Text>
+          <Text style={brandTagline}>מועדון הגברים של ק.קרניצי</Text>
         </Section>
 
         {/* Body card */}
@@ -91,7 +105,7 @@ export const BrandLayout = ({
           <Section style={waCard}>
             <Text style={waTitle}>הצטרפו לקבוצת הוואטסאפ של המועדון</Text>
             <Text style={waText}>
-              עדכונים, אירועים והזדמנויות — ישירות אליכם בקבוצה הרשמית.
+              עדכונים, אירועים והזדמנויות, ישירות אליכם בקבוצה הרשמית.
             </Text>
             <Button style={waButton} href={waUrl}>
               הצטרפו לקבוצה ←
@@ -125,11 +139,11 @@ export const BrandLayout = ({
 }
 
 
-// — styles —
+//, styles ,
 const main = {
   backgroundColor: '#efe9df',
   fontFamily:
-    "'Helvetica Neue', Helvetica, Arial, 'Segoe UI', Tahoma, sans-serif",
+    "'Tel Aviv', 'Assistant', 'Heebo', 'Helvetica Neue', Helvetica, Arial, sans-serif",
   margin: 0,
   padding: '24px 0',
 }

@@ -10,7 +10,7 @@ ALTER TABLE public.profiles
 CREATE TABLE IF NOT EXISTS public.birthday_email_template (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   subject text NOT NULL DEFAULT 'מזל טוב ליום הולדתך! 🎂',
-  body_html text NOT NULL DEFAULT '<p>שלום {{first_name}},</p><p>בשם מועדון הגברים של קריית קריניצי - מאחלים לך יום הולדת שמח, בריאות, אושר והרבה הצלחה!</p><p>נשמח לראותך באירועי המועדון הקרובים.</p><p>בברכה,<br/>צוות המועדון</p>',
+  body_html text NOT NULL DEFAULT '<p>שלום {{first_name}},</p><p>בשם מועדון הגברים של ק.קרניצי - מאחלים לך יום הולדת שמח, בריאות, אושר והרבה הצלחה!</p><p>נשמח לראותך באירועי המועדון הקרובים.</p><p>בברכה,<br/>צוות המועדון</p>',
   is_active boolean NOT NULL DEFAULT true,
   updated_at timestamptz NOT NULL DEFAULT now(),
   updated_by uuid
@@ -29,7 +29,7 @@ CREATE POLICY "Admins manage birthday template" ON public.birthday_email_templat
 
 INSERT INTO public.birthday_email_template (subject, body_html)
   SELECT 'מזל טוב ליום הולדתך! 🎂',
-    '<p>שלום {{first_name}},</p><p>בשם מועדון הגברים של קריית קריניצי - מאחלים לך יום הולדת שמח, בריאות, אושר והרבה הצלחה!</p><p>נשמח לראותך באירועי המועדון הקרובים.</p><p>בברכה,<br/>צוות המועדון</p>'
+    '<p>שלום {{first_name}},</p><p>בשם מועדון הגברים של ק.קרניצי - מאחלים לך יום הולדת שמח, בריאות, אושר והרבה הצלחה!</p><p>נשמח לראותך באירועי המועדון הקרובים.</p><p>בברכה,<br/>צוות המועדון</p>'
   WHERE NOT EXISTS (SELECT 1 FROM public.birthday_email_template);
 
 CREATE TABLE IF NOT EXISTS public.birthday_email_log (

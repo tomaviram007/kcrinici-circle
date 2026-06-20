@@ -76,7 +76,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero section (landing)
     "landing.hero.badge": "מועדון חברים אקסקלוסיבי",
     "landing.hero.title1": "הגברים של",
-    "landing.hero.title2": "ק. קריניצי",
+    "landing.hero.title2": "ק.קרניצי",
     "landing.hero.subtitle": "קהילה סגורה של שכנים, מקצוענים ואנשי עשייה.",
     "landing.hero.welcome": "ברוכים הבאים למועדון.",
     "landing.hero.bulletinBtn": "לוח מודעות",
@@ -101,7 +101,7 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.cta.pendingNote": "תקבל עדכון ברגע שתאושר.",
     "landing.cta.title": "הצטרף",
     "landing.cta.highlight": "למועדון",
-    "landing.cta.subtitle": "קהילה סגורה של שכנים, מקצוענים ואנשי עשייה בשכונת ק. קריניצי.",
+    "landing.cta.subtitle": "קהילה סגורה של שכנים, מקצוענים ואנשי עשייה בשכונת ק.קרניצי.",
     "landing.cta.desc": "הירשם עכשיו וקבל גישה מלאה לכל התוכן והאירועים.",
     "landing.cta.joinBtn": "הרשמה למועדון",
     "landing.cta.loginBtn": "כניסת חברים",

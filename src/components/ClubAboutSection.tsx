@@ -23,7 +23,7 @@ const ClubAboutSection = () => {
         אודות <span className="text-gold">המועדון</span>
       </h2>
       <p className="mt-4 font-body text-sm leading-relaxed text-muted-foreground max-w-2xl mx-auto sm:text-base">
-        מועדון הגברים של ק. קריניצי הוא קהילה אקסקלוסיבית של שכנים, אנשי מקצוע ואנשי עשייה מהשכונה.
+        מועדון הגברים של ק.קרניצי הוא קהילה אקסקלוסיבית של שכנים, אנשי מקצוע ואנשי עשייה מהשכונה.
         אנחנו מחברים בין אנשים, יוצרים הזדמנויות עסקיות, ובונים קהילה חזקה שמבוססת על אמון ושותפות.
       </p>
       <div className="mt-6 flex justify-center gap-8 sm:gap-12">
