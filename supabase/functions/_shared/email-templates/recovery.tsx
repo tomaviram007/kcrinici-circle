@@ -7,11 +7,13 @@ interface RecoveryEmailProps {
   siteName: string
   confirmationUrl: string
   whatsappGroupUrl?: string
+  unsubscribeUrl?: string
 }
 
-export const RecoveryEmail = ({ confirmationUrl, whatsappGroupUrl }: RecoveryEmailProps) => (
+export const RecoveryEmail = ({ confirmationUrl, whatsappGroupUrl, unsubscribeUrl }: RecoveryEmailProps) => (
   <BrandLayout
     whatsappGroupUrl={whatsappGroupUrl}
+    unsubscribeUrl={unsubscribeUrl}
     preview="איפוס סיסמה למועדון"
     heading="איפוס סיסמה"
     intro="התקבלה בקשה לאיפוס הסיסמה לחשבון שלכם במועדון. לחצו על הכפתור הבא כדי לבחור סיסמה חדשה. הקישור תקף ל-60 דקות."

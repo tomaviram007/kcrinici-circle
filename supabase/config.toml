@@ -9,6 +9,8 @@ project_id = "wzbvdpgoyetmgluvhygf"
     verify_jwt = false
   [functions.email-failure-monitor]
     verify_jwt = false
+  [functions.handle-unsubscribe]
+    verify_jwt = false
   [functions.event-share]
     verify_jwt = false
   [functions.process-email-queue]

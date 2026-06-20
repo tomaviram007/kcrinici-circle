@@ -32,12 +32,48 @@ Deno.serve(async (req) => {
     const { to, subject, html, text, replyTo } = await req.json();
     if (!to || !subject || (!html && !text)) return json({ error: "missing fields" }, 400);
 
-    const recipients = Array.isArray(to) ? to : [to];
+    const recipientsInput = Array.isArray(to) ? to : [to];
+
+    // Filter out suppressed recipients
+    const { data: suppRows } = await supabase
+      .from("suppressed_emails")
+      .select("email")
+      .in("email", recipientsInput.map((r: string) => r.toLowerCase()));
+    const suppressedSet = new Set((suppRows || []).map((r: any) => r.email.toLowerCase()));
+    const recipients = recipientsInput.filter((r: string) => !suppressedSet.has(r.toLowerCase()));
+    const skipped = recipientsInput.filter((r: string) => suppressedSet.has(r.toLowerCase()));
+
+    if (recipients.length === 0) {
+      return json({ ok: false, skipped, error: "all recipients are unsubscribed" }, 200);
+    }
+
     const messageId = `admin-${user.id}-${crypto.randomUUID()}`;
     const from = Deno.env.get("BIRTHDAY_FROM_EMAIL") || "מועדון K. קריניצי <onboarding@resend.dev>";
 
-    // pending log row
+    // Build per-recipient HTML with unsubscribe footer + token
+    const siteUrl = "https://kcrinici.com";
+    async function withFooter(recipient: string, baseHtml: string | undefined, baseText: string | undefined) {
+      const lower = recipient.toLowerCase();
+      const { data: existing } = await supabase
+        .from("email_unsubscribe_tokens").select("token").eq("email", lower).maybeSingle();
+      let tok = existing?.token;
+      if (!tok) {
+        tok = crypto.randomUUID().replace(/-/g, "");
+        await supabase.from("email_unsubscribe_tokens").insert({ email: lower, token: tok });
+      }
+      const unsubUrl = `${siteUrl}/unsubscribe?token=${tok}`;
+      const footerHtml = `<div dir="rtl" style="margin-top:24px;padding-top:16px;border-top:1px solid #e8e1d4;font-family:Arial,sans-serif;font-size:12px;color:#968c7e;text-align:center"><a href="${unsubUrl}" style="color:#4B2C20">הסרה מרשימת התפוצה</a></div>`;
+      const footerText = `\n\n---\nהסרה מרשימת התפוצה: ${unsubUrl}`;
+      return {
+        html: baseHtml ? baseHtml + footerHtml : undefined,
+        text: baseText ? baseText + footerText : undefined,
+      };
+    }
+
+    // Send one email per recipient so each gets a unique unsubscribe footer
+    const results: Array<{ to: string; ok: boolean; status: number; resp: any }> = [];
     for (const r of recipients) {
+      // Pending log
       await supabase.from("email_send_log").insert({
         message_id: messageId,
         template_name: "admin-manual",
@@ -45,29 +81,28 @@ Deno.serve(async (req) => {
         status: "pending",
         metadata: { sender_id: user.id, subject },
       });
-    }
 
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
-      },
-      body: JSON.stringify({
-        from,
-        to: recipients,
-        subject,
-        html: html || undefined,
-        text: text || undefined,
-        reply_to: replyTo || undefined,
-      }),
-    });
+      const { html: rHtml, text: rText } = await withFooter(r, html, text);
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+        },
+        body: JSON.stringify({
+          from,
+          to: [r],
+          subject,
+          html: rHtml,
+          text: rText,
+          reply_to: replyTo || undefined,
+        }),
+      });
+      const respJson = await res.json().catch(() => ({}));
+      const ok = res.ok;
+      const errMsg = ok ? null : (respJson?.message || respJson?.error || `HTTP ${res.status}`);
+      results.push({ to: r, ok, status: res.status, resp: respJson });
 
-    const respJson = await res.json().catch(() => ({}));
-    const ok = res.ok;
-    const errMsg = ok ? null : (respJson?.message || respJson?.error || `HTTP ${res.status}`);
-
-    for (const r of recipients) {
       await supabase.from("email_send_log").insert({
         message_id: messageId,
         template_name: "admin-manual",
@@ -78,7 +113,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    return json({ ok, messageId, esp: respJson, status: res.status }, ok ? 200 : 502);
+    const allOk = results.every((r) => r.ok);
+    return json({ ok: allOk, messageId, results, skipped }, allOk ? 200 : 502);
   } catch (e) {
     console.error(e);
     return json({ error: String(e?.message || e) }, 500);

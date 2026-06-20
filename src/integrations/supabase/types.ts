@@ -1399,6 +1399,24 @@ export type Database = {
         Args: { _end?: string; _start?: string }
         Returns: Json
       }
+      admin_list_mailing_list: {
+        Args: never
+        Returns: {
+          email: string
+          email_opt_in: boolean
+          full_name: string
+          is_approved: boolean
+          is_suppressed: boolean
+          suppressed_at: string
+          suppression_reason: string
+          user_id: string
+        }[]
+      }
+      admin_remove_suppression: { Args: { _email: string }; Returns: undefined }
+      admin_set_email_opt_in: {
+        Args: { _opt_in: boolean; _user_id: string }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1497,6 +1515,10 @@ export type Database = {
         Returns: undefined
       }
       is_approved_user: { Args: { _user_id: string }; Returns: boolean }
+      mark_email_suppressed: {
+        Args: { _email: string; _metadata?: Json; _reason: string }
+        Returns: undefined
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string

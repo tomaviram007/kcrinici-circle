@@ -9,11 +9,13 @@ interface InviteEmailProps {
   siteUrl: string
   confirmationUrl: string
   whatsappGroupUrl?: string
+  unsubscribeUrl?: string
 }
 
-export const InviteEmail = ({ confirmationUrl, whatsappGroupUrl }: InviteEmailProps) => (
+export const InviteEmail = ({ confirmationUrl, whatsappGroupUrl, unsubscribeUrl }: InviteEmailProps) => (
   <BrandLayout
     whatsappGroupUrl={whatsappGroupUrl}
+    unsubscribeUrl={unsubscribeUrl}
     preview="הוזמנתם להצטרף למועדון הגברים של ק. כריניצי"
     heading="הוזמנתם להצטרף"
     intro="קיבלתם הזמנה אישית להצטרף למועדון הגברים של קריית כריניצי — קהילה ייחודית של אנשי עסקים, יצירה ומקצוע."
