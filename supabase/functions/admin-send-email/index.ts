@@ -70,27 +70,39 @@ Deno.serve(async (req) => {
       };
     }
 
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
-      },
-      body: JSON.stringify({
-        from,
-        to: recipients,
-        subject,
-        html: html || undefined,
-        text: text || undefined,
-        reply_to: replyTo || undefined,
-      }),
-    });
-
-    const respJson = await res.json().catch(() => ({}));
-    const ok = res.ok;
-    const errMsg = ok ? null : (respJson?.message || respJson?.error || `HTTP ${res.status}`);
-
+    // Send one email per recipient so each gets a unique unsubscribe footer
+    const results: Array<{ to: string; ok: boolean; status: number; resp: any }> = [];
     for (const r of recipients) {
+      // Pending log
+      await supabase.from("email_send_log").insert({
+        message_id: messageId,
+        template_name: "admin-manual",
+        recipient_email: r,
+        status: "pending",
+        metadata: { sender_id: user.id, subject },
+      });
+
+      const { html: rHtml, text: rText } = await withFooter(r, html, text);
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+        },
+        body: JSON.stringify({
+          from,
+          to: [r],
+          subject,
+          html: rHtml,
+          text: rText,
+          reply_to: replyTo || undefined,
+        }),
+      });
+      const respJson = await res.json().catch(() => ({}));
+      const ok = res.ok;
+      const errMsg = ok ? null : (respJson?.message || respJson?.error || `HTTP ${res.status}`);
+      results.push({ to: r, ok, status: res.status, resp: respJson });
+
       await supabase.from("email_send_log").insert({
         message_id: messageId,
         template_name: "admin-manual",
@@ -101,7 +113,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    return json({ ok, messageId, esp: respJson, status: res.status }, ok ? 200 : 502);
+    const allOk = results.every((r) => r.ok);
+    return json({ ok: allOk, messageId, results, skipped }, allOk ? 200 : 502);
   } catch (e) {
     console.error(e);
     return json({ error: String(e?.message || e) }, 500);
