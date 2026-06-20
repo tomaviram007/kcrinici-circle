@@ -395,6 +395,9 @@ const translations: Record<Language, Record<string, string>> = {
     "gallery.uploadNewFile": "העלה קובץ חדש",
     "gallery.uploadPhotos": "העלה תמונות",
     // SecondHand page
+    "secondhand.heroTitle": "יד שנייה",
+    "secondhand.heroHighlight": "לחברי המועדון",
+    "secondhand.heroSubtitle": "פריטים, אספנות והזדמנויות מהקהילה שלנו",
     "secondhand.searchPlaceholder": "חיפוש פריט...",
     "secondhand.allCategories": "כל הקטגוריות",
     "secondhand.postBtn": "פרסום פריט",
@@ -849,6 +852,9 @@ const translations: Record<Language, Record<string, string>> = {
     "gallery.uploadNewFile": "Upload new file",
     "gallery.uploadPhotos": "Upload photos",
     // SecondHand page
+    "secondhand.heroTitle": "Second",
+    "secondhand.heroHighlight": "Hand",
+    "secondhand.heroSubtitle": "Items, collectibles and opportunities from our community",
     "secondhand.searchPlaceholder": "Search item...",
     "secondhand.allCategories": "All categories",
     "secondhand.postBtn": "Post Item",
