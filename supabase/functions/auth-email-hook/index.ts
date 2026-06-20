@@ -9,20 +9,12 @@ import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
+import { EMAIL_COPY_DEFAULTS, type EmailCopy, type EmailTemplateId } from '../_shared/email-templates/_copy.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type, x-lovable-signature, x-lovable-timestamp, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-}
-
-const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'אשר את כתובת האימייל שלך',
-  invite: 'הוזמנת להצטרף למועדון',
-  magiclink: 'קישור כניסה למועדון',
-  recovery: 'איפוס סיסמה',
-  email_change: 'אישור החלפת אימייל',
-  reauthentication: 'קוד אימות',
 }
 
 // Template mapping
@@ -33,6 +25,23 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   recovery: RecoveryEmail,
   email_change: EmailChangeEmail,
   reauthentication: ReauthenticationEmail,
+}
+
+async function loadCopyOverride(
+  supabase: any,
+  id: EmailTemplateId,
+): Promise<Partial<EmailCopy> | null> {
+  try {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', `email_copy_${id}`)
+      .maybeSingle()
+    if (!data?.value) return null
+    return JSON.parse(data.value) as Partial<EmailCopy>
+  } catch (_e) {
+    return null
+  }
 }
 
 // Configuration
@@ -102,9 +111,11 @@ async function handlePreview(req: Request): Promise<Response> {
   }
 
   let type: string
+  let copy: any = undefined
   try {
     const body = await req.json()
     type = body.type
+    if (body && typeof body.copy === 'object') copy = body.copy
   } catch (error) {
     return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
       status: 400,
@@ -122,7 +133,7 @@ async function handlePreview(req: Request): Promise<Response> {
   }
 
   const sampleData = SAMPLE_DATA[type] || {}
-  const html = await renderAsync(React.createElement(EmailTemplate, sampleData))
+  const html = await renderAsync(React.createElement(EmailTemplate, { ...sampleData, copy }))
 
   return new Response(html, {
     status: 200,
@@ -254,6 +265,13 @@ async function handleWebhook(req: Request): Promise<Response> {
     console.warn('unsubscribe token generation failed', e)
   }
 
+  // Load admin copy override (subject + body strings)
+  const copyOverride = await loadCopyOverride(supabase, emailType as EmailTemplateId)
+  const effectiveSubject =
+    (copyOverride?.subject?.trim()) ||
+    EMAIL_COPY_DEFAULTS[emailType as EmailTemplateId]?.subject ||
+    'Notification'
+
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
@@ -266,6 +284,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     newEmail: payload.data.new_email,
     whatsappGroupUrl,
     unsubscribeUrl,
+    copy: copyOverride || undefined,
   }
 
   // Render React Email to HTML and plain text
@@ -293,7 +312,7 @@ async function handleWebhook(req: Request): Promise<Response> {
       to: payload.data.email,
       from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
       sender_domain: SENDER_DOMAIN,
-      subject: EMAIL_SUBJECTS[emailType] || 'Notification',
+      subject: effectiveSubject,
       html,
       text,
       purpose: 'transactional',

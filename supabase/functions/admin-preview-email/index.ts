@@ -91,7 +91,19 @@ Deno.serve(async (req) => {
       waRow?.value ||
       'https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo'
 
-    const props = { ...SAMPLE_DATA[type], whatsappGroupUrl }
+    // Determine copy overrides: inline (live editor) takes precedence over saved settings
+    let copy: any = undefined
+    if (body.copy && typeof body.copy === 'object') {
+      copy = body.copy
+    } else {
+      const { data: copyRow } = await supabase
+        .from('site_settings').select('value').eq('key', `email_copy_${type}`).maybeSingle()
+      if (copyRow?.value) {
+        try { copy = JSON.parse(copyRow.value) } catch (_e) { /* ignore */ }
+      }
+    }
+
+    const props = { ...SAMPLE_DATA[type], whatsappGroupUrl, copy }
     const html = await renderAsync(React.createElement(Template, props))
 
     return new Response(html, {

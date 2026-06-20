@@ -3,22 +3,31 @@
 import * as React from 'npm:react@18.3.1'
 import { Text } from 'npm:@react-email/components@0.0.22'
 import { BrandLayout, tokenBoxStyle } from './_layout.tsx'
+import { mergeCopy, type EmailCopy } from './_copy.ts'
 
 interface ReauthenticationEmailProps {
   token: string
+  whatsappGroupUrl?: string
+  unsubscribeUrl?: string
+  copy?: Partial<EmailCopy>
 }
 
-export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
+export const ReauthenticationEmail = ({ token, whatsappGroupUrl, unsubscribeUrl, copy }: ReauthenticationEmailProps) => {
+  const c = mergeCopy('reauthentication', copy)
+  return (
   <BrandLayout
-    preview="קוד אימות לחשבון שלכם"
-    heading="קוד אימות חד-פעמי"
-    intro="להמשך הפעולה במועדון, הזינו את הקוד הבא במסך האימות:"
+    whatsappGroupUrl={whatsappGroupUrl}
+    unsubscribeUrl={unsubscribeUrl}
+    preview={c.preview}
+    heading={c.heading}
+    intro={c.intro}
     cta={null}
-    outro="הקוד תקף ל-10 דקות בלבד. לא ביקשתם אותו? צרו איתנו קשר מיד."
+    outro={c.outro}
     showWhatsapp={false}
   >
     <Text style={tokenBoxStyle}>{token}</Text>
   </BrandLayout>
-)
+  )
+}
 
 export default ReauthenticationEmail

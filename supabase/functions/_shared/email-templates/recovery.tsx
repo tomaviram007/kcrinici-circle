@@ -2,26 +2,31 @@
 
 import * as React from 'npm:react@18.3.1'
 import { BrandLayout } from './_layout.tsx'
+import { mergeCopy, type EmailCopy } from './_copy.ts'
 
 interface RecoveryEmailProps {
   siteName: string
   confirmationUrl: string
   whatsappGroupUrl?: string
   unsubscribeUrl?: string
+  copy?: Partial<EmailCopy>
 }
 
-export const RecoveryEmail = ({ confirmationUrl, whatsappGroupUrl, unsubscribeUrl }: RecoveryEmailProps) => (
+export const RecoveryEmail = ({ confirmationUrl, whatsappGroupUrl, unsubscribeUrl, copy }: RecoveryEmailProps) => {
+  const c = mergeCopy('recovery', copy)
+  return (
   <BrandLayout
     whatsappGroupUrl={whatsappGroupUrl}
     unsubscribeUrl={unsubscribeUrl}
-    preview="איפוס סיסמה למועדון"
-    heading="איפוס סיסמה"
-    intro="התקבלה בקשה לאיפוס הסיסמה לחשבון שלכם במועדון. לחצו על הכפתור הבא כדי לבחור סיסמה חדשה. הקישור תקף ל-60 דקות."
-    cta={{ label: 'בחירת סיסמה חדשה', url: confirmationUrl }}
-    outro="לא ביקשתם איפוס? ניתן להתעלם מההודעה — הסיסמה הנוכחית שלכם לא תשתנה."
+    preview={c.preview}
+    heading={c.heading}
+    intro={c.intro}
+    cta={{ label: c.ctaLabel, url: confirmationUrl }}
+    outro={c.outro}
   >
     <></>
   </BrandLayout>
-)
+  )
+}
 
 export default RecoveryEmail
