@@ -240,13 +240,13 @@ const AdminCommunication = () => {
                 {!loading && logs.length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">אין רשומות בטווח שנבחר</td></tr>}
                 {logs.map(row => (
                   <tr key={row.message_id} className="border-t border-border hover:bg-muted/20">
-                    <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{new Date(row.created_at).toLocaleString("he-IL")}</td>
-                    <td className="px-3 py-2 text-xs">{row.template_name || "-"}</td>
-                    <td className="px-3 py-2 text-xs" dir="ltr">{row.recipient_email}</td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap text-right">{new Date(row.created_at).toLocaleString("he-IL")}</td>
+                    <td className="px-3 py-2 text-xs text-right">{row.template_name || "-"}</td>
+                    <td className="px-3 py-2 text-xs text-right" dir="ltr">{row.recipient_email}</td>
+                    <td className="px-3 py-2 text-right">
                       <Badge variant="outline" className={STATUS_COLORS[row.status] || ""}>{row.status}</Badge>
                     </td>
-                    <td className="px-3 py-2 text-xs text-muted-foreground max-w-md">
+                    <td className="px-3 py-2 text-xs text-muted-foreground max-w-md text-right">
                       <div className="truncate" title={row.error_message || JSON.stringify(row.metadata)}>
                         {row.error_message || row.metadata?.subject || "-"}
                       </div>
