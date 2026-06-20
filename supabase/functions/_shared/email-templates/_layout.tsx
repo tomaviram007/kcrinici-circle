@@ -37,6 +37,7 @@ interface LayoutProps {
   cta?: { label: string; url: string } | null
   outro?: string
   showWhatsapp?: boolean
+  whatsappGroupUrl?: string
 }
 
 export const BrandLayout = ({
@@ -47,7 +48,10 @@ export const BrandLayout = ({
   cta,
   outro,
   showWhatsapp = true,
-}: LayoutProps) => (
+  whatsappGroupUrl,
+}: LayoutProps) => {
+  const waUrl = whatsappGroupUrl || BRAND.whatsappGroupUrl
+  return (
   <Html lang="he" dir="rtl">
     <Head />
     <Preview>{preview}</Preview>
@@ -86,7 +90,7 @@ export const BrandLayout = ({
             <Text style={waText}>
               עדכונים, אירועים והזדמנויות — ישירות אליכם בקבוצה הרשמית.
             </Text>
-            <Button style={waButton} href={BRAND.whatsappGroupUrl}>
+            <Button style={waButton} href={waUrl}>
               הצטרפו לקבוצה ←
             </Button>
           </Section>
@@ -111,7 +115,9 @@ export const BrandLayout = ({
       </Container>
     </Body>
   </Html>
-)
+  )
+}
+
 
 // — styles —
 const main = {

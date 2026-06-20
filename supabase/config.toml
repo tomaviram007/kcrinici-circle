@@ -1,6 +1,8 @@
 project_id = "wzbvdpgoyetmgluvhygf"
 
 [functions]
+  [functions.admin-preview-email]
+    verify_jwt = true
   [functions.admin-send-email]
     verify_jwt = true
   [functions.auth-email-hook]

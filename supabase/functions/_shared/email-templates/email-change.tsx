@@ -10,15 +10,16 @@ interface EmailChangeEmailProps {
   email?: string
   newEmail?: string
   confirmationUrl: string
+  whatsappGroupUrl?: string
 }
 
 export const EmailChangeEmail = ({
   oldEmail,
   newEmail,
   email,
-  confirmationUrl,
-}: EmailChangeEmailProps) => (
+  confirmationUrl, whatsappGroupUrl }: EmailChangeEmailProps) => (
   <BrandLayout
+    whatsappGroupUrl={whatsappGroupUrl}
     preview="אישור החלפת כתובת האימייל"
     heading="אישור החלפת אימייל"
     intro="התקבלה בקשה להחליף את כתובת האימייל המקושרת לחשבונכם במועדון. אנא אשרו את הבקשה כדי להשלים את התהליך."
