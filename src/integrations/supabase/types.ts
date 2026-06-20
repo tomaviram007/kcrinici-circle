@@ -350,6 +350,39 @@ export type Database = {
         }
         Relationships: []
       }
+      content_access_settings: {
+        Row: {
+          content_type: string
+          public_action_enabled: boolean
+          public_card_open_enabled: boolean
+          public_contact_enabled: boolean
+          public_images_enabled: boolean
+          public_list_enabled: boolean
+          public_price_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          content_type: string
+          public_action_enabled?: boolean
+          public_card_open_enabled?: boolean
+          public_contact_enabled?: boolean
+          public_images_enabled?: boolean
+          public_list_enabled?: boolean
+          public_price_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          content_type?: string
+          public_action_enabled?: boolean
+          public_card_open_enabled?: boolean
+          public_contact_enabled?: boolean
+          public_images_enabled?: boolean
+          public_list_enabled?: boolean
+          public_price_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           benefit_type: string | null
@@ -1503,6 +1536,25 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_content_access: {
+        Args: { _content_type: string }
+        Returns: {
+          content_type: string
+          public_action_enabled: boolean
+          public_card_open_enabled: boolean
+          public_contact_enabled: boolean
+          public_images_enabled: boolean
+          public_list_enabled: boolean
+          public_price_enabled: boolean
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "content_access_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_event_attending_counts: {
         Args: { _event_ids: string[] }
         Returns: {
@@ -1523,6 +1575,72 @@ export type Database = {
           option_id: string
           total_votes: number
           vote_count: number
+        }[]
+      }
+      get_public_deals: {
+        Args: never
+        Returns: {
+          benefit_type: string
+          benefit_value: number
+          business_logo_url: string
+          business_name: string
+          category: string
+          created_at: string
+          description: string
+          discount_label: string
+          expires_at: string
+          id: string
+          title: string
+        }[]
+      }
+      get_public_jobs: {
+        Args: never
+        Returns: {
+          category: string
+          company_name: string
+          created_at: string
+          id: string
+          job_type: string
+          location: string
+          summary: string
+          title: string
+        }[]
+      }
+      get_public_members: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          first_name: string
+          id: string
+          profession: string
+        }[]
+      }
+      get_public_recommendations: {
+        Args: never
+        Returns: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          is_admin_post: boolean
+          professional_first_name: string
+          rating: number
+          recommender_name: string
+        }[]
+      }
+      get_public_secondhand: {
+        Args: never
+        Returns: {
+          category: string
+          condition: string
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          images: string[]
+          is_sold: boolean
+          price: number
+          title: string
         }[]
       }
       get_public_stats: { Args: never; Returns: Json }
