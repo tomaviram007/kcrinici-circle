@@ -90,7 +90,7 @@ export const BrandLayout = ({
             <Text style={waText}>
               עדכונים, אירועים והזדמנויות — ישירות אליכם בקבוצה הרשמית.
             </Text>
-            <Button style={waButton} href={BRAND.whatsappGroupUrl}>
+            <Button style={waButton} href={waUrl}>
               הצטרפו לקבוצה ←
             </Button>
           </Section>
