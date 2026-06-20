@@ -118,17 +118,10 @@ ${signature ? `<tr><td style="padding:0 28px 28px;font-size:14px;color:${text};o
     setSendingTest(true);
     // Save first so the function reads latest fields
     await save();
-    const { data, error } = await supabase.functions.invoke("send-birthday-emails", {
-      body: { kind: "test" },
-      headers: {},
-    });
-    // The function expects test=1&to=... as query params. supabase-js doesn't support query, so call via fetch
     try {
       const session = (await supabase.auth.getSession()).data.session;
-      const url = `${(supabase as any).functionsUrl || ""}/send-birthday-emails?test=1&to=${encodeURIComponent(testEmail)}`;
-      // Fallback to constructing from supabase URL
       const projectUrl = (import.meta as any).env?.VITE_SUPABASE_URL || "";
-      const finalUrl = projectUrl ? `${projectUrl}/functions/v1/send-birthday-emails?test=1&to=${encodeURIComponent(testEmail)}` : url;
+      const finalUrl = `${projectUrl}/functions/v1/send-birthday-emails?test=1&to=${encodeURIComponent(testEmail)}`;
       const resp = await fetch(finalUrl, {
         method: "POST",
         headers: {
@@ -145,8 +138,6 @@ ${signature ? `<tr><td style="padding:0 28px 28px;font-size:14px;color:${text};o
     } catch (e: any) {
       toast({ title: "שגיאה", description: e?.message || String(e), variant: "destructive" });
     } finally {
-      // suppress unused
-      void data; void error;
       setSendingTest(false);
     }
   };
