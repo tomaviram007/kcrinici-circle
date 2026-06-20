@@ -852,6 +852,9 @@ const translations: Record<Language, Record<string, string>> = {
     "gallery.uploadNewFile": "Upload new file",
     "gallery.uploadPhotos": "Upload photos",
     // SecondHand page
+    "secondhand.heroTitle": "Second",
+    "secondhand.heroHighlight": "Hand",
+    "secondhand.heroSubtitle": "Items, collectibles and opportunities from our community",
     "secondhand.searchPlaceholder": "Search item...",
     "secondhand.allCategories": "All categories",
     "secondhand.postBtn": "Post Item",
