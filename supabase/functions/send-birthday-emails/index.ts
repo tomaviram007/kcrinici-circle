@@ -141,24 +141,25 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  // Auth: cron secret OR authenticated admin (for manual triggers from UI)
+  // Auth: cron secret OR service-role bearer OR authenticated admin
   const cronSecret = Deno.env.get("CRON_SECRET");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const provided = req.headers.get("x-cron-secret");
-  let isAuthed = cronSecret ? provided === cronSecret : false;
-  if (!isAuthed) {
-    const authHeader = req.headers.get("authorization") || "";
-    const token = authHeader.replace(/^Bearer\s+/i, "");
-    if (token) {
-      const { data: userRes } = await supabase.auth.getUser(token);
-      if (userRes?.user) {
-        const { data: roleRow } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userRes.user.id)
-          .eq("role", "admin")
-          .maybeSingle();
-        if (roleRow) isAuthed = true;
-      }
+  const authHeader = req.headers.get("authorization") || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  let isAuthed = false;
+  if (cronSecret && provided === cronSecret) isAuthed = true;
+  if (!isAuthed && token && token === serviceRoleKey) isAuthed = true;
+  if (!isAuthed && token) {
+    const { data: userRes } = await supabase.auth.getUser(token);
+    if (userRes?.user) {
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userRes.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (roleRow) isAuthed = true;
     }
   }
   if (!isAuthed) {
