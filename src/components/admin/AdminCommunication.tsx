@@ -107,13 +107,34 @@ const AdminCommunication = () => {
   };
 
   const handleWhatsApp = () => {
-    const clean = waPhone.replace(/\D/g, "").replace(/^0/, "972");
-    if (!clean || !waMsg) {
+    const numbers = waPhone.split(",").map(s => s.trim()).filter(Boolean);
+    if (!numbers.length || !waMsg) {
       toast({ title: "חסרים שדות", description: "מספר טלפון והודעה הם חובה", variant: "destructive" });
       return;
     }
-    window.open(`https://wa.me/${clean}?text=${encodeURIComponent(waMsg)}`, "_blank");
+    numbers.forEach((raw) => {
+      const clean = raw.replace(/\D/g, "").replace(/^0/, "972");
+      if (clean) window.open(`https://wa.me/${clean}?text=${encodeURIComponent(waMsg)}`, "_blank");
+    });
   };
+
+  const addEmails = (values: string[]) => {
+    const existing = to.split(",").map(s => s.trim()).filter(Boolean);
+    const merged = Array.from(new Set([...existing, ...values]));
+    setTo(merged.join(", "));
+  };
+  const addPhones = (values: string[]) => {
+    const existing = waPhone.split(",").map(s => s.trim()).filter(Boolean);
+    const merged = Array.from(new Set([...existing, ...values]));
+    setWaPhone(merged.join(", "));
+  };
+  const removeRecipient = (which: "email" | "phone", value: string) => {
+    const setter = which === "email" ? setTo : setWaPhone;
+    const cur = (which === "email" ? to : waPhone).split(",").map(s => s.trim()).filter(Boolean);
+    setter(cur.filter(v => v !== value).join(", "));
+  };
+  const emailChips = to.split(",").map(s => s.trim()).filter(Boolean);
+  const phoneChips = waPhone.split(",").map(s => s.trim()).filter(Boolean);
 
   const templates: string[] = stats?.templates || [];
 
