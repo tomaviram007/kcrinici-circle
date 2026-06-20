@@ -17,7 +17,7 @@ export const EmailChangeEmail = ({
   oldEmail,
   newEmail,
   email,
-  confirmationUrl,, whatsappGroupUrl }: EmailChangeEmailProps) => (
+  confirmationUrl, whatsappGroupUrl }: EmailChangeEmailProps) => (
   <BrandLayout
     whatsappGroupUrl={whatsappGroupUrl}
     preview="אישור החלפת כתובת האימייל"
