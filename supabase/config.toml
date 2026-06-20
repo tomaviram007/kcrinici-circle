@@ -1,19 +1,17 @@
 project_id = "wzbvdpgoyetmgluvhygf"
 
-[functions.register-event]
-verify_jwt = false
-
-[functions.event-share]
-verify_jwt = false
-
-[functions.send-birthday-emails]
-verify_jwt = false
-
-[functions.process-email-queue]
-verify_jwt = true
-
-[functions.admin-send-email]
-verify_jwt = true
-
-[functions.email-failure-monitor]
-verify_jwt = false
+[functions]
+  [functions.admin-send-email]
+    verify_jwt = true
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.email-failure-monitor]
+    verify_jwt = false
+  [functions.event-share]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.register-event]
+    verify_jwt = false
+  [functions.send-birthday-emails]
+    verify_jwt = false
