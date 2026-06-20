@@ -184,7 +184,7 @@ const AdminCommunication = () => {
             </div>
             <div>
               <Label>נושא</Label>
-              <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="נושא ההודעה" />
+              <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="נושא ההודעה" className="text-right" />
             </div>
             <div>
               <Label>גוף ההודעה</Label>
