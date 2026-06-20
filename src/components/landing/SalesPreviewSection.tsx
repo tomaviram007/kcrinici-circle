@@ -79,7 +79,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
       msg += `\n\n👤 *מפרסם:* ${c.full_name}`;
       if (c.phone) msg += `\n📱 ${c.phone}`;
     }
-    msg += "\n\n🏘️ _הגברים של ק. קריניצי_";
+    msg += "\n\n🏘️ _הגברים של ק.קרניצי_";
     return encodeURIComponent(msg);
   };
 

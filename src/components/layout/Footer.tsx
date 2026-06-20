@@ -33,7 +33,7 @@ const Footer = () => {
             <Link to="/" className="flex items-center gap-3">
               <img src={logoUrl} alt="לוגו המועדון" className="h-12 w-12 rounded-full object-contain" />
               <h3 className="font-serif text-lg font-bold text-foreground">
-                הגברים של ק. קריניצי
+                הגברים של ק.קרניצי
               </h3>
             </Link>
             <p className="font-body text-sm text-muted-foreground leading-relaxed">
@@ -96,7 +96,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-border/50 flex flex-col items-center justify-center gap-2 text-center">
           <p className="font-body text-xs text-muted-foreground">
-            © {currentYear} הגברים של ק. קריניצי — כל הזכויות שמורות
+            © {currentYear} הגברים של ק.קרניצי — כל הזכויות שמורות
           </p>
           <p className="font-body text-xs text-muted-foreground/60">
             עוצב ופותח על ידי{" "}

@@ -56,7 +56,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
   const mockJobs = [
     { id: "m1", title: "מנהל שיווק דיגיטלי", company_name: "סטארטאפ מקומי", location: "רמת גן", job_type: "full-time", description: "חיפוש מנהל שיווק מנוסה" },
     { id: "m2", title: "מעצב UX/UI", company_name: "סטודיו עיצוב", location: "תל אביב", job_type: "freelance", description: "פרויקט עיצוב אפליקציה" },
-    { id: "m3", title: "יועץ פיננסי", company_name: "משרד רואי חשבון", location: "ק. קריניצי", job_type: "part-time", description: "ייעוץ פיננסי לעסקים קטנים" },
+    { id: "m3", title: "יועץ פיננסי", company_name: "משרד רואי חשבון", location: "ק.קרניצי", job_type: "part-time", description: "ייעוץ פיננסי לעסקים קטנים" },
   ];
 
   const displayItems = isApproved ? (jobs.length > 0 ? jobs : []) : mockJobs;

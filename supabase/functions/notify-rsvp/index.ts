@@ -27,7 +27,7 @@ function shell(title: string, rows: Array<[string, string]>, intro?: string): st
     <h2 style="color:#D4AF37;text-align:center;margin-bottom:20px;">${escapeHtml(title)}</h2>
     ${intro ? `<p style="text-align:center;margin-bottom:20px;">${escapeHtml(intro)}</p>` : ""}
     <table style="width:100%;border-collapse:collapse;">${r}</table>
-    <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק. קריניצי</p>
+    <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק.קרניצי</p>
   </div>`;
 }
 
@@ -37,7 +37,7 @@ async function sendEmail(to: string, subject: string, html: string) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: "מועדון ק. קריניצי <onboarding@resend.dev>", to: [to], subject, html }),
+    body: JSON.stringify({ from: "מועדון ק.קרניצי <onboarding@resend.dev>", to: [to], subject, html }),
   });
   if (!res.ok) console.error("Resend error:", await res.text());
 }

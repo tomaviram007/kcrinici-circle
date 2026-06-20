@@ -41,7 +41,7 @@ const PageHero = ({ image, title, highlight, subtitle, children }: PageHeroProps
       <div ref={contentRef} className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
         <div className="mb-3 h-px w-16 gradient-gold opacity-60" />
         <p className="mb-3 font-body text-xs tracking-[0.3em] text-gold uppercase">
-          הגברים של ק. קריניצי
+          הגברים של ק.קרניצי
         </p>
         <h1 className="font-serif text-3xl font-bold leading-tight text-foreground sm:text-4xl md:text-5xl">
           {title} <span className="text-gold">{highlight}</span>

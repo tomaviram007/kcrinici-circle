@@ -22,7 +22,7 @@ const TeaserOverlay = ({ type }: { type: "no-session" | "not-approved" }) => (
             תוכן <span className="text-gold">בלעדי</span> לחברי המועדון
           </h2>
           <p className="mt-3 font-body text-sm leading-relaxed text-muted-foreground">
-            הצטרף למועדון הגברים של ק. קריניצי כדי לצפות בתוכן המלא
+            הצטרף למועדון הגברים של ק.קרניצי כדי לצפות בתוכן המלא
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button asChild className="gradient-gold text-primary-foreground font-body hover:opacity-90">

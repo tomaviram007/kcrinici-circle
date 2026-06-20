@@ -5,7 +5,7 @@ const Terms = () => (
       <div className="prose prose-invert max-w-none font-body text-muted-foreground space-y-6">
         <section>
           <h2 className="font-serif text-xl font-bold text-foreground">1. כללי</h2>
-          <p>ברוכים הבאים לאתר "הגברים של ק. קריניצי". השימוש באתר זה כפוף לתנאי השימוש המפורטים להלן. בעצם הכניסה לאתר והשימוש בו, הנך מסכים לתנאים אלה במלואם.</p>
+          <p>ברוכים הבאים לאתר "הגברים של ק.קרניצי". השימוש באתר זה כפוף לתנאי השימוש המפורטים להלן. בעצם הכניסה לאתר והשימוש בו, הנך מסכים לתנאים אלה במלואם.</p>
         </section>
         <section>
           <h2 className="font-serif text-xl font-bold text-foreground">2. הגבלת שימוש</h2>

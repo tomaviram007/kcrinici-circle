@@ -318,7 +318,7 @@ const Announcements = () => {
       msg += `\n\n👤 *מפרסם:* ${creator.full_name}`;
       if (creator.phone) msg += `\n📱 ${creator.phone}`;
     }
-    msg += "\n\n🏘️ _מודעה מלוח המודעות של הגברים של ק. קריניצי_";
+    msg += "\n\n🏘️ _מודעה מלוח המודעות של הגברים של ק.קרניצי_";
     return encodeURIComponent(msg);
   };
 

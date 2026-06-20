@@ -101,7 +101,7 @@ serve(async (req) => {
             <p style="text-align:center;color:#d9c9a8;">📅 מחר, ${eventDate}</p>
             <p style="text-align:center;color:#d9c9a8;">📍 ${event.location || "לא צוין מיקום"}</p>
             <p style="text-align:center;color:#D4AF37;margin-top:20px;">נתראה שם! 🎉</p>
-            <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק. קריניצי</p>
+            <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק.קרניצי</p>
           </div>`;
 
         // WhatsApp
@@ -190,7 +190,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "מועדון ק. קריניצי <onboarding@resend.dev>",
+      from: "מועדון ק.קרניצי <onboarding@resend.dev>",
       to: [to],
       subject,
       html,

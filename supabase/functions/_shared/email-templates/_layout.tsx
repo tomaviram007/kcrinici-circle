@@ -21,7 +21,7 @@ export const BRAND = {
     'https://wzbvdpgoyetmgluvhygf.supabase.co/storage/v1/object/public/site-assets/logo-1771366653000.png',
   siteUrl: 'https://kcrinici.com',
   whatsappGroupUrl: 'https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo',
-  siteTitle: 'הגברים של ק. כריניצי',
+  siteTitle: 'הגברים של ק.קרניצי',
   charcoal: '#16110e',
   wood: '#4B2C20',
   gold: '#D4AF37',
@@ -64,7 +64,7 @@ export const BrandLayout = ({
         <Section style={hero}>
           <Img src={BRAND.logoUrl} alt={BRAND.siteTitle} width="76" height="76" style={logo} />
           <Text style={brandTitle}>{BRAND.siteTitle}</Text>
-          <Text style={brandTagline}>מועדון הגברים של קריית כריניצי</Text>
+          <Text style={brandTagline}>מועדון הגברים של ק.קרניצי</Text>
         </Section>
 
         {/* Body card */}

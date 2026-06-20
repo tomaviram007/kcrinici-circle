@@ -5,7 +5,7 @@ const Regulations = () => (
       <div className="prose prose-invert max-w-none font-body text-muted-foreground space-y-6">
         <section>
           <h2 className="font-serif text-xl font-bold text-foreground">1. מטרת המועדון</h2>
-          <p>מועדון "הגברים של ק. קריניצי" הוקם במטרה לחבר בין אנשי עסקים ואנשי מקצוע מובילים באזור רמת גן והסביבה, ליצור קשרים עסקיים וחברתיים ולקדם פעילות קהילתית.</p>
+          <p>מועדון "הגברים של ק.קרניצי" הוקם במטרה לחבר בין אנשי עסקים ואנשי מקצוע מובילים באזור רמת גן והסביבה, ליצור קשרים עסקיים וחברתיים ולקדם פעילות קהילתית.</p>
         </section>
         <section>
           <h2 className="font-serif text-xl font-bold text-foreground">2. חברות במועדון</h2>

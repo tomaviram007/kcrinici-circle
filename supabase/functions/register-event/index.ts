@@ -51,7 +51,7 @@ function emailShell(title: string, rows: Array<[string, string]>, intro?: string
       <h2 style="color:#D4AF37;text-align:center;margin-bottom:20px;">${escapeHtml(title)}</h2>
       ${intro ? `<p style="text-align:center;margin-bottom:20px;">${escapeHtml(intro)}</p>` : ""}
       <table style="width:100%;border-collapse:collapse;">${rowsHtml}</table>
-      <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק. קריניצי</p>
+      <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק.קרניצי</p>
     </div>
   `;
 }
@@ -69,7 +69,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "מועדון ק. קריניצי <onboarding@resend.dev>",
+      from: "מועדון ק.קרניצי <onboarding@resend.dev>",
       to: [to],
       subject,
       html,

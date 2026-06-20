@@ -130,13 +130,13 @@ serve(async (req) => {
     let htmlBody: string;
 
     if (action === "approve") {
-      subject = "ברוך הבא למועדון הגברים של ק. קריניצי!";
+      subject = "ברוך הבא למועדון הגברים של ק.קרניצי!";
       htmlBody = `
         <div dir="rtl" style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px; background: #1a1410; color: #d9c9a8; border-radius: 12px;">
           <h1 style="color: #D4AF37; font-size: 24px; text-align: center; margin-bottom: 20px;">ברוך הבא למועדון!</h1>
           <p style="font-size: 16px; line-height: 1.8; text-align: center;">
             שלום ${name},<br/><br/>
-            בקשתך לחברות במועדון <strong style="color: #D4AF37;">הגברים של ק. קריניצי</strong> אושרה!<br/>
+            בקשתך לחברות במועדון <strong style="color: #D4AF37;">הגברים של ק.קרניצי</strong> אושרה!<br/>
             כעת יש לך גישה מלאה לכל הלוחות, האינדקס והאירועים.
           </p>
           <div style="text-align: center; margin-top: 30px;">
@@ -145,13 +145,13 @@ serve(async (req) => {
         </div>
       `;
     } else {
-      subject = "הגברים של ק. קריניצי - עדכון בנוגע לבקשתך";
+      subject = "הגברים של ק.קרניצי - עדכון בנוגע לבקשתך";
       htmlBody = `
         <div dir="rtl" style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px; background: #1a1410; color: #d9c9a8; border-radius: 12px;">
           <h1 style="color: #D4AF37; font-size: 24px; text-align: center; margin-bottom: 20px;">עדכון לגבי בקשתך</h1>
           <p style="font-size: 16px; line-height: 1.8; text-align: center;">
             שלום ${name},<br/><br/>
-            לצערנו, הגישה למועדון <strong style="color: #D4AF37;">הגברים של ק. קריניצי</strong> מוגבלת כרגע לתושבי השכונה בלבד.<br/>
+            לצערנו, הגישה למועדון <strong style="color: #D4AF37;">הגברים של ק.קרניצי</strong> מוגבלת כרגע לתושבי השכונה בלבד.<br/>
             ניתן לפנות להנהלת המועדון לבירורים נוספים.
           </p>
         </div>
@@ -168,7 +168,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "מועדון ק. קריניצי <onboarding@resend.dev>",
+          from: "מועדון ק.קרניצי <onboarding@resend.dev>",
           to: [email],
           subject,
           html: htmlBody,
