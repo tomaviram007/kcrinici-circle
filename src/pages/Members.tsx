@@ -323,6 +323,12 @@ const Members = () => {
       {members.length === 0 && <p className="font-body text-muted-foreground">אין חברים מאושרים עדיין.</p>}
     </div>
 
+    <Dialog open={showLockedNotice} onOpenChange={setShowLockedNotice}>
+      <DialogContent className="sm:max-w-md p-0 bg-transparent border-0 shadow-none" dir="rtl">
+        <MembersOnlyNotice variant="members" />
+      </DialogContent>
+    </Dialog>
+
 
 
     <Dialog open={!!editMember} onOpenChange={(open) => !open && setEditMember(null)}>
