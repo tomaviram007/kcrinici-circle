@@ -23,7 +23,7 @@ function formatDate(value: string): string {
 
 function shell(title: string, rows: Array<[string, string]>, intro?: string): string {
   const r = rows.map(([l, v]) => `<tr><td style="padding:6px 12px;font-weight:bold;color:#D4AF37;">${escapeHtml(l)}</td><td style="padding:6px 12px;color:#d9c9a8;">${escapeHtml(v)}</td></tr>`).join("");
-  return `<div dir="rtl" style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:30px 20px;background:#1a1410;color:#d9c9a8;border-radius:12px;">
+  return `<div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif;max-width:520px;margin:0 auto;padding:30px 20px;background:#1a1410;color:#d9c9a8;border-radius:12px;">
     <h2 style="color:#D4AF37;text-align:center;margin-bottom:20px;">${escapeHtml(title)}</h2>
     ${intro ? `<p style="text-align:center;margin-bottom:20px;">${escapeHtml(intro)}</p>` : ""}
     <table style="width:100%;border-collapse:collapse;">${r}</table>

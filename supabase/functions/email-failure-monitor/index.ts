@@ -60,7 +60,7 @@ Deno.serve(async () => {
           if (u?.user?.email) emails.push(u.user.email);
         }
         if (emails.length) {
-          const html = `<div dir="rtl" style="font-family:Arial;line-height:1.6">
+          const html = `<div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif;line-height:1.6">
             <h2 style="color:#b91c1c">🚨 כשלי שליחת מייל</h2>
             <p>${rows.length} כשלים מאז ${new Date(since).toLocaleString("he-IL")}.</p>
             ${authIssues.length ? `<p style="color:#b91c1c"><strong>⚠️ ${authIssues.length} כשלי SPF/DKIM/DMARC/Bounce, בדוק את הגדרות הדומיין notify.kcrinici.com ב-Cloud → Emails.</strong></p>` : ""}

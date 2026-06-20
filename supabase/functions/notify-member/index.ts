@@ -132,7 +132,7 @@ serve(async (req) => {
     if (action === "approve") {
       subject = "ברוך הבא למועדון הגברים של ק.קרניצי!";
       htmlBody = `
-        <div dir="rtl" style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px; background: #1a1410; color: #d9c9a8; border-radius: 12px;">
+        <div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px; background: #1a1410; color: #d9c9a8; border-radius: 12px;">
           <h1 style="color: #D4AF37; font-size: 24px; text-align: center; margin-bottom: 20px;">ברוך הבא למועדון!</h1>
           <p style="font-size: 16px; line-height: 1.8; text-align: center;">
             שלום ${name},<br/><br/>
@@ -147,7 +147,7 @@ serve(async (req) => {
     } else {
       subject = "הגברים של ק.קרניצי - עדכון בנוגע לבקשתך";
       htmlBody = `
-        <div dir="rtl" style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px; background: #1a1410; color: #d9c9a8; border-radius: 12px;">
+        <div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px; background: #1a1410; color: #d9c9a8; border-radius: 12px;">
           <h1 style="color: #D4AF37; font-size: 24px; text-align: center; margin-bottom: 20px;">עדכון לגבי בקשתך</h1>
           <p style="font-size: 16px; line-height: 1.8; text-align: center;">
             שלום ${name},<br/><br/>

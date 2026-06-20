@@ -95,7 +95,7 @@ serve(async (req) => {
 
         const reminderText = `🔔 תזכורת: ${event.title}\n📅 מחר, ${eventDate}\n📍 ${event.location || "לא צוין מיקום"}\n\nנתראה שם! 🎉`;
         const reminderHTML = `
-          <div dir="rtl" style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:30px 20px;background:#1a1410;color:#d9c9a8;border-radius:12px;">
+          <div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif;max-width:520px;margin:0 auto;padding:30px 20px;background:#1a1410;color:#d9c9a8;border-radius:12px;">
             <h2 style="color:#D4AF37;text-align:center;">🔔 תזכורת לאירוע</h2>
             <h3 style="color:#ffffff;text-align:center;">${event.title}</h3>
             <p style="text-align:center;color:#d9c9a8;">📅 מחר, ${eventDate}</p>
