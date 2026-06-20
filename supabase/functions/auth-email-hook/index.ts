@@ -111,9 +111,11 @@ async function handlePreview(req: Request): Promise<Response> {
   }
 
   let type: string
+  let copy: any = undefined
   try {
     const body = await req.json()
     type = body.type
+    if (body && typeof body.copy === 'object') copy = body.copy
   } catch (error) {
     return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
       status: 400,
@@ -131,12 +133,6 @@ async function handlePreview(req: Request): Promise<Response> {
   }
 
   const sampleData = SAMPLE_DATA[type] || {}
-  // Allow preview-time copy overrides via request body
-  let copy: any = undefined
-  try {
-    const reqBody = await req.clone().json()
-    if (reqBody && typeof reqBody.copy === 'object') copy = reqBody.copy
-  } catch (_e) {}
   const html = await renderAsync(React.createElement(EmailTemplate, { ...sampleData, copy }))
 
   return new Response(html, {
