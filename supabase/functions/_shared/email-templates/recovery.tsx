@@ -6,10 +6,12 @@ import { BrandLayout } from './_layout.tsx'
 interface RecoveryEmailProps {
   siteName: string
   confirmationUrl: string
+  whatsappGroupUrl?: string
 }
 
-export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
+export const RecoveryEmail = ({ confirmationUrl, whatsappGroupUrl }: RecoveryEmailProps) => (
   <BrandLayout
+    whatsappGroupUrl={whatsappGroupUrl}
     preview="איפוס סיסמה למועדון"
     heading="איפוס סיסמה"
     intro="התקבלה בקשה לאיפוס הסיסמה לחשבון שלכם במועדון. לחצו על הכפתור הבא כדי לבחור סיסמה חדשה. הקישור תקף ל-60 דקות."

@@ -9,10 +9,12 @@ interface SignupEmailProps {
   siteUrl: string
   recipient: string
   confirmationUrl: string
+  whatsappGroupUrl?: string
 }
 
-export const SignupEmail = ({ confirmationUrl }: SignupEmailProps) => (
+export const SignupEmail = ({ confirmationUrl, whatsappGroupUrl }: SignupEmailProps) => (
   <BrandLayout
+    whatsappGroupUrl={whatsappGroupUrl}
     preview="ברוכים הבאים — אשרו את כתובת האימייל שלכם"
     heading="ברוכים הבאים למועדון"
     intro="אנחנו שמחים שהצטרפתם אלינו. כדי להשלים את ההרשמה ולהמשיך בתהליך האישור, אשרו את כתובת האימייל שלכם בלחיצה על הכפתור הבא:"
