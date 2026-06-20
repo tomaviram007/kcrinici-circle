@@ -144,7 +144,7 @@ serve(async (req) => {
   // Auth: cron secret OR authenticated admin (for manual triggers from UI)
   const cronSecret = Deno.env.get("CRON_SECRET");
   const provided = req.headers.get("x-cron-secret");
-  let isAuthed = !cronSecret || provided === cronSecret;
+  let isAuthed = cronSecret ? provided === cronSecret : false;
   if (!isAuthed) {
     const authHeader = req.headers.get("authorization") || "";
     const token = authHeader.replace(/^Bearer\s+/i, "");
