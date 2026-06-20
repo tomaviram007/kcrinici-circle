@@ -35,6 +35,7 @@ import SecondHand from "./pages/SecondHand";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Regulations from "./pages/Regulations";
+import Unsubscribe from "./pages/Unsubscribe";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,7 +50,7 @@ const AppLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { sessionExpired } = useAuth();
-  const hideHeader = ["/login", "/register", "/pending", "/reset-password"].includes(location.pathname);
+  const hideHeader = ["/login", "/register", "/pending", "/reset-password", "/unsubscribe"].includes(location.pathname);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -89,6 +90,7 @@ const AppLayout = () => {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/regulations" element={<Regulations />} />
+        <Route path="/unsubscribe" element={<Unsubscribe />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </PageTransition>
