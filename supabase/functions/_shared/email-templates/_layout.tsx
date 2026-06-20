@@ -56,7 +56,21 @@ export const BrandLayout = ({
   const unsubUrl = unsubscribeUrl || `${BRAND.siteUrl}/unsubscribe`
   return (
   <Html lang="he" dir="rtl">
-    <Head />
+    <Head>
+      <style>{`
+        @font-face {
+          font-family: 'Tel Aviv';
+          src: url('${BRAND.siteUrl}/fonts/TelAviv-ModernistRegular.ttf') format('truetype');
+          font-weight: 400; font-style: normal; font-display: swap;
+        }
+        @font-face {
+          font-family: 'Tel Aviv';
+          src: url('${BRAND.siteUrl}/fonts/TelAviv-ModernistBold.ttf') format('truetype');
+          font-weight: 700; font-style: normal; font-display: swap;
+        }
+        body, table, td, p, a, h1, h2, h3, h4, span, div { font-family: 'Tel Aviv', 'Assistant', 'Heebo', 'Helvetica Neue', Arial, sans-serif !important; }
+      `}</style>
+    </Head>
     <Preview>{preview}</Preview>
     <Body style={main}>
       <Container style={container}>
