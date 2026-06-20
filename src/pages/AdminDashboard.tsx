@@ -6,6 +6,7 @@ import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Imag
 import AdminCommunication from "@/components/admin/AdminCommunication";
 import AdminEmailPreview from "@/components/admin/AdminEmailPreview";
 import AdminMailingList from "@/components/admin/AdminMailingList";
+import AdminEmailContent from "@/components/admin/AdminEmailContent";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -58,6 +59,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   ads: "manage_settings",
   communication: "manage_settings",
   mailing: "manage_settings",
+  "email-content": "manage_settings",
 };
 
 const AdminDashboard = () => {
@@ -149,6 +151,7 @@ const AdminDashboard = () => {
             {activeTab === "communication" && hasPermission("manage_settings") && <AdminCommunication />}
             {activeTab === "email-preview" && hasPermission("manage_settings") && <AdminEmailPreview />}
             {activeTab === "mailing" && hasPermission("manage_settings") && <AdminMailingList />}
+            {activeTab === "email-content" && hasPermission("manage_settings") && <AdminEmailContent />}
             {activeTab === "team" && hasPermission("manage_team") && <AdminTeam />}
             {/* Show access denied message if no permission */}
             {TAB_PERMISSION_MAP[activeTab] && !hasPermission(TAB_PERMISSION_MAP[activeTab]) && (
