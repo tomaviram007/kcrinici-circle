@@ -128,9 +128,11 @@ const Jobs = () => {
               <button onClick={() => setViewMode("grid")} className={`p-2 transition-colors ${viewMode === "grid" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`} title="תצוגת רשת"><LayoutGrid className="h-4 w-4" /></button>
               <button onClick={() => setViewMode("list")} className={`p-2 transition-colors ${viewMode === "list" ? "bg-secondary text-gold" : "text-muted-foreground hover:text-foreground"}`} title="תצוגת רשימה"><List className="h-4 w-4" /></button>
             </div>
-            <Button size="sm" onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
-              <Plus className="h-4 w-4 ml-1" /> {t("jobs.postBtn")}
-            </Button>
+            {isMember && (
+              <Button size="sm" onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }} className="gradient-gold text-primary-foreground font-body">
+                <Plus className="h-4 w-4 ml-1" /> {t("jobs.postBtn")}
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -210,7 +212,7 @@ const Jobs = () => {
         {filtered.map((job) => (
           <div
             key={job.id}
-            onClick={() => setSelectedJob(job)}
+            onClick={() => canOpenCard ? setSelectedJob(job) : setSelectedJob({ __locked: true, title: job.title })}
             className="job-card cursor-pointer rounded-lg border border-border bg-card p-4 transition-all hover:shadow-[0_0_30px_hsl(43_72%_52%/0.1)] hover:border-gold/30"
           >
             <div className="flex items-start gap-3">
