@@ -37,6 +37,7 @@ interface LayoutProps {
   cta?: { label: string; url: string } | null
   outro?: string
   showWhatsapp?: boolean
+  whatsappGroupUrl?: string
 }
 
 export const BrandLayout = ({
@@ -47,7 +48,10 @@ export const BrandLayout = ({
   cta,
   outro,
   showWhatsapp = true,
-}: LayoutProps) => (
+  whatsappGroupUrl,
+}: LayoutProps) => {
+  const waUrl = whatsappGroupUrl || BRAND.whatsappGroupUrl
+  return (
   <Html lang="he" dir="rtl">
     <Head />
     <Preview>{preview}</Preview>
