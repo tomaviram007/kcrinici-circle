@@ -115,7 +115,9 @@ export const BrandLayout = ({
       </Container>
     </Body>
   </Html>
-)
+  )
+}
+
 
 // — styles —
 const main = {
