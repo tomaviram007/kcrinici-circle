@@ -8,18 +8,21 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Smartphone, Monitor, RefreshCw, Save, MessageCircle } from "lucide-react";
+import { Loader2, Smartphone, Monitor, RefreshCw, Save, MessageCircle, Star, Reply, Forward, MoreVertical, Inbox } from "lucide-react";
 
 const TEMPLATES = [
-  { id: "signup", label: "אישור הרשמה" },
-  { id: "magiclink", label: "קישור כניסה (Magic Link)" },
-  { id: "recovery", label: "איפוס סיסמה" },
-  { id: "invite", label: "הזמנה להצטרף" },
-  { id: "email_change", label: "החלפת כתובת אימייל" },
-  { id: "reauthentication", label: "קוד אימות (OTP)" },
+  { id: "signup", label: "אישור הרשמה", subject: "ברוך הבא — אישור הרשמה לאנשי ק. כרינצי", preview: "תודה שנרשמת. אשר את כתובת המייל כדי להשלים את ההרשמה." },
+  { id: "magiclink", label: "קישור כניסה (Magic Link)", subject: "קישור כניסה מאובטח לאתר", preview: "לחץ על הקישור כדי להתחבר ללא סיסמה." },
+  { id: "recovery", label: "איפוס סיסמה", subject: "בקשה לאיפוס סיסמה", preview: "קיבלנו בקשה לאפס את הסיסמה שלך." },
+  { id: "invite", label: "הזמנה להצטרף", subject: "הוזמנת להצטרף לאנשי ק. כרינצי", preview: "קבלת הזמנה אישית להצטרף לקהילה." },
+  { id: "email_change", label: "החלפת כתובת אימייל", subject: "אישור החלפת כתובת אימייל", preview: "אנא אשר את החלפת כתובת המייל בחשבונך." },
+  { id: "reauthentication", label: "קוד אימות (OTP)", subject: "קוד אימות לחשבון שלך", preview: "השתמש בקוד החד-פעמי כדי להמשיך." },
 ];
 
 const FUNCTIONS_URL = `${(import.meta as any).env.VITE_SUPABASE_URL || ""}/functions/v1/admin-preview-email`;
+const SENDER_NAME = "אנשי ק. כרינצי";
+const SENDER_EMAIL = "no-reply@kcrinici.com";
+const RECIPIENT_EMAIL = "member@example.com";
 
 const AdminEmailPreview = () => {
   const { toast } = useToast();
