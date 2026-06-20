@@ -111,7 +111,7 @@ export default function AdminMailingList() {
       </div>
 
       <Tabs defaultValue="members" className="w-full">
-        <TabsList>
+        <TabsList className="mr-0 ml-auto">
           <TabsTrigger value="members">חברי המועדון</TabsTrigger>
           <TabsTrigger value="suppressed">רשימת חסומים</TabsTrigger>
         </TabsList>
