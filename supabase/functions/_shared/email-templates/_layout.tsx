@@ -38,6 +38,7 @@ interface LayoutProps {
   outro?: string
   showWhatsapp?: boolean
   whatsappGroupUrl?: string
+  unsubscribeUrl?: string
 }
 
 export const BrandLayout = ({
@@ -49,8 +50,10 @@ export const BrandLayout = ({
   outro,
   showWhatsapp = true,
   whatsappGroupUrl,
+  unsubscribeUrl,
 }: LayoutProps) => {
   const waUrl = whatsappGroupUrl || BRAND.whatsappGroupUrl
+  const unsubUrl = unsubscribeUrl || `${BRAND.siteUrl}/unsubscribe`
   return (
   <Html lang="he" dir="rtl">
     <Head />
@@ -109,6 +112,9 @@ export const BrandLayout = ({
           </Text>
           <Text style={footer}>
             אם פנייה זו לא מוכרת לכם, ניתן להתעלם ממנה בבטחה.
+          </Text>
+          <Text style={footer}>
+            <Link href={unsubUrl} style={footerLink}>הסרה מרשימת התפוצה</Link>
           </Text>
           <Text style={footerSmall}>© {new Date().getFullYear()} K. Krinitzi Club</Text>
         </Section>
