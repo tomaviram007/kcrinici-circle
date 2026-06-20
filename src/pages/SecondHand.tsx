@@ -56,6 +56,7 @@ const emptyForm = {
 
 const SecondHand = () => {
   const { user, isApproved } = useAuth();
+  const { isMember, canOpenCard, canSeeContact } = useContentAccess("secondhand");
   const { t } = useLanguage();
   const { toast } = useToast();
   const cover = usePageCover("secondhand", heroImg);
@@ -69,20 +70,26 @@ const SecondHand = () => {
   const [saving, setSaving] = useState(false);
   const [viewItem, setViewItem] = useState<Item | null>(null);
   const [imageUrlInput, setImageUrlInput] = useState("");
+  const [showLockedNotice, setShowLockedNotice] = useState(false);
 
 
   const fetchItems = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("secondhand_items")
-      .select("*")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false });
-    setItems((data as Item[]) || []);
+    if (isMember) {
+      const { data } = await supabase
+        .from("secondhand_items")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      setItems((data as Item[]) || []);
+    } else {
+      const { data } = await (supabase as any).rpc("get_public_secondhand");
+      setItems((data || []) as Item[]);
+    }
     setLoading(false);
   };
 
-  useEffect(() => { fetchItems(); }, []);
+  useEffect(() => { fetchItems(); }, [isMember]);
 
   const filtered = useMemo(() => {
     return items.filter(it => {
