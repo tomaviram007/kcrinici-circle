@@ -143,7 +143,7 @@ export const BrandLayout = ({
 const main = {
   backgroundColor: '#efe9df',
   fontFamily:
-    "'Helvetica Neue', Helvetica, Arial, 'Segoe UI', Tahoma, sans-serif",
+    "'Tel Aviv', 'Assistant', 'Heebo', 'Helvetica Neue', Helvetica, Arial, sans-serif",
   margin: 0,
   padding: '24px 0',
 }
