@@ -395,6 +395,9 @@ const translations: Record<Language, Record<string, string>> = {
     "gallery.uploadNewFile": "העלה קובץ חדש",
     "gallery.uploadPhotos": "העלה תמונות",
     // SecondHand page
+    "secondhand.heroTitle": "יד שנייה",
+    "secondhand.heroHighlight": "לחברי המועדון",
+    "secondhand.heroSubtitle": "פריטים, אספנות והזדמנויות מהקהילה שלנו",
     "secondhand.searchPlaceholder": "חיפוש פריט...",
     "secondhand.allCategories": "כל הקטגוריות",
     "secondhand.postBtn": "פרסום פריט",
