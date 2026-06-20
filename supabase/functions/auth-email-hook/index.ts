@@ -9,20 +9,12 @@ import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
+import { EMAIL_COPY_DEFAULTS, type EmailCopy, type EmailTemplateId } from '../_shared/email-templates/_copy.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type, x-lovable-signature, x-lovable-timestamp, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-}
-
-const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'אשר את כתובת האימייל שלך',
-  invite: 'הוזמנת להצטרף למועדון',
-  magiclink: 'קישור כניסה למועדון',
-  recovery: 'איפוס סיסמה',
-  email_change: 'אישור החלפת אימייל',
-  reauthentication: 'קוד אימות',
 }
 
 // Template mapping
@@ -33,6 +25,23 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   recovery: RecoveryEmail,
   email_change: EmailChangeEmail,
   reauthentication: ReauthenticationEmail,
+}
+
+async function loadCopyOverride(
+  supabase: any,
+  id: EmailTemplateId,
+): Promise<Partial<EmailCopy> | null> {
+  try {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', `email_copy_${id}`)
+      .maybeSingle()
+    if (!data?.value) return null
+    return JSON.parse(data.value) as Partial<EmailCopy>
+  } catch (_e) {
+    return null
+  }
 }
 
 // Configuration
