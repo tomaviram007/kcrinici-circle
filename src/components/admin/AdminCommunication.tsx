@@ -155,8 +155,32 @@ const AdminCommunication = () => {
         <TabsContent value="send" className="mt-6">
           <div className="rounded-xl border border-border bg-card p-6 space-y-4 max-w-2xl">
             <div>
-              <Label>נמען (מייל, אפשר כמה מופרדים בפסיק)</Label>
-              <Input value={to} onChange={e => setTo(e.target.value)} placeholder="user@example.com" type="email" />
+              <div className="flex items-center justify-between mb-1.5">
+                <Label>נמענים</Label>
+                <MemberPicker mode="email" onConfirm={addEmails} />
+              </div>
+              <Input
+                value={to}
+                onChange={e => setTo(e.target.value)}
+                placeholder="user@example.com, another@example.com"
+                type="text"
+                dir="ltr"
+              />
+              {emailChips.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {emailChips.map((v) => (
+                    <Badge key={v} variant="outline" className="gap-1 pl-1" dir="ltr">
+                      {v}
+                      <button type="button" onClick={() => removeRecipient("email", v)} className="hover:text-destructive">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                בחר חברי מועדון מהרשימה או הוסף כתובת ידנית (מופרדות בפסיקים)
+              </p>
             </div>
             <div>
               <Label>נושא</Label>
@@ -168,7 +192,7 @@ const AdminCommunication = () => {
               <p className="text-xs text-muted-foreground mt-1">שורות חדשות יהפכו ל-&lt;br/&gt; אוטומטית</p>
             </div>
             <Button onClick={handleSend} disabled={sending} className="bg-gold text-charcoal hover:bg-gold/90">
-              <Send className="h-4 w-4 ml-2" />{sending ? "שולח..." : "שלח מייל"}
+              <Send className="h-4 w-4 ml-2" />{sending ? "שולח..." : `שלח מייל${emailChips.length > 1 ? ` (${emailChips.length})` : ""}`}
             </Button>
           </div>
         </TabsContent>
@@ -176,19 +200,46 @@ const AdminCommunication = () => {
         <TabsContent value="whatsapp" className="mt-6">
           <div className="rounded-xl border border-border bg-card p-6 space-y-4 max-w-2xl">
             <div>
-              <Label>מספר טלפון</Label>
-              <Input value={waPhone} onChange={e => setWaPhone(e.target.value)} placeholder="050-1234567" dir="ltr" />
+              <div className="flex items-center justify-between mb-1.5">
+                <Label>מספרי טלפון</Label>
+                <MemberPicker mode="phone" onConfirm={addPhones} />
+              </div>
+              <Input
+                value={waPhone}
+                onChange={e => setWaPhone(e.target.value)}
+                placeholder="050-1234567, 052-7654321"
+                dir="ltr"
+              />
+              {phoneChips.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {phoneChips.map((v) => (
+                    <Badge key={v} variant="outline" className="gap-1 pl-1" dir="ltr">
+                      {v}
+                      <button type="button" onClick={() => removeRecipient("phone", v)} className="hover:text-destructive">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                בחר חברי מועדון לפי מספר השמור בפרופיל או הוסף מספר ידני (מופרדים בפסיקים)
+              </p>
             </div>
             <div>
               <Label>הודעה</Label>
               <Textarea value={waMsg} onChange={e => setWaMsg(e.target.value)} rows={5} placeholder="תוכן ההודעה..." />
             </div>
             <Button onClick={handleWhatsApp} className="bg-green-600 text-white hover:bg-green-700">
-              <MessageCircle className="h-4 w-4 ml-2" />פתח בוואטסאפ
+              <MessageCircle className="h-4 w-4 ml-2" />
+              פתח בוואטסאפ{phoneChips.length > 1 ? ` (${phoneChips.length})` : ""}
             </Button>
-            <p className="text-xs text-muted-foreground">פותח את WhatsApp עם הודעה מוכנה לשליחה</p>
+            <p className="text-xs text-muted-foreground">
+              נפתחת חלונית WhatsApp לכל נמען. ייתכן שהדפדפן יבקש לאשר פתיחת חלונות מרובים.
+            </p>
           </div>
         </TabsContent>
+
 
         <TabsContent value="logs" className="mt-6 space-y-4">
           {/* Stats */}
