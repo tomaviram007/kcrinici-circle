@@ -218,6 +218,23 @@ async function handleWebhook(req: Request): Promise<Response> {
     )
   }
 
+  // Fetch WhatsApp group URL from site_settings (with fallback)
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+  let whatsappGroupUrl = 'https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo'
+  try {
+    const { data: waRow } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'whatsapp_group_url')
+      .maybeSingle()
+    if (waRow?.value) whatsappGroupUrl = waRow.value
+  } catch (e) {
+    console.warn('Could not fetch whatsapp_group_url', e)
+  }
+
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
@@ -228,6 +245,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     email: payload.data.email,
     oldEmail: payload.data.old_email,
     newEmail: payload.data.new_email,
+    whatsappGroupUrl,
   }
 
   // Render React Email to HTML and plain text
@@ -236,11 +254,6 @@ async function handleWebhook(req: Request): Promise<Response> {
     plainText: true,
   })
 
-  // Enqueue email for async processing by the dispatcher (process-email-queue).
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
 
   const messageId = crypto.randomUUID()
 
