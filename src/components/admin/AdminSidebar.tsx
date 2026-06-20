@@ -29,9 +29,6 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   ads: "manage_settings",
   secondhand: "manage_deals",
   communication: "manage_settings",
-  "email-preview": "manage_settings",
-  "email-content": "manage_settings",
-  mailing: "manage_settings",
 };
 
 const groups = [
@@ -68,9 +65,6 @@ const groups = [
       { id: "quotes", label: "ציטוטים", icon: Quote },
       { id: "ads", label: "פרסום", icon: Tv },
       { id: "communication", label: "תקשורת", icon: Mail },
-      { id: "email-content", label: "מלל מיילים", icon: FileEdit },
-      { id: "email-preview", label: "תצוגת מיילים", icon: Eye },
-      { id: "mailing", label: "ניהול תפוצה", icon: MailX },
     ],
   },
 ];
