@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package, Mail } from "lucide-react";
+import AdminCommunication from "@/components/admin/AdminCommunication";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -53,6 +54,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   logo: "manage_settings",
   covers: "manage_quotes",
   ads: "manage_settings",
+  communication: "manage_settings",
 };
 
 const AdminDashboard = () => {
@@ -141,6 +143,7 @@ const AdminDashboard = () => {
             {activeTab === "deals" && hasPermission("manage_deals") && <AdminDeals />}
             {activeTab === "secondhand" && hasPermission("manage_deals") && <AdminSecondHand />}
             {activeTab === "ads" && hasPermission("manage_settings") && <AdminAds />}
+            {activeTab === "communication" && hasPermission("manage_settings") && <AdminCommunication />}
             {activeTab === "team" && hasPermission("manage_team") && <AdminTeam />}
             {/* Show access denied message if no permission */}
             {TAB_PERMISSION_MAP[activeTab] && !hasPermission(TAB_PERMISSION_MAP[activeTab]) && (
@@ -193,6 +196,7 @@ const mobileNavGroups = [
       { id: "polls", label: "סקרים", icon: BarChart3 },
       { id: "quotes", label: "ציטוטים", icon: Quote },
       { id: "ads", label: "פרסום", icon: Tv },
+      { id: "communication", label: "תקשורת", icon: Mail },
     ],
   },
 ];
