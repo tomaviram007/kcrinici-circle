@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, MailX, CheckCircle2 } from "lucide-react";
 
 const FN_URL =
+  "https://wzbvdpgoyetmgluvhygf.supabase.co/functions/v1/handle-email-unsubscribe";
+const LEGACY_FN_URL =
   "https://wzbvdpgoyetmgluvhygf.supabase.co/functions/v1/handle-unsubscribe";
 
 export default function Unsubscribe() {
@@ -22,7 +24,8 @@ export default function Unsubscribe() {
 
   useEffect(() => {
     if (!token || initialEmail) return;
-    fetch(`${FN_URL}?token=${encodeURIComponent(token)}`)
+    // Try legacy endpoint that returns email by token (best-effort, used for confirmation UI)
+    fetch(`${LEGACY_FN_URL}?token=${encodeURIComponent(token)}`)
       .then((r) => r.json())
       .then((d) => { if (d?.email) setEmail(d.email); })
       .catch(() => {});
@@ -36,13 +39,24 @@ export default function Unsubscribe() {
     }
     setLoading(true);
     try {
-      const res = await fetch(FN_URL, {
+      // Primary: new infra endpoint (token-based, suppresses email & marks token used)
+      if (token) {
+        const res = await fetch(FN_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
+        const data = await res.json();
+        if (!res.ok && data?.reason !== "already_unsubscribed") {
+          throw new Error(data?.error || "שגיאה");
+        }
+      }
+      // Also call legacy endpoint to notify admin + handle email-only suppression
+      await fetch(LEGACY_FN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: token || undefined, email: email || undefined, reason }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "שגיאה");
+      }).catch(() => {});
       setDone(true);
     } catch (e: any) {
       setError(e.message || "שגיאה בלתי צפויה");
