@@ -298,26 +298,53 @@ export type Database = {
       }
       birthday_email_template: {
         Row: {
+          bg_color: string | null
           body_html: string
+          button_color: string | null
+          from_name: string | null
+          heading: string | null
           id: string
           is_active: boolean
+          logo_url: string | null
+          preview_text: string | null
+          reply_to: string | null
+          signature: string | null
           subject: string
+          text_color: string | null
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          bg_color?: string | null
           body_html?: string
+          button_color?: string | null
+          from_name?: string | null
+          heading?: string | null
           id?: string
           is_active?: boolean
+          logo_url?: string | null
+          preview_text?: string | null
+          reply_to?: string | null
+          signature?: string | null
           subject?: string
+          text_color?: string | null
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          bg_color?: string | null
           body_html?: string
+          button_color?: string | null
+          from_name?: string | null
+          heading?: string | null
           id?: string
           is_active?: boolean
+          logo_url?: string | null
+          preview_text?: string | null
+          reply_to?: string | null
+          signature?: string | null
           subject?: string
+          text_color?: string | null
           updated_at?: string
           updated_by?: string | null
         }
