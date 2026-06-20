@@ -131,7 +131,13 @@ async function handlePreview(req: Request): Promise<Response> {
   }
 
   const sampleData = SAMPLE_DATA[type] || {}
-  const html = await renderAsync(React.createElement(EmailTemplate, sampleData))
+  // Allow preview-time copy overrides via request body
+  let copy: any = undefined
+  try {
+    const reqBody = await req.clone().json()
+    if (reqBody && typeof reqBody.copy === 'object') copy = reqBody.copy
+  } catch (_e) {}
+  const html = await renderAsync(React.createElement(EmailTemplate, { ...sampleData, copy }))
 
   return new Response(html, {
     status: 200,
