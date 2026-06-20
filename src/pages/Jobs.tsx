@@ -255,7 +255,9 @@ const Jobs = () => {
       {/* Job Detail Dialog */}
       <Dialog open={!!selectedJob} onOpenChange={(open) => !open && setSelectedJob(null)}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          {selectedJob && (
+          {selectedJob?.__locked ? (
+            <MembersOnlyNotice variant="jobs" />
+          ) : selectedJob && (
             <>
               <DialogHeader>
                 <DialogTitle className="font-serif text-xl font-bold text-foreground">{selectedJob.title}</DialogTitle>
@@ -294,25 +296,31 @@ const Jobs = () => {
                     </span>
                   )}
                 </div>
-                {(selectedJob.contact_name || selectedJob.contact) && (
-                  <div className="border-t border-border pt-4 space-y-2">
-                    <p className="font-body text-sm font-medium text-foreground">{t("jobs.contactTitle")}</p>
-                    {selectedJob.contact_name && (
-                      <span className="font-body text-sm text-gold flex items-center gap-1.5">
-                        <User className="h-4 w-4" /> {selectedJob.contact_name}
-                      </span>
-                    )}
-                    {selectedJob.contact && (
-                      <a
-                        href={`https://wa.me/${selectedJob.contact.replace(/[^0-9]/g, '').replace(/^0/, '972')}?text=${encodeURIComponent(`היי ${selectedJob.contact_name || ''} ראיתי את הפרסום של המשרה "${selectedJob.title}" שלך, אשמח לשמוע עוד פרטים`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        {selectedJob.contact}
-                      </a>
-                    )}
+                {canSeeContact ? (
+                  (selectedJob.contact_name || selectedJob.contact) && (
+                    <div className="border-t border-border pt-4 space-y-2">
+                      <p className="font-body text-sm font-medium text-foreground">{t("jobs.contactTitle")}</p>
+                      {selectedJob.contact_name && (
+                        <span className="font-body text-sm text-gold flex items-center gap-1.5">
+                          <User className="h-4 w-4" /> {selectedJob.contact_name}
+                        </span>
+                      )}
+                      {canAct && selectedJob.contact && (
+                        <a
+                          href={`https://wa.me/${selectedJob.contact.replace(/[^0-9]/g, '').replace(/^0/, '972')}?text=${encodeURIComponent(`היי ${selectedJob.contact_name || ''} ראיתי את הפרסום של המשרה "${selectedJob.title}" שלך, אשמח לשמוע עוד פרטים`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          {selectedJob.contact}
+                        </a>
+                      )}
+                    </div>
+                  )
+                ) : (
+                  <div className="border-t border-border pt-4">
+                    <MembersOnlyNotice variant="jobs" compact />
                   </div>
                 )}
               </div>
