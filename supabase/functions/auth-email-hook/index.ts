@@ -235,6 +235,25 @@ async function handleWebhook(req: Request): Promise<Response> {
     console.warn('Could not fetch whatsapp_group_url', e)
   }
 
+  // Generate / upsert unsubscribe token for recipient
+  let unsubscribeUrl = `https://${ROOT_DOMAIN}/unsubscribe`
+  try {
+    const recip = String(payload.data.email).trim().toLowerCase()
+    const { data: existing } = await supabase
+      .from('email_unsubscribe_tokens')
+      .select('token')
+      .eq('email', recip)
+      .maybeSingle()
+    let tok = existing?.token
+    if (!tok) {
+      tok = crypto.randomUUID().replace(/-/g, '')
+      await supabase.from('email_unsubscribe_tokens').insert({ email: recip, token: tok })
+    }
+    unsubscribeUrl = `https://${ROOT_DOMAIN}/unsubscribe?token=${tok}`
+  } catch (e) {
+    console.warn('unsubscribe token generation failed', e)
+  }
+
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
@@ -246,6 +265,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     oldEmail: payload.data.old_email,
     newEmail: payload.data.new_email,
     whatsappGroupUrl,
+    unsubscribeUrl,
   }
 
   // Render React Email to HTML and plain text
