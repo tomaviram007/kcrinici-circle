@@ -152,7 +152,7 @@ const AdminEmailContent = () => {
                 value={copy.preview} onChange={(v) => update("preview", v)} />
               <Field label="כותרת ראשית" placeholder={defaults.heading}
                 value={copy.heading} onChange={(v) => update("heading", v)} />
-              <Field label="תווית כפתור (CTA)" placeholder={defaults.ctaLabel || "—"}
+              <Field label="תווית כפתור (CTA)" placeholder={defaults.ctaLabel || ","}
                 value={copy.ctaLabel} onChange={(v) => update("ctaLabel", v)}
                 disabled={templateId === "reauthentication"} />
               <Field label="פסקת פתיחה" placeholder={defaults.intro} multiline
@@ -216,7 +216,7 @@ const AdminEmailContent = () => {
             </div>
           </div>
           <p className="text-xs text-muted-foreground text-center mt-3">
-            התצוגה משקפת את השינויים שלא נשמרו עדיין — לחיצה על "שמור" תפעיל אותם על המיילים האמיתיים.
+            התצוגה משקפת את השינויים שלא נשמרו עדיין, לחיצה על "שמור" תפעיל אותם על המיילים האמיתיים.
           </p>
         </CardContent>
       </Card>

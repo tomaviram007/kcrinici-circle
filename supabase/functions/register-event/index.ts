@@ -191,7 +191,7 @@ serve(async (req) => {
           return jsonResponse({ error: "כתובת המייל הזו כבר רשומה לאירוע" }, 409);
         }
         if (insertError.message?.includes("EVENT_FULL")) {
-          return jsonResponse({ error: "האירוע מלא — לא נותרו מקומות פנויים" }, 409);
+          return jsonResponse({ error: "האירוע מלא, לא נותרו מקומות פנויים" }, 409);
         }
         console.error("Insert error:", insertError);
         return jsonResponse({ error: "שגיאה בשמירת ההרשמה" }, 500);

@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       return json({ email });
     }
 
-    // POST — perform suppression
+    // POST, perform suppression
     await supabase.rpc("mark_email_suppressed", {
       _email: email,
       _reason: "unsubscribe",
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             chat_id: chat,
-            text: `🚫 בקשת הסרה מרשימת תפוצה\nאימייל: ${email}\nסיבה: ${reason || "—"}`,
+            text: `🚫 בקשת הסרה מרשימת תפוצה\nאימייל: ${email}\nסיבה: ${reason || ","}`,
           }),
         });
       }

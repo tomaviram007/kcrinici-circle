@@ -107,7 +107,7 @@ serve(async (req) => {
     const adminRows: Array<[string, string]> = [
       ["שם החבר", memberName],
       ["אימייל", memberEmail],
-      ["טלפון", memberPhone || "—"],
+      ["טלפון", memberPhone || ","],
       ["אירוע", event.title],
       ["תאריך", formatDate(event.event_date)],
     ];

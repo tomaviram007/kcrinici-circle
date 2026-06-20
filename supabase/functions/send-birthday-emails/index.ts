@@ -346,7 +346,7 @@ serve(async (req) => {
     for (const r of recipients) if (!r.last_name) r.last_name = lastNameMap[r.user_id] || "";
   }
 
-  // If resend=1 — clear existing log row(s) for this year for the targeted user(s)
+  // If resend=1, clear existing log row(s) for this year for the targeted user(s)
   if (resend && onlyUserId) {
     await supabase
       .from("birthday_email_log")

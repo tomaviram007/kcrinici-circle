@@ -15,7 +15,7 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
-// Brand constants — mirrors the site (Dark Charcoal + Dim Gold)
+// Brand constants, mirrors the site (Dark Charcoal + Dim Gold)
 export const BRAND = {
   logoUrl:
     'https://wzbvdpgoyetmgluvhygf.supabase.co/storage/v1/object/public/site-assets/logo-1771366653000.png',
@@ -60,7 +60,7 @@ export const BrandLayout = ({
     <Preview>{preview}</Preview>
     <Body style={main}>
       <Container style={container}>
-        {/* Hero — dark band with logo & site title */}
+        {/* Hero, dark band with logo & site title */}
         <Section style={hero}>
           <Img src={BRAND.logoUrl} alt={BRAND.siteTitle} width="76" height="76" style={logo} />
           <Text style={brandTitle}>{BRAND.siteTitle}</Text>
@@ -91,7 +91,7 @@ export const BrandLayout = ({
           <Section style={waCard}>
             <Text style={waTitle}>הצטרפו לקבוצת הוואטסאפ של המועדון</Text>
             <Text style={waText}>
-              עדכונים, אירועים והזדמנויות — ישירות אליכם בקבוצה הרשמית.
+              עדכונים, אירועים והזדמנויות, ישירות אליכם בקבוצה הרשמית.
             </Text>
             <Button style={waButton} href={waUrl}>
               הצטרפו לקבוצה ←
@@ -125,7 +125,7 @@ export const BrandLayout = ({
 }
 
 
-// — styles —
+//, styles ,
 const main = {
   backgroundColor: '#efe9df',
   fontFamily:

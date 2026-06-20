@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Smartphone, Monitor, RefreshCw, Save, MessageCircle, Star, Reply, Forward, MoreVertical, Inbox } from "lucide-react";
 
 const TEMPLATES = [
-  { id: "signup", label: "אישור הרשמה", subject: "ברוך הבא — אישור הרשמה לאנשי ק.קרניצי", preview: "תודה שנרשמת. אשר את כתובת המייל כדי להשלים את ההרשמה." },
+  { id: "signup", label: "אישור הרשמה", subject: "ברוך הבא, אישור הרשמה לאנשי ק.קרניצי", preview: "תודה שנרשמת. אשר את כתובת המייל כדי להשלים את ההרשמה." },
   { id: "magiclink", label: "קישור כניסה (Magic Link)", subject: "קישור כניסה מאובטח לאתר", preview: "לחץ על הקישור כדי להתחבר ללא סיסמה." },
   { id: "recovery", label: "איפוס סיסמה", subject: "בקשה לאיפוס סיסמה", preview: "קיבלנו בקשה לאפס את הסיסמה שלך." },
   { id: "invite", label: "הזמנה להצטרף", subject: "הוזמנת להצטרף לאנשי ק.קרניצי", preview: "קבלת הזמנה אישית להצטרף לקהילה." },
@@ -130,7 +130,7 @@ const AdminEmailPreview = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            הקישור הזה מופיע בכל מיילי המערכת (הרשמה, איפוס סיסמה, הזמנות ועוד) — עדכון כאן משפיע על כל התבניות באופן אוטומטי.
+            הקישור הזה מופיע בכל מיילי המערכת (הרשמה, איפוס סיסמה, הזמנות ועוד), עדכון כאן משפיע על כל התבניות באופן אוטומטי.
           </p>
           <div className="flex flex-col sm:flex-row gap-2">
             <Input
@@ -252,7 +252,7 @@ const AdminEmailPreview = () => {
           </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            כך ייראה המייל אצל הנמען — כולל שורת נושא, שולח ותצוגת לקוח הדואר. הקישור לוואטסאפ נטען מההגדרות בזמן אמת.
+            כך ייראה המייל אצל הנמען, כולל שורת נושא, שולח ותצוגת לקוח הדואר. הקישור לוואטסאפ נטען מההגדרות בזמן אמת.
           </p>
         </CardContent>
       </Card>

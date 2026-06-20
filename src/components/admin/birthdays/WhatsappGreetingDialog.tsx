@@ -157,7 +157,7 @@ const WhatsappGreetingDialog = ({ open, onOpenChange, monthName, members }: Prop
                targetType === "open" ? "פתיחת WhatsApp ללא יעד" :
                "העתקה ללוח בלבד"}
             </span>
-            {" "}— ניתן לשנות בהגדרות תזמון.
+            {" "}, ניתן לשנות בהגדרות תזמון.
           </p>
         </div>
 
