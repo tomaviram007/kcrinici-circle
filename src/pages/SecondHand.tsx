@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Phone, Tag, Trash2, Pencil, CheckCircle2, X, Package } from "lucide-react";
+import { Plus, Phone, Tag, Trash2, Pencil, CheckCircle2, X, Package, Lock } from "lucide-react";
+import MembersOnlyNotice from "@/components/MembersOnlyNotice";
+import { useContentAccess } from "@/hooks/useContentAccess";
 import PageHero from "@/components/PageHero";
 import { usePageCover } from "@/hooks/usePageCover";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -223,7 +225,7 @@ const SecondHand = () => {
                 <article
                   key={it.id}
                   className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-gold/40 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)] transition-all cursor-pointer"
-                  onClick={() => setViewItem(it)}
+                  onClick={() => (canOpenCard ? setViewItem(it) : setShowLockedNotice(true))}
                 >
                   <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
                     {it.images?.[0] ? (
@@ -484,18 +486,28 @@ const SecondHand = () => {
                 {viewItem.description && (
                   <p className="font-body text-foreground whitespace-pre-line">{viewItem.description}</p>
                 )}
-                {viewItem.contact_phone && !viewItem.is_sold && (
-                  <a
-                    href={`tel:${viewItem.contact_phone}`}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg gradient-gold text-primary-foreground font-body"
-                  >
-                    <Phone className="h-4 w-4" />
-                    {viewItem.contact_phone}
-                  </a>
+                {!viewItem.is_sold && (
+                  canSeeContact && viewItem.contact_phone ? (
+                    <a
+                      href={`tel:${viewItem.contact_phone}`}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg gradient-gold text-primary-foreground font-body"
+                    >
+                      <Phone className="h-4 w-4" />
+                      {viewItem.contact_phone}
+                    </a>
+                  ) : !canSeeContact ? (
+                    <MembersOnlyNotice variant="secondhand" compact />
+                  ) : null
                 )}
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showLockedNotice} onOpenChange={setShowLockedNotice}>
+        <DialogContent className="sm:max-w-md p-0 bg-transparent border-0 shadow-none" dir="rtl">
+          <MembersOnlyNotice variant="secondhand" />
         </DialogContent>
       </Dialog>
     </>
