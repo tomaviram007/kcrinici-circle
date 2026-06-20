@@ -10,7 +10,9 @@ export interface TemplateEntry {
 }
 
 import { template as adminBroadcast } from './admin-broadcast.tsx'
+import { template as birthdayGreeting } from './birthday-greeting.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'admin-broadcast': adminBroadcast,
+  'birthday-greeting': birthdayGreeting,
 }
