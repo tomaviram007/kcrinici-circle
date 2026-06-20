@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package, Mail } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package, Mail, Cake } from "lucide-react";
 import AdminCommunicationHub from "@/components/admin/AdminCommunicationHub";
+import AdminBirthdays from "@/components/admin/AdminBirthdays";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -55,6 +56,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   covers: "manage_quotes",
   ads: "manage_settings",
   communication: "manage_settings",
+  birthdays: "manage_members",
 };
 
 const AdminDashboard = () => {
@@ -144,6 +146,7 @@ const AdminDashboard = () => {
             {activeTab === "secondhand" && hasPermission("manage_deals") && <AdminSecondHand />}
             {activeTab === "ads" && hasPermission("manage_settings") && <AdminAds />}
             {activeTab === "communication" && hasPermission("manage_settings") && <AdminCommunicationHub />}
+            {activeTab === "birthdays" && hasPermission("manage_members") && <AdminBirthdays />}
             {activeTab === "team" && hasPermission("manage_team") && <AdminTeam />}
             {/* Show access denied message if no permission */}
             {TAB_PERMISSION_MAP[activeTab] && !hasPermission(TAB_PERMISSION_MAP[activeTab]) && (
@@ -168,6 +171,7 @@ const mobileNavGroups = [
     label: "ניהול חברים",
     items: [
       { id: "members", label: "בקשות הצטרפות", icon: Users },
+      { id: "birthdays", label: "ימי הולדת", icon: Cake },
       { id: "team", label: "צוות", icon: Shield },
     ],
   },
