@@ -2,7 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import MemberProfilePopup from "@/components/MemberProfilePopup";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Phone, Briefcase, Pencil, Cake, Heart, LayoutGrid, List } from "lucide-react";
+import { User, Phone, Briefcase, Pencil, Cake, Heart, LayoutGrid, List, Lock } from "lucide-react";
+import MembersOnlyNotice from "@/components/MembersOnlyNotice";
+import { useContentAccess } from "@/hooks/useContentAccess";
 import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
@@ -46,9 +48,11 @@ const Members = () => {
   const [members, setMembers] = useState<any[]>([]);
   const navigate = useNavigate();
   const coverImage = usePageCover("members", heroImg);
+  const { isMember, canOpenCard, canSeeContact } = useContentAccess("members");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [editMember, setEditMember] = useState<any | null>(null);
   const [viewMember, setViewMember] = useState<any | null>(null);
+  const [showLockedNotice, setShowLockedNotice] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [editForm, setEditForm] = useState({ full_name: "", profession: "", expertise: "", bio: "", phone: "", address: "", birth_date: "", hobbies: "", website_url: "", facebook_url: "", instagram_url: "", linkedin_url: "" });
   const [saving, setSaving] = useState(false);
@@ -58,8 +62,13 @@ const Members = () => {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const fetchMembers = async () => {
-    const { data } = await supabase.from("profiles").select("*").eq("is_approved", true).order("full_name");
-    setMembers(data || []);
+    if (isMember) {
+      const { data } = await supabase.from("profiles").select("*").eq("is_approved", true).order("full_name");
+      setMembers(data || []);
+    } else {
+      const { data } = await (supabase as any).rpc("get_public_members");
+      setMembers((data || []).map((m: any) => ({ ...m, full_name: m.first_name })));
+    }
   };
 
   useEffect(() => {
@@ -69,7 +78,7 @@ const Members = () => {
       await fetchMembers();
     };
     init();
-  }, []);
+  }, [isMember]);
 
   useEffect(() => {
     if (members.length > 0 && gridRef.current) {
@@ -99,8 +108,10 @@ const Members = () => {
   const handleCardClick = (member: any) => {
     if (isOwnCard(member)) {
       openEdit(member);
-    } else {
+    } else if (canOpenCard && canSeeContact) {
       setViewMember(member);
+    } else {
+      setShowLockedNotice(true);
     }
   };
 
