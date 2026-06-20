@@ -8,18 +8,21 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Smartphone, Monitor, RefreshCw, Save, MessageCircle } from "lucide-react";
+import { Loader2, Smartphone, Monitor, RefreshCw, Save, MessageCircle, Star, Reply, Forward, MoreVertical, Inbox } from "lucide-react";
 
 const TEMPLATES = [
-  { id: "signup", label: "אישור הרשמה" },
-  { id: "magiclink", label: "קישור כניסה (Magic Link)" },
-  { id: "recovery", label: "איפוס סיסמה" },
-  { id: "invite", label: "הזמנה להצטרף" },
-  { id: "email_change", label: "החלפת כתובת אימייל" },
-  { id: "reauthentication", label: "קוד אימות (OTP)" },
+  { id: "signup", label: "אישור הרשמה", subject: "ברוך הבא — אישור הרשמה לאנשי ק. כרינצי", preview: "תודה שנרשמת. אשר את כתובת המייל כדי להשלים את ההרשמה." },
+  { id: "magiclink", label: "קישור כניסה (Magic Link)", subject: "קישור כניסה מאובטח לאתר", preview: "לחץ על הקישור כדי להתחבר ללא סיסמה." },
+  { id: "recovery", label: "איפוס סיסמה", subject: "בקשה לאיפוס סיסמה", preview: "קיבלנו בקשה לאפס את הסיסמה שלך." },
+  { id: "invite", label: "הזמנה להצטרף", subject: "הוזמנת להצטרף לאנשי ק. כרינצי", preview: "קבלת הזמנה אישית להצטרף לקהילה." },
+  { id: "email_change", label: "החלפת כתובת אימייל", subject: "אישור החלפת כתובת אימייל", preview: "אנא אשר את החלפת כתובת המייל בחשבונך." },
+  { id: "reauthentication", label: "קוד אימות (OTP)", subject: "קוד אימות לחשבון שלך", preview: "השתמש בקוד החד-פעמי כדי להמשיך." },
 ];
 
 const FUNCTIONS_URL = `${(import.meta as any).env.VITE_SUPABASE_URL || ""}/functions/v1/admin-preview-email`;
+const SENDER_NAME = "אנשי ק. כרינצי";
+const SENDER_EMAIL = "no-reply@kcrinici.com";
+const RECIPIENT_EMAIL = "member@example.com";
 
 const AdminEmailPreview = () => {
   const { toast } = useToast();
@@ -106,8 +109,14 @@ const AdminEmailPreview = () => {
     loadPreview();
   };
 
-  const deviceWidth = useMemo(() => (device === "mobile" ? 390 : 720), [device]);
+  const deviceWidth = useMemo(() => (device === "mobile" ? 390 : 760), [device]);
   const dirty = whatsappUrl.trim() !== originalUrl.trim();
+  const current = TEMPLATES.find((t) => t.id === templateType)!;
+  const now = useMemo(
+    () => new Date().toLocaleString("he-IL", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }),
+    [templateType]
+  );
+  const initials = SENDER_NAME.trim().charAt(0);
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -180,12 +189,52 @@ const AdminEmailPreview = () => {
             </div>
           </div>
 
-          {/* Preview frame */}
-          <div className="rounded-xl border bg-muted/30 p-4 sm:p-6 overflow-auto">
+          {/* Email-client style preview */}
+          <div className="rounded-xl border bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-950 p-4 sm:p-8 overflow-auto">
             <div
-              className="mx-auto bg-white shadow-xl rounded-lg overflow-hidden transition-all duration-300"
+              className="mx-auto bg-white shadow-2xl rounded-xl overflow-hidden transition-all duration-300 ring-1 ring-black/5"
               style={{ width: `${deviceWidth}px`, maxWidth: "100%" }}
+              dir="ltr"
             >
+              {/* Mail client toolbar */}
+              <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-b bg-slate-50 text-slate-600">
+                <div className="flex items-center gap-2 text-xs font-medium">
+                  <Inbox className="h-3.5 w-3.5" />
+                  <span>Inbox</span>
+                </div>
+                <div className="flex items-center gap-1 text-slate-400">
+                  <Reply className="h-4 w-4" />
+                  <Forward className="h-4 w-4" />
+                  <Star className="h-4 w-4" />
+                  <MoreVertical className="h-4 w-4" />
+                </div>
+              </div>
+
+              {/* Subject header */}
+              <div className="px-5 pt-5 pb-3 border-b" dir="rtl">
+                <h2 className="text-[17px] sm:text-xl font-semibold text-slate-900 leading-snug">
+                  {current.subject}
+                </h2>
+                <div className="mt-3 flex items-start gap-3">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 text-white grid place-items-center text-sm font-bold shrink-0">
+                    {initials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <div className="text-sm font-medium text-slate-900 truncate">
+                        {SENDER_NAME}
+                        <span className="ms-2 text-slate-400 font-normal" dir="ltr">&lt;{SENDER_EMAIL}&gt;</span>
+                      </div>
+                      <div className="text-xs text-slate-400 shrink-0">{now}</div>
+                    </div>
+                    <div className="text-xs text-slate-500 mt-0.5" dir="rtl">
+                      אל: <span dir="ltr">{RECIPIENT_EMAIL}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Email body */}
               {loading && !html ? (
                 <div className="flex items-center justify-center h-96">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -195,15 +244,15 @@ const AdminEmailPreview = () => {
                   ref={iframeRef}
                   title="Email preview"
                   srcDoc={html}
-                  className="w-full"
-                  style={{ height: "780px", border: 0, background: "white" }}
+                  className="w-full block"
+                  style={{ height: device === "mobile" ? "720px" : "880px", border: 0, background: "white" }}
                 />
               )}
             </div>
           </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            התצוגה מקדימה משתמשת בנתוני דמה. הקישור לוואטסאפ נטען מההגדרות בזמן אמת.
+            כך ייראה המייל אצל הנמען — כולל שורת נושא, שולח ותצוגת לקוח הדואר. הקישור לוואטסאפ נטען מההגדרות בזמן אמת.
           </p>
         </CardContent>
       </Card>
