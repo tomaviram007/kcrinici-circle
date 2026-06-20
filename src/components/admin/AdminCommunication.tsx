@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Send, RefreshCw, Mail, MessageCircle, AlertCircle, CheckCircle2, Clock, Ban } from "lucide-react";
+import { Send, RefreshCw, Mail, MessageCircle, AlertCircle, CheckCircle2, Clock, Ban, X } from "lucide-react";
+import MemberPicker from "./MemberPicker";
 
 interface LogRow {
   message_id: string;
