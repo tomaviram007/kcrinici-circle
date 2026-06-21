@@ -141,8 +141,8 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
                         : "border-border/40 hover:border-gold/30"
                       }
                       hover:scale-105 hover:bg-card/60`}
-                    onClick={() => isApproved && handleOpenProfile(person.user_id)}
-                    title={isApproved ? `פרופיל של ${person.full_name}` : ""}
+                    onClick={() => handleCardClick(person)}
+                    title={isApproved ? (isAdmin ? `שלח ברכה ל${person.full_name}` : `פרופיל של ${person.full_name}`) : ""}
                   >
                     {isToday && (
                       <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-gold text-background text-xs animate-pulse">
@@ -171,7 +171,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
                     {isApproved && (
                       <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <span className="inline-flex items-center gap-1 text-xs text-gold font-body">
-                          לחץ לפרטים ←
+                          {isAdmin ? "שלח ברכה ←" : "לחץ לפרטים ←"}
                         </span>
                       </div>
                     )}
