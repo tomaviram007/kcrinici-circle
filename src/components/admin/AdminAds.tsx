@@ -97,6 +97,18 @@ const PLACEMENT_LABELS: Record<string, string> = Object.fromEntries(
   PLACEMENT_GROUPS.flatMap(g => g.items.map(i => [i.value, i.label]))
 );
 
+/** Recommended media dimensions per placement (matches SmartAdBanner aspect ratios) */
+const PLACEMENT_SPECS: Record<string, { width: number; height: number; ratio: string; note?: string }> = {
+  hero:            { width: 1230, height: 414, ratio: "1230 × 414", note: "באנר רחב לראש הדף" },
+  premium:         { width: 1230, height: 414, ratio: "1230 × 414" },
+  inline:          { width: 1230, height: 414, ratio: "1230 × 414" },
+  between_content: { width: 1230, height: 414, ratio: "1230 × 414" },
+  inline_repeat:   { width: 1230, height: 414, ratio: "1230 × 414" },
+  sidebar:         { width: 600,  height: 450, ratio: "600 × 450",  note: "יחס 4:3 – מוצג בדסקטופ בלבד" },
+  sidebar_right:   { width: 600,  height: 450, ratio: "600 × 450",  note: "יחס 4:3 – צד ימני" },
+  sidebar_left:    { width: 600,  height: 450, ratio: "600 × 450",  note: "יחס 4:3 – צד שמאלי" },
+};
+
 const PAGE_OPTIONS = [
   { value: "home", label: "דף הבית" },
   { value: "announcements", label: "לוח מודעות" },
