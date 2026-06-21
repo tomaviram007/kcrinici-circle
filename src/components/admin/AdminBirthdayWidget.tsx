@@ -74,14 +74,30 @@ const AdminBirthdayWidget = () => {
                 <p className="font-body text-xs text-muted-foreground">{person.profession}</p>
               </div>
             </div>
-            <Button
-              size="sm"
-              onClick={() => handleWhatsApp(person)}
-              className="gradient-gold text-primary-foreground font-body gap-1 text-xs"
-            >
-              <Send className="h-3 w-3" />
-              שלח ברכה
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => handleEmail(person)}
+                disabled={sendingId === person.user_id}
+                variant="outline"
+                className="font-body gap-1 text-xs border-gold/40 text-gold hover:bg-gold/10"
+              >
+                {sendingId === person.user_id ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Mail className="h-3 w-3" />
+                )}
+                מייל
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => handleWhatsApp(person)}
+                className="gradient-gold text-primary-foreground font-body gap-1 text-xs"
+              >
+                <Send className="h-3 w-3" />
+                WhatsApp
+              </Button>
+            </div>
           </div>
         ))}
       </div>
