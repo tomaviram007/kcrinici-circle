@@ -204,6 +204,12 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
       </div>
     </section>
     <MemberProfilePopup member={viewMember} open={!!viewMember} onOpenChange={(o) => !o && setViewMember(null)} />
+    <BirthdayActionsDialog
+      person={actionsPerson}
+      open={!!actionsPerson}
+      onOpenChange={(o) => !o && setActionsPerson(null)}
+      onOpenProfile={handleOpenProfile}
+    />
     </>
   );
 };
