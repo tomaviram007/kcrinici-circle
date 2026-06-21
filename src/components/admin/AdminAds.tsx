@@ -97,6 +97,18 @@ const PLACEMENT_LABELS: Record<string, string> = Object.fromEntries(
   PLACEMENT_GROUPS.flatMap(g => g.items.map(i => [i.value, i.label]))
 );
 
+/** Recommended media dimensions per placement (matches SmartAdBanner aspect ratios) */
+const PLACEMENT_SPECS: Record<string, { width: number; height: number; ratio: string; note?: string }> = {
+  hero:            { width: 1230, height: 414, ratio: "1230 × 414", note: "באנר רחב לראש הדף" },
+  premium:         { width: 1230, height: 414, ratio: "1230 × 414" },
+  inline:          { width: 1230, height: 414, ratio: "1230 × 414" },
+  between_content: { width: 1230, height: 414, ratio: "1230 × 414" },
+  inline_repeat:   { width: 1230, height: 414, ratio: "1230 × 414" },
+  sidebar:         { width: 600,  height: 450, ratio: "600 × 450",  note: "יחס 4:3 – מוצג בדסקטופ בלבד" },
+  sidebar_right:   { width: 600,  height: 450, ratio: "600 × 450",  note: "יחס 4:3 – צד ימני" },
+  sidebar_left:    { width: 600,  height: 450, ratio: "600 × 450",  note: "יחס 4:3 – צד שמאלי" },
+};
+
 const PAGE_OPTIONS = [
   { value: "home", label: "דף הבית" },
   { value: "announcements", label: "לוח מודעות" },
@@ -625,6 +637,22 @@ const AdminAds = () => {
               {/* media upload */}
               <div>
                 <FieldLabel label="מדיה (תמונה / MP4)" tooltip="ניתן להעלות קובץ מהמחשב או להזין קישור ישיר לתמונה/וידאו." required />
+                {(() => {
+                  const spec = PLACEMENT_SPECS[campForm.placement];
+                  if (!spec) return null;
+                  return (
+                    <div className="mb-2 rounded-md border border-gold/30 bg-gold/5 px-3 py-2 text-[11px] font-body text-foreground/80">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-semibold text-gold">מידות מומלצות:</span>
+                        <span className="font-mono">{spec.ratio} px</span>
+                        {spec.note && <span className="text-muted-foreground">· {spec.note}</span>}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        פורמט: JPG / PNG / WebP / MP4 · עד 10MB · יומר אוטומטית ל-WebP לאופטימיזציה.
+                      </div>
+                    </div>
+                  );
+                })()}
                 <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4" onChange={handleMediaChange} className="hidden" />
 
                 <div className="flex gap-1 mt-1 mb-2">
@@ -640,25 +668,18 @@ const AdminAds = () => {
 
                 {mediaSource === "file" ? (
                   <>
-                    {mediaPreview ? (
+                    {mediaFile && mediaPreview ? (
                       <div className="relative min-h-32 rounded-lg overflow-hidden border border-border bg-muted/30">
                         {campForm.media_type === "video" ? (
                           <video src={mediaPreview} className="w-full h-32 object-cover" muted controls playsInline />
                         ) : (
                           <div className="relative w-full h-32">
                             <img
-                              src={mediaFile ? mediaPreview! : optimizeImageUrl(mediaPreview!, 800)}
+                              src={mediaPreview}
                               className="w-full h-full object-cover"
                               alt="תצוגה מקדימה"
                               loading="eager"
                               decoding="async"
-                              onError={(e) => {
-                                const img = e.currentTarget;
-                                if (!img.dataset.retried && mediaPreview) {
-                                  img.dataset.retried = "1";
-                                  img.src = mediaPreview;
-                                }
-                              }}
                             />
                           </div>
                         )}
@@ -668,12 +689,23 @@ const AdminAds = () => {
                         <button type="button" onClick={() => fileRef.current?.click()} className="absolute bottom-2 left-2 bg-background/80 rounded-full px-2 py-1 text-[10px] font-medium hover:bg-background transition-colors">
                           החלף מדיה
                         </button>
+                        <div className="absolute bottom-2 right-2 bg-green-500/90 text-white rounded-full px-2 py-1 text-[10px] font-medium">
+                          ✓ קובץ חדש: {mediaFile.name}
+                        </div>
                       </div>
                     ) : (
-                      <button type="button" onClick={() => fileRef.current?.click()} className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
-                        <Upload className="h-6 w-6" />
-                        <span className="text-sm">גרור או לחץ להעלאה</span>
-                      </button>
+                      <>
+                        <button type="button" onClick={() => fileRef.current?.click()} className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50">
+                          <Upload className="h-6 w-6" />
+                          <span className="text-sm">גרור או לחץ להעלאת קובץ</span>
+                        </button>
+                        {editingCamp && mediaPreview && (
+                          <div className="mt-2 rounded-md border border-border/60 bg-muted/30 p-2">
+                            <p className="text-[10px] font-body text-muted-foreground mb-1">מדיה נוכחית (תישמר אם לא תעלה קובץ חדש):</p>
+                            <img src={mediaPreview} className="w-full h-20 object-cover rounded" alt="קיים" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                          </div>
+                        )}
+                      </>
                     )}
                   </>
                 ) : (
