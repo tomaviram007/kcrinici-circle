@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import gsap from "gsap";
 import MemberProfilePopup from "@/components/MemberProfilePopup";
+import BirthdayActionsDialog from "@/components/BirthdayActionsDialog";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 
 interface Props {
   isApproved: boolean;
@@ -13,12 +15,24 @@ interface Props {
 const BirthdaysPreviewSection = ({ isApproved }: Props) => {
   const [birthdays, setBirthdays] = useState<any[]>([]);
   const [viewMember, setViewMember] = useState<any | null>(null);
+  const [actionsPerson, setActionsPerson] = useState<any | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const { hasPermission } = useUserPermissions();
+  const isAdmin = hasPermission("all") || hasPermission("manage_birthdays") || hasPermission("manage_members");
 
   const handleOpenProfile = async (userId: string) => {
     const { data } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
     if (data) setViewMember(data);
     else toast.error("לא נמצאו פרטי חבר");
+  };
+
+  const handleCardClick = (person: any) => {
+    if (!isApproved) return;
+    if (isAdmin) {
+      setActionsPerson(person);
+    } else {
+      handleOpenProfile(person.user_id);
+    }
   };
 
   useEffect(() => {
