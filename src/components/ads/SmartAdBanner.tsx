@@ -241,7 +241,7 @@ const SmartAdBanner = ({
             const img = e.currentTarget;
             if (!img.dataset.retried) {
               img.dataset.retried = "1";
-              img.src = ad.media_url;
+              img.src = passthroughMediaUrl(ad.media_url);
             } else {
               setImageLoaded(true);
             }
