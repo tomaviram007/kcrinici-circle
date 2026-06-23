@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Send, FileEdit, Eye, MailX } from "lucide-react";
+import { Send, FileEdit, Eye, MailX, FlaskConical } from "lucide-react";
 import AdminCommunication from "@/components/admin/AdminCommunication";
 import AdminEmailContent from "@/components/admin/AdminEmailContent";
 import AdminEmailPreview from "@/components/admin/AdminEmailPreview";
 import AdminMailingList from "@/components/admin/AdminMailingList";
+import AdminTestNotifications from "@/components/admin/AdminTestNotifications";
 
 const AdminCommunicationHub = () => {
-  const [tab, setTab] = useState("send");
+  const [tab, setTab] = useState("test");
 
   return (
     <div className="space-y-4" dir="rtl">
       <Card className="p-3 sm:p-4 bg-card/60 backdrop-blur-xl border-border/50">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1 bg-background/60">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-5 gap-1 h-auto p-1 bg-background/60">
+            <TabsTrigger value="test" className="gap-2 data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              <FlaskConical className="h-4 w-4" /> בדיקה
+            </TabsTrigger>
             <TabsTrigger value="send" className="gap-2 data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               <Send className="h-4 w-4" /> שליחת הודעות
             </TabsTrigger>
@@ -29,6 +33,9 @@ const AdminCommunicationHub = () => {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="test" className="mt-4">
+            <AdminTestNotifications />
+          </TabsContent>
           <TabsContent value="send" className="mt-4">
             <AdminCommunication />
           </TabsContent>
@@ -48,3 +55,4 @@ const AdminCommunicationHub = () => {
 };
 
 export default AdminCommunicationHub;
+
