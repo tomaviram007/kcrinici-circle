@@ -189,7 +189,8 @@ const SmartAdBanner = ({
   if (!ads.length) return null;
 
   const ad = ads[current];
-  const displayUrl = ad.media_type === "video" ? ad.media_url : optimizeImageUrl(ad.media_url, renderWidth);
+  const videoSrc = ad.media_type === "video" ? passthroughMediaUrl(ad.media_url) : ad.media_url;
+  const displayUrl = ad.media_type === "video" ? videoSrc : optimizeImageUrl(ad.media_url, renderWidth);
 
   const sizeClasses: Record<string, string> = {
     hero: "w-full max-w-[1230px] mx-auto aspect-[16/9] sm:aspect-[3/1] lg:aspect-[1230/414]",
