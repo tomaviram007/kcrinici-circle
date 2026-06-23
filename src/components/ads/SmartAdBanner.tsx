@@ -26,16 +26,30 @@ interface AdCampaign {
 }
 
 /**
- * Convert a Supabase Storage public URL to an optimized render URL.
- * /storage/v1/object/public/bucket/path  →  /storage/v1/render/image/public/bucket/path?width=W&quality=Q
- * Non-Supabase URLs or videos are returned as-is.
+ * Route a Supabase Storage public URL through our neutral-named edge proxy ("/functions/v1/m")
+ * so ad-blockers don't block requests containing "/ads/" in the path.
+ * Also supports Supabase's image render transform (width/quality) via query params.
+ * Non-Supabase URLs are returned as-is.
  */
 const optimizeImageUrl = (url: string, width = 800, quality = 75): string => {
   if (!url) return url;
-  // Only transform Supabase storage URLs for images
-  const match = url.match(/(https:\/\/[^/]+\/storage\/v1\/)object\/(public\/.+)/);
+  // Match: https://<host>/storage/v1/object/public/<bucket>/<path>
+  const match = url.match(/^(https:\/\/[^/]+)\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
   if (!match) return url;
-  return `${match[1]}render/image/${match[2]}?width=${width}&quality=${quality}`;
+  const [, origin, bucket, path] = match;
+  // Use functions host: replace the supabase project host with the functions endpoint path.
+  // Our edge function is reachable at `${origin}/functions/v1/m`.
+  const params = new URLSearchParams({ b: bucket, p: path, w: String(width), q: String(quality) });
+  return `${origin}/functions/v1/m?${params.toString()}`;
+};
+
+const passthroughMediaUrl = (url: string): string => {
+  if (!url) return url;
+  const match = url.match(/^(https:\/\/[^/]+)\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
+  if (!match) return url;
+  const [, origin, bucket, path] = match;
+  const params = new URLSearchParams({ b: bucket, p: path });
+  return `${origin}/functions/v1/m?${params.toString()}`;
 };
 
 const SmartAdBanner = ({
