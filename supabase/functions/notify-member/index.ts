@@ -132,26 +132,34 @@ serve(async (req) => {
     if (action === "approve") {
       subject = "ברוך הבא למועדון הגברים של ק.קרניצי!";
       htmlBody = `
-        <div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px; background: #1a1410; color: #d9c9a8; border-radius: 12px;">
-          <h1 style="color: #D4AF37; font-size: 24px; text-align: center; margin-bottom: 20px;">ברוך הבא למועדון!</h1>
-          <p style="font-size: 16px; line-height: 1.8; text-align: center;">
-            שלום ${name},<br/><br/>
-            בקשתך לחברות במועדון <strong style="color: #D4AF37;">הגברים של ק.קרניצי</strong> אושרה!<br/>
+        <div dir="rtl" style="font-family:'Assistant','Heebo',Arial,sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 28px; background: #ffffff; color: #1a1410; border: 1px solid #ece4d2; border-radius: 12px;">
+          <div style="text-align:center; margin-bottom: 24px;">
+            <div style="display:inline-block; padding: 10px 18px; background:#1a1410; color:#D4AF37; border-radius: 999px; font-size: 13px; letter-spacing: 1px;">מועדון הגברים של ק.קרניצי</div>
+          </div>
+          <h1 style="color: #1a1410; font-size: 26px; text-align: center; margin: 0 0 16px;">ברוך הבא למועדון!</h1>
+          <p style="font-size: 16px; line-height: 1.8; text-align: center; color:#3a2f24; margin: 0 0 12px;">
+            שלום ${name},
+          </p>
+          <p style="font-size: 16px; line-height: 1.8; text-align: center; color:#3a2f24; margin: 0 0 24px;">
+            בקשתך לחברות במועדון <strong style="color: #8B6914;">הגברים של ק.קרניצי</strong> אושרה!<br/>
             כעת יש לך גישה מלאה לכל הלוחות, האינדקס והאירועים.
           </p>
-          <div style="text-align: center; margin-top: 30px;">
-            <a href="https://kcrinici-circle.lovable.app" style="display: inline-block; padding: 12px 32px; background: linear-gradient(135deg, #D4AF37, #8B6914); color: #1a1410; text-decoration: none; border-radius: 8px; font-weight: bold;">כניסה למועדון</a>
+          <div style="text-align: center; margin-top: 28px;">
+            <a href="https://kcrinici.com" style="display: inline-block; padding: 14px 36px; background: #1a1410; color: #D4AF37; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">כניסה למועדון</a>
           </div>
+          <p style="font-size: 12px; color:#8a7a5e; text-align:center; margin-top: 32px;">
+            מועדון הגברים של ק.קרניצי · kcrinici.com
+          </p>
         </div>
       `;
     } else {
       subject = "הגברים של ק.קרניצי - עדכון בנוגע לבקשתך";
       htmlBody = `
-        <div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px; background: #1a1410; color: #d9c9a8; border-radius: 12px;">
-          <h1 style="color: #D4AF37; font-size: 24px; text-align: center; margin-bottom: 20px;">עדכון לגבי בקשתך</h1>
-          <p style="font-size: 16px; line-height: 1.8; text-align: center;">
+        <div dir="rtl" style="font-family:'Assistant','Heebo',Arial,sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 28px; background: #ffffff; color: #1a1410; border: 1px solid #ece4d2; border-radius: 12px;">
+          <h1 style="color: #1a1410; font-size: 24px; text-align: center; margin-bottom: 16px;">עדכון לגבי בקשתך</h1>
+          <p style="font-size: 16px; line-height: 1.8; text-align: center; color:#3a2f24;">
             שלום ${name},<br/><br/>
-            לצערנו, הגישה למועדון <strong style="color: #D4AF37;">הגברים של ק.קרניצי</strong> מוגבלת כרגע לתושבי השכונה בלבד.<br/>
+            לצערנו, הגישה למועדון <strong style="color: #8B6914;">הגברים של ק.קרניצי</strong> מוגבלת כרגע לתושבי השכונה בלבד.<br/>
             ניתן לפנות להנהלת המועדון לבירורים נוספים.
           </p>
         </div>
