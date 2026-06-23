@@ -219,7 +219,7 @@ const SmartAdBanner = ({
     >
       {ad.media_type === "video" ? (
         <video
-          src={ad.media_url}
+          src={videoSrc}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           muted
           autoPlay
