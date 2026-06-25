@@ -1279,9 +1279,12 @@ export type Database = {
           created_by: string | null
           currency: string
           description: string | null
+          guest_email: string | null
+          guest_name: string | null
           id: string
           images: string[]
           is_active: boolean
+          is_approved: boolean
           is_sold: boolean
           price: number | null
           title: string
@@ -1295,9 +1298,12 @@ export type Database = {
           created_by?: string | null
           currency?: string
           description?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
           id?: string
           images?: string[]
           is_active?: boolean
+          is_approved?: boolean
           is_sold?: boolean
           price?: number | null
           title: string
@@ -1311,9 +1317,12 @@ export type Database = {
           created_by?: string | null
           currency?: string
           description?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
           id?: string
           images?: string[]
           is_active?: boolean
+          is_approved?: boolean
           is_sold?: boolean
           price?: number | null
           title?: string
