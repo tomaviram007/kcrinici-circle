@@ -331,6 +331,21 @@ const SecondHand = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-2">
             {/* Form fields */}
             <div className="space-y-4 lg:col-span-1">
+              {isGuestFlow && !editId && (
+                <div className="rounded-lg border border-gold/30 bg-gold/5 p-3 space-y-3">
+                  <p className="font-body text-xs text-gold">
+                    פרסום כאורח — המודעה תעבור אישור מנהל לפני שתופיע באתר.
+                  </p>
+                  <div>
+                    <Label className="font-body text-xs">שם מלא *</Label>
+                    <Input value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className="bg-background" />
+                  </div>
+                  <div>
+                    <Label className="font-body text-xs">אימייל *</Label>
+                    <Input type="email" dir="ltr" value={form.guest_email} onChange={(e) => setForm({ ...form, guest_email: e.target.value })} className="bg-background" placeholder="name@example.com" />
+                  </div>
+                </div>
+              )}
               <div>
                 <Label className="font-body text-xs">{t("secondhand.fieldTitle")}</Label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" />
