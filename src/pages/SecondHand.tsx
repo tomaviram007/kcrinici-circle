@@ -52,6 +52,8 @@ const emptyForm = {
   category: "כללי",
   contact_phone: "",
   images: [] as string[],
+  guest_name: "",
+  guest_email: "",
 };
 
 const SecondHand = () => {
@@ -118,19 +120,33 @@ const SecondHand = () => {
       category: it.category,
       contact_phone: it.contact_phone || "",
       images: it.images || [],
+      guest_name: "",
+      guest_email: "",
     });
     setDialogOpen(true);
   };
+
+  const isGuestFlow = !user || !isApproved;
 
   const handleSubmit = async () => {
     if (!form.title.trim()) {
       toast({ title: t("secondhand.toastTitleRequired"), variant: "destructive" });
       return;
     }
-    if (!user) return;
+    if (isGuestFlow && !editId) {
+      if (!form.guest_name.trim() || !form.contact_phone.trim() || !form.guest_email.trim()) {
+        toast({ title: "נא למלא שם מלא, טלפון ואימייל", variant: "destructive" });
+        return;
+      }
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guest_email.trim());
+      if (!emailOk) {
+        toast({ title: "אימייל לא תקין", variant: "destructive" });
+        return;
+      }
+    }
     setSaving(true);
 
-    const payload = {
+    const basePayload = {
       title: form.title.trim(),
       description: form.description.trim() || null,
       price: form.price ? parseFloat(form.price) : null,
@@ -142,15 +158,28 @@ const SecondHand = () => {
 
     let error;
     if (editId) {
-      ({ error } = await supabase.from("secondhand_items").update(payload).eq("id", editId));
+      ({ error } = await supabase.from("secondhand_items").update(basePayload).eq("id", editId));
+    } else if (isGuestFlow) {
+      ({ error } = await supabase.from("secondhand_items").insert({
+        ...basePayload,
+        created_by: null,
+        guest_name: form.guest_name.trim(),
+        guest_email: form.guest_email.trim(),
+      } as any));
     } else {
-      ({ error } = await supabase.from("secondhand_items").insert({ ...payload, created_by: user.id }));
+      ({ error } = await supabase.from("secondhand_items").insert({ ...basePayload, created_by: user!.id }));
     }
 
     if (error) {
       toast({ title: t("secondhand.toastError"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: editId ? t("secondhand.toastUpdated") : t("secondhand.toastPublished") });
+      toast({
+        title: editId
+          ? t("secondhand.toastUpdated")
+          : isGuestFlow
+            ? "המודעה התקבלה וממתינה לאישור מנהל"
+            : t("secondhand.toastPublished"),
+      });
       setDialogOpen(false);
       setForm(emptyForm);
       setEditId(null);
@@ -203,14 +232,13 @@ const SecondHand = () => {
             </SelectContent>
           </Select>
           <div className="md:mr-auto">
-            {user && isApproved ? (
-              <Button onClick={openNew} className="gradient-gold text-primary-foreground font-body w-full md:w-auto">
-                <Plus className="h-4 w-4 ml-1" />
-                {t("secondhand.postItem")}
-              </Button>
-            ) : (
-              <p className="font-body text-xs text-muted-foreground">
-                {t("secondhand.membersOnly")}
+            <Button onClick={openNew} className="gradient-gold text-primary-foreground font-body w-full md:w-auto">
+              <Plus className="h-4 w-4 ml-1" />
+              {t("secondhand.postItem")}
+            </Button>
+            {isGuestFlow && (
+              <p className="font-body text-[11px] text-muted-foreground mt-1 text-center md:text-right">
+                המודעה תפורסם לאחר אישור מנהל
               </p>
             )}
           </div>
@@ -303,6 +331,21 @@ const SecondHand = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-2">
             {/* Form fields */}
             <div className="space-y-4 lg:col-span-1">
+              {isGuestFlow && !editId && (
+                <div className="rounded-lg border border-gold/30 bg-gold/5 p-3 space-y-3">
+                  <p className="font-body text-xs text-gold">
+                    פרסום כאורח — המודעה תעבור אישור מנהל לפני שתופיע באתר.
+                  </p>
+                  <div>
+                    <Label className="font-body text-xs">שם מלא *</Label>
+                    <Input value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className="bg-background" />
+                  </div>
+                  <div>
+                    <Label className="font-body text-xs">אימייל *</Label>
+                    <Input type="email" dir="ltr" value={form.guest_email} onChange={(e) => setForm({ ...form, guest_email: e.target.value })} className="bg-background" placeholder="name@example.com" />
+                  </div>
+                </div>
+              )}
               <div>
                 <Label className="font-body text-xs">{t("secondhand.fieldTitle")}</Label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" />
