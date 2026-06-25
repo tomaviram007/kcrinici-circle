@@ -126,7 +126,7 @@ const SecondHand = () => {
     setDialogOpen(true);
   };
 
-  const isGuestFlow = !user || !isApproved;
+  const isGuestFlow = !user;
 
   const handleSubmit = async () => {
     if (!form.title.trim()) {
