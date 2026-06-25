@@ -52,6 +52,8 @@ const emptyForm = {
   category: "כללי",
   contact_phone: "",
   images: [] as string[],
+  guest_name: "",
+  guest_email: "",
 };
 
 const SecondHand = () => {
