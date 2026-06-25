@@ -120,19 +120,33 @@ const SecondHand = () => {
       category: it.category,
       contact_phone: it.contact_phone || "",
       images: it.images || [],
+      guest_name: "",
+      guest_email: "",
     });
     setDialogOpen(true);
   };
+
+  const isGuestFlow = !user || !isApproved;
 
   const handleSubmit = async () => {
     if (!form.title.trim()) {
       toast({ title: t("secondhand.toastTitleRequired"), variant: "destructive" });
       return;
     }
-    if (!user) return;
+    if (isGuestFlow && !editId) {
+      if (!form.guest_name.trim() || !form.contact_phone.trim() || !form.guest_email.trim()) {
+        toast({ title: "נא למלא שם מלא, טלפון ואימייל", variant: "destructive" });
+        return;
+      }
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guest_email.trim());
+      if (!emailOk) {
+        toast({ title: "אימייל לא תקין", variant: "destructive" });
+        return;
+      }
+    }
     setSaving(true);
 
-    const payload = {
+    const basePayload = {
       title: form.title.trim(),
       description: form.description.trim() || null,
       price: form.price ? parseFloat(form.price) : null,
@@ -144,15 +158,28 @@ const SecondHand = () => {
 
     let error;
     if (editId) {
-      ({ error } = await supabase.from("secondhand_items").update(payload).eq("id", editId));
+      ({ error } = await supabase.from("secondhand_items").update(basePayload).eq("id", editId));
+    } else if (isGuestFlow) {
+      ({ error } = await supabase.from("secondhand_items").insert({
+        ...basePayload,
+        created_by: null,
+        guest_name: form.guest_name.trim(),
+        guest_email: form.guest_email.trim(),
+      } as any));
     } else {
-      ({ error } = await supabase.from("secondhand_items").insert({ ...payload, created_by: user.id }));
+      ({ error } = await supabase.from("secondhand_items").insert({ ...basePayload, created_by: user!.id }));
     }
 
     if (error) {
       toast({ title: t("secondhand.toastError"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: editId ? t("secondhand.toastUpdated") : t("secondhand.toastPublished") });
+      toast({
+        title: editId
+          ? t("secondhand.toastUpdated")
+          : isGuestFlow
+            ? "המודעה התקבלה וממתינה לאישור מנהל"
+            : t("secondhand.toastPublished"),
+      });
       setDialogOpen(false);
       setForm(emptyForm);
       setEditId(null);
