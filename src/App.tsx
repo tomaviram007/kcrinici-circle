@@ -79,7 +79,7 @@ const AppLayout = () => {
         <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
         <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
         <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
-        <Route path="/members" element={<ProtectedRoute publicPartial><Members /></ProtectedRoute>} />
+        <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
         <Route path="/members/:id" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
         <Route path="/events" element={<Events />} />
         <Route path="/events/:id" element={<Events />} />
