@@ -232,14 +232,13 @@ const SecondHand = () => {
             </SelectContent>
           </Select>
           <div className="md:mr-auto">
-            {user && isApproved ? (
-              <Button onClick={openNew} className="gradient-gold text-primary-foreground font-body w-full md:w-auto">
-                <Plus className="h-4 w-4 ml-1" />
-                {t("secondhand.postItem")}
-              </Button>
-            ) : (
-              <p className="font-body text-xs text-muted-foreground">
-                {t("secondhand.membersOnly")}
+            <Button onClick={openNew} className="gradient-gold text-primary-foreground font-body w-full md:w-auto">
+              <Plus className="h-4 w-4 ml-1" />
+              {t("secondhand.postItem")}
+            </Button>
+            {isGuestFlow && (
+              <p className="font-body text-[11px] text-muted-foreground mt-1 text-center md:text-right">
+                המודעה תפורסם לאחר אישור מנהל
               </p>
             )}
           </div>
