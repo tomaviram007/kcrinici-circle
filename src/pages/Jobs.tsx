@@ -21,6 +21,7 @@ import heroImg from "@/assets/hero-jobs.jpg";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
+import ShareButtons from "@/components/ShareButtons";
 
 const JOB_TYPES = [
   { value: "full-time", label: "משרה מלאה" },
