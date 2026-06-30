@@ -11,6 +11,7 @@ import EventsPreviewSection from "@/components/landing/EventsPreviewSection";
 import GalleryPreviewSection from "@/components/landing/GalleryPreviewSection";
 import JobsPreviewSection from "@/components/landing/JobsPreviewSection";
 import BirthdaysPreviewSection from "@/components/landing/BirthdaysPreviewSection";
+import SecondHandPreviewSection from "@/components/landing/SecondHandPreviewSection";
 import QuoteSection from "@/components/landing/QuoteSection";
 import CTASection from "@/components/landing/CTASection";
 import PollPopup from "@/components/PollPopup";
@@ -100,6 +101,10 @@ const Index = () => {
 
           <ScrollReveal delay={0.05}>
             <JobsPreviewSection isApproved={isApproved} />
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.05}>
+            <SecondHandPreviewSection isApproved={isApproved} />
           </ScrollReveal>
         </div>
       </ContentWithSidebarAds>
