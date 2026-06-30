@@ -21,6 +21,7 @@ import heroImg from "@/assets/hero-jobs.jpg";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
+import ShareButtons from "@/components/ShareButtons";
 
 const JOB_TYPES = [
   { value: "full-time", label: "משרה מלאה" },
@@ -244,6 +245,12 @@ const Jobs = () => {
                   <Banknote className="h-3 w-3 text-gold" /> {job.salary}
                 </span>
               )}
+            </div>
+            <div className="mt-3 pt-2 border-t border-border/40 flex justify-end">
+              <ShareButtons
+                title={job.title}
+                text={`משרה: ${job.title}${job.company_name ? ` ב-${job.company_name}` : ""} — לוח הדרושים של הגברים של ק.קרניצי`}
+              />
             </div>
           </div>
         ))}

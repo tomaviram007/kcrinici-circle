@@ -17,6 +17,7 @@ import { usePageCover } from "@/hooks/usePageCover";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SaleImageUpload from "@/components/announcements/SaleImageUpload";
 import heroImg from "@/assets/hero-secondhand.jpg";
+import ShareButtons from "@/components/ShareButtons";
 
 const CATEGORIES = ["כללי", "רכב", "אלקטרוניקה", "ריהוט", "ביגוד / אופנה", "ספורט ופנאי", "כלי בית", "נדל״ן", "אחר"];
 const CONDITIONS = [
@@ -289,11 +290,15 @@ const SecondHand = () => {
                     <p className="font-body text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
                       {it.description || "—"}
                     </p>
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center justify-between gap-2 pt-1">
                       <Badge variant="outline" className="font-body text-[10px] border-border/60">
                         <Tag className="h-3 w-3 ml-1" />
                         {conditionLabel(it.condition)}
                       </Badge>
+                      <ShareButtons
+                        title={it.title}
+                        text={`${it.title}${it.price !== null ? ` — ₪${it.price.toLocaleString("he-IL")}` : ""} | יד שנייה — הגברים של ק.קרניצי`}
+                      />
                     </div>
                     {isOwner && (
                       <div className="flex gap-1.5 pt-2 border-t border-border/40" onClick={(e) => e.stopPropagation()}>

@@ -21,6 +21,7 @@ import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import recommendationsHero from "@/assets/recommendations-hero.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
+import ShareButtons from "@/components/ShareButtons";
 
 
 const CATEGORIES = [
@@ -467,18 +468,24 @@ const RecommendationCard = ({ rec, isLoggedIn = true }: { rec: Recommendation; i
         <MembersOnlyNotice variant="professionals" compact />
       )}
 
-      <div className="mt-2 pt-3 border-t border-border/50 flex items-center gap-2">
-        <User className="h-3.5 w-3.5 text-primary" />
-        <span className="text-xs font-body text-muted-foreground">
-          {t("recommendations.recommendedBy")}{" "}
-          {rec.is_admin_post ? (
-            <strong className="admin-badge inline-flex items-center gap-1 text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/30">
-              ⭐ {t("recommendations.badge")}
-            </strong>
-          ) : (
-            <strong className="text-foreground">{rec.recommender_name}</strong>
-          )}
-        </span>
+      <div className="mt-2 pt-3 border-t border-border/50 flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <User className="h-3.5 w-3.5 text-primary" />
+          <span className="text-xs font-body text-muted-foreground">
+            {t("recommendations.recommendedBy")}{" "}
+            {rec.is_admin_post ? (
+              <strong className="admin-badge inline-flex items-center gap-1 text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/30">
+                ⭐ {t("recommendations.badge")}
+              </strong>
+            ) : (
+              <strong className="text-foreground">{rec.recommender_name}</strong>
+            )}
+          </span>
+        </div>
+        <ShareButtons
+          title={[rec.professional_first_name, rec.professional_last_name].filter(Boolean).join(" ") || rec.professional_name}
+          text={`המלצה על ${[rec.professional_first_name, rec.professional_last_name].filter(Boolean).join(" ") || rec.professional_name} (${rec.category}) — מתוך הגברים של ק.קרניצי`}
+        />
       </div>
     </div>
   );
