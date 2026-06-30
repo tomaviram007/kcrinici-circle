@@ -271,72 +271,35 @@ const Announcements = () => {
     <ContentWithSidebarAds targetPage="announcements">
     <div className="page-container py-4 sm:py-8 md:py-12">
 
-      {/* Tuesday Banner */}
-      {isTuesday && (
-        <div className="mb-6 rounded-lg border border-gold/30 bg-gold/5 p-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+      {/* Dynamic promo banners (managed in admin) */}
+      {promoBanners.map((b) => (
+        <div key={b.id} className="mb-6 rounded-lg border border-gold/30 bg-gold/5 p-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <Calendar className="h-6 w-6 text-gold shrink-0" />
-            <div>
-              <p className="font-serif text-base font-bold text-gold">📢 היום יום שלישי — יום פרסומים!</p>
-              <p className="font-body text-sm text-muted-foreground">
-                היום יום הפרסום הרשמי בקבוצת הוואטסאפ של הגברים של קריניצי. שתפו מודעות והזדמנויות!
+            <div className="min-w-0">
+              <p className="font-serif text-base font-bold text-gold">
+                {b.emoji ? `${b.emoji} ` : ""}{b.title}
               </p>
+              {b.body && (
+                <p className="font-body text-sm text-muted-foreground">{b.body}</p>
+              )}
             </div>
           </div>
-          <button
-            disabled={copyingGroupMsg}
-            onClick={async () => {
-              const message = "היום יום הפרסום הרשמי בקבוצת שלנו הגברים של קריניצי. מוזמנים לשתף מודעות והזדמנויות!";
-              setCopyingGroupMsg(true);
-              let copied = false;
-              try {
-                if (navigator.clipboard?.writeText) {
-                  await navigator.clipboard.writeText(message);
-                  copied = true;
-                } else {
-                  // Fallback: textarea + execCommand
-                  const ta = document.createElement("textarea");
-                  ta.value = message;
-                  ta.style.position = "fixed";
-                  ta.style.opacity = "0";
-                  document.body.appendChild(ta);
-                  ta.select();
-                  copied = document.execCommand("copy");
-                  document.body.removeChild(ta);
-                }
-              } catch {
-                copied = false;
-              }
-
-              if (copied) {
-                toast({ title: "ההודעה הועתקה!", description: "הדביקו אותה בקבוצה (Ctrl/Cmd+V)" });
-                window.open(WHATSAPP_GROUP_LINK, "_blank", "noopener,noreferrer");
-              } else {
-                // Offer download fallback
-                try {
-                  const blob = new Blob([message], { type: "text/plain;charset=utf-8" });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "הודעה-לקבוצה.txt";
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                  toast({ title: "אין הרשאת העתקה", description: "הקובץ ירד למחשב — פתחו והדביקו בקבוצה" });
-                } catch {
-                  toast({ title: "לא ניתן להעתיק", description: "העתיקו ידנית: " + message });
-                }
-              }
-              setCopyingGroupMsg(false);
-            }}
-            className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <MessageCircle className={`h-4 w-4 ${copyingGroupMsg ? "animate-pulse" : ""}`} />
-            <span className="hidden sm:inline">{copyingGroupMsg ? "מעתיק..." : "לקבוצה"}</span>
-          </button>
+          {b.button_text && b.button_url && (
+            <a
+              href={b.button_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-sm text-green-600 hover:bg-green-600/20 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">{b.button_text}</span>
+            </a>
+          )}
         </div>
-      )}
+      ))}
+
+
 
       {/* Upcoming Birthdays Section */}
       {upcomingBirthdays.length > 0 && (
