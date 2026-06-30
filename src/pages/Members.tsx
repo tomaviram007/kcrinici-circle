@@ -235,7 +235,7 @@ const Members = () => {
 
       {/* Grid / List */}
       {viewMode === "grid" ? (
-      <div ref={gridRef} className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 sm:gap-4">
+      <div ref={gridRef} className="grid gap-6 grid-cols-1 lg:grid-cols-2 sm:gap-8">
         {filtered.map((member, idx) => {
           const birthdayToday = isBirthdayToday(member.birth_date);
           const elements: React.ReactNode[] = [];
@@ -252,42 +252,91 @@ const Members = () => {
           elements.push(
             <div
               key={member.id}
-              className={`member-card group cursor-pointer rounded-lg border bg-card p-4 transition-all hover:border-gold/20 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)] ${isOwnCard(member) ? "ring-1 ring-gold/30" : "border-border"} ${birthdayToday ? "border-gold/40 shadow-[0_0_20px_hsl(43_72%_52%/0.12)]" : ""}`}
+              className="member-card group cursor-pointer"
               onClick={() => handleCardClick(member)}
             >
-              <div className="flex flex-col items-center text-center gap-3">
-                {isOwnCard(member) && (
-                  <span className="self-start inline-flex items-center gap-1 text-xs text-gold font-body">
-                    <Pencil className="h-3 w-3" /> לחץ לעריכה
-                  </span>
-                )}
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20 overflow-hidden">
+              {/* Desktop / tablet — overlap layout */}
+              <div className="hidden sm:block relative h-[280px]">
+                {/* Photo (right side in RTL) */}
+                <div className={`absolute right-0 top-0 h-full w-[58%] rounded-2xl overflow-hidden bg-secondary border ${birthdayToday ? "border-gold/40 shadow-[0_0_25px_hsl(43_72%_52%/0.15)]" : "border-border/60"} transition-all duration-300 group-hover:shadow-[0_10px_40px_hsl(0_0%_0%/0.4)]`}>
                   {member.avatar_url ? (
-                    <img src={member.avatar_url} alt={member.full_name} className="h-full w-full rounded-full object-cover" />
+                    <img src={member.avatar_url} alt={member.full_name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   ) : (
-                    <User className="h-7 w-7 text-gold" />
+                    <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-secondary to-card">
+                      <User className="h-20 w-20 text-gold/40" />
+                    </div>
                   )}
                 </div>
-                <div className="min-w-0 w-full">
-                  <h3 className="font-serif text-base font-bold text-foreground truncate">{member.full_name}</h3>
-                  <div className="flex items-center justify-center gap-1 mt-0.5">
-                    <Briefcase className="h-3 w-3 text-gold" />
-                    <span className="font-body text-sm text-gold truncate">{member.profession}</span>
+
+                {/* Overlapping card (left side in RTL) */}
+                <div className={`absolute left-0 top-[12%] bottom-[12%] w-[58%] z-10 rounded-2xl bg-card border ${isOwnCard(member) ? "border-gold/40 ring-1 ring-gold/20" : "border-border/60"} shadow-[0_15px_50px_hsl(0_0%_0%/0.35)] p-5 flex flex-col justify-between transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_20px_60px_hsl(43_72%_52%/0.12)]`}>
+                  <div className="min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-serif text-lg font-bold text-foreground truncate">{member.full_name}</h3>
+                      {isOwnCard(member) && <Pencil className="h-3.5 w-3.5 text-gold shrink-0" />}
+                    </div>
+                    {member.profession && (
+                      <p className="mt-1 font-body text-xs font-semibold text-gold truncate">
+                        {member.profession}{member.expertise ? ` · ${member.expertise}` : ""}
+                      </p>
+                    )}
+                    {(member.bio || member.hobbies) && (
+                      <p className="mt-3 font-body text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                        {member.bio || `תחביבים: ${member.hobbies}`}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <SocialLinks
+                      website_url={member.website_url}
+                      facebook_url={member.facebook_url}
+                      instagram_url={member.instagram_url}
+                      linkedin_url={member.linkedin_url}
+                    />
+                    {birthdayToday && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 text-gold border border-gold/30 px-2 py-0.5 text-[11px] font-body animate-pulse">
+                        <Cake className="h-3 w-3" /> חוגג היום
+                      </span>
+                    )}
                   </div>
                 </div>
+              </div>
 
-                {member.birth_date && (
-                  <div className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-body ${birthdayToday ? "bg-gold/15 text-gold border border-gold/30 animate-pulse" : "bg-secondary text-muted-foreground"}`}>
-                    <Cake className={`h-3 w-3 ${birthdayToday ? "text-gold" : ""}`} />
-                    {birthdayToday ? "🎂 חוגג היום!" : formatHebrewDate(member.birth_date)}
+              {/* Mobile — stacked */}
+              <div className="sm:hidden">
+                <div className={`relative rounded-2xl overflow-hidden bg-secondary border ${birthdayToday ? "border-gold/40" : "border-border/60"} aspect-[4/3]`}>
+                  {member.avatar_url ? (
+                    <img src={member.avatar_url} alt={member.full_name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center"><User className="h-16 w-16 text-gold/40" /></div>
+                  )}
+                </div>
+                <div className={`-mt-8 mx-3 relative z-10 rounded-2xl bg-card border ${isOwnCard(member) ? "border-gold/40" : "border-border/60"} shadow-xl p-4`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-serif text-base font-bold text-foreground truncate">{member.full_name}</h3>
+                    {isOwnCard(member) && <Pencil className="h-3.5 w-3.5 text-gold shrink-0" />}
                   </div>
-                )}
-
-                {!isOwnCard(member) && (
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 inline-flex items-center gap-1 text-xs text-gold/70 font-body">
-                    לחץ לפרטים ←
-                  </span>
-                )}
+                  {member.profession && (
+                    <p className="mt-0.5 font-body text-xs font-semibold text-gold truncate">{member.profession}</p>
+                  )}
+                  {member.bio && (
+                    <p className="mt-2 font-body text-sm text-muted-foreground leading-relaxed line-clamp-2">{member.bio}</p>
+                  )}
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <SocialLinks
+                      website_url={member.website_url}
+                      facebook_url={member.facebook_url}
+                      instagram_url={member.instagram_url}
+                      linkedin_url={member.linkedin_url}
+                    />
+                    {birthdayToday && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 text-gold border border-gold/30 px-2 py-0.5 text-[11px] font-body">
+                        <Cake className="h-3 w-3" /> חוגג היום
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           );
