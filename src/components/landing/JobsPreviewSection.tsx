@@ -26,7 +26,6 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isApproved) return;
     supabase
       .from("jobs")
       .select("*")
@@ -35,7 +34,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
       .order("created_at", { ascending: false })
       .limit(3)
       .then(({ data }) => setJobs(data || []));
-  }, [isApproved]);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current) return;
