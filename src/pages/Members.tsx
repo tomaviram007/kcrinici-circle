@@ -61,13 +61,18 @@ const Members = () => {
   const [filterHobby, setFilterHobby] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
 
+  const sortHebrew = (list: any[]) =>
+    [...list].sort((a, b) =>
+      (a.full_name || "").localeCompare(b.full_name || "", "he", { sensitivity: "base" })
+    );
+
   const fetchMembers = async () => {
     if (isMember) {
-      const { data } = await supabase.from("profiles").select("*").eq("is_approved", true).order("full_name");
-      setMembers(data || []);
+      const { data } = await supabase.from("profiles").select("*").eq("is_approved", true);
+      setMembers(sortHebrew(data || []));
     } else {
       const { data } = await (supabase as any).rpc("get_public_members");
-      setMembers((data || []).map((m: any) => ({ ...m, full_name: m.first_name })));
+      setMembers(sortHebrew((data || []).map((m: any) => ({ ...m, full_name: m.first_name }))));
     }
   };
 
