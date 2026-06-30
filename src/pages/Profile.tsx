@@ -83,6 +83,10 @@ const Profile = () => {
       toast({ title: t("profile.toastError"), description: t("profile.toastRequiredFields"), variant: "destructive" });
       return;
     }
+    if (!avatarUrl) {
+      toast({ title: t("profile.toastError"), description: "חובה להעלות תמונת פרופיל לפני שמירת הכרטיסיה", variant: "destructive" });
+      return;
+    }
 
     setSaving(true);
     try {

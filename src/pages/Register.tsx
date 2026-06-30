@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
-import { Globe, Facebook, Instagram, Linkedin, ArrowRight } from "lucide-react";
+import { Globe, Facebook, Instagram, Linkedin, ArrowRight, Camera, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,7 @@ import { z } from "zod";
 import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { cn } from "@/lib/utils";
 import RegisterBackground from "@/components/register/RegisterBackground";
+import { validateImageFile } from "@/lib/file-validation";
 
 const registerSchema = z.object({
   full_name: z.string().trim().min(2, "שם חייב להכיל לפחות 2 תווים").max(100, "שם ארוך מדי"),
@@ -73,6 +74,9 @@ const Register = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -89,6 +93,19 @@ const Register = () => {
     instagram_url: "",
     linkedin_url: "",
   });
+
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const validation = validateImageFile(file, 2);
+    if (!validation.valid) {
+      toast({ ...validation.error!, variant: "destructive" });
+      return;
+    }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+    setErrors((prev) => { const n = { ...prev }; delete n.avatar; return n; });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -110,8 +127,15 @@ const Register = () => {
         if (!fieldErrors[field]) fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
+    }
+
+    if (!avatarFile) {
+      setErrors((prev) => ({ ...prev, avatar: "חובה להעלות תמונת פרופיל" }));
+      toast({ title: "תמונת פרופיל חסרה", description: "יש להעלות תמונת פרופיל כדי להירשם", variant: "destructive" });
       return;
     }
+
+    if (!result.success) return;
 
     setLoading(true);
     try {
@@ -139,13 +163,27 @@ const Register = () => {
 
       if (error) throw error;
 
+      const newUserId = signUpData.user?.id;
+      if (newUserId && avatarFile) {
+        try {
+          const ext = avatarFile.name.split(".").pop() || "jpg";
+          const path = `${newUserId}/avatar.${ext}`;
+          const { error: upErr } = await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+          if (!upErr) {
+            const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+            const urlWithCache = `${publicUrl}?t=${Date.now()}`;
+            await supabase.from("profiles").update({ avatar_url: urlWithCache }).eq("user_id", newUserId);
+          }
+        } catch { /* non-blocking */ }
+      }
+
       sendTelegramNotification("new_member", {
         name: form.full_name,
         phone: form.phone,
         address: form.address,
         profession: form.profession,
         email: form.email,
-        user_id: signUpData.user?.id,
+        user_id: newUserId,
       });
 
       toast({
@@ -194,6 +232,32 @@ const Register = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5" noValidate autoComplete="off">
+          {/* Avatar upload — required */}
+          <div className="flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className={cn(
+                "relative h-28 w-28 rounded-full border-2 bg-secondary overflow-hidden flex items-center justify-center transition-all hover:border-gold/60 focus:outline-none focus:ring-2 focus:ring-gold/30",
+                errors.avatar ? "border-destructive" : "border-gold/30"
+              )}
+            >
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="תמונת פרופיל" className="h-full w-full object-cover" />
+              ) : (
+                <User className="h-12 w-12 text-gold/60" />
+              )}
+              <div className="absolute -bottom-0.5 -left-0.5 rounded-full bg-card border border-border p-1.5">
+                <Camera className="h-3.5 w-3.5 text-gold" />
+              </div>
+            </button>
+            <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
+            <p className="font-body text-xs text-muted-foreground">
+              תמונת פרופיל <span className="text-gold">*</span> (חובה)
+            </p>
+            {errors.avatar && <p className="font-body text-xs text-destructive">{errors.avatar}</p>}
+          </div>
+
           <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
             <Field name="full_name" label="שם מלא" required {...fieldProps} />
             <Field name="phone" label="מספר טלפון" required dir="ltr" {...fieldProps} />
