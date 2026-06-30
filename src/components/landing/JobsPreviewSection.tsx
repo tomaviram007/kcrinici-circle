@@ -26,7 +26,6 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isApproved) return;
     supabase
       .from("jobs")
       .select("*")
@@ -35,7 +34,7 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
       .order("created_at", { ascending: false })
       .limit(3)
       .then(({ data }) => setJobs(data || []));
-  }, [isApproved]);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -59,7 +58,11 @@ const JobsPreviewSection = ({ isApproved }: Props) => {
     { id: "m3", title: "יועץ פיננסי", company_name: "משרד רואי חשבון", location: "ק.קרניצי", job_type: "part-time", description: "ייעוץ פיננסי לעסקים קטנים" },
   ];
 
-  const displayItems = isApproved ? (jobs.length > 0 ? jobs : []) : mockJobs;
+  // Hide section entirely when no real jobs exist
+  if (jobs.length === 0) return null;
+
+  const displayItems = isApproved ? jobs : mockJobs;
+
 
   return (
     <section className="py-8 px-5 sm:py-24 sm:px-6" ref={sectionRef}>

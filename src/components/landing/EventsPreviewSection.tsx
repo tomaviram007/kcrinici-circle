@@ -39,29 +39,37 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
       const uid = session?.user?.id || null;
       setUserId(uid);
 
-      if (isApproved) {
-        const { data } = await supabase
-          .from("events")
-          .select("*")
-          .gte("event_date", new Date().toISOString())
-          .order("event_date", { ascending: true })
-          .limit(3);
-        const evts = data || [];
-        setEvents(evts);
+      // Fetch real upcoming events for everyone, so we can hide the section when empty
+      const { data } = isApproved
+        ? await supabase
+            .from("events")
+            .select("*")
+            .gte("event_date", new Date().toISOString())
+            .order("event_date", { ascending: true })
+            .limit(3)
+        : await supabase.rpc("get_public_events");
+      let evts = (data as any[]) || [];
+      if (!isApproved) {
+        const now = new Date();
+        evts = evts
+          .filter((e: any) => new Date(e.event_date) >= now)
+          .sort((a: any, b: any) => +new Date(a.event_date) - +new Date(b.event_date))
+          .slice(0, 3);
+      }
+      setEvents(evts);
 
-        if (uid && evts.length > 0) {
-          const eventIds = evts.map(e => e.id);
-          const [{ data: myRsvps }, { data: allRsvps }] = await Promise.all([
-            supabase.from("event_rsvps").select("event_id, status").eq("user_id", uid).in("event_id", eventIds),
-            supabase.rpc("get_event_attending_counts", { _event_ids: eventIds }),
-          ]);
-          const rsvpMap: Record<string, string> = {};
-          myRsvps?.forEach((r: any) => { rsvpMap[r.event_id] = r.status; });
-          setRsvps(rsvpMap);
-          const counts: Record<string, number> = {};
-          (allRsvps as any[] | null)?.forEach((r: any) => { counts[r.event_id] = Number(r.attending_count) || 0; });
-          setRsvpCounts(counts);
-        }
+      if (isApproved && uid && evts.length > 0) {
+        const eventIds = evts.map((e: any) => e.id);
+        const [{ data: myRsvps }, { data: allRsvps }] = await Promise.all([
+          supabase.from("event_rsvps").select("event_id, status").eq("user_id", uid).in("event_id", eventIds),
+          supabase.rpc("get_event_attending_counts", { _event_ids: eventIds }),
+        ]);
+        const rsvpMap: Record<string, string> = {};
+        myRsvps?.forEach((r: any) => { rsvpMap[r.event_id] = r.status; });
+        setRsvps(rsvpMap);
+        const counts: Record<string, number> = {};
+        (allRsvps as any[] | null)?.forEach((r: any) => { counts[r.event_id] = Number(r.attending_count) || 0; });
+        setRsvpCounts(counts);
       }
     };
     init();
@@ -140,9 +148,10 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
 
-  const displayEvents = isApproved ? events : mockEvents;
+  // Hide section entirely when no real upcoming events exist
+  if (events.length === 0) return null;
 
-  if (isApproved && events.length === 0) return null;
+  const displayEvents = events;
 
 
   return (

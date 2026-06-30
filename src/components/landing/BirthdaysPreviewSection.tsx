@@ -36,7 +36,6 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
   };
 
   useEffect(() => {
-    if (!isApproved) return;
     const fetchBirthdays = async () => {
       const { data } = await supabase
         .from("profiles")
@@ -47,9 +46,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
 
       const now = new Date();
       const currentMonth = now.getMonth();
-      const currentDate = now.getDate();
 
-      // Get birthdays this month, sorted by day
       const matched = data
         .filter((p) => {
           if (!p.birth_date) return false;
@@ -66,7 +63,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
       setBirthdays(matched);
     };
     fetchBirthdays();
-  }, [isApproved]);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current || birthdays.length === 0) return;
@@ -108,9 +105,10 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
     { full_name: "משה ישראלי", birth_date: "1988-03-28", profession: "אדריכל", avatar_url: null, user_id: "m4" },
   ];
 
-  const displayItems = isApproved && birthdays.length > 0 ? birthdays : !isApproved ? mockBirthdays : [];
+  // Hide section entirely when no real birthdays this month
+  if (birthdays.length === 0) return null;
 
-  if (isApproved && birthdays.length === 0) return null;
+  const displayItems = isApproved ? birthdays : mockBirthdays;
 
   return (
     <>

@@ -27,7 +27,6 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isApproved) return;
     const fetch = async () => {
       const { data } = await supabase
         .from("announcements")
@@ -47,7 +46,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
       }
     };
     fetch();
-  }, [isApproved]);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -89,7 +88,11 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
     { id: "m3", title: "iPhone 15 Pro", content: "חדש באריזה, אחריות מלאה", sale_type: "electronics", sale_data: { price: "₪4,200" } },
   ];
 
-  const displayItems = isApproved ? (sales.length > 0 ? sales : []) : mockSales;
+  // Hide section entirely when there is no real content
+  if (sales.length === 0) return null;
+
+  const displayItems = isApproved ? sales : mockSales;
+
 
   return (
     <section className="py-8 px-5 sm:py-24 sm:px-6 bg-card/50" ref={sectionRef}>
