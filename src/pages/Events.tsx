@@ -68,10 +68,17 @@ const Events = () => {
       const uid = session?.user?.id || null;
       setUserId(uid);
 
-      const { data: eventsData } = await supabase
-        .from("events")
-        .select("*")
-        .order("event_date", { ascending: false });
+      let eventsData: any[] | null = null;
+      if (uid) {
+        const { data } = await supabase
+          .from("events")
+          .select("*")
+          .order("event_date", { ascending: false });
+        eventsData = data;
+      } else {
+        const { data } = await supabase.rpc("get_public_events");
+        eventsData = data as any[] | null;
+      }
       setEvents(eventsData || []);
 
       if (eventsData?.length) {
