@@ -52,6 +52,12 @@ const AdminSecondHand = () => {
     else fetchAll();
   };
 
+  const approve = async (it: Item) => {
+    const { error } = await supabase.from("secondhand_items").update({ is_approved: true }).eq("id", it.id);
+    if (error) toast({ title: "שגיאה", description: error.message, variant: "destructive" });
+    else { toast({ title: "אושר ופורסם" }); fetchAll(); }
+  };
+
   const remove = async (id: string) => {
     if (!confirm("למחוק את הפריט?")) return;
     const { error } = await supabase.from("secondhand_items").delete().eq("id", id);
