@@ -99,10 +99,16 @@ const AdminSecondHand = () => {
                 </p>
                 <div className="flex flex-wrap gap-1 mt-1">
                   <Badge variant="outline" className="text-[10px]">{it.category}</Badge>
+                  {!it.is_approved && <Badge className="text-[10px] bg-amber-500 text-white">ממתין לאישור</Badge>}
                   {it.is_sold && <Badge variant="destructive" className="text-[10px]">נמכר</Badge>}
                   {!it.is_active && <Badge variant="secondary" className="text-[10px]">מוסתר</Badge>}
                 </div>
-                <div className="flex gap-1 mt-2">
+                <div className="flex gap-1 mt-2 flex-wrap">
+                  {!it.is_approved && (
+                    <Button size="sm" variant="ghost" className="h-7 text-xs text-emerald-600" onClick={() => approve(it)}>
+                      <CheckCircle2 className="h-3 w-3 ml-1" />אשר
+                    </Button>
+                  )}
                   <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => toggleActive(it)}>
                     {it.is_active ? <><EyeOff className="h-3 w-3 ml-1" />הסתר</> : <><Eye className="h-3 w-3 ml-1" />הצג</>}
                   </Button>
