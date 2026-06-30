@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, MessageCircle, Gift, Megaphone, ShoppingBag, Calendar, Share2, Car, Smartphone, Sofa, Shirt, Home, Package, Banknote, CheckCircle2, ChevronLeft, ChevronRight, X, Pencil } from "lucide-react";
+import { Plus, MessageCircle, Gift, Megaphone, Calendar, Share2, X, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
@@ -14,7 +14,6 @@ import PageHero from "@/components/PageHero";
 import { fireConfetti } from "@/lib/confetti";
 
 import QuoteSection from "@/components/landing/QuoteSection";
-import SaleImageUpload from "@/components/announcements/SaleImageUpload";
 import heroImg from "@/assets/hero-announcements.jpg";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
@@ -30,83 +29,12 @@ import {
 
 const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo";
 
-const TAPE_COLORS = ["bg-gold/80", "bg-gold/60", "bg-amber-700/50", "bg-gold/70", "bg-amber-600/40"];
-const ROTATIONS = ["-rotate-2", "rotate-1", "-rotate-1", "rotate-2", "rotate-0", "-rotate-3", "rotate-3"];
-
-const SALE_TYPES = [
-  { value: "car", label: "רכב", icon: Car },
-  { value: "electronics", label: "אלקטרוניקה", icon: Smartphone },
-  { value: "furniture", label: "ריהוט", icon: Sofa },
-  { value: "fashion", label: "ביגוד / אופנה", icon: Shirt },
-  { value: "real_estate", label: "נדל״ן", icon: Home },
-  { value: "general", label: "כללי", icon: Package },
-];
-
-interface SaleField {
-  key: string;
-  label: string;
-  type: "text" | "select";
-  options?: string[];
-}
-
-const SALE_FIELDS: Record<string, SaleField[]> = {
-  car: [
-    { key: "price", label: "מחיר", type: "text" },
-    { key: "km", label: 'ק"מ', type: "text" },
-    { key: "year", label: "שנת ייצור", type: "text" },
-    { key: "hand", label: "יד", type: "select", options: ["ראשונה", "שנייה", "שלישית", "רביעית+"] },
-    { key: "condition", label: "מצב", type: "select", options: ["חדש", "כמו חדש", "טוב מאוד", "טוב", "סביר"] },
-    { key: "test", label: "טסט", type: "select", options: ["בתוקף", "לא בתוקף"] },
-    { key: "accident", label: "עבר תאונה", type: "select", options: ["לא", "כן — קל", "כן — בינוני", "כן — קשה"] },
-    { key: "color", label: "צבע", type: "text" },
-    { key: "ownership", label: "בעלות", type: "select", options: ["פרטי", "חברה", "ליסינג"] },
-    { key: "gear", label: "תיבת הילוכים", type: "select", options: ["אוטומט", "ידני"] },
-  ],
-  electronics: [
-    { key: "price", label: "מחיר", type: "text" },
-    { key: "condition", label: "מצב", type: "select", options: ["חדש באריזה", "כמו חדש", "משומש — תקין", "דורש תיקון"] },
-    { key: "warranty", label: "אחריות", type: "select", options: ["בתוקף", "נגמרה", "אין"] },
-    { key: "brand", label: "מותג / יצרן", type: "text" },
-    { key: "model", label: "דגם", type: "text" },
-  ],
-  furniture: [
-    { key: "price", label: "מחיר", type: "text" },
-    { key: "condition", label: "מצב", type: "select", options: ["חדש", "כמו חדש", "משומש — טוב", "משומש — סביר"] },
-    { key: "dimensions", label: "מידות", type: "text" },
-    { key: "material", label: "חומר", type: "text" },
-    { key: "color", label: "צבע", type: "text" },
-  ],
-  fashion: [
-    { key: "price", label: "מחיר", type: "text" },
-    { key: "size", label: "מידה", type: "text" },
-    { key: "condition", label: "מצב", type: "select", options: ["חדש עם תגית", "חדש בלי תגית", "לבוש פעם אחת", "משומש — טוב"] },
-    { key: "brand", label: "מותג", type: "text" },
-    { key: "color", label: "צבע", type: "text" },
-  ],
-  real_estate: [
-    { key: "price", label: "מחיר", type: "text" },
-    { key: "type", label: "סוג", type: "select", options: ["מכירה", "השכרה", "שותפים"] },
-    { key: "rooms", label: "חדרים", type: "text" },
-    { key: "sqm", label: 'שטח (מ"ר)', type: "text" },
-    { key: "floor", label: "קומה", type: "text" },
-    { key: "area", label: "שכונה / אזור", type: "text" },
-    { key: "parking", label: "חניה", type: "select", options: ["כן", "לא"] },
-    { key: "elevator", label: "מעלית", type: "select", options: ["כן", "לא"] },
-  ],
-  general: [
-    { key: "price", label: "מחיר", type: "text" },
-    { key: "condition", label: "מצב", type: "select", options: ["חדש", "כמו חדש", "משומש — טוב", "משומש — סביר"] },
-  ],
-};
-
 interface BirthdayMember {
   full_name: string;
   birth_date: string;
   phone: string;
   avatar_url: string | null;
 }
-
-const EMPTY_SALE_DATA: Record<string, string> = {};
 
 const Announcements = () => {
   const { user } = useAuth();
@@ -117,32 +45,20 @@ const Announcements = () => {
   const coverImage = usePageCover("announcements", heroImg);
   const [items, setItems] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [formCategory, setFormCategory] = useState("announcement");
   const [formTitle, setFormTitle] = useState("");
   const [formContent, setFormContent] = useState("");
-  const [saleType, setSaleType] = useState("");
-  const [saleData, setSaleData] = useState<Record<string, string>>(EMPTY_SALE_DATA);
-  const [saleMainImage, setSaleMainImage] = useState<string | null>(null);
-  const [saleGalleryImages, setSaleGalleryImages] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
   const [filterMonth, setFilterMonth] = useState("all");
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<BirthdayMember[]>([]);
   const [birthdayToastShown, setBirthdayToastShown] = useState(false);
   const [copyingGroupMsg, setCopyingGroupMsg] = useState(false);
   const birthdayRef = useRef<HTMLDivElement>(null);
-  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const isTuesday = new Date().getDay() === 2;
 
   const resetForm = () => {
     setFormTitle("");
     setFormContent("");
-    setFormCategory("announcement");
-    setSaleType("");
-    setSaleData(EMPTY_SALE_DATA);
-    setSaleMainImage(null);
-    setSaleGalleryImages([]);
   };
 
   const [creatorProfiles, setCreatorProfiles] = useState<Record<string, any>>({});
