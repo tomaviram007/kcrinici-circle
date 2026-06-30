@@ -1201,6 +1201,60 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_banners: {
+        Row: {
+          body: string | null
+          button_text: string | null
+          button_url: string | null
+          created_at: string
+          created_by: string | null
+          days_of_week: number[] | null
+          display_order: number
+          emoji: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          start_date: string | null
+          target_page: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          button_text?: string | null
+          button_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          days_of_week?: number[] | null
+          display_order?: number
+          emoji?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date?: string | null
+          target_page?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          button_text?: string | null
+          button_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          days_of_week?: number[] | null
+          display_order?: number
+          emoji?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date?: string | null
+          target_page?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth_key: string
