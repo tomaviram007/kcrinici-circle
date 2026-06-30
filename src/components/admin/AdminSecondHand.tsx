@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, EyeOff, Eye, Package } from "lucide-react";
+import { Trash2, EyeOff, Eye, Package, CheckCircle2 } from "lucide-react";
 
 interface Item {
   id: string;
@@ -14,6 +14,7 @@ interface Item {
   condition: string;
   is_active: boolean;
   is_sold: boolean;
+  is_approved: boolean;
   images: string[];
   created_at: string;
   created_by: string | null;
@@ -49,6 +50,12 @@ const AdminSecondHand = () => {
     const { error } = await supabase.from("secondhand_items").update({ is_active: !it.is_active }).eq("id", it.id);
     if (error) toast({ title: "שגיאה", description: error.message, variant: "destructive" });
     else fetchAll();
+  };
+
+  const approve = async (it: Item) => {
+    const { error } = await supabase.from("secondhand_items").update({ is_approved: true }).eq("id", it.id);
+    if (error) toast({ title: "שגיאה", description: error.message, variant: "destructive" });
+    else { toast({ title: "אושר ופורסם" }); fetchAll(); }
   };
 
   const remove = async (id: string) => {
@@ -92,10 +99,16 @@ const AdminSecondHand = () => {
                 </p>
                 <div className="flex flex-wrap gap-1 mt-1">
                   <Badge variant="outline" className="text-[10px]">{it.category}</Badge>
+                  {!it.is_approved && <Badge className="text-[10px] bg-amber-500 text-white">ממתין לאישור</Badge>}
                   {it.is_sold && <Badge variant="destructive" className="text-[10px]">נמכר</Badge>}
                   {!it.is_active && <Badge variant="secondary" className="text-[10px]">מוסתר</Badge>}
                 </div>
-                <div className="flex gap-1 mt-2">
+                <div className="flex gap-1 mt-2 flex-wrap">
+                  {!it.is_approved && (
+                    <Button size="sm" variant="ghost" className="h-7 text-xs text-emerald-600" onClick={() => approve(it)}>
+                      <CheckCircle2 className="h-3 w-3 ml-1" />אשר
+                    </Button>
+                  )}
                   <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => toggleActive(it)}>
                     {it.is_active ? <><EyeOff className="h-3 w-3 ml-1" />הסתר</> : <><Eye className="h-3 w-3 ml-1" />הצג</>}
                   </Button>
