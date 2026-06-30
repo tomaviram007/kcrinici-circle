@@ -106,6 +106,7 @@ const Index = () => {
           <ScrollReveal delay={0.05}>
             <SecondHandPreviewSection isApproved={isApproved} />
           </ScrollReveal>
+        </div>
       </ContentWithSidebarAds>
 
       <PollPopup />
