@@ -82,6 +82,8 @@ const Gallery = () => {
   // Lightbox
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -95,6 +97,21 @@ const Gallery = () => {
     };
     init();
   }, []);
+
+  // Auto-open album when ?album=<id> is present in URL
+  useEffect(() => {
+    const albumId = searchParams.get("album");
+    if (!albumId || albums.length === 0 || selectedAlbum?.id === albumId) return;
+    const target = albums.find((a) => a.id === albumId);
+    if (target) {
+      openAlbum(target);
+      // Clear query so back-navigation works naturally
+      const next = new URLSearchParams(searchParams);
+      next.delete("album");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [albums, searchParams]);
 
   const fetchAlbums = async () => {
     const [albumsRes, eventsRes] = await Promise.all([
