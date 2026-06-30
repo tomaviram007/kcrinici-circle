@@ -246,6 +246,12 @@ const Jobs = () => {
                 </span>
               )}
             </div>
+            <div className="mt-3 pt-2 border-t border-border/40 flex justify-end">
+              <ShareButtons
+                title={job.title}
+                text={`משרה: ${job.title}${job.company_name ? ` ב-${job.company_name}` : ""} — לוח הדרושים של הגברים של ק.קרניצי`}
+              />
+            </div>
           </div>
         ))}
       </div>
