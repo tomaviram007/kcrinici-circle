@@ -27,7 +27,6 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isApproved) return;
     const fetch = async () => {
       const { data } = await supabase
         .from("announcements")
@@ -47,7 +46,7 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
       }
     };
     fetch();
-  }, [isApproved]);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current) return;
