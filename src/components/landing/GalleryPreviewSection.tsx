@@ -36,7 +36,7 @@ const GalleryPreviewSection = ({ isApproved }: Props) => {
     gsap.fromTo(cards, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: "power3.out" });
   }, [albums]);
 
-  if (!isApproved || albums.length === 0) return null;
+  if (albums.length === 0) return null;
 
   return (
     <section className="py-8 px-5 sm:py-16 sm:px-6" ref={sectionRef}>
