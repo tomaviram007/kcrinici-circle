@@ -336,31 +336,45 @@ const Announcements = () => {
     return imgs;
   };
 
-  // ===== Render announcement card (note-style) =====
-  const renderAnnouncementCard = (item: any, i: number) => (
-    <div key={item.id} className={`group relative ${ROTATIONS[i % ROTATIONS.length]} hover:rotate-0 transition-transform duration-300`}>
-      <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 ${TAPE_COLORS[i % TAPE_COLORS.length]} rounded-sm z-10 shadow-sm`} />
-      <div className="relative bg-[#fdf6e3] dark:bg-[#f5f0dc] rounded shadow-lg p-5 pt-6 min-h-[180px] flex flex-col border border-amber-200/30">
-        <div className="absolute inset-x-5 top-6 bottom-5 pointer-events-none">
-          {[...Array(8)].map((_, lineIdx) => (
-            <div key={lineIdx} className="border-b border-blue-200/30" style={{ height: "22px" }} />
-          ))}
+  // ===== Render announcement card (banner style) =====
+  const renderAnnouncementCard = (item: any, i: number) => {
+    const creator = item.created_by ? creatorProfiles[item.created_by] : null;
+    return (
+      <div
+        key={item.id}
+        className="group relative rounded-xl border border-gold/30 bg-card/60 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 hover:border-gold/60 transition-colors"
+      >
+        <div className="shrink-0 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg bg-gold/10 border border-gold/30">
+          <Megaphone className="h-5 w-5 text-gold" />
         </div>
-        <div className="relative z-[1] flex-1 flex flex-col items-center justify-center text-center">
-          <h3 className="font-serif text-lg font-bold text-gray-800 leading-tight mb-2">{item.title}</h3>
-          <p className="font-body text-sm text-gray-600 leading-relaxed whitespace-pre-line">{item.content}</p>
+
+        <div className="flex-1 min-w-0 text-right">
+          <h3 className="font-serif text-base sm:text-lg font-bold text-gold leading-tight mb-1">
+            {item.title}
+          </h3>
+          <p className="font-body text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+            {item.content}
+          </p>
+          <div className="mt-2 flex items-center justify-end gap-2 text-[11px] font-body text-muted-foreground/70">
+            <Calendar className="h-3 w-3" />
+            <span>{new Date(item.created_at).toLocaleDateString("he-IL")}</span>
+            {creator?.full_name && <span>• {creator.full_name}</span>}
+          </div>
         </div>
-        <div className="relative z-[1] mt-3 text-center">
-          <span className="font-body text-[11px] text-gray-400">
-            {new Date(item.created_at).toLocaleDateString("he-IL")}
-            {item.created_by && creatorProfiles[item.created_by] && (
-              <> • {creatorProfiles[item.created_by].full_name}</>
-            )}
-          </span>
-        </div>
+
+        <a
+          href={`https://api.whatsapp.com/send?text=${buildShareMessage(item)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-xs sm:text-sm text-green-600 hover:bg-green-600/20 transition-colors"
+          title="שתף בוואטסאפ"
+        >
+          <MessageCircle className="h-4 w-4" />
+          <span className="hidden sm:inline">לקבוצה</span>
+        </a>
       </div>
-    </div>
-  );
+    );
+  };
 
   // ===== Render sale card =====
   const renderSaleCard = (item: any) => {
@@ -713,7 +727,7 @@ const Announcements = () => {
       {filteredAnnouncements.length === 0 ? (
         <p className="font-body text-muted-foreground text-center py-12">אין הודעות כרגע.</p>
       ) : (
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           {filteredAnnouncements.map((item, i) => renderAnnouncementCard(item, i))}
         </div>
       )}
