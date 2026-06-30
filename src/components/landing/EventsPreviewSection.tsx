@@ -148,10 +148,10 @@ const EventsPreviewSection = ({ isApproved }: Props) => {
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
 
-  const displayEvents = isApproved ? events : (events.length > 0 ? events : mockEvents);
-
   // Hide section entirely when no real upcoming events exist
   if (events.length === 0) return null;
+
+  const displayEvents = events;
 
 
   return (
