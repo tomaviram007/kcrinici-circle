@@ -21,7 +21,6 @@ const GalleryPreviewSection = ({ isApproved }: Props) => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isApproved) return;
     supabase
       .from("gallery_albums")
       .select("id, title, description, cover_image_url, created_at")
@@ -29,7 +28,7 @@ const GalleryPreviewSection = ({ isApproved }: Props) => {
       .order("created_at", { ascending: false })
       .limit(3)
       .then(({ data }) => setAlbums(data || []));
-  }, [isApproved]);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current || albums.length === 0) return;
