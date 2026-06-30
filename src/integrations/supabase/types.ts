@@ -1578,6 +1578,16 @@ export type Database = {
           participant_count: number
         }[]
       }
+      get_latest_event_banner: {
+        Args: never
+        Returns: {
+          album_id: string
+          event_date: string
+          event_id: string
+          image_url: string
+          title: string
+        }[]
+      }
       get_member_secondhand: {
         Args: never
         Returns: {

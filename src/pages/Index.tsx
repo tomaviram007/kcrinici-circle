@@ -55,14 +55,14 @@ const Index = () => {
     <main className="min-h-screen bg-background">
       <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
 
+      <ScrollReveal>
+        <ClubAboutSection />
+      </ScrollReveal>
+
       {/* Hero Ad Banner */}
       <div className="w-full px-5 sm:px-6 py-4">
         <SmartAdBanner placement="hero" targetPage="home" />
       </div>
-
-      <ScrollReveal>
-        <ClubAboutSection />
-      </ScrollReveal>
 
       {/* Premium ad placement - below About section */}
       <div className="page-container py-4">
