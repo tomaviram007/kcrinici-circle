@@ -232,6 +232,32 @@ const Register = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5" noValidate autoComplete="off">
+          {/* Avatar upload — required */}
+          <div className="flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className={cn(
+                "relative h-28 w-28 rounded-full border-2 bg-secondary overflow-hidden flex items-center justify-center transition-all hover:border-gold/60 focus:outline-none focus:ring-2 focus:ring-gold/30",
+                errors.avatar ? "border-destructive" : "border-gold/30"
+              )}
+            >
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="תמונת פרופיל" className="h-full w-full object-cover" />
+              ) : (
+                <User className="h-12 w-12 text-gold/60" />
+              )}
+              <div className="absolute -bottom-0.5 -left-0.5 rounded-full bg-card border border-border p-1.5">
+                <Camera className="h-3.5 w-3.5 text-gold" />
+              </div>
+            </button>
+            <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
+            <p className="font-body text-xs text-muted-foreground">
+              תמונת פרופיל <span className="text-gold">*</span> (חובה)
+            </p>
+            {errors.avatar && <p className="font-body text-xs text-destructive">{errors.avatar}</p>}
+          </div>
+
           <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
             <Field name="full_name" label="שם מלא" required {...fieldProps} />
             <Field name="phone" label="מספר טלפון" required dir="ltr" {...fieldProps} />
