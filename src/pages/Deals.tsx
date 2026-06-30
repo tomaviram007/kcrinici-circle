@@ -179,7 +179,7 @@ const Deals = () => {
       </PageHero>
 
       <ContentWithSidebarAds targetPage="deals">
-      <div className="page-container py-4 sm:px-6 sm:py-8" dir="rtl">
+      <div className="page-container py-4 sm:py-8" dir="rtl">
         {/* Member submit form */}
         {user && isApproved && <DealSubmitForm externalOpen={showSubmitForm} />}
 

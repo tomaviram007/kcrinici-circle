@@ -227,7 +227,7 @@ const Events = () => {
     <PageHero image={coverImage} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
     
     <ContentWithSidebarAds targetPage="events">
-    <div className="page-container py-4 sm:px-6 sm:py-8">
+    <div className="page-container py-4 sm:py-8">
       <div className="mb-6 sm:mb-10 flex items-start justify-between gap-3">
         <div>
           <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">

@@ -123,7 +123,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="page-container py-4 sm:px-6 sm:py-8 md:py-12">
+    <div className="page-container py-4 sm:py-8 md:py-12">
       <div className="mb-2">
         <Link to="/dashboard" className="inline-flex items-center gap-1 font-body text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowRight className="h-4 w-4" />

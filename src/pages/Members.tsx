@@ -189,7 +189,7 @@ const Members = () => {
     <>
     <PageHero image={coverImage} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
     <ContentWithSidebarAds targetPage="members">
-    <div className="page-container py-4 sm:px-6 sm:py-8">
+    <div className="page-container py-4 sm:py-8">
       <div className="mb-6 sm:mb-8">
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
           אינדקס <span className="text-gold">החברים</span>

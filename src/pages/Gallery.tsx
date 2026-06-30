@@ -392,7 +392,7 @@ const Gallery = () => {
   // Album detail view
   if (selectedAlbum) {
     return (
-      <div className="page-container py-4 sm:px-6 sm:py-8 md:py-12">
+      <div className="page-container py-4 sm:py-8 md:py-12">
         <button onClick={() => setSelectedAlbum(null)} className="inline-flex items-center gap-1 font-body text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
           <ArrowRight className="h-4 w-4" />
           {t("gallery.back")}
@@ -702,7 +702,7 @@ const Gallery = () => {
     <>
     <PageHero image={coverImage} title={t("gallery.heroTitle")} highlight={t("gallery.heroHighlight")} subtitle={t("gallery.heroSubtitle")} />
     <ContentWithSidebarAds targetPage="gallery">
-    <div className="page-container py-4 sm:px-6 sm:py-8 md:py-12">
+    <div className="page-container py-4 sm:py-8 md:py-12">
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="font-serif text-2xl font-bold text-foreground md:text-3xl">

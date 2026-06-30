@@ -65,7 +65,7 @@ const Index = () => {
       </ScrollReveal>
 
       {/* Premium ad placement - below About section */}
-      <div className="w-full page-container py-4">
+      <div className="page-container py-4">
         <SmartAdBanner placement="premium" targetPage="home" slotIndex={0} />
       </div>
 
