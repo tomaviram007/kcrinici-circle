@@ -78,12 +78,8 @@ const SecondHand = () => {
   const fetchItems = async () => {
     setLoading(true);
     if (isMember) {
-      const { data } = await supabase
-        .from("secondhand_items")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-      setItems((data as Item[]) || []);
+      const { data } = await (supabase as any).rpc("get_member_secondhand");
+      setItems((data || []) as Item[]);
     } else {
       const { data } = await (supabase as any).rpc("get_public_secondhand");
       setItems((data || []) as Item[]);
