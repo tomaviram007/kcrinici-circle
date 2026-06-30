@@ -1578,6 +1578,25 @@ export type Database = {
           participant_count: number
         }[]
       }
+      get_member_secondhand: {
+        Args: never
+        Returns: {
+          category: string
+          condition: string
+          contact_phone: string
+          created_at: string
+          created_by: string
+          currency: string
+          description: string
+          id: string
+          images: string[]
+          is_active: boolean
+          is_approved: boolean
+          is_sold: boolean
+          price: number
+          title: string
+        }[]
+      }
       get_poll_results: {
         Args: { _poll_id: string }
         Returns: {
