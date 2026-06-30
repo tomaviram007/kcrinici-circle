@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, MessageCircle, Gift, Megaphone, Calendar, Share2, X, Pencil } from "lucide-react";
+import { Plus, MessageCircle, Gift, Megaphone, Calendar, Share2, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
@@ -20,12 +20,6 @@ import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo";
 
@@ -64,7 +58,7 @@ const Announcements = () => {
   const [creatorProfiles, setCreatorProfiles] = useState<Record<string, any>>({});
 
   const fetchItems = async () => {
-    const { data } = await supabase.from("announcements").select("*").eq("is_approved", true).order("created_at", { ascending: false });
+    const { data } = await supabase.from("announcements").select("*").eq("is_approved", true).eq("category", "announcement").order("created_at", { ascending: false });
     setItems(data || []);
 
     const creatorIds = [...new Set((data || []).map((a: any) => a.created_by).filter(Boolean))];
@@ -135,10 +129,6 @@ const Announcements = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || !formContent.trim()) return;
-    if (formCategory === "sale" && !saleType) {
-      toast({ title: "שגיאה", description: "יש לבחור סוג מוצר", variant: "destructive" });
-      return;
-    }
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
@@ -146,23 +136,13 @@ const Announcements = () => {
       return;
     }
 
-    const insertData: any = {
+    const { error } = await supabase.from("announcements").insert({
       title: formTitle.trim(),
       content: formContent.trim(),
-      category: formCategory,
+      category: "announcement",
       created_by: session.user.id,
-    };
+    });
 
-    if (formCategory === "sale") {
-      insertData.sale_type = saleType;
-      const filteredSaleData: Record<string, string> = {};
-      Object.entries(saleData).forEach(([k, v]) => { if (v.trim()) filteredSaleData[k] = v.trim(); });
-      insertData.sale_data = filteredSaleData;
-      insertData.sale_image_url = saleMainImage;
-      insertData.sale_gallery_urls = saleGalleryImages;
-    }
-
-    const { error } = await supabase.from("announcements").insert(insertData);
     if (error) {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
       return;
@@ -172,9 +152,6 @@ const Announcements = () => {
     resetForm();
     setShowForm(false);
   };
-
-  const announcements = items.filter((i) => i.category !== "sale");
-  const sales = items.filter((i) => i.category === "sale");
 
   const filterItems = (list: any[]) => list.filter((i) => {
     if (filterMonth !== "all") {
@@ -190,8 +167,7 @@ const Announcements = () => {
     return true;
   });
 
-  const filteredAnnouncements = filterItems(announcements);
-  const filteredSales = filterItems(sales);
+  const filteredAnnouncements = filterItems(items);
 
   const buildWhatsAppUrl = (name: string, phone: string) => {
     const cleanPhone = phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
@@ -209,26 +185,8 @@ const Announcements = () => {
     return `בעוד ${diff} ימים`;
   };
 
-  const saleTypeLabel = (type: string) => SALE_TYPES.find((t) => t.value === type)?.label || type;
-
-  const saleFieldLabel = (key: string, st: string) => {
-    const fields = SALE_FIELDS[st] || SALE_FIELDS.general;
-    return fields.find((f) => f.key === key)?.label || key;
-  };
-
-  const currentSaleFields = saleType ? (SALE_FIELDS[saleType] || SALE_FIELDS.general) : [];
-
   const buildShareMessage = (item: any) => {
     let msg = `📢 *${item.title}*\n\n${item.content}`;
-    if (item.sale_data && typeof item.sale_data === "object") {
-      const entries = Object.entries(item.sale_data as Record<string, string>).filter(([, v]) => v);
-      if (entries.length > 0) {
-        msg += "\n\n📋 *פרטים:*";
-        entries.forEach(([k, v]) => {
-          msg += `\n• ${saleFieldLabel(k, item.sale_type || "general")}: ${v}`;
-        });
-      }
-    }
     if (item.created_by && creatorProfiles[item.created_by]) {
       const creator = creatorProfiles[item.created_by];
       msg += `\n\n👤 *מפרסם:* ${creator.full_name}`;
@@ -236,20 +194,6 @@ const Announcements = () => {
     }
     msg += "\n\n🏘️ _מודעה מלוח המודעות של הגברים של ק.קרניצי_";
     return encodeURIComponent(msg);
-  };
-
-  const openLightbox = (images: string[], startIndex: number) => {
-    setLightboxImages(images);
-    setLightboxIndex(startIndex);
-  };
-
-  const getAllImages = (item: any): string[] => {
-    const imgs: string[] = [];
-    if (item.sale_image_url) imgs.push(item.sale_image_url);
-    if (item.sale_gallery_urls && Array.isArray(item.sale_gallery_urls)) {
-      imgs.push(...item.sale_gallery_urls);
-    }
-    return imgs;
   };
 
   // ===== Render announcement card (banner style) =====
@@ -288,121 +232,6 @@ const Announcements = () => {
           <MessageCircle className="h-4 w-4" />
           <span className="hidden sm:inline">לקבוצה</span>
         </a>
-      </div>
-    );
-  };
-
-  // ===== Render sale card =====
-  const renderSaleCard = (item: any) => {
-    const allImages = getAllImages(item);
-    return (
-      <div key={item.id} className="rounded-xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-        {/* Main image */}
-        {item.sale_image_url ? (
-          <div
-            className="relative w-full h-48 cursor-pointer"
-            onClick={() => allImages.length > 0 && openLightbox(allImages, 0)}
-          >
-            <img src={item.sale_image_url} alt={item.title} className="w-full h-full object-cover" />
-            {item.is_sold && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                <span className="bg-red-500 text-white font-bold px-4 py-1.5 text-lg rounded font-body tracking-wider">SOLD</span>
-              </div>
-            )}
-            {allImages.length > 1 && (
-              <span className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] font-body px-1.5 py-0.5 rounded">
-                +{allImages.length - 1} תמונות
-              </span>
-            )}
-          </div>
-        ) : item.is_sold ? (
-          <div className="w-full h-24 bg-muted flex items-center justify-center">
-            <span className="bg-red-500 text-white font-bold px-4 py-1 text-sm rounded font-body tracking-wider">SOLD</span>
-          </div>
-        ) : null}
-
-        {/* Gallery thumbnails */}
-        {allImages.length > 1 && (
-          <div className="flex gap-1 p-2 overflow-x-auto">
-            {allImages.slice(0, 4).map((url, idx) => (
-              <div
-                key={idx}
-                className="shrink-0 w-14 h-14 rounded-md overflow-hidden border border-border cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => openLightbox(allImages, idx)}
-              >
-                <img src={url} alt="" className="w-full h-full object-cover" />
-              </div>
-            ))}
-            {allImages.length > 4 && (
-              <div
-                className="shrink-0 w-14 h-14 rounded-md bg-muted flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
-                onClick={() => openLightbox(allImages, 4)}
-              >
-                <span className="font-body text-xs text-muted-foreground">+{allImages.length - 4}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-1.5">
-            <h3 className="font-serif text-base font-bold text-foreground leading-tight flex-1 min-w-0 truncate">{item.title}</h3>
-            <div className="flex items-center gap-1 shrink-0 mr-2">
-              {!item.is_sold && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-body text-gold">
-                  <ShoppingBag className="h-3 w-3" /> {item.sale_type ? saleTypeLabel(item.sale_type) : "מכירה"}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <p className="font-body text-sm text-muted-foreground leading-relaxed whitespace-pre-line line-clamp-3">{item.content}</p>
-
-          {/* Sale data details */}
-          {item.sale_data && typeof item.sale_data === "object" && Object.keys(item.sale_data).length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {Object.entries(item.sale_data as Record<string, string>).filter(([, v]) => v).slice(0, 4).map(([key, val]) => (
-                <span key={key} className="inline-flex items-center gap-0.5 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-body text-foreground/70">
-                  {key === "price" && <Banknote className="h-2.5 w-2.5" />}
-                  {saleFieldLabel(key, item.sale_type || "general")}: {val}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-3 flex items-center justify-between gap-1 flex-wrap">
-            <span className="font-body text-[11px] text-muted-foreground">
-              {new Date(item.created_at).toLocaleDateString("he-IL")}
-              {item.created_by && creatorProfiles[item.created_by] && (
-                <> • {creatorProfiles[item.created_by].full_name}</>
-              )}
-            </span>
-            <div className="flex items-center gap-1">
-              {user?.id === item.created_by && !item.is_sold && (
-                <button
-                  onClick={async () => {
-                    await supabase.from("announcements").update({ is_sold: true }).eq("id", item.id);
-                    toast({ title: "סומן כנמכר!" });
-                    fetchItems();
-                  }}
-                  className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-body text-foreground/70 hover:bg-secondary/80 transition-colors"
-                  title="סמן כנמכר"
-                >
-                  <CheckCircle2 className="h-3 w-3" /> נמכר
-                </button>
-              )}
-              <a
-                href={`https://api.whatsapp.com/send?text=${buildShareMessage(item)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 rounded-full bg-green-600/10 px-2 py-0.5 text-[10px] font-body text-green-700 hover:bg-green-600/20 transition-colors"
-                title="שתף בוואטסאפ"
-              >
-                <Share2 className="h-3 w-3" /> שתף
-              </a>
-            </div>
-          </div>
-        </div>
       </div>
     );
   };
@@ -543,79 +372,8 @@ const Announcements = () => {
       {/* Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 rounded-lg border border-border bg-card p-5 space-y-3">
-          <Select value={formCategory} onValueChange={(v) => { setFormCategory(v); if (v !== "sale") { setSaleType(""); setSaleData(EMPTY_SALE_DATA); setSaleMainImage(null); setSaleGalleryImages([]); } }}>
-            <SelectTrigger className="bg-background font-body w-48">
-              <SelectValue placeholder="סוג מודעה" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="announcement">הודעה</SelectItem>
-              <SelectItem value="sale">מכירה</SelectItem>
-            </SelectContent>
-          </Select>
-
           <Input placeholder="כותרת המודעה" value={formTitle} onChange={(e) => setFormTitle(e.target.value)} required className="bg-background" autoComplete="off" />
-          <Textarea placeholder={formCategory === "sale" ? "תיאור המוצר / הפריט" : "תוכן המודעה"} value={formContent} onChange={(e) => setFormContent(e.target.value)} required className="bg-background min-h-[100px]" autoComplete="off" />
-
-          {/* Sale-specific fields */}
-          {formCategory === "sale" && (
-            <div className="space-y-3 rounded-lg border border-gold/20 bg-secondary/30 p-4">
-              <p className="font-body text-sm font-medium text-gold">📦 פרטי המכירה</p>
-              <Select value={saleType} onValueChange={(v) => { setSaleType(v); setSaleData(EMPTY_SALE_DATA); }}>
-                <SelectTrigger className="bg-background font-body">
-                  <SelectValue placeholder="סוג מוצר" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SALE_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      <span className="flex items-center gap-2">
-                        <t.icon className="h-4 w-4" /> {t.label}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {currentSaleFields.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {currentSaleFields.map((field) => (
-                    <div key={field.key}>
-                      {field.type === "select" ? (
-                        <Select value={saleData[field.key] || ""} onValueChange={(v) => setSaleData({ ...saleData, [field.key]: v })}>
-                          <SelectTrigger className="bg-background font-body">
-                            <SelectValue placeholder={field.label} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {field.options?.map((opt) => (
-                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input
-                          placeholder={field.label}
-                          value={saleData[field.key] || ""}
-                          onChange={(e) => setSaleData({ ...saleData, [field.key]: e.target.value })}
-                          className="bg-background"
-                          autoComplete="off"
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Image Upload */}
-              {user && (
-                <SaleImageUpload
-                  userId={user.id}
-                  mainImage={saleMainImage}
-                  galleryImages={saleGalleryImages}
-                  onMainImageChange={setSaleMainImage}
-                  onGalleryChange={setSaleGalleryImages}
-                />
-              )}
-            </div>
-          )}
+          <Textarea placeholder="תוכן המודעה" value={formContent} onChange={(e) => setFormContent(e.target.value)} required className="bg-background min-h-[100px]" autoComplete="off" />
 
           <p className="font-body text-xs text-muted-foreground">* המודעה תפורסם לאחר אישור מנהל המערכת</p>
           <div className="flex gap-2">
@@ -625,7 +383,7 @@ const Announcements = () => {
         </form>
       )}
 
-      {/* ==================== SECTION 1: ANNOUNCEMENTS ==================== */}
+      {/* ==================== SECTION: ANNOUNCEMENTS ==================== */}
       <div className="mb-6 sm:mb-8 mx-auto max-w-md text-center flex flex-col items-center">
         <div className="flex items-baseline justify-center gap-3 mb-2">
           <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">01</span>
@@ -648,7 +406,7 @@ const Announcements = () => {
         </div>
       )}
 
-      {/* ==================== PREMIUM AD - Between sections ==================== */}
+      {/* ==================== PREMIUM AD ==================== */}
       <div className="my-8">
         <SmartAdBanner
           placement="premium"
@@ -657,82 +415,7 @@ const Announcements = () => {
           fallbackPlacements={["between_content", "inline", "sidebar", "hero"]}
         />
       </div>
-
-      {/* ==================== SEPARATOR ==================== */}
-      <Separator className="my-12" />
-
-      {/* ==================== SECTION 2: SALES ==================== */}
-      <div className="mb-6 sm:mb-8 mx-auto max-w-md text-center flex flex-col items-center">
-        <div className="flex items-baseline justify-center gap-3 mb-2">
-          <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">02</span>
-          <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">שוק</span>
-        </div>
-        <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl flex items-center justify-center gap-2">
-          <ShoppingBag className="h-6 w-6 text-gold" />
-          לוח מכירות
-        </h2>
-        <p className="mt-2 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
-          מוצרים, שירותים ופריטים למכירה מחברי המועדון
-        </p>
-      </div>
-
-      {filteredSales.length === 0 ? (
-        <p className="font-body text-muted-foreground text-center py-12">אין מודעות מכירה כרגע.</p>
-      ) : (
-        <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredSales.map((item) => renderSaleCard(item))}
-        </div>
-      )}
     </div>
-
-    {/* Lightbox */}
-    <Dialog open={lightboxImages.length > 0} onOpenChange={() => setLightboxImages([])}>
-      <DialogContent className="max-w-3xl p-0 bg-black/95 border-0">
-        <DialogHeader className="sr-only">
-          <DialogTitle>תמונות</DialogTitle>
-        </DialogHeader>
-        <div className="relative flex items-center justify-center min-h-[50vh]">
-          <button
-            onClick={() => setLightboxImages([])}
-            className="absolute top-3 left-3 z-20 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-          {lightboxImages.length > 1 && (
-            <>
-              <button
-                onClick={() => setLightboxIndex((i) => (i + 1) % lightboxImages.length)}
-                className="absolute right-3 z-20 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
-              >
-                <ChevronRight className="h-6 w-6" />
-              </button>
-              <button
-                onClick={() => setLightboxIndex((i) => (i - 1 + lightboxImages.length) % lightboxImages.length)}
-                className="absolute left-14 z-20 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-            </>
-          )}
-          <img
-            src={lightboxImages[lightboxIndex]}
-            alt=""
-            className="max-h-[80vh] max-w-full object-contain"
-          />
-          {lightboxImages.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {lightboxImages.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setLightboxIndex(idx)}
-                  className={`w-2 h-2 rounded-full transition-colors ${idx === lightboxIndex ? "bg-white" : "bg-white/30"}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
 
     </ContentWithSidebarAds>
     <QuoteSection page="announcements" />
