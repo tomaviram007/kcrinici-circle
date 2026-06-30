@@ -18,6 +18,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
+import LatestEventBanner from "@/components/landing/LatestEventBanner";
 
 const Index = () => {
   const { user, isApproved } = useAuth();
