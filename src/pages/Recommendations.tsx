@@ -259,7 +259,7 @@ const Recommendations = () => {
       </PageHero>
       
       <ContentWithSidebarAds targetPage="recommendations">
-      <div className="max-w-7xl mx-auto px-5 py-4 sm:px-6 sm:py-8" dir="rtl">
+      <div className="page-container py-4 sm:px-6 sm:py-8" dir="rtl">
         {/* Action Bar */}
         <div className="flex flex-col md:flex-row gap-4 mb-6 items-start md:items-center">
           {user && isApproved && (

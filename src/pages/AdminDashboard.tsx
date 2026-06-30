@@ -103,7 +103,7 @@ const AdminDashboard = () => {
     <>
       <PageHero image={coverImage} title="שולחן" highlight="המנהל" subtitle="ניהול המועדון, אישור חברים ופרסום תוכן" />
 
-      <div className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-8 overflow-x-hidden">
+      <div className="page-container py-4 sm:px-6 sm:py-8 overflow-x-hidden">
         {/* Notification center + Stats row */}
         <div className="flex items-center justify-between mb-4" dir="rtl">
           <h2 className="font-serif text-lg font-bold text-foreground">סקירה כללית</h2>
