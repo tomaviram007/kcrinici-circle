@@ -44,7 +44,7 @@ export const useSiteLogo = (): SiteLogoSettings => {
     fetchSettings();
 
     const channel = supabase
-      .channel("site-settings-realtime")
+      .channel(`site-settings-realtime-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "site_settings" },
