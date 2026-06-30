@@ -1621,6 +1621,22 @@ export type Database = {
           title: string
         }[]
       }
+      get_public_events: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          end_date: string
+          event_date: string
+          id: string
+          image_url: string
+          is_admin_only: boolean
+          max_participants: number
+          price: number
+          registration_required: boolean
+          title: string
+        }[]
+      }
       get_public_jobs: {
         Args: never
         Returns: {
