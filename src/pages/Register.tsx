@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
-import { Globe, Facebook, Instagram, Linkedin, ArrowRight } from "lucide-react";
+import { Globe, Facebook, Instagram, Linkedin, ArrowRight, Camera, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,7 @@ import { z } from "zod";
 import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { cn } from "@/lib/utils";
 import RegisterBackground from "@/components/register/RegisterBackground";
+import { validateImageFile } from "@/lib/file-validation";
 
 const registerSchema = z.object({
   full_name: z.string().trim().min(2, "שם חייב להכיל לפחות 2 תווים").max(100, "שם ארוך מדי"),
