@@ -18,7 +18,6 @@ import ScrollReveal from "@/components/ScrollReveal";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
-import LatestEventBanner from "@/components/landing/LatestEventBanner";
 
 const Index = () => {
   const { user, isApproved } = useAuth();
@@ -56,9 +55,9 @@ const Index = () => {
     <main className="min-h-screen bg-background">
       <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
 
-      {/* Latest event banner (replaces hero ad) */}
+      {/* Hero Ad Banner */}
       <div className="w-full px-5 sm:px-6 py-4">
-        <LatestEventBanner />
+        <SmartAdBanner placement="hero" targetPage="home" />
       </div>
 
       <ScrollReveal>
