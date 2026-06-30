@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import AdminJobs from "@/components/admin/AdminJobs";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminAnnouncements from "@/components/admin/AdminAnnouncements";
+import AdminPromoBanners from "@/components/admin/AdminPromoBanners";
 import AdminPolls from "@/components/admin/AdminPolls";
 import AdminQuotes from "@/components/admin/AdminQuotes";
 import AdminLogo from "@/components/admin/AdminLogo";
@@ -136,6 +137,7 @@ const AdminDashboard = () => {
           <div className="flex-1 min-w-0">
             {activeTab === "members" && hasPermission("manage_members") && <AdminMembers />}
             {activeTab === "announcements" && hasPermission("manage_announcements") && <AdminAnnouncements />}
+            {activeTab === "promo_banners" && hasPermission("manage_announcements") && <AdminPromoBanners />}
             {activeTab === "jobs" && hasPermission("manage_jobs") && <AdminJobs />}
             {activeTab === "events" && hasPermission("manage_events") && <AdminEvents />}
             {activeTab === "polls" && hasPermission("manage_polls") && <AdminPolls />}

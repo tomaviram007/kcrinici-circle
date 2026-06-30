@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Users, Megaphone, Briefcase, Calendar, BarChart3, Image, Shield, Quote, ImageIcon, Award, Search, ChevronDown, Tv, Package, Mail, Eye, MailX, FileEdit, Cake, Lock } from "lucide-react";
+import { Users, Megaphone, Briefcase, Calendar, BarChart3, Image, Shield, Quote, ImageIcon, Award, Search, ChevronDown, Tv, Package, Mail, Eye, MailX, FileEdit, Cake, Lock, Bell } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -31,6 +31,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   communication: "manage_settings",
   birthdays: "manage_members",
   content_access: "manage_settings",
+  promo_banners: "manage_announcements",
 };
 
 const groups = [
@@ -46,6 +47,7 @@ const groups = [
     label: "תוכן קהילתי",
     items: [
       { id: "announcements", label: "מודעות", icon: Megaphone },
+      { id: "promo_banners", label: "באנרים", icon: Bell },
       { id: "jobs", label: "דרושים", icon: Briefcase },
       { id: "events", label: "אירועים", icon: Calendar },
       { id: "recommendations", label: "המלצות", icon: Award },
