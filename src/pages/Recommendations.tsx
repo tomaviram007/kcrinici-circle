@@ -21,6 +21,7 @@ import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import recommendationsHero from "@/assets/recommendations-hero.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
+import ShareButtons from "@/components/ShareButtons";
 
 
 const CATEGORIES = [
