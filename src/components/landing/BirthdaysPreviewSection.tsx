@@ -105,9 +105,10 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
     { full_name: "משה ישראלי", birth_date: "1988-03-28", profession: "אדריכל", avatar_url: null, user_id: "m4" },
   ];
 
-  const displayItems = isApproved && birthdays.length > 0 ? birthdays : !isApproved ? mockBirthdays : [];
+  // Hide section entirely when no real birthdays this month
+  if (birthdays.length === 0) return null;
 
-  if (isApproved && birthdays.length === 0) return null;
+  const displayItems = isApproved ? birthdays : mockBirthdays;
 
   return (
     <>
