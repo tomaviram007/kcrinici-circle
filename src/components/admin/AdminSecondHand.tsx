@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, EyeOff, Eye, Package } from "lucide-react";
+import { Trash2, EyeOff, Eye, Package, CheckCircle2 } from "lucide-react";
 
 interface Item {
   id: string;
@@ -14,6 +14,7 @@ interface Item {
   condition: string;
   is_active: boolean;
   is_sold: boolean;
+  is_approved: boolean;
   images: string[];
   created_at: string;
   created_by: string | null;
