@@ -55,9 +55,9 @@ const Index = () => {
     <main className="min-h-screen bg-background">
       <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
 
-      {/* Hero Ad Banner */}
+      {/* Latest event banner (replaces hero ad) */}
       <div className="w-full px-5 sm:px-6 py-4">
-        <SmartAdBanner placement="hero" targetPage="home" />
+        <LatestEventBanner />
       </div>
 
       <ScrollReveal>
