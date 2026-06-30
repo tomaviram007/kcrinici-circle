@@ -235,7 +235,7 @@ const Members = () => {
 
       {/* Grid / List */}
       {viewMode === "grid" ? (
-      <div ref={gridRef} className="grid gap-6 grid-cols-1 lg:grid-cols-2 sm:gap-8">
+      <div ref={gridRef} className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 sm:gap-8">
         {filtered.map((member, idx) => {
           const birthdayToday = isBirthdayToday(member.birth_date);
           const elements: React.ReactNode[] = [];
