@@ -38,6 +38,7 @@ const Announcements = () => {
   const canEditAnnouncements = hasPermission("manage_announcements");
   const coverImage = usePageCover("announcements", heroImg);
   const [items, setItems] = useState<any[]>([]);
+  const [promoBanners, setPromoBanners] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [formTitle, setFormTitle] = useState("");
   const [formContent, setFormContent] = useState("");
@@ -48,7 +49,7 @@ const Announcements = () => {
   const [copyingGroupMsg, setCopyingGroupMsg] = useState(false);
   const birthdayRef = useRef<HTMLDivElement>(null);
 
-  const isTuesday = new Date().getDay() === 2;
+  const todayDow = new Date().getDay();
 
   const resetForm = () => {
     setFormTitle("");
