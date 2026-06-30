@@ -93,7 +93,25 @@ const Announcements = () => {
     }
   };
 
-  useEffect(() => { fetchItems(); fetchUpcomingBirthdays(); }, []);
+  const fetchPromoBanners = async () => {
+    const { data } = await supabase
+      .from("promo_banners")
+      .select("*")
+      .eq("is_active", true)
+      .eq("target_page", "announcements")
+      .order("display_order", { ascending: true });
+    const now = new Date();
+    const dow = now.getDay();
+    const filtered = (data || []).filter((b: any) => {
+      if (b.days_of_week && b.days_of_week.length > 0 && !b.days_of_week.includes(dow)) return false;
+      if (b.start_date && new Date(b.start_date) > now) return false;
+      if (b.end_date && new Date(b.end_date) < now) return false;
+      return true;
+    });
+    setPromoBanners(filtered);
+  };
+
+  useEffect(() => { fetchItems(); fetchUpcomingBirthdays(); fetchPromoBanners(); }, []);
 
   // Mark announcements as seen when user visits this page
   useEffect(() => {
