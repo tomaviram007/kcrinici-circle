@@ -113,7 +113,7 @@ const Jobs = () => {
       )}
     </PageHero>
     <ContentWithSidebarAds targetPage="jobs">
-    <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 sm:py-8">
+    <div className="page-container py-4 sm:py-8">
       <div className="mb-6 sm:mb-8 flex flex-col gap-4">
         <div className="flex items-start sm:items-center justify-between gap-3">
           <div>

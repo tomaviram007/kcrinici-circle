@@ -1,6 +1,6 @@
 const Privacy = () => (
   <main className="min-h-screen bg-background" dir="rtl">
-    <div className="max-w-4xl mx-auto px-5 sm:px-6 py-10 sm:py-16 md:py-24">
+    <div className="page-container py-10 sm:py-16 md:py-24">
       <h1 className="font-serif text-3xl sm:text-4xl font-bold text-foreground mb-8">מדיניות פרטיות</h1>
       <div className="prose prose-invert max-w-none font-body text-muted-foreground space-y-6">
         <section>

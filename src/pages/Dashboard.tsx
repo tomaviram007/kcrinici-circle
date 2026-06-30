@@ -52,7 +52,7 @@ const Dashboard = () => {
     <>
     <PageHero image={coverImage} title="ברוך הבא" highlight="למועדון" subtitle="המרכז שלך לכל מה שקורה בקהילה" />
     
-    <div className="mx-auto max-w-6xl px-5 py-4 sm:px-6 sm:py-8 md:py-12">
+    <div className="page-container py-4 sm:py-8 md:py-12">
       <div className="mb-4 sm:mb-8 md:mb-12 flex items-center gap-4 sm:gap-5">
         <AvatarUpload userId={userId} currentUrl={avatarUrl} onUpload={setAvatarUrl} size="lg" />
         <div>

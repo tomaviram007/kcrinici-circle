@@ -209,7 +209,7 @@ const SecondHand = () => {
         subtitle={t("secondhand.heroSubtitle")}
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12" dir="rtl">
+      <div className="page-container py-8 sm:py-12" dir="rtl">
         {/* Toolbar */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center gap-3">
           <Input

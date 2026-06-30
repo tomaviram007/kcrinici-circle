@@ -491,7 +491,7 @@ const Announcements = () => {
       )}
     </PageHero>
     <ContentWithSidebarAds targetPage="announcements">
-    <div className="mx-auto max-w-6xl px-5 py-4 sm:px-6 sm:py-8 md:py-12">
+    <div className="page-container py-4 sm:py-8 md:py-12">
 
       {/* Tuesday Banner */}
       {isTuesday && (
