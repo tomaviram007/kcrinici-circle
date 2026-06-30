@@ -127,8 +127,15 @@ const Register = () => {
         if (!fieldErrors[field]) fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
+    }
+
+    if (!avatarFile) {
+      setErrors((prev) => ({ ...prev, avatar: "חובה להעלות תמונת פרופיל" }));
+      toast({ title: "תמונת פרופיל חסרה", description: "יש להעלות תמונת פרופיל כדי להירשם", variant: "destructive" });
       return;
     }
+
+    if (!result.success) return;
 
     setLoading(true);
     try {
@@ -156,13 +163,27 @@ const Register = () => {
 
       if (error) throw error;
 
+      const newUserId = signUpData.user?.id;
+      if (newUserId && avatarFile) {
+        try {
+          const ext = avatarFile.name.split(".").pop() || "jpg";
+          const path = `${newUserId}/avatar.${ext}`;
+          const { error: upErr } = await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+          if (!upErr) {
+            const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+            const urlWithCache = `${publicUrl}?t=${Date.now()}`;
+            await supabase.from("profiles").update({ avatar_url: urlWithCache }).eq("user_id", newUserId);
+          }
+        } catch { /* non-blocking */ }
+      }
+
       sendTelegramNotification("new_member", {
         name: form.full_name,
         phone: form.phone,
         address: form.address,
         profession: form.profession,
         email: form.email,
-        user_id: signUpData.user?.id,
+        user_id: newUserId,
       });
 
       toast({
