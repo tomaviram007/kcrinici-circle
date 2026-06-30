@@ -36,7 +36,6 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
   };
 
   useEffect(() => {
-    if (!isApproved) return;
     const fetchBirthdays = async () => {
       const { data } = await supabase
         .from("profiles")
@@ -47,9 +46,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
 
       const now = new Date();
       const currentMonth = now.getMonth();
-      const currentDate = now.getDate();
 
-      // Get birthdays this month, sorted by day
       const matched = data
         .filter((p) => {
           if (!p.birth_date) return false;
@@ -66,7 +63,7 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
       setBirthdays(matched);
     };
     fetchBirthdays();
-  }, [isApproved]);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current || birthdays.length === 0) return;
