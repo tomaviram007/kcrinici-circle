@@ -40,6 +40,7 @@ interface Item {
   images: string[];
   contact_phone: string | null;
   is_sold: boolean;
+  sold_status: string | null;
   is_active: boolean;
   created_by: string | null;
   created_at: string;
