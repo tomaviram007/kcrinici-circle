@@ -197,9 +197,16 @@ const SecondHand = () => {
     }
   };
 
-  const toggleSold = async (it: Item) => {
-    const { error } = await supabase.from("secondhand_items").update({ is_sold: !it.is_sold }).eq("id", it.id);
-    if (!error) fetchItems();
+  const setSoldStatus = async (it: Item, status: "sold" | "given" | null) => {
+    const { error } = await (supabase as any)
+      .from("secondhand_items")
+      .update({ is_sold: status !== null, sold_status: status })
+      .eq("id", it.id);
+    if (error) {
+      toast({ title: t("secondhand.toastError"), description: error.message, variant: "destructive" });
+    } else {
+      fetchItems();
+    }
   };
 
   return (
