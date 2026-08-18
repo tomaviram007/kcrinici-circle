@@ -14,6 +14,7 @@ interface Item {
   condition: string;
   is_active: boolean;
   is_sold: boolean;
+  sold_status: string | null;
   images: string[];
   created_at: string;
   created_by: string | null;

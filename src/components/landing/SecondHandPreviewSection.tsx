@@ -79,7 +79,9 @@ const SecondHandPreviewSection = ({ isApproved }: Props) => {
                   </div>
                 )}
                 {item.is_sold && (
-                  <div className="absolute top-2 right-2 rounded bg-red-600/90 px-2 py-0.5 font-body text-xs text-white">נמכר</div>
+                  <div className="absolute top-2 right-2 rounded bg-red-600/90 px-2 py-0.5 font-body text-xs text-white">
+                    {item.sold_status === "given" ? "נמסר" : "נמכר"}
+                  </div>
                 )}
               </div>
               <div className="p-4 sm:p-5">
