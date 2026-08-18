@@ -22,7 +22,7 @@ export const usePendingCount = () => {
     // Guard against StrictMode double-invocation and leaked channels
     if (!channelRef.current) {
       const channel = supabase
-        .channel("pending-count")
+        .channel(`pending-count-${Math.random().toString(36).slice(2)}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "profiles" },
