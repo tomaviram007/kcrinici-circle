@@ -1341,6 +1341,7 @@ export type Database = {
           is_approved: boolean
           is_sold: boolean
           price: number | null
+          sold_status: string | null
           title: string
           updated_at: string
         }
@@ -1360,6 +1361,7 @@ export type Database = {
           is_approved?: boolean
           is_sold?: boolean
           price?: number | null
+          sold_status?: string | null
           title: string
           updated_at?: string
         }
@@ -1379,6 +1381,7 @@ export type Database = {
           is_approved?: boolean
           is_sold?: boolean
           price?: number | null
+          sold_status?: string | null
           title?: string
           updated_at?: string
         }
@@ -1659,6 +1662,7 @@ export type Database = {
           is_approved: boolean
           is_sold: boolean
           price: number
+          sold_status: string
           title: string
         }[]
       }
@@ -1749,6 +1753,7 @@ export type Database = {
           images: string[]
           is_sold: boolean
           price: number
+          sold_status: string
           title: string
         }[]
       }

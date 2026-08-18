@@ -28,6 +28,8 @@ const CONDITIONS = [
   { value: "needs_repair", label: "דורש תיקון" },
 ];
 const conditionLabel = (v: string) => CONDITIONS.find(c => c.value === v)?.label || v;
+const soldLabel = (it: { is_sold: boolean; sold_status?: string | null }) =>
+  !it.is_sold ? "" : it.sold_status === "given" ? "נמסר" : "נמכר";
 
 interface Item {
   id: string;
@@ -40,6 +42,7 @@ interface Item {
   images: string[];
   contact_phone: string | null;
   is_sold: boolean;
+  sold_status: string | null;
   is_active: boolean;
   created_by: string | null;
   created_at: string;
@@ -196,9 +199,16 @@ const SecondHand = () => {
     }
   };
 
-  const toggleSold = async (it: Item) => {
-    const { error } = await supabase.from("secondhand_items").update({ is_sold: !it.is_sold }).eq("id", it.id);
-    if (!error) fetchItems();
+  const setSoldStatus = async (it: Item, status: "sold" | "given" | null) => {
+    const { error } = await (supabase as any)
+      .from("secondhand_items")
+      .update({ is_sold: status !== null, sold_status: status })
+      .eq("id", it.id);
+    if (error) {
+      toast({ title: t("secondhand.toastError"), description: error.message, variant: "destructive" });
+    } else {
+      fetchItems();
+    }
   };
 
   return (
@@ -270,7 +280,7 @@ const SecondHand = () => {
                     {it.is_sold && (
                       <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
                         <span className="rotate-[-12deg] border-4 border-destructive text-destructive font-serif font-bold text-3xl px-6 py-1 rounded">
-                          {t("secondhand.sold")}
+                          {soldLabel(it)}
                         </span>
                       </div>
                     )}
@@ -301,13 +311,24 @@ const SecondHand = () => {
                       />
                     </div>
                     {isOwner && (
-                      <div className="flex gap-1.5 pt-2 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
                         <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => openEdit(it)}>
                           <Pencil className="h-3 w-3 ml-1" /> {t("secondhand.edit")}
                         </Button>
-                        <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => toggleSold(it)}>
-                          <CheckCircle2 className="h-3 w-3 ml-1" /> {it.is_sold ? t("secondhand.returnToSale") : t("secondhand.markSold")}
-                        </Button>
+                        {it.is_sold ? (
+                          <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setSoldStatus(it, null)}>
+                            <CheckCircle2 className="h-3 w-3 ml-1" /> החזר למכירה
+                          </Button>
+                        ) : (
+                          <>
+                            <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setSoldStatus(it, "sold")}>
+                              <CheckCircle2 className="h-3 w-3 ml-1" /> סמן כנמכר
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setSoldStatus(it, "given")}>
+                              <CheckCircle2 className="h-3 w-3 ml-1" /> סמן כנמסר
+                            </Button>
+                          </>
+                        )}
                         <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => handleDelete(it.id)}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -529,7 +550,7 @@ const SecondHand = () => {
                 <div className="flex flex-wrap gap-2">
                   <Badge className="bg-gold/20 text-gold border-gold/40">{viewItem.category}</Badge>
                   <Badge variant="outline">{conditionLabel(viewItem.condition)}</Badge>
-                  {viewItem.is_sold && <Badge variant="destructive">{t("secondhand.sold")}</Badge>}
+                  {viewItem.is_sold && <Badge variant="destructive">{soldLabel(viewItem)}</Badge>}
                 </div>
                 {viewItem.price !== null && (
                   <p className="font-serif text-3xl font-bold text-gold">₪{viewItem.price.toLocaleString("he-IL")}</p>

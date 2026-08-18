@@ -14,6 +14,7 @@ interface Item {
   condition: string;
   is_active: boolean;
   is_sold: boolean;
+  sold_status: string | null;
   images: string[];
   created_at: string;
   created_by: string | null;
@@ -92,7 +93,7 @@ const AdminSecondHand = () => {
                 </p>
                 <div className="flex flex-wrap gap-1 mt-1">
                   <Badge variant="outline" className="text-[10px]">{it.category}</Badge>
-                  {it.is_sold && <Badge variant="destructive" className="text-[10px]">נמכר</Badge>}
+                  {it.is_sold && <Badge variant="destructive" className="text-[10px]">{it.sold_status === "given" ? "נמסר" : "נמכר"}</Badge>}
                   {!it.is_active && <Badge variant="secondary" className="text-[10px]">מוסתר</Badge>}
                 </div>
                 <div className="flex gap-1 mt-2">
