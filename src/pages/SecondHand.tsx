@@ -28,6 +28,8 @@ const CONDITIONS = [
   { value: "needs_repair", label: "דורש תיקון" },
 ];
 const conditionLabel = (v: string) => CONDITIONS.find(c => c.value === v)?.label || v;
+const soldLabel = (it: { is_sold: boolean; sold_status?: string | null }) =>
+  !it.is_sold ? "" : it.sold_status === "given" ? "נמסר" : "נמכר";
 
 interface Item {
   id: string;
