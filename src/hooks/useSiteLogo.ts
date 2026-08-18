@@ -1,6 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
 
 const DEFAULT_LOGO = "/images/default-logo.png";
 
@@ -20,6 +19,7 @@ const DEFAULTS: SiteLogoSettings = {
 
 export const useSiteLogo = (): SiteLogoSettings => {
   const [settings, setSettings] = useState<SiteLogoSettings>(DEFAULTS);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const fetchSettings = useCallback(async () => {
     const { data } = await supabase
@@ -43,16 +43,25 @@ export const useSiteLogo = (): SiteLogoSettings => {
   useEffect(() => {
     fetchSettings();
 
-    const channel = supabase
-      .channel(`site-settings-realtime-${Math.random().toString(36).slice(2)}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "site_settings" },
-        () => { fetchSettings(); }
-      )
-      .subscribe();
+    // Stable channel name + ref guard prevents duplicate subscriptions in StrictMode
+    if (!channelRef.current) {
+      const channel = supabase
+        .channel("site-settings-realtime")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "site_settings" },
+          () => { fetchSettings(); }
+        )
+        .subscribe();
+      channelRef.current = channel;
+    }
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
   }, [fetchSettings]);
 
   return settings;
