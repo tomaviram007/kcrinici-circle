@@ -43,10 +43,10 @@ export const useSiteLogo = (): SiteLogoSettings => {
   useEffect(() => {
     fetchSettings();
 
-    // Stable channel name + ref guard prevents duplicate subscriptions in StrictMode
+    // Unique channel name per instance avoids reusing an already-subscribed channel
     if (!channelRef.current) {
       const channel = supabase
-        .channel("site-settings-realtime")
+        .channel(`site-settings-realtime-${Math.random().toString(36).slice(2)}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "site_settings" },
