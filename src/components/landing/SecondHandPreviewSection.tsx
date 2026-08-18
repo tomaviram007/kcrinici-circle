@@ -14,6 +14,7 @@ interface Item {
   category: string | null;
   images: string[] | null;
   is_sold: boolean | null;
+  sold_status?: string | null;
   created_at: string;
 }
 
