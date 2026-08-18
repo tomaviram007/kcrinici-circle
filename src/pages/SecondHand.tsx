@@ -278,7 +278,7 @@ const SecondHand = () => {
                     {it.is_sold && (
                       <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
                         <span className="rotate-[-12deg] border-4 border-destructive text-destructive font-serif font-bold text-3xl px-6 py-1 rounded">
-                          {t("secondhand.sold")}
+                          {soldLabel(it)}
                         </span>
                       </div>
                     )}
