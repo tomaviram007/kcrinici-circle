@@ -309,13 +309,24 @@ const SecondHand = () => {
                       />
                     </div>
                     {isOwner && (
-                      <div className="flex gap-1.5 pt-2 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
                         <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => openEdit(it)}>
                           <Pencil className="h-3 w-3 ml-1" /> {t("secondhand.edit")}
                         </Button>
-                        <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => toggleSold(it)}>
-                          <CheckCircle2 className="h-3 w-3 ml-1" /> {it.is_sold ? t("secondhand.returnToSale") : t("secondhand.markSold")}
-                        </Button>
+                        {it.is_sold ? (
+                          <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setSoldStatus(it, null)}>
+                            <CheckCircle2 className="h-3 w-3 ml-1" /> החזר למכירה
+                          </Button>
+                        ) : (
+                          <>
+                            <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setSoldStatus(it, "sold")}>
+                              <CheckCircle2 className="h-3 w-3 ml-1" /> סמן כנמכר
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setSoldStatus(it, "given")}>
+                              <CheckCircle2 className="h-3 w-3 ml-1" /> סמן כנמסר
+                            </Button>
+                          </>
+                        )}
                         <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => handleDelete(it.id)}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
