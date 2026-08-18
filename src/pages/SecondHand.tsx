@@ -550,7 +550,7 @@ const SecondHand = () => {
                 <div className="flex flex-wrap gap-2">
                   <Badge className="bg-gold/20 text-gold border-gold/40">{viewItem.category}</Badge>
                   <Badge variant="outline">{conditionLabel(viewItem.condition)}</Badge>
-                  {viewItem.is_sold && <Badge variant="destructive">{t("secondhand.sold")}</Badge>}
+                  {viewItem.is_sold && <Badge variant="destructive">{soldLabel(viewItem)}</Badge>}
                 </div>
                 {viewItem.price !== null && (
                   <p className="font-serif text-3xl font-bold text-gold">₪{viewItem.price.toLocaleString("he-IL")}</p>
