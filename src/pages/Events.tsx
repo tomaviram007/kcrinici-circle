@@ -20,6 +20,7 @@ import heroImg from "@/assets/hero-events.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import { isEventEnded } from "@/lib/event-status";
 import {
+import { avatarSrc } from "@/lib/default-avatar";
   Dialog,
   DialogContent,
   DialogTitle,
@@ -573,11 +574,7 @@ const Events = () => {
                     <p className="font-body text-xs text-muted-foreground mb-2">פורסם על ידי</p>
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-secondary border border-gold/20 flex items-center justify-center shrink-0 overflow-hidden">
-                        {eventCreator.avatar_url ? (
-                          <img src={eventCreator.avatar_url} alt={eventCreator.full_name} className="h-full w-full object-cover rounded-full" />
-                        ) : (
-                          <User className="h-5 w-5 text-gold" />
-                        )}
+                        <img src={avatarSrc(eventCreator.avatar_url, eventCreator.user_id)} alt={eventCreator.full_name} className="h-full w-full object-cover rounded-full" />
                       </div>
                       <div>
                         <p className="font-serif text-sm font-bold text-foreground">{eventCreator.full_name}</p>

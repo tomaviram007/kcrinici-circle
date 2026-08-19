@@ -18,6 +18,7 @@ import { usePageCover } from "@/hooks/usePageCover";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { validateImageFile } from "@/lib/file-validation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { avatarSrc } from "@/lib/default-avatar";
 
 type Album = Tables<"gallery_albums">;
 type Photo = Tables<"gallery_photos">;
@@ -451,11 +452,7 @@ const Gallery = () => {
               {albumCreator && (
                 <div className="flex items-center gap-2 mt-3">
                   <div className="h-8 w-8 rounded-full bg-secondary border border-gold/20 flex items-center justify-center shrink-0 overflow-hidden">
-                    {albumCreator.avatar_url ? (
-                      <img src={albumCreator.avatar_url} alt={albumCreator.full_name} className="h-full w-full object-cover rounded-full" />
-                    ) : (
-                      <User className="h-4 w-4 text-gold" />
-                    )}
+                    <img src={avatarSrc(albumCreator.avatar_url, albumCreator.user_id)} alt={albumCreator.full_name} className="h-full w-full object-cover rounded-full" />
                   </div>
                   <div>
                     <span className="font-body text-sm text-foreground">{albumCreator.full_name}</span>

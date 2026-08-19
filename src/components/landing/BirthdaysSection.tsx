@@ -7,6 +7,7 @@ import gsap from "gsap";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { avatarSrc } from "@/lib/default-avatar";
 
 interface Props {
   isApproved?: boolean;
@@ -90,11 +91,7 @@ const BirthdaysSection = ({ isApproved = false }: Props) => {
           {birthdays.map((person, i) => (
             <div key={i} className="birthday-card opacity-0 rounded-lg border border-gold/20 bg-card p-5 sm:p-8 text-center glow-gold hover:border-gold/40 transition-colors">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 overflow-hidden">
-                {person.avatar_url ? (
-                  <img src={person.avatar_url} alt={person.full_name} className="w-full h-full object-cover" />
-                ) : (
-                  <Gift className="h-7 w-7 text-gold" />
-                )}
+                <img src={avatarSrc(person.avatar_url, person.user_id)} alt={person.full_name} className="w-full h-full object-cover" />
               </div>
               <h3 className={`font-serif text-xl font-bold text-foreground ${!isApproved ? "blur-[3px]" : ""}`}>{person.full_name}</h3>
               <p className={`mt-1 font-body text-sm text-gold ${!isApproved ? "blur-[4px]" : ""}`}>{formatHebrewDate(person.birth_date)}</p>

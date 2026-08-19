@@ -20,6 +20,7 @@ import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
 import { Separator } from "@/components/ui/separator";
+import { avatarSrc } from "@/lib/default-avatar";
 
 const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo";
 
@@ -312,11 +313,7 @@ const Announcements = () => {
             {upcomingBirthdays.map((person, i) => (
               <div key={i} className="bday-card opacity-0 flex items-center gap-3 rounded-lg border border-gold/10 bg-secondary/50 p-3 transition-colors hover:border-gold/30">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold/10 overflow-hidden">
-                  {person.avatar_url ? (
-                    <img src={person.avatar_url} alt={person.full_name} className="w-full h-full object-cover" />
-                  ) : (
-                    <Gift className="h-5 w-5 text-gold" />
-                  )}
+                  <img src={avatarSrc(person.avatar_url, person.full_name)} alt={person.full_name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-serif text-sm font-bold text-foreground truncate">{person.full_name}</p>

@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
+import { avatarSrc } from "@/lib/default-avatar";
 
 interface Profile {
   id: string;
@@ -392,11 +393,7 @@ const AdminMembers = () => {
               <div key={p.id} className="rounded-lg border border-border bg-card/50 p-4 space-y-3 opacity-70">
                 <div className="flex items-start gap-3">
                   <div className="h-10 w-10 rounded-full bg-secondary border border-border flex items-center justify-center overflow-hidden shrink-0">
-                    {p.avatar_url ? (
-                      <img src={p.avatar_url} alt="" className="h-full w-full object-cover rounded-full grayscale" />
-                    ) : (
-                      <Users className="h-5 w-5 text-muted-foreground" />
-                    )}
+                    <img src={avatarSrc(p.avatar_url, p.user_id)} alt="" className="h-full w-full object-cover rounded-full grayscale" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h4 className="font-serif text-base font-bold text-foreground truncate line-through">{p.full_name}</h4>
@@ -436,11 +433,7 @@ const AdminMembers = () => {
                 {/* Header */}
                 <div className="flex items-center gap-4">
                   <div className="h-20 w-20 rounded-full bg-secondary border-2 border-gold/30 flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
-                    {viewProfile.avatar_url ? (
-                      <img src={viewProfile.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
-                    ) : (
-                      <User className="h-10 w-10 text-gold" />
-                    )}
+                    <img src={avatarSrc(viewProfile.avatar_url, viewProfile.user_id)} alt="" className="h-full w-full object-cover rounded-full" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-serif text-xl font-bold text-foreground">{viewProfile.full_name}</h3>
@@ -681,11 +674,7 @@ const PendingMemberCard = ({
         className="h-10 w-10 rounded-full bg-secondary border border-gold/20 flex items-center justify-center overflow-hidden shrink-0 cursor-pointer"
         onClick={() => onView(p)}
       >
-        {p.avatar_url ? (
-          <img src={p.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
-        ) : (
-          <Users className="h-5 w-5 text-gold" />
-        )}
+        <img src={avatarSrc(p.avatar_url, p.user_id)} alt="" className="h-full w-full object-cover rounded-full" />
       </div>
       <div className="min-w-0 flex-1 cursor-pointer" onClick={() => onView(p)}>
         <h4 className="font-serif text-base font-bold text-foreground truncate">{p.full_name}</h4>
@@ -743,11 +732,7 @@ const MemberCard = ({
   >
     <div className="flex items-start gap-3">
       <div className="h-10 w-10 rounded-full bg-secondary border border-gold/20 flex items-center justify-center overflow-hidden shrink-0">
-        {p.avatar_url ? (
-          <img src={p.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
-        ) : (
-          <Users className="h-5 w-5 text-gold" />
-        )}
+        <img src={avatarSrc(p.avatar_url, p.user_id)} alt="" className="h-full w-full object-cover rounded-full" />
       </div>
       <div className="min-w-0 flex-1">
         <h4 className="font-serif text-base font-bold text-foreground truncate">{p.full_name}</h4>

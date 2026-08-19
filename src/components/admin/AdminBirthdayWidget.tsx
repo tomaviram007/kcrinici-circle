@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useBirthdaysToday, BirthdayMember } from "@/hooks/useBirthdaysToday";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { avatarSrc } from "@/lib/default-avatar";
 
 const AdminBirthdayWidget = () => {
   const { birthdays, loading } = useBirthdaysToday();
@@ -63,11 +64,7 @@ const AdminBirthdayWidget = () => {
           >
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-full bg-gold/10 border border-gold/20 overflow-hidden flex items-center justify-center">
-                {person.avatar_url ? (
-                  <img src={person.avatar_url} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <Cake className="h-4 w-4 text-gold" />
-                )}
+                <img src={avatarSrc(person.avatar_url, person.user_id)} alt="" className="h-full w-full object-cover" />
               </div>
               <div>
                 <p className="font-serif text-sm font-bold text-foreground">{person.full_name}</p>
