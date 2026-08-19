@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, User } from "lucide-react";
+import { Camera } from "lucide-react";
+import { avatarSrc } from "@/lib/default-avatar";
 import { validateImageFile } from "@/lib/file-validation";
 
 interface AvatarUploadProps {
@@ -72,11 +73,7 @@ const AvatarUpload = ({ userId, currentUrl, onUpload, size = "md" }: AvatarUploa
         disabled={uploading}
         className={`${sizes[size]} rounded-full border-2 border-gold/20 bg-secondary overflow-hidden flex items-center justify-center transition-all hover:border-gold/50 focus:outline-none focus:ring-2 focus:ring-gold/30`}
       >
-        {preview ? (
-          <img src={preview} alt="תמונת פרופיל" className="h-full w-full object-cover" />
-        ) : (
-          <User className={`${iconSizes[size]} text-gold`} />
-        )}
+        <img src={avatarSrc(preview, userId)} alt="תמונת פרופיל" className="h-full w-full object-cover" />
       </button>
       <div className="absolute -bottom-0.5 -left-0.5 rounded-full bg-card border border-border p-1">
         <Camera className="h-3 w-3 text-gold" />
