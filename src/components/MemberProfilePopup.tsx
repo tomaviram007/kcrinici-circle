@@ -1,4 +1,5 @@
 import { User, Phone, Briefcase, MapPin, Cake, Heart, MessageCircle, Calendar } from "lucide-react";
+import { avatarSrc } from "@/lib/default-avatar";
 import SocialLinks from "@/components/SocialLinks";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,11 +64,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6">
             <div className="mb-3 h-20 w-20 rounded-full bg-secondary border-2 border-gold/30 overflow-hidden flex items-center justify-center">
-              {member.avatar_url ? (
-                <img src={member.avatar_url} alt={member.full_name} className="h-full w-full object-cover" />
-              ) : (
-                <User className="h-10 w-10 text-gold" />
-              )}
+              <img src={avatarSrc(member.avatar_url, member.id)} alt={member.full_name} loading="lazy" className="h-full w-full object-cover" />
             </div>
             <h2 className="font-serif text-2xl font-bold text-foreground">{member.full_name}</h2>
             <div className="flex items-center gap-1.5 mt-1.5">

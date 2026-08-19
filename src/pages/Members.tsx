@@ -8,6 +8,7 @@ import { useContentAccess } from "@/hooks/useContentAccess";
 import AvatarUpload from "@/components/AvatarUpload";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import { avatarSrc } from "@/lib/default-avatar";
 import SocialLinks from "@/components/SocialLinks";
 import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -259,13 +260,7 @@ const Members = () => {
               <div className="hidden sm:block relative h-[280px]">
                 {/* Photo (right side in RTL) */}
                 <div className={`absolute right-0 top-0 h-full w-[58%] rounded-2xl overflow-hidden bg-secondary border ${birthdayToday ? "border-gold/40 shadow-[0_0_25px_hsl(43_72%_52%/0.15)]" : "border-border/60"} transition-all duration-300 group-hover:shadow-[0_10px_40px_hsl(0_0%_0%/0.4)]`}>
-                  {member.avatar_url ? (
-                    <img src={member.avatar_url} alt={member.full_name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-secondary to-card">
-                      <User className="h-20 w-20 text-gold/40" />
-                    </div>
-                  )}
+                  <img src={avatarSrc(member.avatar_url, member.id)} alt={member.full_name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 </div>
 
                 {/* Overlapping card (left side in RTL) */}
@@ -306,11 +301,7 @@ const Members = () => {
               {/* Mobile — stacked */}
               <div className="sm:hidden">
                 <div className={`relative rounded-2xl overflow-hidden bg-secondary border ${birthdayToday ? "border-gold/40" : "border-border/60"} aspect-[4/3]`}>
-                  {member.avatar_url ? (
-                    <img src={member.avatar_url} alt={member.full_name} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center"><User className="h-16 w-16 text-gold/40" /></div>
-                  )}
+                  <img src={avatarSrc(member.avatar_url, member.id)} alt={member.full_name} loading="lazy" className="h-full w-full object-cover" />
                 </div>
                 <div className={`-mt-8 mx-3 relative z-10 rounded-2xl bg-card border ${isOwnCard(member) ? "border-gold/40" : "border-border/60"} shadow-xl p-4`}>
                   <div className="flex items-start justify-between gap-2">
@@ -353,11 +344,7 @@ const Members = () => {
             onClick={() => handleCardClick(member)}
           >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary border border-gold/20 overflow-hidden">
-              {member.avatar_url ? (
-                <img src={member.avatar_url} alt={member.full_name} className="h-full w-full rounded-full object-cover" />
-              ) : (
-                <User className="h-4 w-4 text-gold" />
-              )}
+              <img src={avatarSrc(member.avatar_url, member.id)} alt={member.full_name} loading="lazy" className="h-full w-full rounded-full object-cover" />
             </div>
             <span className="font-serif text-sm font-bold text-foreground flex-1 min-w-0 truncate">{member.full_name}</span>
             <span className="font-body text-xs text-gold hidden sm:block truncate max-w-[120px]">{member.profession}</span>
