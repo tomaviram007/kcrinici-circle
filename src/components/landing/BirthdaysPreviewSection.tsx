@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Lock, Cake } from "lucide-react";
+import { Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import gsap from "gsap";
 import MemberProfilePopup from "@/components/MemberProfilePopup";
 import BirthdayActionsDialog from "@/components/BirthdayActionsDialog";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { avatarSrc } from "@/lib/default-avatar";
 
 interface Props {
   isApproved: boolean;
@@ -148,12 +149,13 @@ const BirthdaysPreviewSection = ({ isApproved }: Props) => {
                       </div>
                     )}
 
-                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gold/10 border border-gold/20 overflow-hidden">
-                      {person.avatar_url ? (
-                        <img src={person.avatar_url} alt={person.full_name} className="w-full h-full object-cover" />
-                      ) : (
-                        <Cake className="h-5 w-5 text-gold" />
-                      )}
+                    <div className="mx-auto mb-3 h-16 w-16 rounded-full bg-gold/10 border border-gold/20 overflow-hidden">
+                      <img
+                        src={avatarSrc(person.avatar_url, person.user_id)}
+                        alt={person.full_name}
+                        loading="lazy"
+                        className={`h-full w-full object-cover ${!isApproved ? "blur-[3px]" : ""}`}
+                      />
                     </div>
 
                     <h3
