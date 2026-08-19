@@ -5,6 +5,7 @@ import { useBirthdaysToday, BirthdayMember } from "@/hooks/useBirthdaysToday";
 import { useAuth } from "@/contexts/AuthContext";
 import { fireConfetti } from "@/lib/confetti";
 import gsap from "gsap";
+import { avatarSrc } from "@/lib/default-avatar";
 
 const BirthdayPopup = () => {
   const { user, isApproved } = useAuth();
@@ -111,11 +112,7 @@ const BirthdayPopup = () => {
               className="flex items-center gap-3 rounded-xl border border-gold/20 bg-secondary/50 p-3 transition-colors hover:border-gold/40"
             >
               <div className="h-12 w-12 flex-shrink-0 rounded-full bg-gold/10 border border-gold/20 overflow-hidden flex items-center justify-center">
-                {person.avatar_url ? (
-                  <img src={person.avatar_url} alt={person.full_name} className="h-full w-full object-cover" />
-                ) : (
-                  <Gift className="h-5 w-5 text-gold" />
-                )}
+                <img src={avatarSrc(person.avatar_url, person.user_id)} alt={person.full_name} className="h-full w-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-serif text-sm font-bold text-foreground truncate">{person.full_name}</p>

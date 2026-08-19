@@ -32,6 +32,7 @@ import PageHero from "@/components/PageHero";
 
 import heroAdmin from "@/assets/hero-admin.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
+import { avatarSrc } from "@/lib/default-avatar";
 
 interface DashboardStats {
   approvedMembers: number;
@@ -640,11 +641,7 @@ const AdminTeam = () => {
                   onClick={() => setExpandedRoleId(isExpanded ? null : role.id)}
                 >
                   <div className="h-10 w-10 rounded-full bg-secondary border border-gold/20 flex items-center justify-center overflow-hidden shrink-0">
-                    {member?.avatar_url ? (
-                      <img src={member.avatar_url} alt="" className="h-full w-full object-cover rounded-full" />
-                    ) : (
-                      <Users className="h-5 w-5 text-gold" />
-                    )}
+                    <img src={avatarSrc(member?.avatar_url, member?.user_id)} alt="" className="h-full w-full object-cover rounded-full" />
                   </div>
                   <div>
                     <p className="font-serif text-sm font-bold text-foreground">{member?.full_name || "משתמש"}</p>
