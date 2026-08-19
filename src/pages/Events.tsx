@@ -19,8 +19,8 @@ import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import heroImg from "@/assets/hero-events.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import { isEventEnded } from "@/lib/event-status";
-import {
 import { avatarSrc } from "@/lib/default-avatar";
+import {
   Dialog,
   DialogContent,
   DialogTitle,
