@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Phone, Briefcase, MapPin, Cake, Heart, MessageCircle, Calendar, ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
+import { avatarSrc } from "@/lib/default-avatar";
 import SocialLinks from "@/components/SocialLinks";
 import { Button } from "@/components/ui/button";
 import heroImg from "@/assets/hero-members.jpg";
@@ -82,11 +83,7 @@ const MemberProfile = () => {
             {/* Header */}
             <div className="flex flex-col items-center text-center mb-8">
               <div className="mb-4 h-24 w-24 rounded-full bg-secondary border-2 border-gold/30 overflow-hidden flex items-center justify-center">
-                {member.avatar_url ? (
-                  <img src={member.avatar_url} alt={member.full_name} className="h-full w-full object-cover" />
-                ) : (
-                  <User className="h-12 w-12 text-gold" />
-                )}
+                <img src={avatarSrc(member.avatar_url, member.id)} alt={member.full_name} className="h-full w-full object-cover" />
               </div>
               <h1 className="font-serif text-3xl font-bold text-foreground">{member.full_name}</h1>
               <div className="flex items-center gap-1.5 mt-2">
