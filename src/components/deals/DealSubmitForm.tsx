@@ -180,43 +180,87 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
         </div>
       </div>
 
-      <div>
-        <Label className="font-body text-xs">לוגו בית העסק</Label>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleLogoSelect}
-        />
-        <div className="flex items-center gap-3 mt-1">
-          {logoPreview ? (
-            <div className="relative">
-              <img src={logoPreview} alt="לוגו" className="h-14 w-14 rounded-lg object-contain border border-primary/20 bg-background p-1" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Logo upload */}
+        <div>
+          <Label className="font-body text-xs">לוגו בית העסק</Label>
+          <input
+            ref={logoInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleLogoSelect}
+          />
+          <div className="flex items-center gap-3 mt-1">
+            {logoPreview ? (
+              <div className="relative">
+                <img src={logoPreview} alt="לוגו" className="h-14 w-14 rounded-lg object-contain border border-primary/20 bg-background p-1" />
+                <button
+                  type="button"
+                  onClick={() => { setLogoFile(null); setLogoPreview(null); }}
+                  className="absolute -top-1.5 -left-1.5 bg-destructive text-destructive-foreground rounded-full h-4 w-4 flex items-center justify-center text-[10px]"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
               <button
                 type="button"
-                onClick={() => { setLogoFile(null); setLogoPreview(null); }}
-                className="absolute -top-1.5 -left-1.5 bg-destructive text-destructive-foreground rounded-full h-4 w-4 flex items-center justify-center text-[10px]"
+                onClick={() => logoInputRef.current?.click()}
+                className="h-14 w-14 rounded-lg border border-dashed border-primary/30 bg-background flex flex-col items-center justify-center gap-0.5 hover:border-primary/60 transition-colors"
               >
-                ×
+                <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                <span className="text-[9px] text-muted-foreground">העלאה</span>
               </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="h-14 w-14 rounded-lg border border-dashed border-primary/30 bg-background flex flex-col items-center justify-center gap-0.5 hover:border-primary/60 transition-colors"
-            >
-              <ImageIcon className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[9px] text-muted-foreground">העלאה</span>
-            </button>
-          )}
-          {logoPreview && (
-            <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => fileInputRef.current?.click()}>
-              <Upload className="h-3 w-3 ml-1" />
-              החלף
-            </Button>
-          )}
+            )}
+            {logoPreview && (
+              <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => logoInputRef.current?.click()}>
+                <Upload className="h-3 w-3 ml-1" />
+                החלף
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Card image upload */}
+        <div>
+          <Label className="font-body text-xs">תמונת כרטיס ההטבה</Label>
+          <input
+            ref={cardImageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleCardImageSelect}
+          />
+          <div className="flex items-center gap-3 mt-1">
+            {cardImage.preview ? (
+              <div className="relative">
+                <img src={cardImage.preview} alt="תמונת כרטיס" className="h-14 w-24 rounded-lg object-cover border border-primary/20 bg-background" />
+                <button
+                  type="button"
+                  onClick={() => setCardImage({ file: null, preview: null })}
+                  className="absolute -top-1.5 -left-1.5 bg-destructive text-destructive-foreground rounded-full h-4 w-4 flex items-center justify-center text-[10px]"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => cardImageInputRef.current?.click()}
+                className="h-14 w-24 rounded-lg border border-dashed border-primary/30 bg-background flex flex-col items-center justify-center gap-0.5 hover:border-primary/60 transition-colors"
+              >
+                <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                <span className="text-[9px] text-muted-foreground">העלאה</span>
+              </button>
+            )}
+            {cardImage.preview && (
+              <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => cardImageInputRef.current?.click()}>
+                <Upload className="h-3 w-3 ml-1" />
+                החלף
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
