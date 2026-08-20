@@ -390,6 +390,7 @@ export type Database = {
           business_logo_url: string | null
           business_name: string
           business_phone: string | null
+          card_image_url: string | null
           category: string
           claim_count: number
           coupon_code: string | null
@@ -412,6 +413,7 @@ export type Database = {
           business_logo_url?: string | null
           business_name: string
           business_phone?: string | null
+          card_image_url?: string | null
           category?: string
           claim_count?: number
           coupon_code?: string | null
@@ -434,6 +436,7 @@ export type Database = {
           business_logo_url?: string | null
           business_name?: string
           business_phone?: string | null
+          card_image_url?: string | null
           category?: string
           claim_count?: number
           coupon_code?: string | null
@@ -1681,13 +1684,17 @@ export type Database = {
           benefit_value: number
           business_logo_url: string
           business_name: string
+          business_phone: string
+          card_image_url: string
           category: string
+          coupon_code: string
           created_at: string
           description: string
           discount_label: string
           expires_at: string
           id: string
           title: string
+          website_url: string
         }[]
       }
       get_public_events: {

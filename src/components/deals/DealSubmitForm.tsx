@@ -26,6 +26,11 @@ const emptyForm = {
   expires_at: "",
 };
 
+interface FileUploadState {
+  file: File | null;
+  preview: string | null;
+}
+
 const buildDiscountLabel = (type: string, value: string) => {
   if (!value) return null;
   if (type === "percent") return `${value}% הנחה`;
@@ -39,7 +44,9 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
   const [saving, setSaving] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cardImage, setCardImage] = useState<FileUploadState>({ file: null, preview: null });
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const cardImageInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -54,13 +61,23 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
     setLogoPreview(URL.createObjectURL(file));
   };
 
-  const uploadLogo = async (): Promise<string | null> => {
-    if (!logoFile || !user?.id) return null;
-    const ext = logoFile.name.split(".").pop();
-    const path = `deal-logos/${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("deals").upload(path, logoFile, { upsert: true });
+  const handleCardImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "הקובץ גדול מדי", description: "גודל מקסימלי 2MB", variant: "destructive" });
+      return;
+    }
+    setCardImage({ file, preview: URL.createObjectURL(file) });
+  };
+
+  const uploadFile = async (file: File, folder: string): Promise<string | null> => {
+    if (!user?.id) return null;
+    const ext = file.name.split(".").pop();
+    const path = `${folder}/${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("deals").upload(path, file, { upsert: true });
     if (error) {
-      console.error("Logo upload error:", error);
+      console.error("Upload error:", error);
       return null;
     }
     const { data: urlData } = supabase.storage.from("deals").getPublicUrl(path);
@@ -74,7 +91,8 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
     }
     setSaving(true);
 
-    const logoUrl = await uploadLogo();
+    const logoUrl = logoFile ? await uploadFile(logoFile, "deal-logos") : null;
+    const cardImageUrl = cardImage.file ? await uploadFile(cardImage.file, "deal-images") : null;
 
     const { error } = await supabase.from("deals").insert({
       title: form.title,
@@ -92,6 +110,7 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
       is_approved: false,
       created_by: user?.id,
       business_logo_url: logoUrl,
+      card_image_url: cardImageUrl,
     } as any);
 
     if (error) {
@@ -108,6 +127,7 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
       setForm(emptyForm);
       setLogoFile(null);
       setLogoPreview(null);
+      setCardImage({ file: null, preview: null });
       setShowForm(false);
       onSubmitted?.();
     }
@@ -161,43 +181,87 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
         </div>
       </div>
 
-      <div>
-        <Label className="font-body text-xs">לוגו בית העסק</Label>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleLogoSelect}
-        />
-        <div className="flex items-center gap-3 mt-1">
-          {logoPreview ? (
-            <div className="relative">
-              <img src={logoPreview} alt="לוגו" className="h-14 w-14 rounded-lg object-contain border border-primary/20 bg-background p-1" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Logo upload */}
+        <div>
+          <Label className="font-body text-xs">לוגו בית העסק</Label>
+          <input
+            ref={logoInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleLogoSelect}
+          />
+          <div className="flex items-center gap-3 mt-1">
+            {logoPreview ? (
+              <div className="relative">
+                <img src={logoPreview} alt="לוגו" className="h-14 w-14 rounded-lg object-contain border border-primary/20 bg-background p-1" />
+                <button
+                  type="button"
+                  onClick={() => { setLogoFile(null); setLogoPreview(null); }}
+                  className="absolute -top-1.5 -left-1.5 bg-destructive text-destructive-foreground rounded-full h-4 w-4 flex items-center justify-center text-[10px]"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
               <button
                 type="button"
-                onClick={() => { setLogoFile(null); setLogoPreview(null); }}
-                className="absolute -top-1.5 -left-1.5 bg-destructive text-destructive-foreground rounded-full h-4 w-4 flex items-center justify-center text-[10px]"
+                onClick={() => logoInputRef.current?.click()}
+                className="h-14 w-14 rounded-lg border border-dashed border-primary/30 bg-background flex flex-col items-center justify-center gap-0.5 hover:border-primary/60 transition-colors"
               >
-                ×
+                <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                <span className="text-[9px] text-muted-foreground">העלאה</span>
               </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="h-14 w-14 rounded-lg border border-dashed border-primary/30 bg-background flex flex-col items-center justify-center gap-0.5 hover:border-primary/60 transition-colors"
-            >
-              <ImageIcon className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[9px] text-muted-foreground">העלאה</span>
-            </button>
-          )}
-          {logoPreview && (
-            <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => fileInputRef.current?.click()}>
-              <Upload className="h-3 w-3 ml-1" />
-              החלף
-            </Button>
-          )}
+            )}
+            {logoPreview && (
+              <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => logoInputRef.current?.click()}>
+                <Upload className="h-3 w-3 ml-1" />
+                החלף
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Card image upload */}
+        <div>
+          <Label className="font-body text-xs">תמונת כרטיס ההטבה</Label>
+          <input
+            ref={cardImageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleCardImageSelect}
+          />
+          <div className="flex items-center gap-3 mt-1">
+            {cardImage.preview ? (
+              <div className="relative">
+                <img src={cardImage.preview} alt="תמונת כרטיס" className="h-14 w-24 rounded-lg object-cover border border-primary/20 bg-background" />
+                <button
+                  type="button"
+                  onClick={() => setCardImage({ file: null, preview: null })}
+                  className="absolute -top-1.5 -left-1.5 bg-destructive text-destructive-foreground rounded-full h-4 w-4 flex items-center justify-center text-[10px]"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => cardImageInputRef.current?.click()}
+                className="h-14 w-24 rounded-lg border border-dashed border-primary/30 bg-background flex flex-col items-center justify-center gap-0.5 hover:border-primary/60 transition-colors"
+              >
+                <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                <span className="text-[9px] text-muted-foreground">העלאה</span>
+              </button>
+            )}
+            {cardImage.preview && (
+              <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => cardImageInputRef.current?.click()}>
+                <Upload className="h-3 w-3 ml-1" />
+                החלף
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 

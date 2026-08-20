@@ -24,6 +24,7 @@ interface Deal {
   coupon_code: string | null;
   business_name: string;
   business_logo_url: string | null;
+  card_image_url: string | null;
   business_phone: string | null;
   website_url: string | null;
   category: string;
@@ -44,6 +45,7 @@ const emptyForm = {
   coupon_code: "",
   business_name: "",
   business_logo_url: "",
+  card_image_url: "",
   business_phone: "",
   website_url: "",
   category: "כללי",
@@ -104,6 +106,7 @@ const AdminDeals = () => {
       coupon_code: form.coupon_code || null,
       business_name: form.business_name,
       business_logo_url: form.business_logo_url || null,
+      card_image_url: form.card_image_url || null,
       business_phone: form.business_phone || null,
       website_url: form.website_url || null,
       category: form.category,
@@ -141,6 +144,7 @@ const AdminDeals = () => {
       coupon_code: deal.coupon_code || "",
       business_name: deal.business_name,
       business_logo_url: deal.business_logo_url || "",
+      card_image_url: deal.card_image_url || "",
       business_phone: deal.business_phone || "",
       website_url: deal.website_url || "",
       category: deal.category,
@@ -269,12 +273,18 @@ const AdminDeals = () => {
             </div>
           </div>
 
-          {/* Row 4: logo URL + website URL + expiry */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Row 4: logo URL + card image URL + website URL + expiry */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label className="font-body text-xs">URL לוגו העסק</Label>
               <Input value={form.business_logo_url} onChange={(e) => setForm({ ...form, business_logo_url: e.target.value })} className="bg-background" placeholder="https://..." autoComplete="off" />
             </div>
+            <div>
+              <Label className="font-body text-xs">URL תמונת כרטיס ההטבה</Label>
+              <Input value={form.card_image_url} onChange={(e) => setForm({ ...form, card_image_url: e.target.value })} className="bg-background" placeholder="https://..." autoComplete="off" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label className="font-body text-xs flex items-center gap-1"><LinkIcon className="h-3 w-3" /> לינק לאתר ההטבה</Label>
               <Input value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} className="bg-background" placeholder="https://..." autoComplete="off" />
