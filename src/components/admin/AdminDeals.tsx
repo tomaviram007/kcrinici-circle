@@ -273,12 +273,18 @@ const AdminDeals = () => {
             </div>
           </div>
 
-          {/* Row 4: logo URL + website URL + expiry */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Row 4: logo URL + card image URL + website URL + expiry */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label className="font-body text-xs">URL לוגו העסק</Label>
               <Input value={form.business_logo_url} onChange={(e) => setForm({ ...form, business_logo_url: e.target.value })} className="bg-background" placeholder="https://..." autoComplete="off" />
             </div>
+            <div>
+              <Label className="font-body text-xs">URL תמונת כרטיס ההטבה</Label>
+              <Input value={form.card_image_url} onChange={(e) => setForm({ ...form, card_image_url: e.target.value })} className="bg-background" placeholder="https://..." autoComplete="off" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label className="font-body text-xs flex items-center gap-1"><LinkIcon className="h-3 w-3" /> לינק לאתר ההטבה</Label>
               <Input value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} className="bg-background" placeholder="https://..." autoComplete="off" />
