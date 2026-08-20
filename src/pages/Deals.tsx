@@ -190,87 +190,18 @@ const Deals = () => {
           </div>
         </div>
 
-        {/* Grid */}
+        {/* Carousel */}
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             <Tag className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
             <p className="font-body text-muted-foreground">{t("deals.emptyState")}</p>
           </div>
         ) : (
-          <div
-            ref={gridRef}
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {filtered.map((deal) => (
-              <div
-                key={deal.id}
-                className="deal-card group relative rounded-2xl border border-border/40 p-5 backdrop-blur-md bg-card/60 cursor-pointer transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--primary)/0.12)] hover:-translate-y-1"
-                onClick={() => handleClaimClick(deal)}
-              >
-                {/* Discount badge */}
-                <DealBadge
-                  benefitType={(deal as any).benefit_type}
-                  benefitValue={(deal as any).benefit_value}
-                  discountLabel={deal.discount_label}
-                />
-
-                {/* Logo */}
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-xl border border-border/40 bg-background/60 flex items-center justify-center overflow-hidden shrink-0">
-                    {deal.business_logo_url ? (
-                      <img
-                        src={deal.business_logo_url}
-                        alt={deal.business_name}
-                        className="h-full w-full object-contain p-1"
-                      />
-                    ) : (
-                      <Store className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-serif text-sm font-bold text-foreground truncate">
-                      {deal.business_name}
-                    </p>
-                    <Badge variant="secondary" className="text-[10px] font-body">
-                      {deal.category}
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <h3 className="font-serif text-lg font-bold text-foreground mb-2 leading-snug">
-                  {deal.title}
-                </h3>
-                <p className="font-body text-sm text-muted-foreground line-clamp-2">
-                  {deal.description}
-                </p>
-
-                {/* Expiry */}
-                {deal.expires_at && (
-                  <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground font-body">
-                    <Clock className="h-3 w-3" />
-                    <span>
-                      {t("deals.expiresAt")}{" "}
-                      {new Date(deal.expires_at).toLocaleDateString("he-IL")}
-                    </span>
-                  </div>
-                )}
-
-                {/* CTA */}
-                <Button
-                  size="sm"
-                  className="mt-4 w-full gradient-gold text-primary-foreground font-body"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleClaimClick(deal);
-                  }}
-                >
-                  <Tag className="h-4 w-4 ml-1" />
-                  {t("deals.getBtn")}
-                </Button>
-              </div>
-            ))}
-          </div>
+          <DealsCarousel
+            deals={filtered}
+            onDealClick={handleClaimClick}
+            expiresLabel={t("deals.expiresAt")}
+          />
         )}
       </div>
 
