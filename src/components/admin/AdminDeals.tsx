@@ -45,6 +45,7 @@ const emptyForm = {
   coupon_code: "",
   business_name: "",
   business_logo_url: "",
+  card_image_url: "",
   business_phone: "",
   website_url: "",
   category: "כללי",
