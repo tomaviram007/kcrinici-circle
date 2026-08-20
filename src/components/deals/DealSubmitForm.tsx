@@ -26,6 +26,11 @@ const emptyForm = {
   expires_at: "",
 };
 
+interface FileUploadState {
+  file: File | null;
+  preview: string | null;
+}
+
 const buildDiscountLabel = (type: string, value: string) => {
   if (!value) return null;
   if (type === "percent") return `${value}% הנחה`;
