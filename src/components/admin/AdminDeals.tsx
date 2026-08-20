@@ -106,6 +106,7 @@ const AdminDeals = () => {
       coupon_code: form.coupon_code || null,
       business_name: form.business_name,
       business_logo_url: form.business_logo_url || null,
+      card_image_url: form.card_image_url || null,
       business_phone: form.business_phone || null,
       website_url: form.website_url || null,
       category: form.category,
