@@ -1,15 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Tag, Search, Copy, MessageCircle, Clock, Store, ExternalLink, Plus, Pencil, Lock } from "lucide-react";
+import { Tag, Search, Copy, MessageCircle, ExternalLink, Plus, Pencil } from "lucide-react";
 import MembersOnlyNotice from "@/components/MembersOnlyNotice";
 import { useContentAccess } from "@/hooks/useContentAccess";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -19,12 +18,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import PageHero from "@/components/PageHero";
 import QuoteSection from "@/components/landing/QuoteSection";
-import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
-import gsap from "gsap";
 import DealSubmitForm from "@/components/deals/DealSubmitForm";
-import DealBadge from "@/components/deals/DealBadge";
+import DealsCarousel from "@/components/deals/DealsCarousel";
 
 import heroEvents from "@/assets/hero-events.jpg";
 
