@@ -54,36 +54,52 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto p-0" dir="rtl">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-0 rounded-3xl border-border/60 bg-card overflow-hidden" dir="rtl">
         <DialogHeader className="sr-only">
           <DialogTitle>{member.full_name}</DialogTitle>
           <DialogDescription>פרופיל חבר</DialogDescription>
         </DialogHeader>
 
-        <div className="p-6 sm:p-8">
-          {/* Header */}
-          <div className="flex flex-col items-center text-center mb-6">
-            <div className="mb-3 h-20 w-20 rounded-full bg-secondary border-2 border-gold/30 overflow-hidden flex items-center justify-center">
-              <img src={avatarSrc(member.avatar_url, member.id)} alt={member.full_name} loading="lazy" className="h-full w-full object-cover" />
-            </div>
-            <h2 className="font-serif text-2xl font-bold text-foreground">{member.full_name}</h2>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <Briefcase className="h-3.5 w-3.5 text-gold" />
-              <span className="font-body text-base text-gold">{member.profession}</span>
-            </div>
-            {birthdayToday && (
-              <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-gold/15 border border-gold/30 px-3 py-1 text-xs font-body text-gold animate-pulse">
-                <Cake className="h-3.5 w-3.5" />
-                🎂 חוגג יום הולדת היום!
-              </div>
-            )}
-            {!birthdayToday && daysLeft !== null && (
-              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary border border-border px-3 py-1 text-xs font-body text-muted-foreground">
-                <Cake className="h-3.5 w-3.5 text-gold" />
-                עוד {daysLeft} ימים ליום ההולדת 🎉
-              </div>
-            )}
+        {/* Photo with gradient fade */}
+        <div className="relative">
+          <div className="aspect-[4/3] w-full overflow-hidden bg-secondary">
+            <img
+              src={avatarSrc(member.avatar_url, member.id)}
+              alt={member.full_name}
+              loading="lazy"
+              className="h-full w-full object-cover object-top"
+            />
           </div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-card via-card/80 to-transparent" />
+
+          <div className="absolute inset-x-0 bottom-0 px-6 pb-4">
+            <h2 className="font-serif text-2xl font-bold text-foreground flex items-center gap-2">
+              {member.full_name}
+              <BadgeCheck className="h-5 w-5 text-gold" />
+            </h2>
+            <div className="flex items-center gap-1.5 mt-1">
+              <Briefcase className="h-3.5 w-3.5 text-gold" />
+              <span className="font-body text-sm text-gold">{member.profession}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 pt-2">
+          {(birthdayToday || daysLeft !== null) && (
+            <div className="mb-4">
+              {birthdayToday ? (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-gold/15 border border-gold/30 px-3 py-1 text-xs font-body text-gold animate-pulse">
+                  <Cake className="h-3.5 w-3.5" />
+                  🎂 חוגג יום הולדת היום!
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-secondary border border-border px-3 py-1 text-xs font-body text-muted-foreground">
+                  <Cake className="h-3.5 w-3.5 text-gold" />
+                  עוד {daysLeft} ימים ליום ההולדת 🎉
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Details */}
           <div className="space-y-3">
@@ -97,10 +113,11 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
             )}
 
             {member.bio && (
-              <p className="font-body text-sm text-muted-foreground italic leading-relaxed text-center px-2">
-                "{member.bio}"
+              <p className="font-body text-sm text-muted-foreground leading-relaxed">
+                {member.bio}
               </p>
             )}
+
 
             {member.birth_date && !birthdayToday && (
               <div className="flex items-center gap-2.5">
