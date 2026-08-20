@@ -158,7 +158,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
 
             {/* Contact */}
             {member.phone && (
-              <div className="border-t border-border pt-4 mt-4 flex items-center justify-center gap-2">
+              <div className="border-t border-border pt-4 mt-4 flex items-center gap-2">
                 <Phone className="h-3.5 w-3.5 text-gold" />
                 <a
                   href={`tel:${member.phone}`}
@@ -172,25 +172,24 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
             )}
 
             {/* Action buttons */}
-            <div className="flex gap-3 justify-center pt-2">
-              {member.phone && (
-                <Button onClick={handleWhatsApp} size="sm" className="gradient-gold text-primary-foreground font-body gap-1.5">
+            {member.phone && (
+              <div className="flex gap-2 pt-2">
+                <Button onClick={handleWhatsApp} size="sm" className="flex-1 rounded-full gradient-gold text-primary-foreground font-body gap-1.5">
                   <MessageCircle className="h-4 w-4" />
                   וואטסאפ
                 </Button>
-              )}
-              {member.phone && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={(e) => { e.stopPropagation(); window.open(`tel:${member.phone}`, "_self"); }}
-                  className="border-gold/30 text-gold hover:bg-gold/10 font-body gap-1.5"
+                  className="flex-1 rounded-full border-gold/30 text-gold hover:bg-gold/10 font-body gap-1.5"
                 >
                   <Phone className="h-4 w-4" />
                   חייג
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
+
           </div>
         </div>
       </DialogContent>
