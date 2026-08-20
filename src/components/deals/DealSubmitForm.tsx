@@ -44,7 +44,9 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
   const [saving, setSaving] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cardImage, setCardImage] = useState<FileUploadState>({ file: null, preview: null });
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const cardImageInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
