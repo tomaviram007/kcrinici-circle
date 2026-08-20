@@ -127,6 +127,7 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
       setForm(emptyForm);
       setLogoFile(null);
       setLogoPreview(null);
+      setCardImage({ file: null, preview: null });
       setShowForm(false);
       onSubmitted?.();
     }
