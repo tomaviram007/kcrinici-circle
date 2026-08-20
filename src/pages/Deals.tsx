@@ -58,7 +58,6 @@ const Deals = () => {
   const [copied, setCopied] = useState(false);
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const coverImage = usePageCover("deals", heroEvents);
-  const gridRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user, isApproved } = useAuth();
   const { isMember, canSeeContact, canAct } = useContentAccess("deals");
