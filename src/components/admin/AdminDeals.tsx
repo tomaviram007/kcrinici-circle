@@ -143,6 +143,7 @@ const AdminDeals = () => {
       coupon_code: deal.coupon_code || "",
       business_name: deal.business_name,
       business_logo_url: deal.business_logo_url || "",
+      card_image_url: deal.card_image_url || "",
       business_phone: deal.business_phone || "",
       website_url: deal.website_url || "",
       category: deal.category,
