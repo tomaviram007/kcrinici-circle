@@ -1,4 +1,4 @@
-import { User, Phone, Briefcase, MapPin, Cake, Heart, MessageCircle, Calendar } from "lucide-react";
+import { User, Phone, Briefcase, MapPin, Cake, Heart, MessageCircle, Calendar, BadgeCheck } from "lucide-react";
 import { avatarSrc } from "@/lib/default-avatar";
 import SocialLinks from "@/components/SocialLinks";
 import { Button } from "@/components/ui/button";
