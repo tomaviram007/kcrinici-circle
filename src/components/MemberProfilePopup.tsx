@@ -1,4 +1,4 @@
-import { User, Phone, Briefcase, MapPin, Cake, Heart, MessageCircle, Calendar } from "lucide-react";
+import { User, Phone, Briefcase, MapPin, Cake, Heart, MessageCircle, Calendar, BadgeCheck } from "lucide-react";
 import { avatarSrc } from "@/lib/default-avatar";
 import SocialLinks from "@/components/SocialLinks";
 import { Button } from "@/components/ui/button";
@@ -54,36 +54,52 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto p-0" dir="rtl">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-0 rounded-3xl border-border/60 bg-card overflow-hidden" dir="rtl">
         <DialogHeader className="sr-only">
           <DialogTitle>{member.full_name}</DialogTitle>
           <DialogDescription>פרופיל חבר</DialogDescription>
         </DialogHeader>
 
-        <div className="p-6 sm:p-8">
-          {/* Header */}
-          <div className="flex flex-col items-center text-center mb-6">
-            <div className="mb-3 h-20 w-20 rounded-full bg-secondary border-2 border-gold/30 overflow-hidden flex items-center justify-center">
-              <img src={avatarSrc(member.avatar_url, member.id)} alt={member.full_name} loading="lazy" className="h-full w-full object-cover" />
-            </div>
-            <h2 className="font-serif text-2xl font-bold text-foreground">{member.full_name}</h2>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <Briefcase className="h-3.5 w-3.5 text-gold" />
-              <span className="font-body text-base text-gold">{member.profession}</span>
-            </div>
-            {birthdayToday && (
-              <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-gold/15 border border-gold/30 px-3 py-1 text-xs font-body text-gold animate-pulse">
-                <Cake className="h-3.5 w-3.5" />
-                🎂 חוגג יום הולדת היום!
-              </div>
-            )}
-            {!birthdayToday && daysLeft !== null && (
-              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary border border-border px-3 py-1 text-xs font-body text-muted-foreground">
-                <Cake className="h-3.5 w-3.5 text-gold" />
-                עוד {daysLeft} ימים ליום ההולדת 🎉
-              </div>
-            )}
+        {/* Photo with gradient fade */}
+        <div className="relative">
+          <div className="aspect-[4/3] w-full overflow-hidden bg-secondary">
+            <img
+              src={avatarSrc(member.avatar_url, member.id)}
+              alt={member.full_name}
+              loading="lazy"
+              className="h-full w-full object-cover object-top"
+            />
           </div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-card via-card/80 to-transparent" />
+
+          <div className="absolute inset-x-0 bottom-0 px-6 pb-4">
+            <h2 className="font-serif text-2xl font-bold text-foreground flex items-center gap-2">
+              {member.full_name}
+              <BadgeCheck className="h-5 w-5 text-gold" />
+            </h2>
+            <div className="flex items-center gap-1.5 mt-1">
+              <Briefcase className="h-3.5 w-3.5 text-gold" />
+              <span className="font-body text-sm text-gold">{member.profession}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 pt-2">
+          {(birthdayToday || daysLeft !== null) && (
+            <div className="mb-4">
+              {birthdayToday ? (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-gold/15 border border-gold/30 px-3 py-1 text-xs font-body text-gold animate-pulse">
+                  <Cake className="h-3.5 w-3.5" />
+                  🎂 חוגג יום הולדת היום!
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-secondary border border-border px-3 py-1 text-xs font-body text-muted-foreground">
+                  <Cake className="h-3.5 w-3.5 text-gold" />
+                  עוד {daysLeft} ימים ליום ההולדת 🎉
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Details */}
           <div className="space-y-3">
@@ -97,10 +113,11 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
             )}
 
             {member.bio && (
-              <p className="font-body text-sm text-muted-foreground italic leading-relaxed text-center px-2">
-                "{member.bio}"
+              <p className="font-body text-sm text-muted-foreground leading-relaxed">
+                {member.bio}
               </p>
             )}
+
 
             {member.birth_date && !birthdayToday && (
               <div className="flex items-center gap-2.5">
@@ -117,7 +134,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
             )}
 
             {member.hobbies && (
-              <div className="flex flex-wrap gap-1.5 justify-center pt-1">
+              <div className="flex flex-wrap gap-1.5 pt-1">
                 {member.hobbies.split(/[,،]/).filter(Boolean).map((h: string, i: number) => (
                   <span key={i} className="inline-flex items-center gap-1 rounded-full bg-secondary border border-border px-2.5 py-0.5 font-body text-xs text-muted-foreground">
                     <Heart className="h-2.5 w-2.5 text-gold" />
@@ -128,7 +145,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
             )}
 
             {/* Social links */}
-            <div className="flex justify-center pt-1">
+            <div className="flex pt-1">
               <SocialLinks
                 website_url={member.website_url}
                 facebook_url={member.facebook_url}
@@ -138,9 +155,10 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
               />
             </div>
 
+
             {/* Contact */}
             {member.phone && (
-              <div className="border-t border-border pt-4 mt-4 flex items-center justify-center gap-2">
+              <div className="border-t border-border pt-4 mt-4 flex items-center gap-2">
                 <Phone className="h-3.5 w-3.5 text-gold" />
                 <a
                   href={`tel:${member.phone}`}
@@ -154,25 +172,24 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
             )}
 
             {/* Action buttons */}
-            <div className="flex gap-3 justify-center pt-2">
-              {member.phone && (
-                <Button onClick={handleWhatsApp} size="sm" className="gradient-gold text-primary-foreground font-body gap-1.5">
+            {member.phone && (
+              <div className="flex gap-2 pt-2">
+                <Button onClick={handleWhatsApp} size="sm" className="flex-1 rounded-full gradient-gold text-primary-foreground font-body gap-1.5">
                   <MessageCircle className="h-4 w-4" />
                   וואטסאפ
                 </Button>
-              )}
-              {member.phone && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={(e) => { e.stopPropagation(); window.open(`tel:${member.phone}`, "_self"); }}
-                  className="border-gold/30 text-gold hover:bg-gold/10 font-body gap-1.5"
+                  className="flex-1 rounded-full border-gold/30 text-gold hover:bg-gold/10 font-body gap-1.5"
                 >
                   <Phone className="h-4 w-4" />
                   חייג
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
+
           </div>
         </div>
       </DialogContent>
