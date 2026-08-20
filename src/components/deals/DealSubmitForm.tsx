@@ -61,13 +61,23 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
     setLogoPreview(URL.createObjectURL(file));
   };
 
-  const uploadLogo = async (): Promise<string | null> => {
-    if (!logoFile || !user?.id) return null;
-    const ext = logoFile.name.split(".").pop();
-    const path = `deal-logos/${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("deals").upload(path, logoFile, { upsert: true });
+  const handleCardImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "הקובץ גדול מדי", description: "גודל מקסימלי 2MB", variant: "destructive" });
+      return;
+    }
+    setCardImage({ file, preview: URL.createObjectURL(file) });
+  };
+
+  const uploadFile = async (file: File, folder: string): Promise<string | null> => {
+    if (!user?.id) return null;
+    const ext = file.name.split(".").pop();
+    const path = `${folder}/${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("deals").upload(path, file, { upsert: true });
     if (error) {
-      console.error("Logo upload error:", error);
+      console.error("Upload error:", error);
       return null;
     }
     const { data: urlData } = supabase.storage.from("deals").getPublicUrl(path);
