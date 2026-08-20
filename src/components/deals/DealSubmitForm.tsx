@@ -91,7 +91,8 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
     }
     setSaving(true);
 
-    const logoUrl = await uploadLogo();
+    const logoUrl = logoFile ? await uploadFile(logoFile, "deal-logos") : null;
+    const cardImageUrl = cardImage.file ? await uploadFile(cardImage.file, "deal-images") : null;
 
     const { error } = await supabase.from("deals").insert({
       title: form.title,
@@ -109,6 +110,7 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
       is_approved: false,
       created_by: user?.id,
       business_logo_url: logoUrl,
+      card_image_url: cardImageUrl,
     } as any);
 
     if (error) {
