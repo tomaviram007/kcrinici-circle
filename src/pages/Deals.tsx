@@ -38,12 +38,15 @@ interface Deal {
   coupon_code: string | null;
   business_name: string;
   business_logo_url: string | null;
+  card_image_url: string | null;
   business_phone: string | null;
   website_url: string | null;
   category: string;
   is_active: boolean;
   expires_at: string | null;
   created_at: string;
+  benefit_type?: string | null;
+  benefit_value?: number | null;
 }
 
 const Deals = () => {
