@@ -134,7 +134,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
             )}
 
             {member.hobbies && (
-              <div className="flex flex-wrap gap-1.5 justify-center pt-1">
+              <div className="flex flex-wrap gap-1.5 pt-1">
                 {member.hobbies.split(/[,،]/).filter(Boolean).map((h: string, i: number) => (
                   <span key={i} className="inline-flex items-center gap-1 rounded-full bg-secondary border border-border px-2.5 py-0.5 font-body text-xs text-muted-foreground">
                     <Heart className="h-2.5 w-2.5 text-gold" />
@@ -145,7 +145,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
             )}
 
             {/* Social links */}
-            <div className="flex justify-center pt-1">
+            <div className="flex pt-1">
               <SocialLinks
                 website_url={member.website_url}
                 facebook_url={member.facebook_url}
@@ -154,6 +154,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
                 size="md"
               />
             </div>
+
 
             {/* Contact */}
             {member.phone && (
