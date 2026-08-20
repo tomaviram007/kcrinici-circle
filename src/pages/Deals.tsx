@@ -85,26 +85,6 @@ const Deals = () => {
     fetch();
   }, [isMember]);
 
-  useEffect(() => {
-    if (!gridRef.current) return;
-    const cards = gridRef.current.querySelectorAll(".deal-card");
-    if (!cards.length) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          gsap.fromTo(
-            cards,
-            { opacity: 0, y: 30, scale: 0.95 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)" }
-          );
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    obs.observe(gridRef.current);
-    return () => obs.disconnect();
-  }, [deals, filterCategory, searchText]);
 
   const filtered = deals.filter((d) => {
     const matchCat = filterCategory === "הכל" || d.category === filterCategory;
