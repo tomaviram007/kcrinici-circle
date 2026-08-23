@@ -510,6 +510,10 @@ const EventFeedback = () => {
       _improvement: form.improvement.trim() || null,
       _next_event_likelihood: form.next_event_likelihood,
       _nps: form.nps,
+      _membership_interest: form.membership_interest || null,
+      _membership_fair_price: form.membership_fair_price || null,
+      _membership_benefits: form.membership_benefits,
+      _membership_benefits_other: form.membership_benefits_other.trim() || null,
     });
     setSubmitting(false);
     if (rpcError) {
