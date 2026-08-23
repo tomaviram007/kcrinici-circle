@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy } from "lucide-react";
+import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy, Eye, ExternalLink } from "lucide-react";
 import QRCode from "qrcode";
 
 interface EventOption {
@@ -76,6 +76,8 @@ const AdminEventFeedback = () => {
   const [rows, setRows] = useState<FeedbackRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrEvent, setQrEvent] = useState<EventOption | null>(null);
+  const [previewEvent, setPreviewEvent] = useState<EventOption | null>(null);
+
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
 
   const eventTitles = useMemo(
