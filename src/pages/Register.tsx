@@ -12,6 +12,7 @@ import HebrewDatePicker from "@/components/HebrewDatePicker";
 import { cn } from "@/lib/utils";
 import RegisterBackground from "@/components/register/RegisterBackground";
 import { validateImageFile } from "@/lib/file-validation";
+import Seo from "@/components/Seo";
 
 const registerSchema = z.object({
   full_name: z.string().trim().min(2, "שם חייב להכיל לפחות 2 תווים").max(100, "שם ארוך מדי"),
@@ -209,6 +210,7 @@ const Register = () => {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-3 py-6 sm:px-4 sm:py-12">
+      <Seo title="הצטרפות למועדון" description="טופס הרשמה למועדון הגברים של ק.קרניצי. החברות מאושרת ידנית על ידי ההנהלה." path="/register" />
       <RegisterBackground />
 
       {/* Back to home button */}

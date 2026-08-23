@@ -1,7 +1,10 @@
+import Seo from "@/components/Seo";
+
 const LAST_UPDATED = "18 באוגוסט 2026";
 
 const Terms = () => (
   <main className="min-h-screen bg-background" dir="rtl">
+    <Seo title="תנאי שימוש" description="תנאי השימוש באתר ובשירותי מועדון הגברים של ק.קרניצי." path="/terms" />
     <div className="page-container py-10 sm:py-16 md:py-24">
       <h1 className="font-serif text-3xl sm:text-4xl font-bold text-foreground mb-2">תנאי שימוש</h1>
       <p className="font-body text-sm text-muted-foreground mb-8">עודכן לאחרונה: {LAST_UPDATED}</p>
