@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy, Eye, ExternalLink } from "lucide-react";
+import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy, Eye, ExternalLink, Plus } from "lucide-react";
 import QRCode from "qrcode";
 
 interface EventOption {
