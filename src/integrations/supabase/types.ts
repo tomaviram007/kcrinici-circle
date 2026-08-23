@@ -596,6 +596,71 @@ export type Database = {
         }
         Relationships: []
       }
+      event_feedback: {
+        Row: {
+          anon_id: string | null
+          attend_reason: string | null
+          created_at: string
+          enjoyment: number
+          event_id: string
+          id: string
+          improvement: string | null
+          keep_in_touch: boolean
+          keep_in_touch_name: string | null
+          meaningful_moment: string | null
+          met_new_person: boolean
+          new_people_count: number | null
+          next_event_likelihood: number | null
+          nps: number | null
+          preferred_meetup_type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          anon_id?: string | null
+          attend_reason?: string | null
+          created_at?: string
+          enjoyment: number
+          event_id: string
+          id?: string
+          improvement?: string | null
+          keep_in_touch?: boolean
+          keep_in_touch_name?: string | null
+          meaningful_moment?: string | null
+          met_new_person?: boolean
+          new_people_count?: number | null
+          next_event_likelihood?: number | null
+          nps?: number | null
+          preferred_meetup_type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          anon_id?: string | null
+          attend_reason?: string | null
+          created_at?: string
+          enjoyment?: number
+          event_id?: string
+          id?: string
+          improvement?: string | null
+          keep_in_touch?: boolean
+          keep_in_touch_name?: string | null
+          meaningful_moment?: string | null
+          met_new_person?: boolean
+          new_people_count?: number | null
+          next_event_likelihood?: number | null
+          nps?: number | null
+          preferred_meetup_type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_feedback_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_participant_removals: {
         Row: {
           email: string | null
@@ -1571,6 +1636,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_event_feedback_summary: {
+        Args: { _end?: string; _event_id?: string; _start?: string }
+        Returns: Json
+      }
       admin_get_email_logs: {
         Args: {
           _end?: string
@@ -1698,6 +1767,14 @@ export type Database = {
         Returns: {
           attending_count: number
           event_id: string
+        }[]
+      }
+      get_event_feedback_info: {
+        Args: { _event_id: string }
+        Returns: {
+          event_date: string
+          id: string
+          title: string
         }[]
       }
       get_event_participant_counts: {
@@ -1869,6 +1946,24 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      submit_event_feedback: {
+        Args: {
+          _anon_id: string
+          _attend_reason?: string
+          _enjoyment: number
+          _event_id: string
+          _improvement?: string
+          _keep_in_touch?: boolean
+          _keep_in_touch_name?: string
+          _meaningful_moment?: string
+          _met_new_person: boolean
+          _new_people_count?: number
+          _next_event_likelihood?: number
+          _nps?: number
+          _preferred_meetup_type?: string
+        }
+        Returns: string
       }
       track_ad_click: {
         Args: { p_campaign_id: string; p_user_id?: string }

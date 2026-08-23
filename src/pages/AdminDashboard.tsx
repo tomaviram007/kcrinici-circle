@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package, Mail, Cake, Lock, LineChart } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package, Mail, Cake, Lock, LineChart, MessageSquare } from "lucide-react";
 import AdminCommunicationHub from "@/components/admin/AdminCommunicationHub";
 import AdminBirthdays from "@/components/admin/AdminBirthdays";
 import AdminContentAccess from "@/components/admin/AdminContentAccess";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
+import AdminEventFeedback from "@/components/admin/AdminEventFeedback";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -63,6 +64,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   birthdays: "manage_members",
   content_access: "manage_settings",
   analytics: "manage_settings",
+  event_feedback: "manage_events",
 };
 
 const AdminDashboard = () => {
@@ -156,6 +158,7 @@ const AdminDashboard = () => {
             {activeTab === "birthdays" && hasPermission("manage_members") && <AdminBirthdays />}
             {activeTab === "content_access" && hasPermission("manage_settings") && <AdminContentAccess />}
             {activeTab === "analytics" && hasPermission("manage_settings") && <AdminAnalytics />}
+            {activeTab === "event_feedback" && hasPermission("manage_events") && <AdminEventFeedback />}
             {activeTab === "team" && hasPermission("manage_team") && <AdminTeam />}
             {/* Show access denied message if no permission */}
             {TAB_PERMISSION_MAP[activeTab] && !hasPermission(TAB_PERMISSION_MAP[activeTab]) && (
@@ -212,6 +215,7 @@ const mobileNavGroups = [
       { id: "communication", label: "תקשורת", icon: Mail },
       { id: "content_access", label: "הרשאות תוכן", icon: Lock },
       { id: "analytics", label: "אנליטיקות", icon: LineChart },
+      { id: "event_feedback", label: "משוב אירועים", icon: MessageSquare },
 
     ],
   },

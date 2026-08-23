@@ -37,6 +37,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Regulations from "./pages/Regulations";
 import Unsubscribe from "./pages/Unsubscribe";
+import EventFeedback from "./pages/EventFeedback";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,7 +53,9 @@ const AppLayout = () => {
   const navigate = useNavigate();
   const { sessionExpired } = useAuth();
   usePageAnalytics();
-  const hideHeader = ["/login", "/register", "/pending", "/reset-password", "/unsubscribe"].includes(location.pathname);
+  const hideHeader =
+    ["/login", "/register", "/pending", "/reset-password", "/unsubscribe"].includes(location.pathname) ||
+    location.pathname.startsWith("/feedback/");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -93,6 +96,8 @@ const AppLayout = () => {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/regulations" element={<Regulations />} />
         <Route path="/unsubscribe" element={<Unsubscribe />} />
+        {/* Hidden: reachable only via per-event QR code */}
+        <Route path="/feedback/:eventId" element={<EventFeedback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </PageTransition>
