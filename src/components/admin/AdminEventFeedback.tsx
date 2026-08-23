@@ -390,10 +390,71 @@ const AdminEventFeedback = () => {
             </div>
           )}
 
+          {/* Open a questionnaire for an event */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setNewEventOpen(true)}>
+                <Plus className="h-4 w-4" /> אירוע חדש
+              </Button>
+              <h3 className="font-serif text-lg font-bold text-foreground">פתיחת שאלון לאירוע</h3>
+            </div>
+
+            {events.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border/70 p-6 text-center">
+                <p className="mb-3 font-body text-sm text-muted-foreground">
+                  אין עדיין אירועים במערכת. אפשר לפתוח אירוע חדש ולקשר אליו שאלון משוב.
+                </p>
+                <Button className="gap-2" onClick={() => setNewEventOpen(true)}>
+                  <Plus className="h-4 w-4" /> יצירת אירוע חדש
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Select value={selectedForQuestionnaire} onValueChange={setSelectedForQuestionnaire}>
+                  <SelectTrigger dir="rtl" className="text-right sm:flex-1">
+                    <SelectValue placeholder="בחירת אירוע לקישור השאלון" />
+                  </SelectTrigger>
+                  <SelectContent dir="rtl">
+                    {events.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.title} — {new Date(e.event_date).toLocaleDateString("he-IL")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Button
+                    className="gap-1.5"
+                    disabled={!selectedForQuestionnaire}
+                    onClick={() => {
+                      const ev = events.find((e) => e.id === selectedForQuestionnaire);
+                      if (ev) void openQr(ev);
+                    }}
+                  >
+                    <QrCode className="h-4 w-4" /> פתיחת שאלון
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="gap-1.5"
+                    disabled={!selectedForQuestionnaire}
+                    onClick={() => {
+                      const ev = events.find((e) => e.id === selectedForQuestionnaire);
+                      if (ev) setPreviewEvent(ev);
+                    }}
+                  >
+                    <Eye className="h-4 w-4" /> תצוגה
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* QR codes per event */}
+          {events.length > 0 && (
           <div className="rounded-xl border border-border bg-card p-4">
             <h3 className="mb-3 font-serif text-lg font-bold text-foreground">קודי QR לאירועים</h3>
             <div className="max-h-72 space-y-2 overflow-y-auto">
+
               {events.map((e) => (
                 <div key={e.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-2.5">
                   <div className="flex shrink-0 gap-2">
