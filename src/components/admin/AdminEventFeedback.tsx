@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy, Eye, ExternalLink, Plus } from "lucide-react";
+import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy, Eye, ExternalLink, Plus, ClipboardList, AlertTriangle } from "lucide-react";
 import QRCode from "qrcode";
 
 interface EventOption {
@@ -14,9 +14,18 @@ interface EventOption {
   event_date: string;
 }
 
+interface StandaloneForm {
+  id: string;
+  title: string;
+  description: string | null;
+  form_date: string;
+  is_active: boolean;
+}
+
 interface FeedbackRow {
   id: string;
-  event_id: string;
+  event_id: string | null;
+  form_id: string | null;
   created_at: string;
   enjoyment: number;
   met_new_person: boolean;
@@ -82,13 +91,23 @@ const AdminEventFeedback = () => {
   const [creating, setCreating] = useState(false);
   const [newEvent, setNewEvent] = useState({ title: "", date: "", time: "", location: "", description: "" });
 
+  const [forms, setForms] = useState<StandaloneForm[]>([]);
+  const [newForm, setNewForm] = useState({ title: "", description: "" });
+  const [creatingForm, setCreatingForm] = useState(false);
+  const [formToDelete, setFormToDelete] = useState<StandaloneForm | null>(null);
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
+  const [deleting, setDeleting] = useState(false);
 
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
 
   const eventTitles = useMemo(
-    () => Object.fromEntries(events.map((e) => [e.id, e.title])),
-    [events]
-  );
+    () =>
+      Object.fromEntries([
+        ...events.map((e) => [e.id, e.title]),
+        ...forms.map((f) => [f.id, `${f.title} (שאלון עצמאי)`]),
+      ]),
+    [events, forms]
+  ) as Record<string, string>;
 
   const loadEvents = async () => {
     const { data } = await supabase
@@ -100,8 +119,19 @@ const AdminEventFeedback = () => {
     return list;
   };
 
+  const loadForms = async () => {
+    const { data } = await supabase
+      .from("feedback_forms")
+      .select("id, title, description, form_date, is_active")
+      .order("created_at", { ascending: false });
+    const list = (data as StandaloneForm[]) || [];
+    setForms(list);
+    return list;
+  };
+
   useEffect(() => {
     void loadEvents();
+    void loadForms();
   }, []);
 
 
@@ -197,6 +227,64 @@ const AdminEventFeedback = () => {
     void openQr(data as EventOption);
   };
 
+  const createForm = async () => {
+    if (!newForm.title.trim()) {
+      toast({ title: "יש למלא שם לשאלון", variant: "destructive" });
+      return;
+    }
+    setCreatingForm(true);
+    const { data: userData } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("feedback_forms")
+      .insert({
+        title: newForm.title.trim(),
+        description: newForm.description.trim() || null,
+        created_by: userData.user?.id ?? null,
+      })
+      .select("id, title, description, form_date, is_active")
+      .single();
+    setCreatingForm(false);
+
+    if (error || !data) {
+      toast({ title: "שגיאה ביצירת השאלון", description: error?.message, variant: "destructive" });
+      return;
+    }
+
+    await loadForms();
+    setNewForm({ title: "", description: "" });
+    toast({ title: "השאלון נפתח" });
+    void openQr({ id: data.id, title: data.title, event_date: data.form_date });
+  };
+
+  const toggleForm = async (form: StandaloneForm) => {
+    const { error } = await supabase
+      .from("feedback_forms")
+      .update({ is_active: !form.is_active })
+      .eq("id", form.id);
+    if (error) {
+      toast({ title: "שגיאה בעדכון", description: error.message, variant: "destructive" });
+      return;
+    }
+    await loadForms();
+  };
+
+  const confirmDeleteForm = async () => {
+    if (!formToDelete) return;
+    setDeleting(true);
+    const { error } = await supabase.from("feedback_forms").delete().eq("id", formToDelete.id);
+    setDeleting(false);
+    if (error) {
+      toast({ title: "שגיאה במחיקת השאלון", description: error.message, variant: "destructive" });
+      return;
+    }
+    setFormToDelete(null);
+    setDeleteStep(1);
+    if (eventId === formToDelete.id) setEventId("all");
+    await loadForms();
+    load();
+    toast({ title: "השאלון נמחק" });
+  };
+
 
   const deleteRow = async (id: string) => {
     const { error } = await supabase.from("event_feedback").delete().eq("id", id);
@@ -228,7 +316,7 @@ const AdminEventFeedback = () => {
     const lines = rows.map((r) =>
       [
         new Date(r.created_at).toLocaleString("he-IL"),
-        eventTitles[r.event_id] || r.event_id,
+        eventTitles[(r.event_id || r.form_id) as string] || r.event_id || r.form_id,
         r.enjoyment,
         r.met_new_person ? "כן" : "לא",
         r.new_people_count ?? "",
@@ -270,16 +358,21 @@ const AdminEventFeedback = () => {
       {/* Filters */}
       <div className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-3">
         <div className="space-y-1.5">
-          <label className="font-body text-xs text-muted-foreground">אירוע</label>
+          <label className="font-body text-xs text-muted-foreground">אירוע / שאלון</label>
           <Select value={eventId} onValueChange={setEventId}>
             <SelectTrigger className="text-right">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">כל האירועים</SelectItem>
+              <SelectItem value="all">הכל</SelectItem>
               {events.map((e) => (
                 <SelectItem key={e.id} value={e.id}>
                   {e.title}
+                </SelectItem>
+              ))}
+              {forms.map((f) => (
+                <SelectItem key={f.id} value={f.id}>
+                  {f.title} (שאלון עצמאי)
                 </SelectItem>
               ))}
             </SelectContent>
@@ -449,6 +542,100 @@ const AdminEventFeedback = () => {
             )}
           </div>
 
+          {/* Standalone questionnaires */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 flex items-center justify-end gap-2">
+              <h3 className="font-serif text-lg font-bold text-foreground">שאלון עצמאי (ללא אירוע)</h3>
+              <ClipboardList className="h-5 w-5 text-primary" />
+            </div>
+            <p className="mb-3 font-body text-sm text-muted-foreground">
+              שאלון שאינו מקושר לאירוע במערכת. מקבל קישור וקוד QR משלו.
+            </p>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                dir="rtl"
+                placeholder="שם השאלון"
+                className="text-right sm:flex-1"
+                value={newForm.title}
+                onChange={(e) => setNewForm((p) => ({ ...p, title: e.target.value }))}
+              />
+              <Input
+                dir="rtl"
+                placeholder="תיאור קצר (לא חובה)"
+                className="text-right sm:flex-1"
+                value={newForm.description}
+                onChange={(e) => setNewForm((p) => ({ ...p, description: e.target.value }))}
+              />
+              <Button className="gap-1.5" disabled={creatingForm} onClick={createForm}>
+                {creatingForm ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                פתיחת שאלון
+              </Button>
+            </div>
+
+            {forms.length > 0 && (
+              <div className="mt-4 max-h-72 space-y-2 overflow-y-auto">
+                {forms.map((f) => (
+                  <div
+                    key={f.id}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-2.5"
+                  >
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5"
+                        onClick={() => openQr({ id: f.id, title: f.title, event_date: f.form_date })}
+                      >
+                        <QrCode className="h-4 w-4" /> QR
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5"
+                        onClick={() => setPreviewEvent({ id: f.id, title: f.title, event_date: f.form_date })}
+                      >
+                        <Eye className="h-4 w-4" /> שאלון
+                      </Button>
+                      <Button size="icon" variant="ghost" aria-label="העתק קישור" onClick={() => copyLink(f.id)}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="font-body text-xs"
+                        onClick={() => toggleForm(f)}
+                      >
+                        {f.is_active ? "השהיה" : "הפעלה"}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label="מחיקת שאלון"
+                        onClick={() => {
+                          setDeleteStep(1);
+                          setFormToDelete(f);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+
+                    <div className="min-w-0 text-right">
+                      <p className="truncate font-body text-sm text-foreground">{f.title}</p>
+                      <p className="font-body text-xs text-muted-foreground">
+                        {new Date(f.form_date).toLocaleDateString("he-IL")}
+                        {!f.is_active && " · מושהה"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+
+
           {/* QR codes per event */}
           {events.length > 0 && (
           <div className="rounded-xl border border-border bg-card p-4">
@@ -502,7 +689,7 @@ const AdminEventFeedback = () => {
                       </Button>
                       <div className="min-w-0 text-right">
                         <p className="truncate font-body text-sm text-foreground">
-                          {eventTitles[r.event_id] || "אירוע"}
+                          {eventTitles[(r.event_id || r.form_id) as string] || "שאלון"}
                         </p>
                         <p className="font-body text-xs text-muted-foreground">
                           {new Date(r.created_at).toLocaleString("he-IL")}
@@ -632,6 +819,58 @@ const AdminEventFeedback = () => {
               {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               יצירת אירוע ופתיחת שאלון
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!formToDelete}
+        onOpenChange={(o) => {
+          if (!o) {
+            setFormToDelete(null);
+            setDeleteStep(1);
+          }
+        }}
+      >
+        <DialogContent dir="rtl" className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-end gap-2 text-right font-serif">
+              {deleteStep === 1 ? "מחיקת שאלון" : "אישור סופי"}
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-right">
+            {deleteStep === 1 ? (
+              <p className="font-body text-sm text-muted-foreground">
+                למחוק את השאלון "{formToDelete?.title}"? הקישור וקוד ה-QR שלו יפסיקו לעבוד.
+              </p>
+            ) : (
+              <p className="font-body text-sm text-muted-foreground">
+                שאלה אחרונה: כל התשובות שנאספו בשאלון הזה יימחקו גם הן, ואי אפשר לשחזר אותן. להמשיך במחיקה?
+              </p>
+            )}
+            <div className="flex gap-2">
+              {deleteStep === 1 ? (
+                <Button variant="destructive" className="flex-1" onClick={() => setDeleteStep(2)}>
+                  כן, להמשיך
+                </Button>
+              ) : (
+                <Button variant="destructive" className="flex-1 gap-2" disabled={deleting} onClick={confirmDeleteForm}>
+                  {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  מחיקה סופית
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setFormToDelete(null);
+                  setDeleteStep(1);
+                }}
+              >
+                ביטול
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
