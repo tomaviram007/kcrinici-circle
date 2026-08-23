@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { trackFunnel } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { Globe, Facebook, Instagram, Linkedin, ArrowRight, Camera, User, X } from "lucide-react";
