@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { trackFunnel } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { Globe, Facebook, Instagram, Linkedin, ArrowRight, Camera, User, X } from "lucide-react";
@@ -95,6 +96,10 @@ const Register = () => {
     linkedin_url: "",
   });
 
+  useEffect(() => {
+    trackFunnel("register_view");
+  }, []);
+
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -105,6 +110,7 @@ const Register = () => {
     }
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
+    trackFunnel("register_avatar_uploaded");
     setErrors((prev) => { const n = { ...prev }; delete n.avatar; return n; });
   };
 
@@ -119,6 +125,8 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    trackFunnel("register_submit");
 
     const result = registerSchema.safeParse(form);
     if (!result.success) {
@@ -138,6 +146,7 @@ const Register = () => {
 
     if (!result.success) return;
 
+    trackFunnel("register_details_filled");
     setLoading(true);
     try {
       const { data: signUpData, error } = await supabase.auth.signUp({
@@ -191,6 +200,7 @@ const Register = () => {
         title: "בקשתך נשלחה",
         description: "אנא אשר את כתובת האימייל שלך. תקבל הודעה ברגע שהגישה תאושר.",
       });
+      trackFunnel("register_success");
       navigate("/pending");
     } catch (error: any) {
       const msg = error.message === "User already registered"

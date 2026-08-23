@@ -1,4 +1,5 @@
 import { Clock, Store } from "lucide-react";
+import { trackAction } from "@/lib/analytics";
 import { Badge } from "@/components/ui/badge";
 import DealBadge from "./DealBadge";
 
@@ -39,7 +40,7 @@ const DealCard = ({ deal, expiresLabel = "תוקף עד", onClick, className = "
 
   return (
     <div
-      onClick={onClick}
+      onClick={() => { trackAction("deal_card_open", { id: deal.id, business: deal.business_name }); onClick?.(); }}
       className={`group relative flex flex-col rounded-3xl border border-border/40 bg-card/80 backdrop-blur-md overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[0_0_40px_hsl(var(--primary)/0.15)] hover:-translate-y-1 ${className}`}
       dir="rtl"
     >

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { trackAction } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,7 @@ const EventRegistrationDialog = ({ event, onClose, onRegistered }: EventRegistra
       }
       if (data?.error) throw new Error(data.error);
 
+      trackAction("event_register_submit", { event_id: event.id, title: event.title });
       onRegistered?.(event.id);
       if (data.payment_required) {
         setRegistration({ id: data.registration_id, token: data.confirm_token, paymentLink: data.payment_link, price: data.price });
