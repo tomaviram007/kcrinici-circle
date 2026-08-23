@@ -479,6 +479,8 @@ const AdminEventFeedback = () => {
               ))}
             </div>
           </div>
+          )}
+
 
           {/* Responses */}
           <div className="rounded-xl border border-border bg-card p-4">
