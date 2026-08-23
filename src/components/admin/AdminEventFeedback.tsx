@@ -591,7 +591,52 @@ const AdminEventFeedback = () => {
           </Button>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={newEventOpen} onOpenChange={setNewEventOpen}>
+        <DialogContent dir="rtl" className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-right font-serif">אירוע חדש</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-right">
+            <Input
+              dir="rtl"
+              placeholder="שם האירוע"
+              value={newEvent.title}
+              onChange={(e) => setNewEvent((p) => ({ ...p, title: e.target.value }))}
+            />
+            <div className="flex gap-2">
+              <Input
+                type="date"
+                value={newEvent.date}
+                onChange={(e) => setNewEvent((p) => ({ ...p, date: e.target.value }))}
+              />
+              <Input
+                type="time"
+                value={newEvent.time}
+                onChange={(e) => setNewEvent((p) => ({ ...p, time: e.target.value }))}
+              />
+            </div>
+            <Input
+              dir="rtl"
+              placeholder="מיקום (לא חובה)"
+              value={newEvent.location}
+              onChange={(e) => setNewEvent((p) => ({ ...p, location: e.target.value }))}
+            />
+            <Input
+              dir="rtl"
+              placeholder="תיאור קצר (לא חובה)"
+              value={newEvent.description}
+              onChange={(e) => setNewEvent((p) => ({ ...p, description: e.target.value }))}
+            />
+            <Button className="w-full gap-2" disabled={creating} onClick={createEvent}>
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              יצירת אירוע ופתיחת שאלון
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
+
 
   );
 };
