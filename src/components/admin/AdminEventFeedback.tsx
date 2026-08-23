@@ -590,7 +590,7 @@ const AdminEventFeedback = () => {
                       </Button>
                       <div className="min-w-0 text-right">
                         <p className="truncate font-body text-sm text-foreground">
-                          {eventTitles[r.event_id] || "אירוע"}
+                          {eventTitles[(r.event_id || r.form_id) as string] || "שאלון"}
                         </p>
                         <p className="font-body text-xs text-muted-foreground">
                           {new Date(r.created_at).toLocaleString("he-IL")}
