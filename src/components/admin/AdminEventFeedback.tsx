@@ -85,13 +85,20 @@ const AdminEventFeedback = () => {
     [events]
   );
 
-  useEffect(() => {
-    supabase
+  const loadEvents = async () => {
+    const { data } = await supabase
       .from("events")
       .select("id, title, event_date")
-      .order("event_date", { ascending: false })
-      .then(({ data }) => setEvents((data as EventOption[]) || []));
+      .order("event_date", { ascending: false });
+    const list = (data as EventOption[]) || [];
+    setEvents(list);
+    return list;
+  };
+
+  useEffect(() => {
+    void loadEvents();
   }, []);
+
 
   const load = async () => {
     setLoading(true);
