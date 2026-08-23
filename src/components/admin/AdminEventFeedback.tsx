@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy } from "lucide-react";
+import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy, Eye, ExternalLink } from "lucide-react";
 import QRCode from "qrcode";
 
 interface EventOption {
@@ -76,6 +76,8 @@ const AdminEventFeedback = () => {
   const [rows, setRows] = useState<FeedbackRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrEvent, setQrEvent] = useState<EventOption | null>(null);
+  const [previewEvent, setPreviewEvent] = useState<EventOption | null>(null);
+
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
 
   const eventTitles = useMemo(
@@ -352,10 +354,14 @@ const AdminEventFeedback = () => {
                     <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openQr(e)}>
                       <QrCode className="h-4 w-4" /> QR
                     </Button>
+                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setPreviewEvent(e)}>
+                      <Eye className="h-4 w-4" /> שאלון
+                    </Button>
                     <Button size="icon" variant="ghost" aria-label="העתק קישור" onClick={() => copyLink(e.id)}>
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
+
                   <div className="min-w-0 text-right">
                     <p className="truncate font-body text-sm text-foreground">{e.title}</p>
                     <p className="font-body text-xs text-muted-foreground">
@@ -452,7 +458,32 @@ const AdminEventFeedback = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!previewEvent} onOpenChange={(o) => !o && setPreviewEvent(null)}>
+        <DialogContent dir="rtl" className="max-w-md p-4">
+          <DialogHeader>
+            <DialogTitle className="text-right font-serif">תצוגת השאלון — {previewEvent?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-hidden rounded-xl border border-border bg-background">
+            {previewEvent && (
+              <iframe
+                src={feedbackUrl(previewEvent.id)}
+                title="תצוגה מקדימה של שאלון המשוב"
+                className="h-[70vh] w-full"
+              />
+            )}
+          </div>
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => previewEvent && window.open(feedbackUrl(previewEvent.id), "_blank", "noopener")}
+          >
+            <ExternalLink className="h-4 w-4" /> פתיחה בכרטיסייה חדשה
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 };
 
