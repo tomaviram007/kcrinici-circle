@@ -609,6 +609,10 @@ export type Database = {
           keep_in_touch: boolean
           keep_in_touch_name: string | null
           meaningful_moment: string | null
+          membership_benefits: string[]
+          membership_benefits_other: string | null
+          membership_fair_price: string | null
+          membership_interest: string | null
           met_new_person: boolean
           new_people_count: number | null
           next_event_likelihood: number | null
@@ -628,6 +632,10 @@ export type Database = {
           keep_in_touch?: boolean
           keep_in_touch_name?: string | null
           meaningful_moment?: string | null
+          membership_benefits?: string[]
+          membership_benefits_other?: string | null
+          membership_fair_price?: string | null
+          membership_interest?: string | null
           met_new_person?: boolean
           new_people_count?: number | null
           next_event_likelihood?: number | null
@@ -647,6 +655,10 @@ export type Database = {
           keep_in_touch?: boolean
           keep_in_touch_name?: string | null
           meaningful_moment?: string | null
+          membership_benefits?: string[]
+          membership_benefits_other?: string | null
+          membership_fair_price?: string | null
+          membership_interest?: string | null
           met_new_person?: boolean
           new_people_count?: number | null
           next_event_likelihood?: number | null
@@ -1990,24 +2002,47 @@ export type Database = {
           read_ct: number
         }[]
       }
-      submit_event_feedback: {
-        Args: {
-          _anon_id: string
-          _attend_reason?: string
-          _enjoyment: number
-          _event_id: string
-          _improvement?: string
-          _keep_in_touch?: boolean
-          _keep_in_touch_name?: string
-          _meaningful_moment?: string
-          _met_new_person: boolean
-          _new_people_count?: number
-          _next_event_likelihood?: number
-          _nps?: number
-          _preferred_meetup_type?: string
-        }
-        Returns: string
-      }
+      submit_event_feedback:
+        | {
+            Args: {
+              _anon_id: string
+              _attend_reason?: string
+              _enjoyment: number
+              _event_id: string
+              _improvement?: string
+              _keep_in_touch?: boolean
+              _keep_in_touch_name?: string
+              _meaningful_moment?: string
+              _met_new_person: boolean
+              _new_people_count?: number
+              _next_event_likelihood?: number
+              _nps?: number
+              _preferred_meetup_type?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _anon_id: string
+              _attend_reason?: string
+              _enjoyment: number
+              _event_id: string
+              _improvement?: string
+              _keep_in_touch?: boolean
+              _keep_in_touch_name?: string
+              _meaningful_moment?: string
+              _membership_benefits?: string[]
+              _membership_benefits_other?: string
+              _membership_fair_price?: string
+              _membership_interest?: string
+              _met_new_person: boolean
+              _new_people_count?: number
+              _next_event_likelihood?: number
+              _nps?: number
+              _preferred_meetup_type?: string
+            }
+            Returns: string
+          }
       track_ad_click: {
         Args: { p_campaign_id: string; p_user_id?: string }
         Returns: undefined

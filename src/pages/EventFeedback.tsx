@@ -32,6 +32,32 @@ const MEETUP_TYPES = [
 
 const LIKELIHOOD_LABELS = ["ממש לא", "כנראה שלא", "אולי", "סביר", "בוודאות"];
 
+const MEMBERSHIP_INTEREST = [
+  "בהחלט כן",
+  "כנראה שכן",
+  "לא בטוח, תלוי במחיר ובמה שמקבלים",
+  "כנראה שלא",
+  "לא",
+];
+
+const MEMBERSHIP_PRICES = [
+  "עד 50 ₪",
+  "100 ₪",
+  "150 ₪",
+  "200 ₪",
+  "250 ₪ ומעלה",
+  "לא הייתי משלם דמי חברות שנתיים",
+];
+
+const MEMBERSHIP_BENEFITS = [
+  "מחיר מוזל באירועים",
+  "קדימות בהרשמה לאירועים",
+  "אירועים שמיועדים לחברי המועדון בלבד",
+  "הטבות מבעלי עסקים בקהילה",
+  "פעילויות ומפגשים נוספים במהלך השנה",
+  "לא צריך הטבה אישית, מבחינתי הכסף נועד לעזור לקהילה להתפתח",
+];
+
 interface FormState {
   enjoyment: number | null;
   met_new_person: boolean | null;
@@ -44,6 +70,10 @@ interface FormState {
   improvement: string;
   next_event_likelihood: number | null;
   nps: number | null;
+  membership_interest: string;
+  membership_fair_price: string;
+  membership_benefits: string[];
+  membership_benefits_other: string;
 }
 
 const emptyForm: FormState = {
@@ -58,6 +88,10 @@ const emptyForm: FormState = {
   improvement: "",
   next_event_likelihood: null,
   nps: null,
+  membership_interest: "",
+  membership_fair_price: "",
+  membership_benefits: [],
+  membership_benefits_other: "",
 };
 
 const StepShell = ({
@@ -360,6 +394,97 @@ const EventFeedback = () => {
       ),
     });
 
+    list.push({
+      key: "membership_interest",
+      valid: !!form.membership_interest,
+      render: () => (
+        <StepShell
+          title="עוזרים לנו לבנות את השלב הבא של המועדון 🍻"
+          subtitle="אנחנו שוקלים ליצור חברות שנתית במועדון, שתאפשר לנו להחזיק קופה קהילתית, לשפר את האירועים, ליזום פעילויות נוספות ולהמשיך לפתח את המועדון. חשוב לנו להבין מה אתם באמת חושבים לפני שמקבלים החלטה."
+        >
+          <div className="space-y-3">
+            <p className="text-right font-body text-[15px] font-bold text-foreground">
+              האם היית שוקל להצטרף כחבר במועדון בתשלום שנתי?
+            </p>
+            <div className="grid gap-2">
+              {MEMBERSHIP_INTEREST.map((r) => (
+                <ChoiceButton
+                  key={r}
+                  active={form.membership_interest === r}
+                  onClick={() => set("membership_interest", r)}
+                >
+                  {r}
+                </ChoiceButton>
+              ))}
+            </div>
+          </div>
+        </StepShell>
+      ),
+    });
+
+    list.push({
+      key: "membership_price",
+      valid: !!form.membership_fair_price,
+      render: () => (
+        <StepShell title="מה לדעתך יהיה סכום שנתי הוגן לחברות במועדון?">
+          <div className="grid gap-2">
+            {MEMBERSHIP_PRICES.map((r) => (
+              <ChoiceButton
+                key={r}
+                active={form.membership_fair_price === r}
+                onClick={() => set("membership_fair_price", r)}
+              >
+                {r}
+              </ChoiceButton>
+            ))}
+          </div>
+        </StepShell>
+      ),
+    });
+
+    list.push({
+      key: "membership_benefits",
+      valid: form.membership_benefits.length > 0 || !!form.membership_benefits_other.trim(),
+      render: () => (
+        <StepShell
+          title="מה היית רוצה לקבל כחבר מועדון בתמורה לדמי החברות?"
+          subtitle="אפשר לבחור כמה תשובות"
+        >
+          <div className="grid gap-2">
+            {MEMBERSHIP_BENEFITS.map((b) => (
+              <ChoiceButton
+                key={b}
+                active={form.membership_benefits.includes(b)}
+                onClick={() =>
+                  set(
+                    "membership_benefits",
+                    form.membership_benefits.includes(b)
+                      ? form.membership_benefits.filter((x) => x !== b)
+                      : [...form.membership_benefits, b]
+                  )
+                }
+              >
+                {b}
+              </ChoiceButton>
+            ))}
+            <Input
+              dir="rtl"
+              placeholder="אחר: מה עוד היית רוצה לקבל?"
+              maxLength={300}
+              value={form.membership_benefits_other}
+              onChange={(e) => set("membership_benefits_other", e.target.value)}
+              className="text-right"
+            />
+          </div>
+          <p className="rounded-xl border border-border/60 bg-muted/30 p-3 text-right font-body text-xs leading-relaxed text-muted-foreground">
+            חשוב לנו להבהיר: אנחנו עדיין לא מחליטים על דמי חברות ולא מתחייבים למודל מסוים. המטרה של
+            השאלות האלה היא להבין יחד אתכם האם יש עניין בחברות שנתית, מה יהיה מחיר שנראה הוגן ומה
+            הייתם רוצים לקבל כחברי המועדון.
+          </p>
+        </StepShell>
+      ),
+    });
+
     return list;
   }, [form]);
 
@@ -385,6 +510,10 @@ const EventFeedback = () => {
       _improvement: form.improvement.trim() || null,
       _next_event_likelihood: form.next_event_likelihood,
       _nps: form.nps,
+      _membership_interest: form.membership_interest || null,
+      _membership_fair_price: form.membership_fair_price || null,
+      _membership_benefits: form.membership_benefits,
+      _membership_benefits_other: form.membership_benefits_other.trim() || null,
     });
     setSubmitting(false);
     if (rpcError) {
