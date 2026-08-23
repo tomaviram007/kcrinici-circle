@@ -227,6 +227,64 @@ const AdminEventFeedback = () => {
     void openQr(data as EventOption);
   };
 
+  const createForm = async () => {
+    if (!newForm.title.trim()) {
+      toast({ title: "יש למלא שם לשאלון", variant: "destructive" });
+      return;
+    }
+    setCreatingForm(true);
+    const { data: userData } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("feedback_forms")
+      .insert({
+        title: newForm.title.trim(),
+        description: newForm.description.trim() || null,
+        created_by: userData.user?.id ?? null,
+      })
+      .select("id, title, description, form_date, is_active")
+      .single();
+    setCreatingForm(false);
+
+    if (error || !data) {
+      toast({ title: "שגיאה ביצירת השאלון", description: error?.message, variant: "destructive" });
+      return;
+    }
+
+    await loadForms();
+    setNewForm({ title: "", description: "" });
+    toast({ title: "השאלון נפתח" });
+    void openQr({ id: data.id, title: data.title, event_date: data.form_date });
+  };
+
+  const toggleForm = async (form: StandaloneForm) => {
+    const { error } = await supabase
+      .from("feedback_forms")
+      .update({ is_active: !form.is_active })
+      .eq("id", form.id);
+    if (error) {
+      toast({ title: "שגיאה בעדכון", description: error.message, variant: "destructive" });
+      return;
+    }
+    await loadForms();
+  };
+
+  const confirmDeleteForm = async () => {
+    if (!formToDelete) return;
+    setDeleting(true);
+    const { error } = await supabase.from("feedback_forms").delete().eq("id", formToDelete.id);
+    setDeleting(false);
+    if (error) {
+      toast({ title: "שגיאה במחיקת השאלון", description: error.message, variant: "destructive" });
+      return;
+    }
+    setFormToDelete(null);
+    setDeleteStep(1);
+    if (eventId === formToDelete.id) setEventId("all");
+    await loadForms();
+    load();
+    toast({ title: "השאלון נמחק" });
+  };
+
 
   const deleteRow = async (id: string) => {
     const { error } = await supabase.from("event_feedback").delete().eq("id", id);
