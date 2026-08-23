@@ -352,10 +352,14 @@ const AdminEventFeedback = () => {
                     <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openQr(e)}>
                       <QrCode className="h-4 w-4" /> QR
                     </Button>
+                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setPreviewEvent(e)}>
+                      <Eye className="h-4 w-4" /> שאלון
+                    </Button>
                     <Button size="icon" variant="ghost" aria-label="העתק קישור" onClick={() => copyLink(e.id)}>
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
+
                   <div className="min-w-0 text-right">
                     <p className="truncate font-body text-sm text-foreground">{e.title}</p>
                     <p className="font-body text-xs text-muted-foreground">
