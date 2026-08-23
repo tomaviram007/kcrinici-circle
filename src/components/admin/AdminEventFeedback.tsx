@@ -52,6 +52,15 @@ interface Summary {
   meetup_types: { name: string; count: number }[];
   attend_reasons: { name: string; count: number }[];
   by_event: { event_id: string; title: string; event_date: string; total: number; avg_enjoyment: number }[];
+  membership?: {
+    respondents: number;
+    positive_pct: number;
+    interest: { name: string; count: number }[];
+    prices: { name: string; count: number }[];
+    benefits: { name: string; count: number }[];
+    other_notes: string[];
+    by_event: { event_id: string; title: string; respondents: number; positive_pct: number }[];
+  } | null;
 }
 
 const StatCard = ({
