@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { trackAction } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -181,6 +182,7 @@ const SecondHand = () => {
             ? "המודעה התקבלה וממתינה לאישור מנהל"
             : t("secondhand.toastPublished"),
       });
+      trackAction(editId ? "secondhand_update" : "secondhand_submit", { guest: isGuestFlow });
       setDialogOpen(false);
       setForm(emptyForm);
       setEditId(null);

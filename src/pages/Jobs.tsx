@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from "react";
+import { trackAction } from "@/lib/analytics";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search, Pencil, Lock } from "lucide-react";
@@ -94,6 +95,7 @@ const Jobs = () => {
       return;
     }
     toast({ title: t("jobs.successTitle"), description: t("jobs.successDesc") });
+    trackAction("job_submit", { category: form.category || null });
     fireConfetti();
     setForm(EMPTY_FORM);
     setShowForm(false);
