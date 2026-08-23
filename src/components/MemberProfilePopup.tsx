@@ -1,4 +1,5 @@
 import { User, Phone, Briefcase, MapPin, Cake, Heart, MessageCircle, Calendar, BadgeCheck } from "lucide-react";
+import { trackAction } from "@/lib/analytics";
 import { avatarSrc } from "@/lib/default-avatar";
 import SocialLinks from "@/components/SocialLinks";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
     if (!member.phone) return;
     const cleanPhone = member.phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
     const msg = encodeURIComponent(`היי ${member.full_name}, אני חבר במועדון הגברים של קרניצי. מה שלומך?`);
+    trackAction("contact_whatsapp", { member_id: member?.id });
     window.open(`https://wa.me/${cleanPhone}?text=${msg}`, "_blank");
   };
 
@@ -181,7 +183,7 @@ const MemberProfilePopup = ({ member, open, onOpenChange }: MemberProfilePopupPr
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={(e) => { e.stopPropagation(); window.open(`tel:${member.phone}`, "_self"); }}
+                  onClick={(e) => { e.stopPropagation(); trackAction("contact_call", { member_id: member.id }); window.open(`tel:${member.phone}`, "_self"); }}
                   className="flex-1 rounded-full border-gold/30 text-gold hover:bg-gold/10 font-body gap-1.5"
                 >
                   <Phone className="h-4 w-4" />

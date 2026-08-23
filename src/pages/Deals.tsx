@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { trackAction } from "@/lib/analytics";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -104,6 +105,7 @@ const Deals = () => {
   };
 
   const trackClick = async (dealId: string, counterName: string) => {
+    trackAction(counterName === "website_click_count" ? "deal_website_click" : "deal_claim", { deal_id: dealId });
     await supabase.rpc("increment_deal_counter", {
       deal_id: dealId,
       counter_name: counterName,
