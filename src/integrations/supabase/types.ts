@@ -1769,6 +1769,14 @@ export type Database = {
           event_id: string
         }[]
       }
+      get_event_feedback_info: {
+        Args: { _event_id: string }
+        Returns: {
+          event_date: string
+          id: string
+          title: string
+        }[]
+      }
       get_event_participant_counts: {
         Args: { _event_ids: string[] }
         Returns: {
