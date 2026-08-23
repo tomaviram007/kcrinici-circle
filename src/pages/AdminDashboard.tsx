@@ -211,6 +211,8 @@ const mobileNavGroups = [
       { id: "ads", label: "פרסום", icon: Tv },
       { id: "communication", label: "תקשורת", icon: Mail },
       { id: "content_access", label: "הרשאות תוכן", icon: Lock },
+      { id: "analytics", label: "אנליטיקות", icon: LineChart },
+
     ],
   },
 ];
