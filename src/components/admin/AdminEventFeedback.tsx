@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy, Eye, ExternalLink } from "lucide-react";
+import { Download, QrCode, Loader2, Star, Users, Repeat, MessageSquare, Trash2, Copy, Eye, ExternalLink, Plus } from "lucide-react";
 import QRCode from "qrcode";
 
 interface EventOption {
@@ -77,6 +77,11 @@ const AdminEventFeedback = () => {
   const [loading, setLoading] = useState(true);
   const [qrEvent, setQrEvent] = useState<EventOption | null>(null);
   const [previewEvent, setPreviewEvent] = useState<EventOption | null>(null);
+  const [selectedForQuestionnaire, setSelectedForQuestionnaire] = useState<string>("");
+  const [newEventOpen, setNewEventOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newEvent, setNewEvent] = useState({ title: "", date: "", time: "", location: "", description: "" });
+
 
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
 
@@ -85,13 +90,20 @@ const AdminEventFeedback = () => {
     [events]
   );
 
-  useEffect(() => {
-    supabase
+  const loadEvents = async () => {
+    const { data } = await supabase
       .from("events")
       .select("id, title, event_date")
-      .order("event_date", { ascending: false })
-      .then(({ data }) => setEvents((data as EventOption[]) || []));
+      .order("event_date", { ascending: false });
+    const list = (data as EventOption[]) || [];
+    setEvents(list);
+    return list;
+  };
+
+  useEffect(() => {
+    void loadEvents();
   }, []);
+
 
   const load = async () => {
     setLoading(true);
@@ -151,6 +163,40 @@ const AdminEventFeedback = () => {
     await navigator.clipboard.writeText(feedbackUrl(id));
     toast({ title: "הקישור הועתק" });
   };
+
+  const createEvent = async () => {
+    if (!newEvent.title.trim() || !newEvent.date) {
+      toast({ title: "יש למלא שם אירוע ותאריך", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    const { data: userData } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("events")
+      .insert({
+        title: newEvent.title.trim(),
+        description: newEvent.description.trim() || newEvent.title.trim(),
+        location: newEvent.location.trim() || null,
+        event_date: new Date(`${newEvent.date}T${newEvent.time || "19:00"}:00`).toISOString(),
+        created_by: userData.user?.id ?? null,
+      })
+      .select("id, title, event_date")
+      .single();
+    setCreating(false);
+
+    if (error || !data) {
+      toast({ title: "שגיאה ביצירת האירוע", description: error?.message, variant: "destructive" });
+      return;
+    }
+
+    await loadEvents();
+    setNewEventOpen(false);
+    setNewEvent({ title: "", date: "", time: "", location: "", description: "" });
+    setSelectedForQuestionnaire(data.id);
+    toast({ title: "האירוע נוצר והשאלון קושר אליו" });
+    void openQr(data as EventOption);
+  };
+
 
   const deleteRow = async (id: string) => {
     const { error } = await supabase.from("event_feedback").delete().eq("id", id);
@@ -344,10 +390,71 @@ const AdminEventFeedback = () => {
             </div>
           )}
 
+          {/* Open a questionnaire for an event */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setNewEventOpen(true)}>
+                <Plus className="h-4 w-4" /> אירוע חדש
+              </Button>
+              <h3 className="font-serif text-lg font-bold text-foreground">פתיחת שאלון לאירוע</h3>
+            </div>
+
+            {events.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border/70 p-6 text-center">
+                <p className="mb-3 font-body text-sm text-muted-foreground">
+                  אין עדיין אירועים במערכת. אפשר לפתוח אירוע חדש ולקשר אליו שאלון משוב.
+                </p>
+                <Button className="gap-2" onClick={() => setNewEventOpen(true)}>
+                  <Plus className="h-4 w-4" /> יצירת אירוע חדש
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Select value={selectedForQuestionnaire} onValueChange={setSelectedForQuestionnaire}>
+                  <SelectTrigger dir="rtl" className="text-right sm:flex-1">
+                    <SelectValue placeholder="בחירת אירוע לקישור השאלון" />
+                  </SelectTrigger>
+                  <SelectContent dir="rtl">
+                    {events.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.title} — {new Date(e.event_date).toLocaleDateString("he-IL")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Button
+                    className="gap-1.5"
+                    disabled={!selectedForQuestionnaire}
+                    onClick={() => {
+                      const ev = events.find((e) => e.id === selectedForQuestionnaire);
+                      if (ev) void openQr(ev);
+                    }}
+                  >
+                    <QrCode className="h-4 w-4" /> פתיחת שאלון
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="gap-1.5"
+                    disabled={!selectedForQuestionnaire}
+                    onClick={() => {
+                      const ev = events.find((e) => e.id === selectedForQuestionnaire);
+                      if (ev) setPreviewEvent(ev);
+                    }}
+                  >
+                    <Eye className="h-4 w-4" /> תצוגה
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* QR codes per event */}
+          {events.length > 0 && (
           <div className="rounded-xl border border-border bg-card p-4">
             <h3 className="mb-3 font-serif text-lg font-bold text-foreground">קודי QR לאירועים</h3>
             <div className="max-h-72 space-y-2 overflow-y-auto">
+
               {events.map((e) => (
                 <div key={e.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-2.5">
                   <div className="flex shrink-0 gap-2">
@@ -372,6 +479,8 @@ const AdminEventFeedback = () => {
               ))}
             </div>
           </div>
+          )}
+
 
           {/* Responses */}
           <div className="rounded-xl border border-border bg-card p-4">
@@ -482,7 +591,52 @@ const AdminEventFeedback = () => {
           </Button>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={newEventOpen} onOpenChange={setNewEventOpen}>
+        <DialogContent dir="rtl" className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-right font-serif">אירוע חדש</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-right">
+            <Input
+              dir="rtl"
+              placeholder="שם האירוע"
+              value={newEvent.title}
+              onChange={(e) => setNewEvent((p) => ({ ...p, title: e.target.value }))}
+            />
+            <div className="flex gap-2">
+              <Input
+                type="date"
+                value={newEvent.date}
+                onChange={(e) => setNewEvent((p) => ({ ...p, date: e.target.value }))}
+              />
+              <Input
+                type="time"
+                value={newEvent.time}
+                onChange={(e) => setNewEvent((p) => ({ ...p, time: e.target.value }))}
+              />
+            </div>
+            <Input
+              dir="rtl"
+              placeholder="מיקום (לא חובה)"
+              value={newEvent.location}
+              onChange={(e) => setNewEvent((p) => ({ ...p, location: e.target.value }))}
+            />
+            <Input
+              dir="rtl"
+              placeholder="תיאור קצר (לא חובה)"
+              value={newEvent.description}
+              onChange={(e) => setNewEvent((p) => ({ ...p, description: e.target.value }))}
+            />
+            <Button className="w-full gap-2" disabled={creating} onClick={createEvent}>
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              יצירת אירוע ופתיחת שאלון
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
+
 
   );
 };
