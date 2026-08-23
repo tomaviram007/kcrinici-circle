@@ -492,6 +492,98 @@ const AdminEventFeedback = () => {
             </div>
           )}
 
+          {/* Annual membership interest */}
+          <div className="rounded-xl border border-primary/40 bg-card p-4">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <span className="rounded-full bg-primary/15 px-3 py-1 font-body text-xs text-primary">
+                {summary?.membership?.respondents ?? 0} משיבים
+              </span>
+              <h3 className="font-serif text-lg font-bold text-foreground">נכונות לחברות שנתית 🍻</h3>
+            </div>
+
+            <div className="mb-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-border bg-background/40 p-3 text-right">
+                <p className="font-body text-xs text-muted-foreground">מעוניינים (כן / כנראה שכן)</p>
+                <p className="font-serif text-2xl font-bold text-primary">
+                  {summary?.membership?.positive_pct ?? 0}%
+                </p>
+              </div>
+              <div className="rounded-xl border border-border bg-background/40 p-3 text-right">
+                <p className="font-body text-xs text-muted-foreground">סה״כ משיבים לשאלון החברות</p>
+                <p className="font-serif text-2xl font-bold text-foreground">
+                  {summary?.membership?.respondents ?? 0}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+              {[
+                { title: "נכונות להצטרף", rows: summary?.membership?.interest ?? [] },
+                { title: "סכום שנתי הוגן", rows: summary?.membership?.prices ?? [] },
+                { title: "הטבות מבוקשות", rows: summary?.membership?.benefits ?? [] },
+              ].map((block) => {
+                const base = summary?.membership?.respondents || 0;
+                return (
+                  <div key={block.title} className="rounded-xl border border-border bg-background/40 p-3">
+                    <h4 className="mb-2 text-right font-body text-sm font-bold text-foreground">{block.title}</h4>
+                    {block.rows.length ? (
+                      <div className="space-y-2">
+                        {block.rows.map((r) => {
+                          const pct = base ? Math.round((r.count / base) * 100) : 0;
+                          return (
+                            <div key={r.name} className="space-y-1">
+                              <div className="flex justify-between gap-2 font-body text-xs">
+                                <span className="shrink-0 text-muted-foreground">{r.count} ({pct}%)</span>
+                                <span className="text-right text-foreground">{r.name}</span>
+                              </div>
+                              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                                <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-right font-body text-xs text-muted-foreground">אין נתונים עדיין</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {!!summary?.membership?.by_event?.length && (
+              <div className="mt-4 rounded-xl border border-border bg-background/40 p-3">
+                <h4 className="mb-2 text-right font-body text-sm font-bold text-foreground">פילוח לפי אירוע</h4>
+                <div className="space-y-1">
+                  {summary.membership.by_event.map((e) => (
+                    <div
+                      key={e.event_id}
+                      className="flex items-center justify-between gap-3 border-b border-border/50 py-1.5 last:border-0"
+                    >
+                      <span className="shrink-0 font-body text-sm text-primary">
+                        {e.positive_pct}% · {e.respondents} משיבים
+                      </span>
+                      <span className="truncate text-right font-body text-sm text-foreground">{e.title}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!!summary?.membership?.other_notes?.length && (
+              <div className="mt-4 rounded-xl border border-border bg-background/40 p-3">
+                <h4 className="mb-2 text-right font-body text-sm font-bold text-foreground">תשובות "אחר"</h4>
+                <div className="space-y-1">
+                  {summary.membership.other_notes.map((n, i) => (
+                    <p key={i} className="text-right font-body text-sm text-muted-foreground">• {n}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+
+
           {/* Open a questionnaire for an event */}
           <div className="rounded-xl border border-border bg-card p-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
