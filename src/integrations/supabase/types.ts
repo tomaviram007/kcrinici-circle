@@ -179,6 +179,45 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          anon_id: string
+          created_at: string
+          duration_ms: number | null
+          event_type: string
+          id: string
+          name: string
+          path: string | null
+          props: Json
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          anon_id: string
+          created_at?: string
+          duration_ms?: number | null
+          event_type: string
+          id?: string
+          name: string
+          path?: string | null
+          props?: Json
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          anon_id?: string
+          created_at?: string
+          duration_ms?: number | null
+          event_type?: string
+          id?: string
+          name?: string
+          path?: string | null
+          props?: Json
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           category: string
@@ -1503,6 +1542,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_analytics_overview: { Args: { _days?: number }; Returns: Json }
+      admin_analytics_timeline: {
+        Args: { _anon_id?: string; _limit?: number; _user_id?: string }
+        Returns: {
+          created_at: string
+          duration_ms: number
+          event_type: string
+          id: string
+          name: string
+          path: string
+          props: Json
+          session_id: string
+        }[]
+      }
+      admin_analytics_visitors: {
+        Args: { _days?: number; _limit?: number }
+        Returns: {
+          actions_count: number
+          anon_id: string
+          avatar_url: string
+          email: string
+          events_count: number
+          first_seen: string
+          full_name: string
+          last_seen: string
+          page_views: number
+          user_id: string
+        }[]
+      }
       admin_get_email_logs: {
         Args: {
           _end?: string
@@ -1808,6 +1876,18 @@ export type Database = {
       }
       track_ad_impression: {
         Args: { p_campaign_id: string; p_user_id?: string }
+        Returns: undefined
+      }
+      track_event: {
+        Args: {
+          _anon_id: string
+          _duration_ms?: number
+          _event_type: string
+          _name: string
+          _path?: string
+          _props?: Json
+          _session_id: string
+        }
         Returns: undefined
       }
     }
