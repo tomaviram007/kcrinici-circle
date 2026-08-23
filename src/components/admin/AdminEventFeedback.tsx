@@ -91,13 +91,23 @@ const AdminEventFeedback = () => {
   const [creating, setCreating] = useState(false);
   const [newEvent, setNewEvent] = useState({ title: "", date: "", time: "", location: "", description: "" });
 
+  const [forms, setForms] = useState<StandaloneForm[]>([]);
+  const [newForm, setNewForm] = useState({ title: "", description: "" });
+  const [creatingForm, setCreatingForm] = useState(false);
+  const [formToDelete, setFormToDelete] = useState<StandaloneForm | null>(null);
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
+  const [deleting, setDeleting] = useState(false);
 
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
 
   const eventTitles = useMemo(
-    () => Object.fromEntries(events.map((e) => [e.id, e.title])),
-    [events]
-  );
+    () =>
+      Object.fromEntries([
+        ...events.map((e) => [e.id, e.title]),
+        ...forms.map((f) => [f.id, `${f.title} (שאלון עצמאי)`]),
+      ]),
+    [events, forms]
+  ) as Record<string, string>;
 
   const loadEvents = async () => {
     const { data } = await supabase
@@ -109,8 +119,19 @@ const AdminEventFeedback = () => {
     return list;
   };
 
+  const loadForms = async () => {
+    const { data } = await supabase
+      .from("feedback_forms")
+      .select("id, title, description, form_date, is_active")
+      .order("created_at", { ascending: false });
+    const list = (data as StandaloneForm[]) || [];
+    setForms(list);
+    return list;
+  };
+
   useEffect(() => {
     void loadEvents();
+    void loadForms();
   }, []);
 
 
