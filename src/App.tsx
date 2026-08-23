@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Header from "@/components/layout/Header";
 import PageTransition from "@/components/layout/PageTransition";
@@ -50,6 +51,7 @@ const AppLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { sessionExpired } = useAuth();
+  usePageAnalytics();
   const hideHeader = ["/login", "/register", "/pending", "/reset-password", "/unsubscribe"].includes(location.pathname);
 
   useEffect(() => {

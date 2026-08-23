@@ -1,4 +1,5 @@
 import { MessageCircle, Facebook } from "lucide-react";
+import { trackAction } from "@/lib/analytics";
 
 interface ShareButtonsProps {
   title: string;
@@ -19,6 +20,10 @@ const ShareButtons = ({ title, url, text, size = "sm", className = "" }: ShareBu
   const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
+  const shareClick = (network: "whatsapp" | "facebook") => (e: React.MouseEvent) => {
+    stop(e);
+    trackAction(network === "whatsapp" ? "share_whatsapp" : "share_facebook", { title, url: shareUrl });
+  };
   const iconSize = size === "md" ? "h-4 w-4" : "h-3.5 w-3.5";
   const btnSize = size === "md" ? "h-8 w-8" : "h-7 w-7";
 
@@ -31,7 +36,7 @@ const ShareButtons = ({ title, url, text, size = "sm", className = "" }: ShareBu
         rel="noopener noreferrer"
         aria-label="שתף בוואטסאפ"
         title="שתף בוואטסאפ"
-        onClick={stop}
+        onClick={shareClick("whatsapp")}
         className={`${btnSize} inline-flex items-center justify-center rounded-full bg-green-600/15 text-green-600 hover:bg-green-600 hover:text-white transition-colors`}
       >
         <MessageCircle className={iconSize} />
@@ -42,7 +47,7 @@ const ShareButtons = ({ title, url, text, size = "sm", className = "" }: ShareBu
         rel="noopener noreferrer"
         aria-label="שתף בפייסבוק"
         title="שתף בפייסבוק"
-        onClick={stop}
+        onClick={shareClick("facebook")}
         className={`${btnSize} inline-flex items-center justify-center rounded-full bg-blue-600/15 text-blue-500 hover:bg-blue-600 hover:text-white transition-colors`}
       >
         <Facebook className={iconSize} />
