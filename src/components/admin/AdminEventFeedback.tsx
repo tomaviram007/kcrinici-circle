@@ -542,6 +542,100 @@ const AdminEventFeedback = () => {
             )}
           </div>
 
+          {/* Standalone questionnaires */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 flex items-center justify-end gap-2">
+              <h3 className="font-serif text-lg font-bold text-foreground">שאלון עצמאי (ללא אירוע)</h3>
+              <ClipboardList className="h-5 w-5 text-primary" />
+            </div>
+            <p className="mb-3 font-body text-sm text-muted-foreground">
+              שאלון שאינו מקושר לאירוע במערכת. מקבל קישור וקוד QR משלו.
+            </p>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                dir="rtl"
+                placeholder="שם השאלון"
+                className="text-right sm:flex-1"
+                value={newForm.title}
+                onChange={(e) => setNewForm((p) => ({ ...p, title: e.target.value }))}
+              />
+              <Input
+                dir="rtl"
+                placeholder="תיאור קצר (לא חובה)"
+                className="text-right sm:flex-1"
+                value={newForm.description}
+                onChange={(e) => setNewForm((p) => ({ ...p, description: e.target.value }))}
+              />
+              <Button className="gap-1.5" disabled={creatingForm} onClick={createForm}>
+                {creatingForm ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                פתיחת שאלון
+              </Button>
+            </div>
+
+            {forms.length > 0 && (
+              <div className="mt-4 max-h-72 space-y-2 overflow-y-auto">
+                {forms.map((f) => (
+                  <div
+                    key={f.id}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-2.5"
+                  >
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5"
+                        onClick={() => openQr({ id: f.id, title: f.title, event_date: f.form_date })}
+                      >
+                        <QrCode className="h-4 w-4" /> QR
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5"
+                        onClick={() => setPreviewEvent({ id: f.id, title: f.title, event_date: f.form_date })}
+                      >
+                        <Eye className="h-4 w-4" /> שאלון
+                      </Button>
+                      <Button size="icon" variant="ghost" aria-label="העתק קישור" onClick={() => copyLink(f.id)}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="font-body text-xs"
+                        onClick={() => toggleForm(f)}
+                      >
+                        {f.is_active ? "השהיה" : "הפעלה"}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label="מחיקת שאלון"
+                        onClick={() => {
+                          setDeleteStep(1);
+                          setFormToDelete(f);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+
+                    <div className="min-w-0 text-right">
+                      <p className="truncate font-body text-sm text-foreground">{f.title}</p>
+                      <p className="font-body text-xs text-muted-foreground">
+                        {new Date(f.form_date).toLocaleDateString("he-IL")}
+                        {!f.is_active && " · מושהה"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+
+
           {/* QR codes per event */}
           {events.length > 0 && (
           <div className="rounded-xl border border-border bg-card p-4">
