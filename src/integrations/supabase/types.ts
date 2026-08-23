@@ -602,7 +602,8 @@ export type Database = {
           attend_reason: string | null
           created_at: string
           enjoyment: number
-          event_id: string
+          event_id: string | null
+          form_id: string | null
           id: string
           improvement: string | null
           keep_in_touch: boolean
@@ -620,7 +621,8 @@ export type Database = {
           attend_reason?: string | null
           created_at?: string
           enjoyment: number
-          event_id: string
+          event_id?: string | null
+          form_id?: string | null
           id?: string
           improvement?: string | null
           keep_in_touch?: boolean
@@ -638,7 +640,8 @@ export type Database = {
           attend_reason?: string | null
           created_at?: string
           enjoyment?: number
-          event_id?: string
+          event_id?: string | null
+          form_id?: string | null
           id?: string
           improvement?: string | null
           keep_in_touch?: boolean
@@ -657,6 +660,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_feedback_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_forms"
             referencedColumns: ["id"]
           },
         ]
@@ -883,6 +893,39 @@ export type Database = {
           title?: string
           updated_at?: string
           waze_url?: string | null
+        }
+        Relationships: []
+      }
+      feedback_forms: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          form_date: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          form_date?: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          form_date?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
