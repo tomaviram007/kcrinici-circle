@@ -32,6 +32,32 @@ const MEETUP_TYPES = [
 
 const LIKELIHOOD_LABELS = ["ממש לא", "כנראה שלא", "אולי", "סביר", "בוודאות"];
 
+const MEMBERSHIP_INTEREST = [
+  "בהחלט כן",
+  "כנראה שכן",
+  "לא בטוח, תלוי במחיר ובמה שמקבלים",
+  "כנראה שלא",
+  "לא",
+];
+
+const MEMBERSHIP_PRICES = [
+  "עד 50 ₪",
+  "100 ₪",
+  "150 ₪",
+  "200 ₪",
+  "250 ₪ ומעלה",
+  "לא הייתי משלם דמי חברות שנתיים",
+];
+
+const MEMBERSHIP_BENEFITS = [
+  "מחיר מוזל באירועים",
+  "קדימות בהרשמה לאירועים",
+  "אירועים שמיועדים לחברי המועדון בלבד",
+  "הטבות מבעלי עסקים בקהילה",
+  "פעילויות ומפגשים נוספים במהלך השנה",
+  "לא צריך הטבה אישית, מבחינתי הכסף נועד לעזור לקהילה להתפתח",
+];
+
 interface FormState {
   enjoyment: number | null;
   met_new_person: boolean | null;
@@ -44,6 +70,10 @@ interface FormState {
   improvement: string;
   next_event_likelihood: number | null;
   nps: number | null;
+  membership_interest: string;
+  membership_fair_price: string;
+  membership_benefits: string[];
+  membership_benefits_other: string;
 }
 
 const emptyForm: FormState = {
@@ -58,6 +88,10 @@ const emptyForm: FormState = {
   improvement: "",
   next_event_likelihood: null,
   nps: null,
+  membership_interest: "",
+  membership_fair_price: "",
+  membership_benefits: [],
+  membership_benefits_other: "",
 };
 
 const StepShell = ({
