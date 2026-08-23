@@ -14,9 +14,18 @@ interface EventOption {
   event_date: string;
 }
 
+interface StandaloneForm {
+  id: string;
+  title: string;
+  description: string | null;
+  form_date: string;
+  is_active: boolean;
+}
+
 interface FeedbackRow {
   id: string;
-  event_id: string;
+  event_id: string | null;
+  form_id: string | null;
   created_at: string;
   enjoyment: number;
   met_new_person: boolean;
