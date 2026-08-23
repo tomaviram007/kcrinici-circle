@@ -77,6 +77,11 @@ const AdminEventFeedback = () => {
   const [loading, setLoading] = useState(true);
   const [qrEvent, setQrEvent] = useState<EventOption | null>(null);
   const [previewEvent, setPreviewEvent] = useState<EventOption | null>(null);
+  const [selectedForQuestionnaire, setSelectedForQuestionnaire] = useState<string>("");
+  const [newEventOpen, setNewEventOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newEvent, setNewEvent] = useState({ title: "", date: "", time: "", location: "", description: "" });
+
 
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
 
@@ -158,6 +163,40 @@ const AdminEventFeedback = () => {
     await navigator.clipboard.writeText(feedbackUrl(id));
     toast({ title: "הקישור הועתק" });
   };
+
+  const createEvent = async () => {
+    if (!newEvent.title.trim() || !newEvent.date) {
+      toast({ title: "יש למלא שם אירוע ותאריך", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    const { data: userData } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("events")
+      .insert({
+        title: newEvent.title.trim(),
+        description: newEvent.description.trim() || newEvent.title.trim(),
+        location: newEvent.location.trim() || null,
+        event_date: new Date(`${newEvent.date}T${newEvent.time || "19:00"}:00`).toISOString(),
+        created_by: userData.user?.id ?? null,
+      })
+      .select("id, title, event_date")
+      .single();
+    setCreating(false);
+
+    if (error || !data) {
+      toast({ title: "שגיאה ביצירת האירוע", description: error?.message, variant: "destructive" });
+      return;
+    }
+
+    await loadEvents();
+    setNewEventOpen(false);
+    setNewEvent({ title: "", date: "", time: "", location: "", description: "" });
+    setSelectedForQuestionnaire(data.id);
+    toast({ title: "האירוע נוצר והשאלון קושר אליו" });
+    void openQr(data as EventOption);
+  };
+
 
   const deleteRow = async (id: string) => {
     const { error } = await supabase.from("event_feedback").delete().eq("id", id);
