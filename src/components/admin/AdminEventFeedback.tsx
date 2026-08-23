@@ -458,7 +458,32 @@ const AdminEventFeedback = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!previewEvent} onOpenChange={(o) => !o && setPreviewEvent(null)}>
+        <DialogContent dir="rtl" className="max-w-md p-4">
+          <DialogHeader>
+            <DialogTitle className="text-right font-serif">תצוגת השאלון — {previewEvent?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-hidden rounded-xl border border-border bg-background">
+            {previewEvent && (
+              <iframe
+                src={feedbackUrl(previewEvent.id)}
+                title="תצוגה מקדימה של שאלון המשוב"
+                className="h-[70vh] w-full"
+              />
+            )}
+          </div>
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => previewEvent && window.open(feedbackUrl(previewEvent.id), "_blank", "noopener")}
+          >
+            <ExternalLink className="h-4 w-4" /> פתיחה בכרטיסייה חדשה
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 };
 
