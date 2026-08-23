@@ -130,6 +130,8 @@ const Header = () => {
         <div className="w-full px-4 md:px-6 relative flex items-center py-[8vw] md:py-3">
           <button
             className="md:hidden text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 z-10"
+            aria-label={menuOpen ? "סגירת תפריט ניווט" : "תפריט ניווט"}
+            aria-expanded={menuOpen}
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -137,7 +139,7 @@ const Header = () => {
 
           {hasBirthdays && (
             <div className="md:hidden absolute left-4 top-1/2 -translate-y-1/2 z-10">
-              <a href="/#birthdays-section" onClick={handleBirthdayClick} className="relative flex items-center justify-center">
+              <a href="/#birthdays-section" onClick={handleBirthdayClick} aria-label="ימי הולדת השבוע" className="relative flex items-center justify-center">
                 <Cake className="h-5 w-5 text-gold" />
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-background">
                   {birthdays.length}
@@ -147,12 +149,12 @@ const Header = () => {
           )}
 
           <Link to={user ? "/dashboard" : "/"} className="md:hidden absolute left-1/2 -translate-x-1/2">
-            <img src={logoUrl} alt="לוגו" className="rounded-full object-contain" style={{ height: `${logoSize}px`, width: `${logoSize}px` }} />
+            <img src={logoUrl} alt="לוגו המועדון הגברים של ק.קרניצי" className="rounded-full object-contain" style={{ height: `${logoSize}px`, width: `${logoSize}px` }} />
           </Link>
 
           <div className="hidden md:flex items-center justify-center" style={{ width: "10%" }}>
             <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2">
-              <img src={logoUrl} alt="לוגו" className="rounded-full object-contain" style={{ height: `${logoSize}px`, width: `${logoSize}px` }} />
+              <img src={logoUrl} alt="לוגו המועדון הגברים של ק.קרניצי" className="rounded-full object-contain" style={{ height: `${logoSize}px`, width: `${logoSize}px` }} />
               {logoText && <span className="font-serif text-lg font-bold text-foreground">{logoText}</span>}
             </Link>
           </div>
@@ -186,6 +188,7 @@ const Header = () => {
               <a
                 href="/#birthdays-section"
                 onClick={handleBirthdayClick}
+                aria-label="ימי הולדת השבוע"
                 className="relative rounded-md px-3 py-1.5 font-body text-sm text-gold hover:bg-secondary transition-colors flex items-center gap-1.5"
               >
                 <Cake className="h-4 w-4" />
@@ -200,8 +203,8 @@ const Header = () => {
 
             {canAccess ? (
               <div className="flex items-center gap-1">
-                <Link to="/profile">
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <Link to="/profile" aria-label="הפרופיל שלי">
+                  <Button variant="ghost" size="icon" aria-label="הפרופיל שלי" className="text-muted-foreground hover:text-foreground">
                     <User className="h-4 w-4" />
                   </Button>
                 </Link>

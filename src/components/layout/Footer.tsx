@@ -31,7 +31,7 @@ const Footer = () => {
           {/* About */}
           <div className="space-y-3">
             <Link to="/" className="flex items-center gap-3">
-              <img src={logoUrl} alt="לוגו המועדון" className="h-12 w-12 rounded-full object-contain" />
+              <img src={logoUrl} alt="לוגו המועדון הגברים של ק.קרניצי" className="h-12 w-12 rounded-full object-contain" />
               <h3 className="font-serif text-lg font-bold text-foreground">
                 הגברים של ק.קרניצי
               </h3>
