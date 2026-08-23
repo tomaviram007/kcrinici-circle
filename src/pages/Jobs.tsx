@@ -22,6 +22,7 @@ import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import { usePageCover } from "@/hooks/usePageCover";
 import ShareButtons from "@/components/ShareButtons";
+import Seo from "@/components/Seo";
 
 const JOB_TYPES = [
   { value: "full-time", label: "משרה מלאה" },
@@ -102,6 +103,7 @@ const Jobs = () => {
 
   return (
     <>
+      <Seo title="לוח דרושים" description="משרות והזדמנויות תעסוקה שמפרסמים חברי המועדון והקהילה בקרית קרניצי." path="/jobs" />
     <PageHero image={coverImage} title={t("hero.jobs.title")} highlight={t("hero.jobs.highlight")} subtitle={t("hero.jobs.subtitle")}>
       {canEditJobs && (
         <button

@@ -18,6 +18,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import SaleImageUpload from "@/components/announcements/SaleImageUpload";
 import heroImg from "@/assets/hero-secondhand.jpg";
 import ShareButtons from "@/components/ShareButtons";
+import Seo from "@/components/Seo";
 
 const CATEGORIES = ["כללי", "רכב", "אלקטרוניקה", "ריהוט", "ביגוד / אופנה", "ספורט ופנאי", "כלי בית", "נדל״ן", "אחר"];
 const CONDITIONS = [
@@ -213,6 +214,7 @@ const SecondHand = () => {
 
   return (
     <>
+      <Seo title="יד שנייה" description="פריטי יד שנייה למכירה ולמסירה בשכונה — פרסום מודעה חינם וקנייה מחברי הקהילה." path="/secondhand" />
       <PageHero
         image={cover}
         title={t("secondhand.heroTitle")}
