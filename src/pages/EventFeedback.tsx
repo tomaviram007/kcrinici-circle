@@ -123,12 +123,8 @@ const EventFeedback = () => {
   useEffect(() => {
     const load = async () => {
       if (!eventId) return;
-      const { data } = await supabase
-        .from("events")
-        .select("id, title, event_date")
-        .eq("id", eventId)
-        .maybeSingle();
-      setEvent(data as EventInfo | null);
+      const { data } = await supabase.rpc("get_event_feedback_info", { _event_id: eventId });
+      setEvent(((data as EventInfo[] | null) || [])[0] || null);
       setLoading(false);
     };
     load();
