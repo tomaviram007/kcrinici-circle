@@ -21,6 +21,7 @@ import { usePageCover } from "@/hooks/usePageCover";
 import { isEventEnded } from "@/lib/event-status";
 import { avatarSrc } from "@/lib/default-avatar";
 import {
+import Seo from "@/components/Seo";
   Dialog,
   DialogContent,
   DialogTitle,
@@ -225,6 +226,7 @@ const Events = () => {
 
   return (
     <>
+      <Seo title="אירועי המועדון" description="מפגשי הגברים של ק.קרניצי: אירועים קרובים, פרטי מיקום ומועד והרשמה מהירה לחברי המועדון." path="/events" />
     <PageHero image={coverImage} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
     
     <ContentWithSidebarAds targetPage="events">

@@ -22,6 +22,7 @@ import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
 import recommendationsHero from "@/assets/recommendations-hero.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import ShareButtons from "@/components/ShareButtons";
+import Seo from "@/components/Seo";
 
 
 const CATEGORIES = [
@@ -247,6 +248,7 @@ const Recommendations = () => {
 
   return (
     <>
+      <Seo title="אנשי מקצוע מומלצים" description="בעלי מקצוע מומלצים על ידי חברי המועדון: שיפוצים, חשמל, אינסטלציה, ייעוץ ועוד." path="/recommendations" />
       <PageHero image={coverImage} title={t("hero.recommendations.title")} highlight={t("hero.recommendations.highlight")} subtitle={t("hero.recommendations.subtitle")}>
         {canEditRecommendations && (
           <button

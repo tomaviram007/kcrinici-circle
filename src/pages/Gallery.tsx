@@ -19,6 +19,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { validateImageFile } from "@/lib/file-validation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { avatarSrc } from "@/lib/default-avatar";
+import Seo from "@/components/Seo";
 
 type Album = Tables<"gallery_albums">;
 type Photo = Tables<"gallery_photos">;
@@ -354,6 +355,7 @@ const Gallery = () => {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
+        <Seo title="גלריית תמונות" description="תמונות ממפגשי ואירועי המועדון של הגברים מק.קרניצי." path="/gallery" />
         <p className="font-body text-muted-foreground">{t("gallery.loading")}</p>
       </div>
     );

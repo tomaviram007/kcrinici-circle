@@ -19,6 +19,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
+import Seo from "@/components/Seo";
 
 const Index = () => {
   const { user, isApproved } = useAuth();
@@ -54,6 +55,10 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background">
+      <Seo title="הגברים של ק.קרניצי | מועדון חברים" description="מועדון החברים של הגברים מקרית קרניצי: אירועים, הטבות, לוח דרושים, יד שנייה והמלצות על אנשי מקצוע מהשכונה." path="/" jsonLd={[
+        { "@context": "https://schema.org", "@type": "Organization", name: "הגברים של ק.קרניצי", url: "https://kcrinici.com", description: "מועדון החברים של הגברים מקרית קרניצי" },
+        { "@context": "https://schema.org", "@type": "WebSite", name: "הגברים של ק.קרניצי", url: "https://kcrinici.com" },
+      ]} />
       <HeroSection isLoggedIn={isLoggedIn} isApproved={isApproved} />
 
       <ScrollReveal>

@@ -24,6 +24,7 @@ import DealSubmitForm from "@/components/deals/DealSubmitForm";
 import DealsCarousel from "@/components/deals/DealsCarousel";
 
 import heroEvents from "@/assets/hero-events.jpg";
+import Seo from "@/components/Seo";
 
 const CATEGORIES = ["הכל", "אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
 
@@ -130,6 +131,7 @@ const Deals = () => {
 
   return (
     <>
+      <Seo title="הטבות לחברי המועדון" description="הטבות והנחות בלעדיות שמעניקים עסקים וחברי המועדון לחברי הגברים של ק.קרניצי." path="/deals" />
       <PageHero
         image={coverImage}
         title={t("hero.deals.title")}

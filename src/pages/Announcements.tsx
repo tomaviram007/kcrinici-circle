@@ -21,6 +21,7 @@ import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
 import { Separator } from "@/components/ui/separator";
 import { avatarSrc } from "@/lib/default-avatar";
+import Seo from "@/components/Seo";
 
 const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo";
 
@@ -258,6 +259,7 @@ const Announcements = () => {
 
   return (
     <>
+      <Seo title="לוח מודעות" description="הודעות ועדכונים שוטפים מהנהלת מועדון הגברים של ק.קרניצי." path="/announcements" />
     <PageHero image={coverImage} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון">
       {canEditAnnouncements && (
         <button

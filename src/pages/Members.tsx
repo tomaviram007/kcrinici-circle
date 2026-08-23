@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import Seo from "@/components/Seo";
 
 const isBirthdayToday = (birthDate: string | null): boolean => {
   if (!birthDate) return false;
@@ -188,6 +189,7 @@ const Members = () => {
 
   return (
     <>
+      <Seo title="חברי המועדון" description="אינדקס חברי המועדון של הגברים מק.קרניצי — פרופילים, תחומי עיסוק ופרטי קשר לחברים מאושרים." path="/members" />
     <PageHero image={coverImage} title="אינדקס" highlight="החברים" subtitle="אנשי המקצוע והעשייה של השכונה — הכירו את חברי המועדון" />
     <ContentWithSidebarAds targetPage="members">
     <div className="page-container py-4 sm:py-8">
