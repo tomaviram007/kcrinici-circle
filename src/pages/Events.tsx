@@ -20,8 +20,8 @@ import heroImg from "@/assets/hero-events.jpg";
 import { usePageCover } from "@/hooks/usePageCover";
 import { isEventEnded } from "@/lib/event-status";
 import { avatarSrc } from "@/lib/default-avatar";
-import {
 import Seo from "@/components/Seo";
+import {
   Dialog,
   DialogContent,
   DialogTitle,
