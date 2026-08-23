@@ -822,6 +822,58 @@ const AdminEventFeedback = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={!!formToDelete}
+        onOpenChange={(o) => {
+          if (!o) {
+            setFormToDelete(null);
+            setDeleteStep(1);
+          }
+        }}
+      >
+        <DialogContent dir="rtl" className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-end gap-2 text-right font-serif">
+              {deleteStep === 1 ? "מחיקת שאלון" : "אישור סופי"}
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-right">
+            {deleteStep === 1 ? (
+              <p className="font-body text-sm text-muted-foreground">
+                למחוק את השאלון "{formToDelete?.title}"? הקישור וקוד ה-QR שלו יפסיקו לעבוד.
+              </p>
+            ) : (
+              <p className="font-body text-sm text-muted-foreground">
+                שאלה אחרונה: כל התשובות שנאספו בשאלון הזה יימחקו גם הן, ואי אפשר לשחזר אותן. להמשיך במחיקה?
+              </p>
+            )}
+            <div className="flex gap-2">
+              {deleteStep === 1 ? (
+                <Button variant="destructive" className="flex-1" onClick={() => setDeleteStep(2)}>
+                  כן, להמשיך
+                </Button>
+              ) : (
+                <Button variant="destructive" className="flex-1 gap-2" disabled={deleting} onClick={confirmDeleteForm}>
+                  {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  מחיקה סופית
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setFormToDelete(null);
+                  setDeleteStep(1);
+                }}
+              >
+                ביטול
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
 
 
