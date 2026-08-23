@@ -316,7 +316,7 @@ const AdminEventFeedback = () => {
     const lines = rows.map((r) =>
       [
         new Date(r.created_at).toLocaleString("he-IL"),
-        eventTitles[r.event_id] || r.event_id,
+        eventTitles[(r.event_id || r.form_id) as string] || r.event_id || r.form_id,
         r.enjoyment,
         r.met_new_person ? "כן" : "לא",
         r.new_people_count ?? "",
