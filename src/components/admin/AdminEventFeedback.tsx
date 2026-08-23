@@ -358,16 +358,21 @@ const AdminEventFeedback = () => {
       {/* Filters */}
       <div className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-3">
         <div className="space-y-1.5">
-          <label className="font-body text-xs text-muted-foreground">אירוע</label>
+          <label className="font-body text-xs text-muted-foreground">אירוע / שאלון</label>
           <Select value={eventId} onValueChange={setEventId}>
             <SelectTrigger className="text-right">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">כל האירועים</SelectItem>
+              <SelectItem value="all">הכל</SelectItem>
               {events.map((e) => (
                 <SelectItem key={e.id} value={e.id}>
                   {e.title}
+                </SelectItem>
+              ))}
+              {forms.map((f) => (
+                <SelectItem key={f.id} value={f.id}>
+                  {f.title} (שאלון עצמאי)
                 </SelectItem>
               ))}
             </SelectContent>
