@@ -202,7 +202,10 @@ const AdminEventFeedback = () => {
           .select("*")
           .order("created_at", { ascending: false })
           .limit(500);
-        if (eventId !== "all") q = q.eq("event_id", eventId);
+        if (eventId !== "all") {
+          const isStandaloneForm = forms.some((form) => form.id === eventId);
+          q = q.eq(isStandaloneForm ? "form_id" : "event_id", eventId);
+        }
         if (startIso) q = q.gte("created_at", startIso);
         if (endIso) q = q.lte("created_at", endIso);
         return q;
