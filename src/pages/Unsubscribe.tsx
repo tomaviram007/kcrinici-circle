@@ -7,8 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, MailX, CheckCircle2 } from "lucide-react";
 
-const FN_URL =
-  "https://wzbvdpgoyetmgluvhygf.supabase.co/functions/v1/handle-email-unsubscribe";
 const LEGACY_FN_URL =
   "https://wzbvdpgoyetmgluvhygf.supabase.co/functions/v1/handle-unsubscribe";
 
@@ -39,19 +37,7 @@ export default function Unsubscribe() {
     }
     setLoading(true);
     try {
-      // Primary: new infra endpoint (token-based, suppresses email & marks token used)
-      if (token) {
-        const res = await fetch(FN_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
-        });
-        const data = await res.json();
-        if (!res.ok && data?.reason !== "already_unsubscribed") {
-          throw new Error(data?.error || "שגיאה");
-        }
-      }
-      // Also call legacy endpoint to notify admin + handle email-only suppression
+      // Notify admin + record the opt-out
       await fetch(LEGACY_FN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
