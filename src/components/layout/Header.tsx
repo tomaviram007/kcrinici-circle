@@ -41,6 +41,10 @@ const Header = () => {
     if (path === "/deals" || path === "/jobs" || path === "/announcements") {
       markSeen(path);
     }
+    // Announcements board is merged into /events
+    if (path === "/events") {
+      markSeen("/announcements");
+    }
   }, [location.pathname, markSeen]);
   const handleLogout = async () => {
     const { supabase } = await import("@/integrations/supabase/client");
@@ -91,7 +95,6 @@ const Header = () => {
 
   const navLinks = [
     { to: "/", label: t("nav.home"), protected: false },
-    { to: "/announcements", label: t("nav.announcements"), protected: false },
     { to: "/realestate", label: t("nav.realestate"), protected: false },
     { to: "/jobs", label: t("nav.jobs"), protected: false },
     { to: "/members", label: t("nav.members"), protected: false },
@@ -117,7 +120,7 @@ const Header = () => {
     if (!user) return false;
     if (path === "/deals") return newContent.deals;
     if (path === "/jobs") return newContent.jobs;
-    if (path === "/announcements") return newContent.announcements;
+    if (path === "/events") return newContent.announcements;
     return false;
   };
 
