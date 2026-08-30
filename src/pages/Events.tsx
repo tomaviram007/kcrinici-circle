@@ -12,7 +12,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import EventRegistrationDialog from "@/components/events/EventRegistrationDialog";
-import AnnouncementsBoard from "@/components/announcements/AnnouncementsBoard";
 
 import QuoteSection from "@/components/landing/QuoteSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
@@ -254,7 +253,7 @@ const Events = () => {
         }}
       />
 
-    <PageHero image={coverImage} title="אירועים" highlight="ומודעות" subtitle="מפגשים, עדכונים והודעות חשובות, הכל במקום אחד" />
+    <PageHero image={coverImage} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
     
     <ContentWithSidebarAds targetPage="events">
     <div className="page-container py-4 sm:py-8">
@@ -419,21 +418,6 @@ const Events = () => {
       {events.length === 0 && (
         <p className="font-body text-muted-foreground text-center py-16">אין אירועים קרובים כרגע.</p>
       )}
-
-      {/* לוח המודעות, חלק מהעמוד המאוחד */}
-      <div className="mt-12 mb-6 mx-auto max-w-md text-center flex flex-col items-center">
-        <div className="flex items-baseline justify-center gap-3 mb-2">
-          <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">הודעות</span>
-        </div>
-        <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
-          לוח <span className="text-gold">מודעות</span>
-        </h2>
-        <p className="mt-2 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
-          עדכונים והודעות חשובות לחברי המועדון
-        </p>
-        <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
-      </div>
-      <AnnouncementsBoard />
     </div>
 
     {/* Event Detail Popup */}

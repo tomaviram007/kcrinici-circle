@@ -37,7 +37,7 @@ export default function Unsubscribe() {
     }
     setLoading(true);
     try {
-      // Notify admin + record the opt-out
+      // Record the opt-out and notify the admins
       await fetch(LEGACY_FN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
