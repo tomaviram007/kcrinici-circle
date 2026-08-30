@@ -7,8 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, MailX, CheckCircle2 } from "lucide-react";
 
-const FN_URL =
-  "https://wzbvdpgoyetmgluvhygf.supabase.co/functions/v1/handle-email-unsubscribe";
 const LEGACY_FN_URL =
   "https://wzbvdpgoyetmgluvhygf.supabase.co/functions/v1/handle-unsubscribe";
 
