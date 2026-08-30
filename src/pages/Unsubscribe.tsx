@@ -38,7 +38,7 @@ export default function Unsubscribe() {
     setLoading(true);
     try {
       // Notify admin + record the opt-out
-      const res = await fetch(LEGACY_FN_URL, {
+      await fetch(LEGACY_FN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: token || undefined, email: email || undefined, reason }),
