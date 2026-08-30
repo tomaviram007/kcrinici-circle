@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendAndLog } from "../_shared/transactional-email-templates/log-send.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -157,8 +158,7 @@ serve(async (req) => {
     };
     const subject = "[בדיקה] " + renderTemplate(tpl.subject || "", vars);
     const res = await sendOne({
-      supabaseUrl,
-      serviceRoleKey,
+      supabase,
       to: testTo,
       subject,
       idempotencyKey: `bday-test-${Date.now()}`,
@@ -323,8 +323,7 @@ serve(async (req) => {
 
     try {
       const res = await sendOne({
-        supabaseUrl,
-        serviceRoleKey,
+        supabase,
         to: r.email,
         subject,
         idempotencyKey: `bday-${r.user_id}-${year}`,
