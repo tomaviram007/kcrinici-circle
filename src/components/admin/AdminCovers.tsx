@@ -16,6 +16,8 @@ const PAGE_DEFINITIONS = [
   { key: "jobs", label: "הזדמנויות בשכונה" },
   { key: "gallery", label: "גלריית תמונות" },
   { key: "recommendations", label: "אנשי מקצוע" },
+  { key: "secondhand", label: "יד שנייה" },
+  { key: "realestate", label: "נדל״ן בשכונה" },
   { key: "admin", label: "שולחן המנהל" },
 ];
 

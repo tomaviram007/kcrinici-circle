@@ -8,6 +8,7 @@ export type MembersOnlyVariant =
   | "professionals"
   | "deals"
   | "secondhand"
+  | "realestate"
   | "events"
   | "generic";
 
@@ -31,6 +32,10 @@ const COPY: Record<MembersOnlyVariant, { title: string; text: string }> = {
   secondhand: {
     title: "יצירת קשר עם המוכר זמינה לחברי המועדון בלבד",
     text: "כדי לצפות בפרטים המלאים וליצור קשר עם המוכר, יש להתחבר או להירשם למועדון.",
+  },
+  realestate: {
+    title: "יצירת קשר עם המפרסם זמינה לחברי המועדון בלבד",
+    text: "כדי לצפות בפרטים המלאים וליצור קשר עם המפרסם, יש להתחבר או להירשם למועדון.",
   },
   events: {
     title: "פרטי האירוע זמינים לחברי המועדון בלבד",

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package, Mail, Cake, Lock, LineChart, MessageSquare } from "lucide-react";
+import { Check, X, Clock, Users, Briefcase, Calendar, Megaphone, BarChart3, Image, Shield, Quote, ImageIcon, Award, ChevronDown, Menu, Tv, Package, Mail, Cake, Lock, LineChart, MessageSquare, Home } from "lucide-react";
 import AdminCommunicationHub from "@/components/admin/AdminCommunicationHub";
 import AdminBirthdays from "@/components/admin/AdminBirthdays";
 import AdminContentAccess from "@/components/admin/AdminContentAccess";
@@ -25,6 +25,7 @@ import AdminCovers from "@/components/admin/AdminCovers";
 import AdminDeals from "@/components/admin/AdminDeals";
 import AdminAds from "@/components/admin/AdminAds";
 import AdminSecondHand from "@/components/admin/AdminSecondHand";
+import AdminRealEstate from "@/components/admin/AdminRealEstate";
 import AdminMembers from "@/components/admin/AdminMembers";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminBirthdayWidget from "@/components/admin/AdminBirthdayWidget";
@@ -54,6 +55,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   recommendations: "manage_recommendations",
   deals: "manage_deals",
   secondhand: "manage_deals",
+  realestate: "manage_deals",
   gallery: "manage_gallery",
   polls: "manage_polls",
   quotes: "manage_quotes",
@@ -153,6 +155,7 @@ const AdminDashboard = () => {
             {activeTab === "covers" && hasPermission("manage_quotes") && <AdminCovers />}
             {activeTab === "deals" && hasPermission("manage_deals") && <AdminDeals />}
             {activeTab === "secondhand" && hasPermission("manage_deals") && <AdminSecondHand />}
+            {activeTab === "realestate" && hasPermission("manage_deals") && <AdminRealEstate />}
             {activeTab === "ads" && hasPermission("manage_settings") && <AdminAds />}
             {activeTab === "communication" && hasPermission("manage_settings") && <AdminCommunicationHub />}
             {activeTab === "birthdays" && hasPermission("manage_members") && <AdminBirthdays />}
@@ -196,6 +199,7 @@ const mobileNavGroups = [
       { id: "recommendations", label: "המלצות", icon: Award },
       { id: "deals", label: "הטבות", icon: Briefcase },
       { id: "secondhand", label: "יד שנייה", icon: Package },
+      { id: "realestate", label: "נדל״ן בשכונה", icon: Home },
     ],
   },
   {

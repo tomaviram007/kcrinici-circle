@@ -16,6 +16,7 @@ const Footer = () => {
     { to: "/deals", label: "הטבות" },
     { to: "/gallery", label: "גלריה" },
     { to: "/secondhand", label: "יד שנייה" },
+    { to: "/realestate", label: "נדל״ן בשכונה" },
   ];
 
   const legalLinks = [

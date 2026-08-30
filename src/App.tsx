@@ -33,6 +33,7 @@ import Gallery from "./pages/Gallery";
 import Recommendations from "./pages/Recommendations";
 import Deals from "./pages/Deals";
 import SecondHand from "./pages/SecondHand";
+import RealEstate from "./pages/RealEstate";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Regulations from "./pages/Regulations";
@@ -92,6 +93,7 @@ const AppLayout = () => {
         <Route path="/recommendations" element={<Recommendations />} />
         <Route path="/deals" element={<ProtectedRoute><Deals /></ProtectedRoute>} />
         <Route path="/secondhand" element={<ProtectedRoute publicPartial><SecondHand /></ProtectedRoute>} />
+        <Route path="/realestate" element={<ProtectedRoute publicPartial><RealEstate /></ProtectedRoute>} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/regulations" element={<Regulations />} />

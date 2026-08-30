@@ -1486,6 +1486,81 @@ export type Database = {
         }
         Relationships: []
       }
+      realestate_listings: {
+        Row: {
+          address: string | null
+          available_from: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          floor_number: number | null
+          guest_email: string | null
+          guest_name: string | null
+          id: string
+          images: string[]
+          is_active: boolean
+          is_approved: boolean
+          is_closed: boolean
+          listing_type: string
+          price: number | null
+          property_type: string
+          rooms: number | null
+          size_sqm: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          available_from?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          floor_number?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          is_approved?: boolean
+          is_closed?: boolean
+          listing_type?: string
+          price?: number | null
+          property_type?: string
+          rooms?: number | null
+          size_sqm?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          available_from?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          floor_number?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          is_approved?: boolean
+          is_closed?: boolean
+          listing_type?: string
+          price?: number | null
+          property_type?: string
+          rooms?: number | null
+          size_sqm?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       secondhand_items: {
         Row: {
           category: string

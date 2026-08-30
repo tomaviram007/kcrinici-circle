@@ -21,6 +21,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://kcrinici.com/realestate</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://kcrinici.com/recommendations</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

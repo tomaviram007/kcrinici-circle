@@ -99,6 +99,7 @@ const Header = () => {
     { to: "/recommendations", label: t("nav.recommendations"), protected: false },
     { to: "/deals", label: t("nav.deals"), protected: false },
     { to: "/secondhand", label: t("nav.secondhand"), protected: false },
+    { to: "/realestate", label: t("nav.realestate"), protected: false },
     ...((isAdmin || isTeamMember) ? [{ to: "/admin", label: t("nav.admin"), protected: true }] : []),
   ];
 

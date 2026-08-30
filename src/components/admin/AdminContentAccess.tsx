@@ -11,6 +11,7 @@ const TYPES: { key: string; label: string }[] = [
   { key: "professionals", label: "אנשי מקצוע" },
   { key: "deals", label: "הטבות" },
   { key: "secondhand", label: "יד שנייה" },
+  { key: "realestate", label: "נדל״ן בשכונה" },
   { key: "events", label: "אירועים" },
 ];
 
