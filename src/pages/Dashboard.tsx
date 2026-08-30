@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Users, Calendar, Megaphone, UserCircle } from "lucide-react";
+import { Briefcase, Users, Calendar, UserCircle } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import PageHero from "@/components/PageHero";
 
