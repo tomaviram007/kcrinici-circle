@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -1924,6 +1924,30 @@ export type Database = {
           title: string
         }[]
       }
+      get_member_realestate: {
+        Args: never
+        Returns: {
+          address: string
+          available_from: string
+          contact_phone: string
+          created_at: string
+          created_by: string
+          currency: string
+          description: string
+          floor_number: number
+          id: string
+          images: string[]
+          is_active: boolean
+          is_approved: boolean
+          is_closed: boolean
+          listing_type: string
+          price: number
+          property_type: string
+          rooms: number
+          size_sqm: number
+          title: string
+        }[]
+      }
       get_member_secondhand: {
         Args: never
         Returns: {
@@ -2008,6 +2032,26 @@ export type Database = {
           first_name: string
           id: string
           profession: string
+        }[]
+      }
+      get_public_realestate: {
+        Args: never
+        Returns: {
+          address: string
+          available_from: string
+          created_at: string
+          currency: string
+          description: string
+          floor_number: number
+          id: string
+          images: string[]
+          is_closed: boolean
+          listing_type: string
+          price: number
+          property_type: string
+          rooms: number
+          size_sqm: number
+          title: string
         }[]
       }
       get_public_recommendations: {
