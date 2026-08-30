@@ -1,29 +1,17 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, MessageCircle, Gift, Megaphone, Calendar, Share2, Pencil } from "lucide-react";
+import { Plus, MessageCircle, Gift, Megaphone, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
-import PageHero from "@/components/PageHero";
 import { fireConfetti } from "@/lib/confetti";
-
-import QuoteSection from "@/components/landing/QuoteSection";
-import heroImg from "@/assets/hero-announcements.jpg";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
-import ContentWithSidebarAds from "@/components/ads/ContentWithSidebarAds";
-import { usePageCover } from "@/hooks/usePageCover";
 import gsap from "gsap";
-import { Separator } from "@/components/ui/separator";
 import { avatarSrc } from "@/lib/default-avatar";
-import Seo from "@/components/Seo";
-
-const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo";
 
 interface BirthdayMember {
   full_name: string;
@@ -32,13 +20,13 @@ interface BirthdayMember {
   avatar_url: string | null;
 }
 
-const Announcements = () => {
+/**
+ * לוח המודעות המלא: באנרים, ימי הולדת, סינון, טופס פרסום ורשימת מודעות.
+ * מוצב בתוך עמוד "אירועים ומודעות" המאוחד.
+ */
+const AnnouncementsBoard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const { hasPermission } = useUserPermissions();
-  const canEditAnnouncements = hasPermission("manage_announcements");
-  const coverImage = usePageCover("announcements", heroImg);
   const [items, setItems] = useState<any[]>([]);
   const [promoBanners, setPromoBanners] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -48,10 +36,7 @@ const Announcements = () => {
   const [filterMonth, setFilterMonth] = useState("all");
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<BirthdayMember[]>([]);
   const [birthdayToastShown, setBirthdayToastShown] = useState(false);
-  const [copyingGroupMsg, setCopyingGroupMsg] = useState(false);
   const birthdayRef = useRef<HTMLDivElement>(null);
-
-  const todayDow = new Date().getDay();
 
   const resetForm = () => {
     setFormTitle("");
@@ -115,7 +100,7 @@ const Announcements = () => {
 
   useEffect(() => { fetchItems(); fetchUpcomingBirthdays(); fetchPromoBanners(); }, []);
 
-  // Mark announcements as seen when user visits this page
+  // Mark announcements as seen when user views the board
   useEffect(() => {
     if (!user?.id) return;
     import("@/hooks/useUnreadAnnouncements").then(({ markAnnouncementsAsSeen }) => {
@@ -217,8 +202,7 @@ const Announcements = () => {
     return encodeURIComponent(msg);
   };
 
-  // ===== Render announcement card (banner style) =====
-  const renderAnnouncementCard = (item: any, i: number) => {
+  const renderAnnouncementCard = (item: any) => {
     const creator = item.created_by ? creatorProfiles[item.created_by] : null;
     return (
       <div
@@ -258,22 +242,7 @@ const Announcements = () => {
   };
 
   return (
-    <>
-      <Seo title="לוח מודעות" description="הודעות ועדכונים שוטפים מהנהלת מועדון הגברים של ק.קרניצי." path="/announcements" />
-    <PageHero image={coverImage} title="לוח" highlight="מודעות" subtitle="עדכונים, מודעות והודעות חשובות לחברי המועדון">
-      {canEditAnnouncements && (
-        <button
-          onClick={() => navigate("/admin?tab=announcements")}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/20 border border-gold/40 px-3 py-1.5 font-body text-xs text-gold hover:bg-gold/30 transition-colors"
-          title="ערוך מודעות"
-        >
-          <Pencil className="h-3 w-3" /> ערוך מודעות
-        </button>
-      )}
-    </PageHero>
-    <ContentWithSidebarAds targetPage="announcements">
-    <div className="page-container py-4 sm:py-8 md:py-12">
-
+    <div className="mt-10 sm:mt-14 border-t border-border/60 pt-8 sm:pt-10">
       {/* Dynamic promo banners (managed in admin) */}
       {promoBanners.map((b) => (
         <div key={b.id} className="mb-6 rounded-lg border border-gold/30 bg-gold/5 p-4 flex items-center justify-between gap-3">
@@ -301,8 +270,6 @@ const Announcements = () => {
           )}
         </div>
       ))}
-
-
 
       {/* Upcoming Birthdays Section */}
       {upcomingBirthdays.length > 0 && (
@@ -332,6 +299,16 @@ const Announcements = () => {
           </div>
         </div>
       )}
+
+      {/* Section header */}
+      <div className="mb-6 sm:mb-8">
+        <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl flex items-center gap-2">
+          <Megaphone className="h-6 w-6 text-gold" />
+          לוח <span className="text-gold">מודעות</span>
+        </h2>
+        <p className="mt-1 font-body text-sm text-muted-foreground">עדכונים והודעות חשובות לחברי המועדון</p>
+        <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
+      </div>
 
       {/* Shared filters */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
@@ -364,44 +341,25 @@ const Announcements = () => {
         </form>
       )}
 
-      {/* ==================== SECTION: ANNOUNCEMENTS ==================== */}
-      <div className="mb-6 sm:mb-8 mx-auto max-w-md text-center flex flex-col items-center">
-        <div className="flex items-baseline justify-center gap-3 mb-2">
-          <span className="font-serif text-3xl font-bold text-gold/30 sm:text-5xl md:text-6xl">01</span>
-          <span className="font-body text-xs sm:text-sm tracking-widest text-gold uppercase">הודעות</span>
-        </div>
-        <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl md:text-4xl flex items-center justify-center gap-2">
-          <Megaphone className="h-6 w-6 text-gold" />
-          לוח הודעות
-        </h2>
-        <p className="mt-2 font-body text-sm text-muted-foreground max-w-md leading-relaxed">
-          עדכונים, הודעות והודעות חשובות לחברי המועדון
-        </p>
-      </div>
-
       {filteredAnnouncements.length === 0 ? (
         <p className="font-body text-muted-foreground text-center py-12">אין הודעות כרגע.</p>
       ) : (
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-          {filteredAnnouncements.map((item, i) => renderAnnouncementCard(item, i))}
+          {filteredAnnouncements.map((item) => renderAnnouncementCard(item))}
         </div>
       )}
 
-      {/* ==================== PREMIUM AD ==================== */}
+      {/* Premium ad */}
       <div className="my-8">
         <SmartAdBanner
           placement="premium"
-          targetPage="announcements"
-          slotIndex={0}
+          targetPage="events"
+          slotIndex={1}
           fallbackPlacements={["between_content", "inline", "sidebar", "hero"]}
         />
       </div>
     </div>
-
-    </ContentWithSidebarAds>
-    <QuoteSection page="announcements" />
-    </>
   );
 };
 
-export default Announcements;
+export default AnnouncementsBoard;

@@ -21,7 +21,7 @@ import Register from "./pages/Register";
 import PendingApproval from "./pages/PendingApproval";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import Announcements from "./pages/Announcements";
+import { Navigate } from "react-router-dom";
 import Jobs from "./pages/Jobs";
 import Members from "./pages/Members";
 import MemberProfile from "./pages/MemberProfile";
@@ -83,7 +83,7 @@ const AppLayout = () => {
         <Route path="/dashboard" element={<Index />} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
+        <Route path="/announcements" element={<Navigate to="/events" replace />} />
         <Route path="/jobs" element={<ProtectedRoute publicPartial><Jobs /></ProtectedRoute>} />
         <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
         <Route path="/members/:id" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
