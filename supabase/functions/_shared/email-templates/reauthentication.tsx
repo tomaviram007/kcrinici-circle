@@ -1,33 +1,60 @@
 /// <reference types="npm:@types/react@18.3.1" />
 
 import * as React from 'npm:react@18.3.1'
-import { Text } from 'npm:@react-email/components@0.0.22'
-import { BrandLayout, tokenBoxStyle } from './_layout.tsx'
-import { mergeCopy, type EmailCopy } from './_copy.ts'
+
+import {
+  Body,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Preview,
+  Text,
+} from 'npm:@react-email/components@0.0.22'
 
 interface ReauthenticationEmailProps {
   token: string
-  whatsappGroupUrl?: string
-  unsubscribeUrl?: string
-  copy?: Partial<EmailCopy>
 }
 
-export const ReauthenticationEmail = ({ token, whatsappGroupUrl, unsubscribeUrl, copy }: ReauthenticationEmailProps) => {
-  const c = mergeCopy('reauthentication', copy)
-  return (
-  <BrandLayout
-    whatsappGroupUrl={whatsappGroupUrl}
-    unsubscribeUrl={unsubscribeUrl}
-    preview={c.preview}
-    heading={c.heading}
-    intro={c.intro}
-    cta={null}
-    outro={c.outro}
-    showWhatsapp={false}
-  >
-    <Text style={tokenBoxStyle}>{token}</Text>
-  </BrandLayout>
-  )
-}
+export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
+  <Html lang="en" dir="ltr">
+    <Head />
+    <Preview>Your verification code</Preview>
+    <Body style={main}>
+      <Container style={container}>
+        <Heading style={h1}>Confirm reauthentication</Heading>
+        <Text style={text}>Use the code below to confirm your identity:</Text>
+        <Text style={codeStyle}>{token}</Text>
+        <Text style={footer}>
+          This code will expire shortly. If you didn't request this, you can
+          safely ignore this email.
+        </Text>
+      </Container>
+    </Body>
+  </Html>
+)
 
 export default ReauthenticationEmail
+
+const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
+const container = { padding: '20px 25px' }
+const h1 = {
+  fontSize: '22px',
+  fontWeight: 'bold' as const,
+  color: '#000000',
+  margin: '0 0 20px',
+}
+const text = {
+  fontSize: '14px',
+  color: '#55575d',
+  lineHeight: '1.5',
+  margin: '0 0 25px',
+}
+const codeStyle = {
+  fontFamily: 'Courier, monospace',
+  fontSize: '22px',
+  fontWeight: 'bold' as const,
+  color: '#000000',
+  margin: '0 0 30px',
+}
+const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
