@@ -417,140 +417,155 @@ const RealEstate = () => {
 
       {/* Form Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-xl">
+        <DialogContent
+          className="w-[96vw] max-w-6xl max-h-[92vh] p-0 gap-0 flex flex-col overflow-hidden"
+          dir="rtl"
+        >
+          <DialogHeader className="shrink-0 px-5 pt-5 pb-3 border-b border-border/60 text-right sm:text-right">
+            <DialogTitle className="font-serif text-lg sm:text-xl">
               {editId ? t("realestate.dialogEditTitle") : t("realestate.dialogNewTitle")}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-2">
-            {/* Form fields */}
-            <div className="space-y-6 lg:col-span-3">
+
+          <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-6 gap-y-5">
               {isGuestFlow && !editId && (
-                <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 space-y-3">
-                  <p className="font-body text-xs text-gold">
+                <div className="lg:col-span-12 rounded-xl border border-gold/30 bg-gold/5 p-3">
+                  <p className="font-body text-xs text-gold mb-2">
                     פרסום כאורח. המודעה תעבור אישור מנהל לפני שתופיע באתר.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Field label="שם מלא *">
-                      <Input value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className="bg-background h-11" />
+                      <Input value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className="bg-background h-10" />
                     </Field>
                     <Field label="אימייל *">
-                      <Input type="email" dir="ltr" value={form.guest_email} onChange={(e) => setForm({ ...form, guest_email: e.target.value })} className="bg-background h-11" placeholder="name@example.com" />
+                      <Input type="email" dir="ltr" value={form.guest_email} onChange={(e) => setForm({ ...form, guest_email: e.target.value })} className="bg-background h-10" placeholder="name@example.com" />
                     </Field>
                   </div>
                 </div>
               )}
 
-              <Section title="מה מפרסמים">
-                <div className="grid grid-cols-2 gap-3">
-                  {LISTING_TYPES.map(lt => {
-                    const active = form.listing_type === lt.value;
-                    return (
-                      <button
-                        key={lt.value}
-                        type="button"
-                        onClick={() => setForm({ ...form, listing_type: lt.value })}
-                        aria-pressed={active}
-                        className={`rounded-xl border-2 px-4 py-3 text-center transition-all ${
-                          active
-                            ? "border-gold bg-gold/10 shadow-[0_0_20px_hsl(43_72%_52%/0.15)]"
-                            : "border-border bg-background hover:border-gold/40"
-                        }`}
-                      >
-                        <span className={`block font-serif text-base font-bold ${active ? "text-gold" : "text-foreground"}`}>
-                          {lt.label}
-                        </span>
-                        <span className="block font-body text-[11px] text-muted-foreground mt-0.5">
-                          {lt.value === "rent" ? "שכירות חודשית" : "מכירת הנכס"}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Section>
+              {/* Column A */}
+              <div className="lg:col-span-4 space-y-4">
+                <Section title="מה מפרסמים">
+                  <div className="grid grid-cols-2 gap-2">
+                    {LISTING_TYPES.map(lt => {
+                      const active = form.listing_type === lt.value;
+                      return (
+                        <button
+                          key={lt.value}
+                          type="button"
+                          onClick={() => setForm({ ...form, listing_type: lt.value })}
+                          aria-pressed={active}
+                          className={`rounded-xl border-2 px-3 py-2.5 text-center transition-all ${
+                            active
+                              ? "border-gold bg-gold/10 shadow-[0_0_20px_hsl(43_72%_52%/0.15)]"
+                              : "border-border bg-background hover:border-gold/40"
+                          }`}
+                        >
+                          <span className={`block font-serif text-base font-bold ${active ? "text-gold" : "text-foreground"}`}>
+                            {lt.label}
+                          </span>
+                          <span className="block font-body text-[10px] text-muted-foreground mt-0.5">
+                            {lt.value === "rent" ? "שכירות חודשית" : "מכירת הנכס"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Section>
 
-              <Section title="פרטי הנכס">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Section title="פרטי הנכס">
                   <Field label={t("realestate.fieldPropertyType")}>
                     <Select value={form.property_type} onValueChange={(v) => setForm({ ...form, property_type: v })}>
-                      <SelectTrigger className="bg-background h-11"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="bg-background h-10"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {PROPERTY_TYPES.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </Field>
-                  <div className="sm:col-span-2">
-                    <Field label={t("realestate.fieldTitle")}>
-                      <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background h-11" placeholder="לדוגמה: 4 חדרים משופצת ברחוב הראשונים" />
+                  <Field label={t("realestate.fieldTitle")}>
+                    <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background h-10" placeholder="4 חדרים משופצת ברחוב הראשונים" />
+                  </Field>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Field label={t("realestate.fieldRooms")}>
+                      <Input type="number" inputMode="decimal" step="0.5" min="0" value={form.rooms} onChange={(e) => setForm({ ...form, rooms: e.target.value })} className="bg-background h-10" placeholder="4" />
+                    </Field>
+                    <Field label={t("realestate.fieldFloor")}>
+                      <Input type="number" inputMode="numeric" value={form.floor_number} onChange={(e) => setForm({ ...form, floor_number: e.target.value })} className="bg-background h-10" placeholder="2" />
+                    </Field>
+                    <Field label={t("realestate.fieldSize")}>
+                      <Input type="number" inputMode="decimal" min="0" value={form.size_sqm} onChange={(e) => setForm({ ...form, size_sqm: e.target.value })} className="bg-background h-10" placeholder="95" />
                     </Field>
                   </div>
-                </div>
-                <Field label={t("realestate.fieldDescription")} hint="מה שווה שהשכנים ידעו: מרפסת, חניה, ממ״ד, שיפוץ, קומה אחרונה.">
-                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-background" rows={4} />
-                </Field>
-                <div className="grid grid-cols-3 gap-3">
-                  <Field label={t("realestate.fieldRooms")}>
-                    <Input type="number" inputMode="decimal" step="0.5" min="0" value={form.rooms} onChange={(e) => setForm({ ...form, rooms: e.target.value })} className="bg-background h-11" placeholder="4" />
-                  </Field>
-                  <Field label={t("realestate.fieldFloor")}>
-                    <Input type="number" inputMode="numeric" value={form.floor_number} onChange={(e) => setForm({ ...form, floor_number: e.target.value })} className="bg-background h-11" placeholder="2" />
-                  </Field>
-                  <Field label={t("realestate.fieldSize")}>
-                    <Input type="number" inputMode="decimal" min="0" value={form.size_sqm} onChange={(e) => setForm({ ...form, size_sqm: e.target.value })} className="bg-background h-11" placeholder="95" />
-                  </Field>
-                </div>
-              </Section>
+                </Section>
+              </div>
 
-              <Section title="מחיר וכניסה">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label={form.listing_type === "rent" ? t("realestate.fieldPriceRent") : t("realestate.fieldPriceSale")}>
-                    <div className="relative">
-                      <Input type="number" inputMode="decimal" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="bg-background h-11 pl-9" placeholder={form.listing_type === "rent" ? "4,500" : "2,300,000"} />
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-body text-sm text-muted-foreground">₪</span>
-                    </div>
-                  </Field>
-                  <Field label={t("realestate.fieldAvailableFrom")}>
-                    <Input type="date" value={form.available_from} onChange={(e) => setForm({ ...form, available_from: e.target.value })} className="bg-background h-11" />
-                  </Field>
-                </div>
-              </Section>
+              {/* Column B */}
+              <div className="lg:col-span-4 space-y-4">
+                <Section title="מחיר וכניסה">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label={form.listing_type === "rent" ? t("realestate.fieldPriceRent") : t("realestate.fieldPriceSale")}>
+                      <div className="relative">
+                        <Input type="number" inputMode="decimal" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="bg-background h-10 pl-8" placeholder={form.listing_type === "rent" ? "4500" : "2300000"} />
+                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-body text-sm text-muted-foreground">₪</span>
+                      </div>
+                    </Field>
+                    <Field label={t("realestate.fieldAvailableFrom")}>
+                      <Input type="date" value={form.available_from} onChange={(e) => setForm({ ...form, available_from: e.target.value })} className="bg-background h-10" />
+                    </Field>
+                  </div>
+                </Section>
 
-              <Section title="יצירת קשר">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label={t("realestate.fieldPhone")}>
-                    <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className="bg-background h-11" placeholder="0501234567" />
-                  </Field>
-                  <Field label={t("realestate.fieldAddress")} hint="בלי מספר בית. את הכתובת המדויקת מוסרים בטלפון.">
-                    <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="bg-background h-11" placeholder="רחוב הראשונים" />
-                  </Field>
-                </div>
-              </Section>
+                <Section title="יצירת קשר">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label={t("realestate.fieldPhone")}>
+                      <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className="bg-background h-10" placeholder="0501234567" />
+                    </Field>
+                    <Field label={t("realestate.fieldAddress")}>
+                      <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="bg-background h-10" placeholder="רחוב הראשונים" />
+                    </Field>
+                  </div>
+                  <p className="font-body text-[10px] leading-snug text-muted-foreground/70">
+                    בלי מספר בית. את הכתובת המדויקת מוסרים בטלפון.
+                  </p>
+                </Section>
 
-              <Section title={t("realestate.fieldImages")}>
-                {user && (
-                  <SaleImageUpload
-                    userId={user.id}
-                    mainImage={form.images[0] || null}
-                    galleryImages={form.images.slice(1)}
-                    onMainImageChange={(url) => {
-                      const rest = form.images.slice(1);
-                      setForm({ ...form, images: url ? [url, ...rest] : rest });
-                    }}
-                    onGalleryChange={(urls) => {
-                      const main = form.images[0];
-                      setForm({ ...form, images: main ? [main, ...urls] : urls });
-                    }}
+                <Section title={t("realestate.fieldDescription")}>
+                  <Textarea
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    className="bg-background resize-none"
+                    rows={3}
+                    placeholder="מרפסת, חניה, ממ״ד, שיפוץ, קומה אחרונה. מה ששווה שהשכנים ידעו."
                   />
-                )}
-                <Field label={t("realestate.addFromUrl")}>
+                </Section>
+              </div>
+
+              {/* Column C: images + live preview */}
+              <div className="lg:col-span-4 space-y-4">
+                <Section title={t("realestate.fieldImages")}>
+                  {user && (
+                    <SaleImageUpload
+                      userId={user.id}
+                      mainImage={form.images[0] || null}
+                      galleryImages={form.images.slice(1)}
+                      onMainImageChange={(url) => {
+                        const rest = form.images.slice(1);
+                        setForm({ ...form, images: url ? [url, ...rest] : rest });
+                      }}
+                      onGalleryChange={(urls) => {
+                        const main = form.images[0];
+                        setForm({ ...form, images: main ? [main, ...urls] : urls });
+                      }}
+                    />
+                  )}
                   <div className="flex gap-2">
                     <Input
                       value={imageUrlInput}
                       onChange={(e) => setImageUrlInput(e.target.value)}
-                      placeholder="https://..."
-                      className="bg-background h-11"
-                      dir="ltr"
+                      placeholder="הדבקת קישור לתמונה"
+                      className="bg-background h-9"
                     />
                     <Button
                       type="button"
@@ -565,105 +580,85 @@ const RealEstate = () => {
                         setForm({ ...form, images: [...form.images, url] });
                         setImageUrlInput("");
                       }}
-                      className="font-body whitespace-nowrap h-11"
+                      className="font-body whitespace-nowrap h-9 px-3"
                     >
-                      <Plus className="h-4 w-4 ml-1" /> {t("realestate.addButton")}
+                      <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                </Field>
-                {form.images.length > 0 && (
-                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                    {form.images.map((url, i) => (
-                      <div key={i} className="relative group aspect-square rounded-md overflow-hidden border border-border">
-                        <img src={url} alt={`img-${i}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setForm({ ...form, images: form.images.filter((_, idx) => idx !== i) })}
-                          className="absolute top-1 left-1 bg-background/80 hover:bg-destructive text-foreground hover:text-destructive-foreground rounded-full p-0.5 transition-colors"
-                          aria-label="מחק תמונה"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                        {i === 0 && (
-                          <span className="absolute bottom-1 right-1 bg-gold text-primary-foreground text-[9px] font-body px-1.5 py-0.5 rounded">
-                            {t("realestate.mainImage")}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Section>
-            </div>
-
-            {/* Live preview */}
-            <div className="space-y-2 lg:col-span-2 lg:sticky lg:top-2 lg:self-start">
-              <Label className="font-body text-xs text-muted-foreground">{t("realestate.preview")}</Label>
-              <article className="rounded-2xl border border-gold/40 bg-card overflow-hidden shadow-[0_0_30px_hsl(43_72%_52%/0.1)]">
-                <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
-                  {form.images[0] ? (
-                    <img src={form.images[0]} alt="preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Home className="h-12 w-12 text-muted-foreground/30" />
+                  {!user && form.images.length > 0 && (
+                    <div className="grid grid-cols-4 gap-2">
+                      {form.images.map((url, i) => (
+                        <div key={i} className="relative aspect-square rounded-md overflow-hidden border border-border">
+                          <img src={url} alt={`img-${i}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setForm({ ...form, images: form.images.filter((_, idx) => idx !== i) })}
+                            className="absolute top-1 left-1 bg-background/80 hover:bg-destructive text-foreground hover:text-destructive-foreground rounded-full p-0.5 transition-colors"
+                            aria-label="מחק תמונה"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                          {i === 0 && (
+                            <span className="absolute bottom-1 right-1 bg-gold text-primary-foreground text-[9px] font-body px-1.5 py-0.5 rounded">
+                              {t("realestate.mainImage")}
+                            </span>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
-                  <TypeBadge type={form.listing_type} className="absolute top-2 right-2" />
-                  <Badge className="absolute top-2 left-2 bg-background/80 text-foreground border-border backdrop-blur-sm">
-                    {form.property_type}
-                  </Badge>
-                </div>
-                <div className="p-4 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-serif text-lg font-bold text-foreground line-clamp-1">
-                      {form.title || t("realestate.previewTitle")}
-                    </h3>
-                    {form.price && (
-                      <p className="font-serif text-lg font-bold text-gold whitespace-nowrap">
-                        ₪{parseFloat(form.price).toLocaleString("he-IL")}{form.listing_type === "rent" ? " לחודש" : ""}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    {form.rooms && (
-                      <span className="inline-flex items-center gap-1 font-body text-xs text-muted-foreground">
-                        <BedDouble className="h-3.5 w-3.5 text-gold/70" /> {form.rooms} חדרים
-                      </span>
-                    )}
-                    {form.floor_number !== "" && (
-                      <span className="inline-flex items-center gap-1 font-body text-xs text-muted-foreground">
-                        <Building2 className="h-3.5 w-3.5 text-gold/70" /> {parseInt(form.floor_number, 10) === 0 ? "קרקע" : `קומה ${form.floor_number}`}
-                      </span>
-                    )}
-                    {form.size_sqm && (
-                      <span className="inline-flex items-center gap-1 font-body text-xs text-muted-foreground">
-                        <Ruler className="h-3.5 w-3.5 text-gold/70" /> {form.size_sqm} מ״ר
-                      </span>
-                    )}
-                  </div>
-                  {form.address && (
-                    <p className="font-body text-xs text-muted-foreground flex items-center gap-1">
-                      <MapPin className="h-3 w-3 text-gold/70" /> {form.address}
-                    </p>
-                  )}
-                  <p className="font-body text-sm text-muted-foreground line-clamp-3 min-h-[2.5rem]">
-                    {form.description || t("realestate.previewDesc")}
-                  </p>
-                  {form.contact_phone && (
-                    <p className="font-body text-xs text-muted-foreground pt-1 flex items-center gap-1">
-                      <Phone className="h-3 w-3" /> {form.contact_phone}
-                    </p>
-                  )}
-                </div>
-              </article>
+                </Section>
+
+                <Section title={t("realestate.preview")}>
+                  <article className="flex gap-2.5 rounded-xl border border-gold/40 bg-card p-2 shadow-[0_0_25px_hsl(43_72%_52%/0.08)]">
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-secondary">
+                      {form.images[0] ? (
+                        <img src={form.images[0]} alt="preview" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                          <Home className="h-6 w-6 text-muted-foreground/30" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="truncate font-serif text-sm font-bold text-foreground">
+                          {form.title || t("realestate.previewTitle")}
+                        </h3>
+                        {form.price && (
+                          <p className="whitespace-nowrap font-serif text-sm font-bold text-gold">
+                            ₪{parseFloat(form.price).toLocaleString("he-IL")}{form.listing_type === "rent" ? "/ח׳" : ""}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <TypeBadge type={form.listing_type} className="h-4 px-1.5 text-[9px]" />
+                        <span className="font-body text-[10px] text-muted-foreground">{form.property_type}</span>
+                        {form.rooms && <span className="font-body text-[10px] text-muted-foreground">{form.rooms} חד׳</span>}
+                        {form.floor_number !== "" && (
+                          <span className="font-body text-[10px] text-muted-foreground">
+                            {parseInt(form.floor_number, 10) === 0 ? "קרקע" : `ק׳ ${form.floor_number}`}
+                          </span>
+                        )}
+                        {form.size_sqm && <span className="font-body text-[10px] text-muted-foreground">{form.size_sqm} מ״ר</span>}
+                      </div>
+                      {form.address && (
+                        <p className="flex items-center gap-1 truncate font-body text-[10px] text-muted-foreground">
+                          <MapPin className="h-2.5 w-2.5 shrink-0 text-gold/70" /> {form.address}
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                </Section>
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-2 pt-4 border-t border-border mt-4">
-            <Button onClick={handleSubmit} disabled={saving} className="gradient-gold text-primary-foreground font-body flex-1">
+          <div className="shrink-0 flex gap-2 px-5 py-3 border-t border-border bg-card/40">
+            <Button onClick={handleSubmit} disabled={saving} className="gradient-gold text-primary-foreground font-body flex-1 h-11">
               {saving ? t("realestate.saving") : editId ? t("realestate.saveChanges") : t("realestate.publish")}
             </Button>
-            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="font-body">{t("realestate.cancel")}</Button>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="font-body h-11">{t("realestate.cancel")}</Button>
           </div>
         </DialogContent>
       </Dialog>
