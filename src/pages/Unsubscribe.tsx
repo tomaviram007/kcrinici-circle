@@ -37,20 +37,8 @@ export default function Unsubscribe() {
     }
     setLoading(true);
     try {
-      // Primary: new infra endpoint (token-based, suppresses email & marks token used)
-      if (token) {
-        const res = await fetch(FN_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
-        });
-        const data = await res.json();
-        if (!res.ok && data?.reason !== "already_unsubscribed") {
-          throw new Error(data?.error || "שגיאה");
-        }
-      }
-      // Also call legacy endpoint to notify admin + handle email-only suppression
-      await fetch(LEGACY_FN_URL, {
+      // Notify admin + record the opt-out
+      const res = await fetch(LEGACY_FN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: token || undefined, email: email || undefined, reason }),
