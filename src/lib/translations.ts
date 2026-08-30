@@ -4,10 +4,9 @@ const translations: Record<Language, Record<string, string>> = {
   he: {
     // Nav
     "nav.home": "דף הבית",
-    "nav.announcements": "לוח מודעות",
     "nav.jobs": "דרושים",
     "nav.members": "חברי המועדון",
-    "nav.events": "לוח אירועים",
+    "nav.events": "אירועים ומודעות",
     "nav.gallery": "גלריה",
     "nav.recommendations": "אנשי מקצוע",
     "nav.deals": "הטבות",
@@ -538,10 +537,9 @@ const translations: Record<Language, Record<string, string>> = {
   en: {
     // Nav
     "nav.home": "Home",
-    "nav.announcements": "Bulletin Board",
     "nav.jobs": "Job Board",
     "nav.members": "Club Members",
-    "nav.events": "Events",
+    "nav.events": "Events & Board",
     "nav.gallery": "Gallery",
     "nav.recommendations": "Professionals",
     "nav.deals": "Benefits",
