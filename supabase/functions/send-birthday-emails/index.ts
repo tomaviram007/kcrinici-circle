@@ -53,30 +53,21 @@ interface TemplateRow {
 }
 
 async function sendOne(opts: {
-  supabaseUrl: string;
-  serviceRoleKey: string;
+  supabase: any;
   to: string;
   subject: string;
   templateData: Record<string, unknown>;
   idempotencyKey: string;
 }): Promise<{ ok: boolean; status: number; body: any }> {
-  const resp = await fetch(`${opts.supabaseUrl}/functions/v1/send-transactional-email`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${opts.serviceRoleKey}`,
-      apikey: opts.serviceRoleKey,
-    },
-    body: JSON.stringify({
-      templateName: "birthday-greeting",
-      recipientEmail: opts.to,
-      idempotencyKey: opts.idempotencyKey,
-      purpose: "transactional",
-      templateData: opts.templateData,
-    }),
+  const res = await sendAndLog(opts.supabase, "birthday-greeting", opts.to, {
+    idempotencyKey: opts.idempotencyKey,
+    templateData: opts.templateData,
   });
-  const body = await resp.json().catch(() => ({}));
-  return { ok: resp.ok, status: resp.status, body };
+  if (res.ok) return { ok: true, status: 200, body: { success: true } };
+  if (res.suppressed) {
+    return { ok: false, status: 200, body: { error: "recipient_suppressed" } };
+  }
+  return { ok: false, status: 500, body: { error: res.error || "send_failed" } };
 }
 
 serve(async (req) => {
