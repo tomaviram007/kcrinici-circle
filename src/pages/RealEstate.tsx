@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, type ReactNode } from "react";
 import { trackAction } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -77,6 +77,24 @@ const specParts = (it: { rooms: number | null; floor_number: number | null; size
   if (it.size_sqm !== null) parts.push({ icon: Ruler, text: `${it.size_sqm} מ״ר` });
   return parts;
 };
+
+const Section = ({ title, children }: { title: string; children: ReactNode }) => (
+  <section className="space-y-3">
+    <h4 className="flex items-center gap-3 font-body text-[11px] font-bold tracking-wider text-gold/80">
+      {title}
+      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-gold/25" />
+    </h4>
+    {children}
+  </section>
+);
+
+const Field = ({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) => (
+  <div className="space-y-1.5">
+    <Label className="font-body text-xs text-muted-foreground">{label}</Label>
+    {children}
+    {hint && <p className="font-body text-[10px] leading-snug text-muted-foreground/70">{hint}</p>}
+  </div>
+);
 
 const RealEstate = () => {
   const { user } = useAuth();
@@ -254,7 +272,7 @@ const RealEstate = () => {
 
   return (
     <>
-      <Seo title="נדל״ן בשכונה" description="דירות להשכרה ולמכירה בשכונת ק.קרניצי — פרסום מודעה חינם ישירות מהשכנים, בלי תיווך." path="/realestate" />
+      <Seo title="נדל״ן בשכונה" description="דירות להשכרה ולמכירה בשכונת ק.קרניצי, פרסום מודעה חינם ישירות מהשכנים, בלי תיווך." path="/realestate" />
       <PageHero
         image={cover}
         title={t("realestate.heroTitle")}
@@ -367,7 +385,7 @@ const RealEstate = () => {
                     <div className="flex items-center justify-end pt-1">
                       <ShareButtons
                         title={it.title}
-                        text={`${it.title} — ${listingTypeLabel(it.listing_type)}${it.price !== null ? ` — ${formatPrice(it)}` : ""} | נדל״ן בשכונה — הגברים של ק.קרניצי`}
+                        text={`${it.title}, ${listingTypeLabel(it.listing_type)}${it.price !== null ? `, ${formatPrice(it)}` : ""} | נדל״ן בשכונה, הגברים של ק.קרניצי`}
                       />
                     </div>
                     {isOwner && (
@@ -405,136 +423,156 @@ const RealEstate = () => {
               {editId ? t("realestate.dialogEditTitle") : t("realestate.dialogNewTitle")}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-2">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-2">
             {/* Form fields */}
-            <div className="space-y-4 lg:col-span-1">
+            <div className="space-y-6 lg:col-span-3">
               {isGuestFlow && !editId && (
-                <div className="rounded-lg border border-gold/30 bg-gold/5 p-3 space-y-3">
+                <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 space-y-3">
                   <p className="font-body text-xs text-gold">
-                    פרסום כאורח — המודעה תעבור אישור מנהל לפני שתופיע באתר.
+                    פרסום כאורח. המודעה תעבור אישור מנהל לפני שתופיע באתר.
                   </p>
-                  <div>
-                    <Label className="font-body text-xs">שם מלא *</Label>
-                    <Input value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className="bg-background" />
-                  </div>
-                  <div>
-                    <Label className="font-body text-xs">אימייל *</Label>
-                    <Input type="email" dir="ltr" value={form.guest_email} onChange={(e) => setForm({ ...form, guest_email: e.target.value })} className="bg-background" placeholder="name@example.com" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Field label="שם מלא *">
+                      <Input value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className="bg-background h-11" />
+                    </Field>
+                    <Field label="אימייל *">
+                      <Input type="email" dir="ltr" value={form.guest_email} onChange={(e) => setForm({ ...form, guest_email: e.target.value })} className="bg-background h-11" placeholder="name@example.com" />
+                    </Field>
                   </div>
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="font-body text-xs">{t("realestate.fieldListingType")}</Label>
-                  <Select value={form.listing_type} onValueChange={(v) => setForm({ ...form, listing_type: v })}>
-                    <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {LISTING_TYPES.map(lt => <SelectItem key={lt.value} value={lt.value}>{lt.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="font-body text-xs">{t("realestate.fieldPropertyType")}</Label>
-                  <Select value={form.property_type} onValueChange={(v) => setForm({ ...form, property_type: v })}>
-                    <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {PROPERTY_TYPES.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div>
-                <Label className="font-body text-xs">{t("realestate.fieldTitle")}</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background" placeholder="לדוגמה: 4 חדרים משופצת ברחוב הראשונים" />
-              </div>
-              <div>
-                <Label className="font-body text-xs">{t("realestate.fieldDescription")}</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-background" rows={4} />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <Label className="font-body text-xs">{t("realestate.fieldRooms")}</Label>
-                  <Input type="number" inputMode="decimal" step="0.5" value={form.rooms} onChange={(e) => setForm({ ...form, rooms: e.target.value })} className="bg-background" />
-                </div>
-                <div>
-                  <Label className="font-body text-xs">{t("realestate.fieldFloor")}</Label>
-                  <Input type="number" inputMode="numeric" value={form.floor_number} onChange={(e) => setForm({ ...form, floor_number: e.target.value })} className="bg-background" />
-                </div>
-                <div>
-                  <Label className="font-body text-xs">{t("realestate.fieldSize")}</Label>
-                  <Input type="number" inputMode="decimal" value={form.size_sqm} onChange={(e) => setForm({ ...form, size_sqm: e.target.value })} className="bg-background" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="font-body text-xs">
-                    {form.listing_type === "rent" ? t("realestate.fieldPriceRent") : t("realestate.fieldPriceSale")}
-                  </Label>
-                  <Input type="number" inputMode="decimal" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="bg-background" />
-                </div>
-                <div>
-                  <Label className="font-body text-xs">{t("realestate.fieldPhone")}</Label>
-                  <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className="bg-background" placeholder="0501234567" />
-                </div>
-                <div>
-                  <Label className="font-body text-xs">{t("realestate.fieldAddress")}</Label>
-                  <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="bg-background" placeholder="רחוב (ללא מספר בית)" />
-                </div>
-                <div>
-                  <Label className="font-body text-xs">{t("realestate.fieldAvailableFrom")}</Label>
-                  <Input type="date" value={form.available_from} onChange={(e) => setForm({ ...form, available_from: e.target.value })} className="bg-background" />
-                </div>
-              </div>
-            </div>
 
-            {/* Images column */}
-            <div className="space-y-3">
-              <Label className="font-body text-xs">{t("realestate.fieldImages")}</Label>
-              {user && (
-                <SaleImageUpload
-                  userId={user.id}
-                  mainImage={form.images[0] || null}
-                  galleryImages={form.images.slice(1)}
-                  onMainImageChange={(url) => {
-                    const rest = form.images.slice(1);
-                    setForm({ ...form, images: url ? [url, ...rest] : rest });
-                  }}
-                  onGalleryChange={(urls) => {
-                    const main = form.images[0];
-                    setForm({ ...form, images: main ? [main, ...urls] : urls });
-                  }}
-                />
-              )}
-              <div className="pt-2 border-t border-border/40">
-                <Label className="font-body text-xs">{t("realestate.addFromUrl")}</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    value={imageUrlInput}
-                    onChange={(e) => setImageUrlInput(e.target.value)}
-                    placeholder="https://..."
-                    className="bg-background"
-                    dir="ltr"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      const url = imageUrlInput.trim();
-                      if (!url) return;
-                      if (!/^https?:\/\//i.test(url)) {
-                        toast({ title: t("realestate.toastInvalidUrl"), variant: "destructive" });
-                        return;
-                      }
-                      setForm({ ...form, images: [...form.images, url] });
-                      setImageUrlInput("");
-                    }}
-                    className="font-body whitespace-nowrap"
-                  >
-                    <Plus className="h-4 w-4 ml-1" /> {t("realestate.addButton")}
-                  </Button>
+              <Section title="מה מפרסמים">
+                <div className="grid grid-cols-2 gap-3">
+                  {LISTING_TYPES.map(lt => {
+                    const active = form.listing_type === lt.value;
+                    return (
+                      <button
+                        key={lt.value}
+                        type="button"
+                        onClick={() => setForm({ ...form, listing_type: lt.value })}
+                        aria-pressed={active}
+                        className={`rounded-xl border-2 px-4 py-3 text-center transition-all ${
+                          active
+                            ? "border-gold bg-gold/10 shadow-[0_0_20px_hsl(43_72%_52%/0.15)]"
+                            : "border-border bg-background hover:border-gold/40"
+                        }`}
+                      >
+                        <span className={`block font-serif text-base font-bold ${active ? "text-gold" : "text-foreground"}`}>
+                          {lt.label}
+                        </span>
+                        <span className="block font-body text-[11px] text-muted-foreground mt-0.5">
+                          {lt.value === "rent" ? "שכירות חודשית" : "מכירת הנכס"}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
+              </Section>
+
+              <Section title="פרטי הנכס">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <Field label={t("realestate.fieldPropertyType")}>
+                    <Select value={form.property_type} onValueChange={(v) => setForm({ ...form, property_type: v })}>
+                      <SelectTrigger className="bg-background h-11"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {PROPERTY_TYPES.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <div className="sm:col-span-2">
+                    <Field label={t("realestate.fieldTitle")}>
+                      <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-background h-11" placeholder="לדוגמה: 4 חדרים משופצת ברחוב הראשונים" />
+                    </Field>
+                  </div>
+                </div>
+                <Field label={t("realestate.fieldDescription")} hint="מה שווה שהשכנים ידעו: מרפסת, חניה, ממ״ד, שיפוץ, קומה אחרונה.">
+                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-background" rows={4} />
+                </Field>
+                <div className="grid grid-cols-3 gap-3">
+                  <Field label={t("realestate.fieldRooms")}>
+                    <Input type="number" inputMode="decimal" step="0.5" min="0" value={form.rooms} onChange={(e) => setForm({ ...form, rooms: e.target.value })} className="bg-background h-11" placeholder="4" />
+                  </Field>
+                  <Field label={t("realestate.fieldFloor")}>
+                    <Input type="number" inputMode="numeric" value={form.floor_number} onChange={(e) => setForm({ ...form, floor_number: e.target.value })} className="bg-background h-11" placeholder="2" />
+                  </Field>
+                  <Field label={t("realestate.fieldSize")}>
+                    <Input type="number" inputMode="decimal" min="0" value={form.size_sqm} onChange={(e) => setForm({ ...form, size_sqm: e.target.value })} className="bg-background h-11" placeholder="95" />
+                  </Field>
+                </div>
+              </Section>
+
+              <Section title="מחיר וכניסה">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Field label={form.listing_type === "rent" ? t("realestate.fieldPriceRent") : t("realestate.fieldPriceSale")}>
+                    <div className="relative">
+                      <Input type="number" inputMode="decimal" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="bg-background h-11 pl-9" placeholder={form.listing_type === "rent" ? "4,500" : "2,300,000"} />
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-body text-sm text-muted-foreground">₪</span>
+                    </div>
+                  </Field>
+                  <Field label={t("realestate.fieldAvailableFrom")}>
+                    <Input type="date" value={form.available_from} onChange={(e) => setForm({ ...form, available_from: e.target.value })} className="bg-background h-11" />
+                  </Field>
+                </div>
+              </Section>
+
+              <Section title="יצירת קשר">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Field label={t("realestate.fieldPhone")}>
+                    <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className="bg-background h-11" placeholder="0501234567" />
+                  </Field>
+                  <Field label={t("realestate.fieldAddress")} hint="בלי מספר בית. את הכתובת המדויקת מוסרים בטלפון.">
+                    <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="bg-background h-11" placeholder="רחוב הראשונים" />
+                  </Field>
+                </div>
+              </Section>
+
+              <Section title={t("realestate.fieldImages")}>
+                {user && (
+                  <SaleImageUpload
+                    userId={user.id}
+                    mainImage={form.images[0] || null}
+                    galleryImages={form.images.slice(1)}
+                    onMainImageChange={(url) => {
+                      const rest = form.images.slice(1);
+                      setForm({ ...form, images: url ? [url, ...rest] : rest });
+                    }}
+                    onGalleryChange={(urls) => {
+                      const main = form.images[0];
+                      setForm({ ...form, images: main ? [main, ...urls] : urls });
+                    }}
+                  />
+                )}
+                <Field label={t("realestate.addFromUrl")}>
+                  <div className="flex gap-2">
+                    <Input
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      placeholder="https://..."
+                      className="bg-background h-11"
+                      dir="ltr"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const url = imageUrlInput.trim();
+                        if (!url) return;
+                        if (!/^https?:\/\//i.test(url)) {
+                          toast({ title: t("realestate.toastInvalidUrl"), variant: "destructive" });
+                          return;
+                        }
+                        setForm({ ...form, images: [...form.images, url] });
+                        setImageUrlInput("");
+                      }}
+                      className="font-body whitespace-nowrap h-11"
+                    >
+                      <Plus className="h-4 w-4 ml-1" /> {t("realestate.addButton")}
+                    </Button>
+                  </div>
+                </Field>
                 {form.images.length > 0 && (
-                  <div className="grid grid-cols-4 gap-2 mt-3">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                     {form.images.map((url, i) => (
                       <div key={i} className="relative group aspect-square rounded-md overflow-hidden border border-border">
                         <img src={url} alt={`img-${i}`} className="w-full h-full object-cover" />
@@ -555,12 +593,12 @@ const RealEstate = () => {
                     ))}
                   </div>
                 )}
-              </div>
+              </Section>
             </div>
 
             {/* Live preview */}
-            <div className="space-y-2">
-              <Label className="font-body text-xs">{t("realestate.preview")}</Label>
+            <div className="space-y-2 lg:col-span-2 lg:sticky lg:top-2 lg:self-start">
+              <Label className="font-body text-xs text-muted-foreground">{t("realestate.preview")}</Label>
               <article className="rounded-2xl border border-gold/40 bg-card overflow-hidden shadow-[0_0_30px_hsl(43_72%_52%/0.1)]">
                 <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
                   {form.images[0] ? (

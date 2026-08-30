@@ -92,6 +92,7 @@ const Header = () => {
   const navLinks = [
     { to: "/", label: t("nav.home"), protected: false },
     { to: "/announcements", label: t("nav.announcements"), protected: false },
+    { to: "/realestate", label: t("nav.realestate"), protected: false },
     { to: "/jobs", label: t("nav.jobs"), protected: false },
     { to: "/members", label: t("nav.members"), protected: false },
     { to: "/events", label: t("nav.events"), protected: false },
@@ -99,7 +100,6 @@ const Header = () => {
     { to: "/recommendations", label: t("nav.recommendations"), protected: false },
     { to: "/deals", label: t("nav.deals"), protected: false },
     { to: "/secondhand", label: t("nav.secondhand"), protected: false },
-    { to: "/realestate", label: t("nav.realestate"), protected: false },
     ...((isAdmin || isTeamMember) ? [{ to: "/admin", label: t("nav.admin"), protected: true }] : []),
   ];
 

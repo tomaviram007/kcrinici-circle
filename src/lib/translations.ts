@@ -398,7 +398,7 @@ const translations: Record<Language, Record<string, string>> = {
     // RealEstate page
     "realestate.heroTitle": "נדל״ן",
     "realestate.heroHighlight": "בשכונה",
-    "realestate.heroSubtitle": "דירות להשכרה ולמכירה ישירות מהשכנים — בלי תיווך, בגובה העיניים",
+    "realestate.heroSubtitle": "דירות להשכרה ולמכירה ישירות מהשכנים, בלי תיווך, בגובה העיניים",
     "realestate.searchPlaceholder": "חיפוש לפי כותרת, תיאור או רחוב...",
     "realestate.filterAll": "הכל",
     "realestate.postListing": "פרסום דירה",
@@ -932,7 +932,7 @@ const translations: Record<Language, Record<string, string>> = {
     // RealEstate page
     "realestate.heroTitle": "Real Estate",
     "realestate.heroHighlight": "in the Neighborhood",
-    "realestate.heroSubtitle": "Apartments for rent and sale directly from neighbors — no brokers",
+    "realestate.heroSubtitle": "Apartments for rent and sale directly from neighbors, no brokers",
     "realestate.searchPlaceholder": "Search by title, description or street...",
     "realestate.filterAll": "All",
     "realestate.postListing": "Post a Listing",

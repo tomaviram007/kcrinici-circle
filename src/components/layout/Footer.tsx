@@ -9,6 +9,7 @@ const Footer = () => {
   const sitemapLinks = [
     { to: "/", label: "דף הבית" },
     { to: "/announcements", label: "לוח מודעות" },
+    { to: "/realestate", label: "נדל״ן בשכונה" },
     { to: "/jobs", label: "דרושים" },
     { to: "/events", label: "לוח אירועים" },
     { to: "/members", label: "חברי המועדון" },
@@ -16,7 +17,6 @@ const Footer = () => {
     { to: "/deals", label: "הטבות" },
     { to: "/gallery", label: "גלריה" },
     { to: "/secondhand", label: "יד שנייה" },
-    { to: "/realestate", label: "נדל״ן בשכונה" },
   ];
 
   const legalLinks = [
