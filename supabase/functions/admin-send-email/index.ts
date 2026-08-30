@@ -1,6 +1,7 @@
 // Admin-only: send a free-form email to one or more recipients via Lovable's
-// built-in email infrastructure (queue + verified sender domain).
+// managed email delivery (verified sender domain).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendAndLog } from "../_shared/transactional-email-templates/log-send.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
