@@ -17,7 +17,7 @@ import PageHero from "@/components/PageHero";
 import { usePageCover } from "@/hooks/usePageCover";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SaleImageUpload from "@/components/announcements/SaleImageUpload";
-import heroImg from "@/assets/hero-bg.jpg";
+import heroImg from "@/assets/hero-realestate.jpg";
 import ShareButtons from "@/components/ShareButtons";
 import Seo from "@/components/Seo";
 
