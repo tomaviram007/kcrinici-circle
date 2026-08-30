@@ -24,7 +24,7 @@ export async function sendAndLog(
         status: 'suppressed',
       })
       if (error) console.error('email_send_log insert failed', error)
-      return { ok: false, suppressed: true, reason: 'recipient_suppressed' } as LoggedSendResult
+      return { ok: false, suppressed: true }
     }
 
     const { error } = await supabase.from('email_send_log').insert({
