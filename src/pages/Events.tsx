@@ -12,6 +12,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import gsap from "gsap";
 import PageHero from "@/components/PageHero";
 import EventRegistrationDialog from "@/components/events/EventRegistrationDialog";
+import AnnouncementsBoard from "@/components/announcements/AnnouncementsBoard";
 
 import QuoteSection from "@/components/landing/QuoteSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
