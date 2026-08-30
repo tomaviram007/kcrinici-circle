@@ -303,7 +303,7 @@ const Profile = () => {
             {unreadItems.map((item) => (
               <Link
                 key={item.id}
-                to="/announcements"
+                to="/events"
                 className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 hover:border-gold/30 hover:bg-card/80 transition-all"
               >
                 <span className="font-body text-sm font-medium text-foreground line-clamp-1">{item.title}</span>
