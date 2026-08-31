@@ -17,7 +17,7 @@ import PageHero from "@/components/PageHero";
 import { usePageCover } from "@/hooks/usePageCover";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ListingImageManager, { MAX_LISTING_IMAGES } from "@/components/realestate/ListingImageManager";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import ImageLightbox from "@/components/realestate/ImageLightbox";
 import heroImg from "@/assets/hero-realestate.jpg";
 import ShareButtons from "@/components/ShareButtons";
 import Seo from "@/components/Seo";
@@ -103,7 +103,7 @@ interface ListingCardProps {
   it: Listing;
   isOwner: boolean;
   canSeeContact: boolean;
-  onOpen: () => void;
+  onOpen: (startIndex: number) => void;
   onEdit: () => void;
   onToggleClosed: () => void;
   onDelete: () => void;
@@ -139,8 +139,7 @@ const ListingCard = ({
     if (touchStartX.current === null) return;
     const delta = e.changedTouches[0].clientX - touchStartX.current;
     touchStartX.current = null;
-    // In RTL a swipe to the left moves forward, matching how the eye reads.
-    if (Math.abs(delta) > 40) go(delta < 0 ? 1 : -1);
+    if (Math.abs(delta) > 40) go(delta < 0 ? -1 : 1);
   };
 
   const phone = it.contact_phone;
@@ -151,7 +150,7 @@ const ListingCard = ({
   return (
     <article
       className="group relative h-[460px] cursor-pointer overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 ease-out hover:-translate-y-2 hover:border-gold/50 hover:shadow-[0_20px_50px_-15px_hsl(43_72%_52%/0.3)]"
-      onClick={onOpen}
+      onClick={() => onOpen(current)}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
@@ -188,16 +187,16 @@ const ListingCard = ({
         <>
           <button
             type="button"
-            onClick={(e) => { stop(e); go(-1); }}
-            aria-label="התמונה הקודמת"
+            onClick={(e) => { stop(e); go(1); }}
+            aria-label="התמונה הבאה"
             className="absolute end-2 top-[30%] z-20 -translate-y-1/2 rounded-full bg-background/70 p-1.5 text-foreground opacity-0 backdrop-blur-sm transition-opacity hover:bg-background focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
           <button
             type="button"
-            onClick={(e) => { stop(e); go(1); }}
-            aria-label="התמונה הבאה"
+            onClick={(e) => { stop(e); go(-1); }}
+            aria-label="התמונה הקודמת"
             className="absolute start-2 top-[30%] z-20 -translate-y-1/2 rounded-full bg-background/70 p-1.5 text-foreground opacity-0 backdrop-blur-sm transition-opacity hover:bg-background focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -356,7 +355,7 @@ const RealEstate = () => {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
-  const [viewItem, setViewItem] = useState<Listing | null>(null);
+  const [lightbox, setLightbox] = useState<{ it: Listing; index: number } | null>(null);
   const [showLockedNotice, setShowLockedNotice] = useState(false);
 
   const fetchItems = async () => {
@@ -578,7 +577,7 @@ const RealEstate = () => {
                   it={it}
                   isOwner={isOwner}
                   canSeeContact={canSeeContact}
-                  onOpen={() => (canOpenCard ? setViewItem(it) : setShowLockedNotice(true))}
+                  onOpen={(index) => (canOpenCard ? setLightbox({ it, index }) : setShowLockedNotice(true))}
                   onEdit={() => openEdit(it)}
                   onToggleClosed={() => setClosed(it, !it.is_closed)}
                   onDelete={() => handleDelete(it.id)}
@@ -786,87 +785,18 @@ const RealEstate = () => {
         </DialogContent>
       </Dialog>
 
-      {/* View Dialog */}
-      <Dialog open={!!viewItem} onOpenChange={() => setViewItem(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
-          {viewItem && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="font-serif text-2xl">{viewItem.title}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 mt-2">
-                {viewItem.images?.length > 0 && (
-                  <Carousel opts={{ direction: "rtl", loop: viewItem.images.length > 1 }} className="w-full">
-                    <CarouselContent>
-                      {viewItem.images.map((url, i) => (
-                        <CarouselItem key={i}>
-                          <img
-                            src={url}
-                            alt={`${viewItem.title} ${i + 1}`}
-                            className="aspect-[4/3] w-full rounded-lg border border-border object-cover"
-                          />
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    {viewItem.images.length > 1 && (
-                      <>
-                        <CarouselPrevious className="right-2" />
-                        <CarouselNext className="left-2" />
-                        <p className="mt-2 text-center font-body text-[11px] text-muted-foreground">
-                          {viewItem.images.length} תמונות. אפשר להחליק בין התמונות.
-                        </p>
-                      </>
-                    )}
-                  </Carousel>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  <TypeBadge type={viewItem.listing_type} />
-                  <Badge variant="outline">{viewItem.property_type}</Badge>
-                  {viewItem.is_closed && <Badge variant="destructive">{closedLabel(viewItem)}</Badge>}
-                </div>
-                {viewItem.price !== null && (
-                  <p className="font-serif text-3xl font-bold text-gold">{formatPrice(viewItem)}</p>
-                )}
-                {specParts(viewItem).length > 0 && (
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    {specParts(viewItem).map((p, i) => (
-                      <span key={i} className="inline-flex items-center gap-1.5 font-body text-sm text-foreground">
-                        <p.icon className="h-4 w-4 text-gold" /> {p.text}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {viewItem.address && (
-                  <p className="font-body text-sm text-foreground flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4 text-gold" /> {viewItem.address}
-                  </p>
-                )}
-                {viewItem.available_from && (
-                  <p className="font-body text-sm text-foreground flex items-center gap-1.5">
-                    <CalendarDays className="h-4 w-4 text-gold" /> כניסה מ־{new Date(viewItem.available_from).toLocaleDateString("he-IL")}
-                  </p>
-                )}
-                {viewItem.description && (
-                  <p className="font-body text-foreground whitespace-pre-line">{viewItem.description}</p>
-                )}
-                {!viewItem.is_closed && (
-                  canSeeContact && viewItem.contact_phone ? (
-                    <a
-                      href={`tel:${viewItem.contact_phone}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg gradient-gold text-primary-foreground font-body"
-                    >
-                      <Phone className="h-4 w-4" />
-                      {viewItem.contact_phone}
-                    </a>
-                  ) : !canSeeContact ? (
-                    <MembersOnlyNotice variant="realestate" compact />
-                  ) : null
-                )}
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Photo viewer, opened by clicking a card */}
+      {lightbox && (
+        <ImageLightbox
+          images={lightbox.it.images || []}
+          startIndex={lightbox.index}
+          title={lightbox.it.title}
+          caption={[listingTypeLabel(lightbox.it.listing_type), lightbox.it.address, formatPrice(lightbox.it)]
+            .filter(Boolean)
+            .join(" · ")}
+          onClose={() => setLightbox(null)}
+        />
+      )}
 
       <Dialog open={showLockedNotice} onOpenChange={setShowLockedNotice}>
         <DialogContent className="sm:max-w-md p-0 bg-transparent border-0 shadow-none" dir="rtl">
