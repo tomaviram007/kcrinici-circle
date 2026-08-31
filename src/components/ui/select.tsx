@@ -4,7 +4,30 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const Select = SelectPrimitive.Root;
+/**
+ * Radix defaults every Select to dir="ltr" and stamps it on the trigger and on
+ * the portalled content, which overrides the RTL direction of the page. We follow
+ * the document direction instead, and keep watching it because the language
+ * switcher flips <html dir> at runtime.
+ */
+const readDocDir = (): "rtl" | "ltr" =>
+  typeof document !== "undefined" && document.documentElement.dir === "ltr" ? "ltr" : "rtl";
+
+const Select = ({ dir, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => {
+  const [docDir, setDocDir] = React.useState<"rtl" | "ltr">(readDocDir);
+
+  React.useEffect(() => {
+    const el = document.documentElement;
+    const update = () => setDocDir(readDocDir());
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(el, { attributes: true, attributeFilter: ["dir"] });
+    return () => observer.disconnect();
+  }, []);
+
+  return <SelectPrimitive.Root dir={dir ?? docDir} {...props} />;
+};
+Select.displayName = "Select";
 
 const SelectGroup = SelectPrimitive.Group;
 
@@ -105,12 +128,12 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 ps-8 pe-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
       className,
     )}
     {...props}
   >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+    <span className="absolute start-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
         <Check className="h-4 w-4" />
       </SelectPrimitive.ItemIndicator>

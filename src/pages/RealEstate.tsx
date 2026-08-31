@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Phone, Trash2, Pencil, CheckCircle2, Home, BedDouble, Building2, Ruler, MapPin, CalendarDays } from "lucide-react";
+import { Plus, Phone, Trash2, Pencil, CheckCircle2, Home, BedDouble, Building2, Ruler, MapPin, CalendarDays, ArrowLeft } from "lucide-react";
 import MembersOnlyNotice from "@/components/MembersOnlyNotice";
 import { useContentAccess } from "@/hooks/useContentAccess";
 import PageHero from "@/components/PageHero";
@@ -336,85 +336,116 @@ const RealEstate = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map(it => {
-              const isOwner = user?.id === it.created_by;
+              // The public RPC omits created_by, so both sides can be undefined.
+              // Owner controls require a signed in user matching a real owner id.
+              const isOwner = !!user?.id && !!it.created_by && user.id === it.created_by;
               return (
                 <article
                   key={it.id}
-                  className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-gold/40 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)] transition-all cursor-pointer"
+                  className="group relative h-[400px] cursor-pointer overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 ease-out hover:-translate-y-2 hover:border-gold/50 hover:shadow-[0_20px_50px_-15px_hsl(43_72%_52%/0.3)]"
                   onClick={() => (canOpenCard ? setViewItem(it) : setShowLockedNotice(true))}
                 >
-                  <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
-                    {it.images?.[0] ? (
-                      <img src={it.images[0]} alt={it.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Home className="h-12 w-12 text-muted-foreground/30" />
-                      </div>
-                    )}
-                    {it.is_closed && (
-                      <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
-                        <span className="rotate-[-12deg] border-4 border-destructive text-destructive font-serif font-bold text-3xl px-6 py-1 rounded">
-                          {closedLabel(it)}
-                        </span>
-                      </div>
-                    )}
-                    <TypeBadge type={it.listing_type} className="absolute top-2 right-2" />
-                    <Badge className="absolute top-2 left-2 bg-background/80 text-foreground border-border backdrop-blur-sm">
+                  {/* Photo fills the card and zooms gently on hover */}
+                  {it.images?.[0] ? (
+                    <img
+                      src={it.images[0]}
+                      alt={it.title}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-secondary">
+                      <Home className="h-14 w-14 text-muted-foreground/25" />
+                    </div>
+                  )}
+
+                  {/* Keeps the text readable over any photo */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/65 to-transparent" />
+
+                  {it.is_closed && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/70">
+                      <span className="rotate-[-12deg] rounded border-4 border-destructive px-6 py-1 font-serif text-3xl font-bold text-destructive">
+                        {closedLabel(it)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  <div className="absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
+                    <TypeBadge type={it.listing_type} />
+                    <Badge className="border-border bg-background/80 text-foreground backdrop-blur-sm">
                       {it.property_type}
                     </Badge>
                   </div>
-                  <div className="p-4 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-serif text-lg font-bold text-foreground line-clamp-1">{it.title}</h3>
-                      {it.price !== null && (
-                        <p className="font-serif text-lg font-bold text-gold whitespace-nowrap">
-                          {formatPrice(it)}
+
+                  {/* Owner controls stay reachable, also on touch screens */}
+                  {isOwner && (
+                    <div
+                      className="absolute end-3 top-12 z-20 flex flex-col gap-1 rounded-lg border border-border/60 bg-background/85 p-1 backdrop-blur-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title={t("realestate.edit")} onClick={() => openEdit(it)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0"
+                        title={it.is_closed ? "החזר ללוח" : it.listing_type === "rent" ? "סמן כהושכרה" : "סמן כנמכרה"}
+                        onClick={() => setClosed(it, !it.is_closed)}
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive" title="מחיקה" onClick={() => handleDelete(it.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Details. On a mouse they slide up to make room for the call to action */}
+                  {/* Extra bottom padding on touch screens keeps the price clear
+                      of the call to action, which is always visible there. */}
+                  <div className="absolute inset-x-0 bottom-0 z-10 p-5 pb-16 md:pb-5">
+                    <div className="space-y-1.5 transition-transform duration-500 ease-out md:group-hover:-translate-y-12">
+                      <h3 className="line-clamp-1 font-serif text-2xl font-bold text-foreground">{it.title}</h3>
+
+                      {it.address && (
+                        <p className="flex items-center gap-1 font-body text-xs text-muted-foreground">
+                          <MapPin className="h-3 w-3 shrink-0 text-gold/80" /> {it.address}
                         </p>
                       )}
+
+                      {specParts(it).length > 0 && (
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-0.5">
+                          {specParts(it).map((p, i) => (
+                            <span key={i} className="inline-flex items-center gap-1 font-body text-xs text-muted-foreground">
+                              <p.icon className="h-3.5 w-3.5 text-gold/80" />
+                              {p.text}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {it.price !== null && (
+                        <p className="pt-1 font-serif text-2xl font-bold text-gold">{formatPrice(it)}</p>
+                      )}
                     </div>
-                    {specParts(it).length > 0 && (
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        {specParts(it).map((p, i) => (
-                          <span key={i} className="inline-flex items-center gap-1 font-body text-xs text-muted-foreground">
-                            <p.icon className="h-3.5 w-3.5 text-gold/70" />
-                            {p.text}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {it.address && (
-                      <p className="font-body text-xs text-muted-foreground flex items-center gap-1">
-                        <MapPin className="h-3 w-3 text-gold/70" /> {it.address}
-                      </p>
-                    )}
-                    <p className="font-body text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
-                      {it.description || "—"}
-                    </p>
-                    <div className="flex items-center justify-end pt-1">
-                      <ShareButtons
-                        title={it.title}
-                        text={`${it.title}, ${listingTypeLabel(it.listing_type)}${it.price !== null ? `, ${formatPrice(it)}` : ""} | נדל״ן בשכונה, הגברים של ק.קרניצי`}
-                      />
+                  </div>
+
+                  {/* Call to action, revealed on hover where hover exists */}
+                  <div className="absolute inset-x-0 bottom-0 z-10 p-5 md:-bottom-24 md:opacity-0 md:transition-all md:duration-500 md:ease-out md:group-hover:bottom-0 md:group-hover:opacity-100">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-4 py-2 font-body text-sm font-bold text-primary-foreground">
+                        לפרטים
+                        <ArrowLeft className="h-4 w-4" />
+                      </span>
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <ShareButtons
+                          title={it.title}
+                          text={`${it.title}, ${listingTypeLabel(it.listing_type)}${it.price !== null ? `, ${formatPrice(it)}` : ""} | נדל״ן בשכונה, הגברים של ק.קרניצי`}
+                        />
+                      </span>
                     </div>
-                    {isOwner && (
-                      <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
-                        <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => openEdit(it)}>
-                          <Pencil className="h-3 w-3 ml-1" /> {t("realestate.edit")}
-                        </Button>
-                        {it.is_closed ? (
-                          <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setClosed(it, false)}>
-                            <CheckCircle2 className="h-3 w-3 ml-1" /> החזר ללוח
-                          </Button>
-                        ) : (
-                          <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setClosed(it, true)}>
-                            <CheckCircle2 className="h-3 w-3 ml-1" /> {it.listing_type === "rent" ? "סמן כהושכרה" : "סמן כנמכרה"}
-                          </Button>
-                        )}
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => handleDelete(it.id)}>
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 </article>
               );
