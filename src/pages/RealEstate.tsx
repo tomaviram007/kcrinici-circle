@@ -342,7 +342,7 @@ const RealEstate = () => {
               return (
                 <article
                   key={it.id}
-                  className="group relative h-[400px] cursor-pointer overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 ease-out hover:-translate-y-2 hover:border-gold/50 hover:shadow-[0_20px_50px_-15px_hsl(43_72%_52%/0.3)]"
+                  className="group relative h-[460px] cursor-pointer overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 ease-out hover:-translate-y-2 hover:border-gold/50 hover:shadow-[0_20px_50px_-15px_hsl(43_72%_52%/0.3)]"
                   onClick={() => (canOpenCard ? setViewItem(it) : setShowLockedNotice(true))}
                 >
                   {/* Photo fills the card and zooms gently on hover */}
@@ -423,6 +423,15 @@ const RealEstate = () => {
                               {p.text}
                             </span>
                           ))}
+                        </div>
+                      )}
+
+                      {it.description && (
+                        <div className="pt-1">
+                          <h4 className="font-body text-[10px] font-bold tracking-wider text-gold/80">על הנכס</h4>
+                          <p className="line-clamp-2 font-body text-xs leading-relaxed text-muted-foreground">
+                            {it.description}
+                          </p>
                         </div>
                       )}
 
