@@ -15,6 +15,7 @@ import SecondHandPreviewSection from "@/components/landing/SecondHandPreviewSect
 import QuoteSection from "@/components/landing/QuoteSection";
 import CTASection from "@/components/landing/CTASection";
 import PollPopup from "@/components/PollPopup";
+import SiteUpdatePopup from "@/components/SiteUpdatePopup";
 import ScrollReveal from "@/components/ScrollReveal";
 import ClubAboutSection from "@/components/ClubAboutSection";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
@@ -115,6 +116,7 @@ const Index = () => {
       </ContentWithSidebarAds>
 
       <PollPopup />
+      <SiteUpdatePopup />
     </main>
   );
 };

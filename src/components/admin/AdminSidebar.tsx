@@ -29,6 +29,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   ads: "manage_settings",
   secondhand: "manage_deals",
   realestate: "manage_deals",
+  site_updates: "manage_announcements",
   communication: "manage_settings",
   birthdays: "manage_members",
   content_access: "manage_settings",
@@ -57,6 +58,7 @@ const groups = [
       { id: "deals", label: "הטבות", icon: Briefcase },
       { id: "secondhand", label: "יד שנייה", icon: Package },
       { id: "realestate", label: "נדל״ן בשכונה", icon: Home },
+      { id: "site_updates", label: "עדכוני אתר", icon: Megaphone },
     ],
   },
   {

@@ -1624,6 +1624,63 @@ export type Database = {
         }
         Relationships: []
       }
+      site_updates: {
+        Row: {
+          audience: string
+          badge_text: string
+          body: string | null
+          button_text: string
+          button_url: string
+          created_at: string
+          created_by: string | null
+          display_order: number
+          ends_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          max_displays: number
+          starts_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          badge_text?: string
+          body?: string | null
+          button_text?: string
+          button_url: string
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_displays?: number
+          starts_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          badge_text?: string
+          body?: string | null
+          button_text?: string
+          button_url?: string
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_displays?: number
+          starts_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string

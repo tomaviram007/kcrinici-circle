@@ -10,13 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Phone, Trash2, Pencil, CheckCircle2, X, Home, BedDouble, Building2, Ruler, MapPin, CalendarDays } from "lucide-react";
+import { Plus, Phone, Trash2, Pencil, CheckCircle2, Home, BedDouble, Building2, Ruler, MapPin, CalendarDays } from "lucide-react";
 import MembersOnlyNotice from "@/components/MembersOnlyNotice";
 import { useContentAccess } from "@/hooks/useContentAccess";
 import PageHero from "@/components/PageHero";
 import { usePageCover } from "@/hooks/usePageCover";
 import { useLanguage } from "@/contexts/LanguageContext";
-import SaleImageUpload from "@/components/announcements/SaleImageUpload";
+import ListingImageManager, { MAX_LISTING_IMAGES } from "@/components/realestate/ListingImageManager";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import heroImg from "@/assets/hero-realestate.jpg";
 import ShareButtons from "@/components/ShareButtons";
 import Seo from "@/components/Seo";
@@ -111,7 +112,6 @@ const RealEstate = () => {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [viewItem, setViewItem] = useState<Listing | null>(null);
-  const [imageUrlInput, setImageUrlInput] = useState("");
   const [showLockedNotice, setShowLockedNotice] = useState(false);
 
   const fetchItems = async () => {
@@ -163,7 +163,7 @@ const RealEstate = () => {
       address: it.address || "",
       available_from: it.available_from || "",
       contact_phone: it.contact_phone || "",
-      images: it.images || [],
+      images: (it.images || []).slice(0, MAX_LISTING_IMAGES),
       guest_name: "",
       guest_email: "",
     });
@@ -174,17 +174,25 @@ const RealEstate = () => {
 
   const handleSubmit = async () => {
     if (!form.title.trim()) {
-      toast({ title: t("realestate.toastTitleRequired"), variant: "destructive" });
+      toast({ title: "חסרה כותרת למודעה", variant: "destructive" });
       return;
     }
     if (isGuestFlow && !editId) {
-      if (!form.guest_name.trim() || !form.contact_phone.trim() || !form.guest_email.trim()) {
-        toast({ title: "נא למלא שם מלא, טלפון ואימייל", variant: "destructive" });
+      // Name each missing field on its own, so it is clear what to fix.
+      if (!form.guest_name.trim()) {
+        toast({ title: "חסר שם מלא", description: "בלי שם אי אפשר לאשר את המודעה.", variant: "destructive" });
         return;
       }
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guest_email.trim());
-      if (!emailOk) {
-        toast({ title: "אימייל לא תקין", variant: "destructive" });
+      if (!form.guest_email.trim()) {
+        toast({ title: "חסר אימייל", description: "האימייל משמש אותנו רק כדי לעדכן אותך שהמודעה אושרה.", variant: "destructive" });
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guest_email.trim())) {
+        toast({ title: "האימייל לא תקין", description: "בדוק את הכתובת ונסה שוב.", variant: "destructive" });
+        return;
+      }
+      if (!form.contact_phone.trim()) {
+        toast({ title: "חסר טלפון ליצירת קשר", description: "זה השדה שדרכו שכנים יפנו אליך. נמצא תחת יצירת קשר.", variant: "destructive" });
         return;
       }
     }
@@ -202,7 +210,7 @@ const RealEstate = () => {
       address: form.address.trim() || null,
       available_from: form.available_from || null,
       contact_phone: form.contact_phone.trim() || null,
-      images: form.images,
+      images: form.images.slice(0, MAX_LISTING_IMAGES),
     };
 
     let error;
@@ -428,23 +436,7 @@ const RealEstate = () => {
           </DialogHeader>
 
           <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-6 gap-y-5">
-              {isGuestFlow && !editId && (
-                <div className="lg:col-span-12 rounded-xl border border-gold/30 bg-gold/5 p-3">
-                  <p className="font-body text-xs text-gold mb-2">
-                    פרסום כאורח. המודעה תעבור אישור מנהל לפני שתופיע באתר.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Field label="שם מלא *">
-                      <Input value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className="bg-background h-10" />
-                    </Field>
-                    <Field label="אימייל *">
-                      <Input type="email" dir="ltr" value={form.guest_email} onChange={(e) => setForm({ ...form, guest_email: e.target.value })} className="bg-background h-10" placeholder="name@example.com" />
-                    </Field>
-                  </div>
-                </div>
-              )}
-
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-5">
               {/* Column A */}
               <div className="lg:col-span-4 space-y-4">
                 <Section title="מה מפרסמים">
@@ -518,9 +510,30 @@ const RealEstate = () => {
                 </Section>
 
                 <Section title="יצירת קשר">
+                  {isGuestFlow && !editId && (
+                    <>
+                      <p className="rounded-lg border border-gold/30 bg-gold/5 px-2.5 py-1.5 font-body text-[10px] leading-snug text-gold">
+                        פרסום כאורח. המודעה תעבור אישור מנהל לפני שתופיע באתר.
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Field label="שם מלא *">
+                          <Input value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className="bg-background h-10" placeholder="השם שלך" />
+                        </Field>
+                        <Field label="אימייל *">
+                          <Input type="email" dir="ltr" value={form.guest_email} onChange={(e) => setForm({ ...form, guest_email: e.target.value })} className="bg-background h-10" placeholder="name@example.com" />
+                        </Field>
+                      </div>
+                    </>
+                  )}
                   <div className="grid grid-cols-2 gap-2">
-                    <Field label={t("realestate.fieldPhone")}>
-                      <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className="bg-background h-10" placeholder="0501234567" />
+                    <Field label={isGuestFlow ? `${t("realestate.fieldPhone")} *` : t("realestate.fieldPhone")}>
+                      <Input
+                        value={form.contact_phone}
+                        onChange={(e) => setForm({ ...form, contact_phone: e.target.value })}
+                        className={`bg-background h-10 ${isGuestFlow && !form.contact_phone.trim() ? "border-gold/50" : ""}`}
+                        inputMode="tel"
+                        placeholder="מספר טלפון"
+                      />
                     </Field>
                     <Field label={t("realestate.fieldAddress")}>
                       <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="bg-background h-10" placeholder="רחוב הראשונים" />
@@ -543,70 +556,13 @@ const RealEstate = () => {
               </div>
 
               {/* Column C: images + live preview */}
-              <div className="lg:col-span-4 space-y-4">
+              <div className="md:col-span-2 lg:col-span-4 space-y-4">
                 <Section title={t("realestate.fieldImages")}>
-                  {user && (
-                    <SaleImageUpload
-                      userId={user.id}
-                      mainImage={form.images[0] || null}
-                      galleryImages={form.images.slice(1)}
-                      onMainImageChange={(url) => {
-                        const rest = form.images.slice(1);
-                        setForm({ ...form, images: url ? [url, ...rest] : rest });
-                      }}
-                      onGalleryChange={(urls) => {
-                        const main = form.images[0];
-                        setForm({ ...form, images: main ? [main, ...urls] : urls });
-                      }}
-                    />
-                  )}
-                  <div className="flex gap-2">
-                    <Input
-                      value={imageUrlInput}
-                      onChange={(e) => setImageUrlInput(e.target.value)}
-                      placeholder="הדבקת קישור לתמונה"
-                      className="bg-background h-9"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        const url = imageUrlInput.trim();
-                        if (!url) return;
-                        if (!/^https?:\/\//i.test(url)) {
-                          toast({ title: t("realestate.toastInvalidUrl"), variant: "destructive" });
-                          return;
-                        }
-                        setForm({ ...form, images: [...form.images, url] });
-                        setImageUrlInput("");
-                      }}
-                      className="font-body whitespace-nowrap h-9 px-3"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {!user && form.images.length > 0 && (
-                    <div className="grid grid-cols-4 gap-2">
-                      {form.images.map((url, i) => (
-                        <div key={i} className="relative aspect-square rounded-md overflow-hidden border border-border">
-                          <img src={url} alt={`img-${i}`} className="w-full h-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => setForm({ ...form, images: form.images.filter((_, idx) => idx !== i) })}
-                            className="absolute top-1 left-1 bg-background/80 hover:bg-destructive text-foreground hover:text-destructive-foreground rounded-full p-0.5 transition-colors"
-                            aria-label="מחק תמונה"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                          {i === 0 && (
-                            <span className="absolute bottom-1 right-1 bg-gold text-primary-foreground text-[9px] font-body px-1.5 py-0.5 rounded">
-                              {t("realestate.mainImage")}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <ListingImageManager
+                    userId={user?.id || null}
+                    images={form.images}
+                    onChange={(urls) => setForm({ ...form, images: urls })}
+                  />
                 </Section>
 
                 <Section title={t("realestate.preview")}>
@@ -673,11 +629,28 @@ const RealEstate = () => {
               </DialogHeader>
               <div className="space-y-4 mt-2">
                 {viewItem.images?.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {viewItem.images.map((url, i) => (
-                      <img key={i} src={url} alt={`${viewItem.title} ${i + 1}`} className="w-full aspect-square object-cover rounded-lg border border-border" />
-                    ))}
-                  </div>
+                  <Carousel opts={{ direction: "rtl", loop: viewItem.images.length > 1 }} className="w-full">
+                    <CarouselContent>
+                      {viewItem.images.map((url, i) => (
+                        <CarouselItem key={i}>
+                          <img
+                            src={url}
+                            alt={`${viewItem.title} ${i + 1}`}
+                            className="aspect-[4/3] w-full rounded-lg border border-border object-cover"
+                          />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    {viewItem.images.length > 1 && (
+                      <>
+                        <CarouselPrevious className="right-2" />
+                        <CarouselNext className="left-2" />
+                        <p className="mt-2 text-center font-body text-[11px] text-muted-foreground">
+                          {viewItem.images.length} תמונות. אפשר להחליק בין התמונות.
+                        </p>
+                      </>
+                    )}
+                  </Carousel>
                 )}
                 <div className="flex flex-wrap gap-2">
                   <TypeBadge type={viewItem.listing_type} />

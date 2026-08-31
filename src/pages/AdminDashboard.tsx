@@ -26,6 +26,7 @@ import AdminDeals from "@/components/admin/AdminDeals";
 import AdminAds from "@/components/admin/AdminAds";
 import AdminSecondHand from "@/components/admin/AdminSecondHand";
 import AdminRealEstate from "@/components/admin/AdminRealEstate";
+import AdminSiteUpdates from "@/components/admin/AdminSiteUpdates";
 import AdminMembers from "@/components/admin/AdminMembers";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminBirthdayWidget from "@/components/admin/AdminBirthdayWidget";
@@ -56,6 +57,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   deals: "manage_deals",
   secondhand: "manage_deals",
   realestate: "manage_deals",
+  site_updates: "manage_announcements",
   gallery: "manage_gallery",
   polls: "manage_polls",
   quotes: "manage_quotes",
@@ -156,6 +158,7 @@ const AdminDashboard = () => {
             {activeTab === "deals" && hasPermission("manage_deals") && <AdminDeals />}
             {activeTab === "secondhand" && hasPermission("manage_deals") && <AdminSecondHand />}
             {activeTab === "realestate" && hasPermission("manage_deals") && <AdminRealEstate />}
+            {activeTab === "site_updates" && hasPermission("manage_announcements") && <AdminSiteUpdates />}
             {activeTab === "ads" && hasPermission("manage_settings") && <AdminAds />}
             {activeTab === "communication" && hasPermission("manage_settings") && <AdminCommunicationHub />}
             {activeTab === "birthdays" && hasPermission("manage_members") && <AdminBirthdays />}
@@ -200,6 +203,7 @@ const mobileNavGroups = [
       { id: "deals", label: "הטבות", icon: Briefcase },
       { id: "secondhand", label: "יד שנייה", icon: Package },
       { id: "realestate", label: "נדל״ן בשכונה", icon: Home },
+      { id: "site_updates", label: "עדכוני אתר", icon: Megaphone },
     ],
   },
   {
