@@ -21,6 +21,7 @@ import { usePageCover } from "@/hooks/usePageCover";
 import { isEventEnded } from "@/lib/event-status";
 import { avatarSrc } from "@/lib/default-avatar";
 import Seo from "@/components/Seo";
+import AnnouncementsBoard from "@/components/announcements/AnnouncementsBoard";
 import {
   Dialog,
   DialogContent,
@@ -227,8 +228,8 @@ const Events = () => {
   return (
     <>
       <Seo
-        title="אירועי המועדון"
-        description="מפגשי הגברים של ק.קרניצי: אירועים קרובים, פרטי מיקום ומועד והרשמה מהירה לחברי המועדון."
+        title="אירועים ומודעות"
+        description="אירועי המועדון, מפגשים ולוח המודעות של הגברים של ק.קרניצי: אירועים קרובים, הודעות ועדכונים לחברי המועדון."
         path="/events"
         jsonLd={{
           "@context": "https://schema.org",
@@ -253,7 +254,7 @@ const Events = () => {
         }}
       />
 
-    <PageHero image={coverImage} title="אירועים" highlight="ומפגשים" subtitle="מפגשים, ערבי נטוורקינג ואירועים בלעדיים לחברי המועדון" />
+    <PageHero image={coverImage} title="אירועים" highlight="ומודעות" subtitle="מפגשים, ערבי נטוורקינג, אירועים בלעדיים ולוח המודעות של המועדון" />
     
     <ContentWithSidebarAds targetPage="events">
     <div className="page-container py-4 sm:py-8">
@@ -418,6 +419,8 @@ const Events = () => {
       {events.length === 0 && (
         <p className="font-body text-muted-foreground text-center py-16">אין אירועים קרובים כרגע.</p>
       )}
+
+      <AnnouncementsBoard />
     </div>
 
     {/* Event Detail Popup */}

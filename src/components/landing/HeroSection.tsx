@@ -57,7 +57,7 @@ const HeroSection = ({ isLoggedIn = false, isApproved = false }: HeroSectionProp
         </p>
         <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full px-8 sm:w-auto sm:px-0">
           {isLoggedIn && isApproved ?
-          <Link to="/announcements">
+          <Link to="/events">
               <Button size="lg" className="gradient-gold text-primary-foreground font-body text-base px-8 py-6 hover:opacity-90 transition-opacity">
                 {t("landing.hero.bulletinBtn")}
               </Button>

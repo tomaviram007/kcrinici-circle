@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Users, Calendar, Megaphone, UserCircle } from "lucide-react";
+import { Briefcase, Users, Calendar, UserCircle } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import PageHero from "@/components/PageHero";
 
@@ -41,10 +41,9 @@ const Dashboard = () => {
   }, []);
 
   const cards = [
-    { icon: Megaphone, title: "לוח מודעות", desc: "עדכונים ומודעות", to: "/announcements" },
+    { icon: Calendar, title: "אירועים ומודעות", desc: "מפגשים, עדכונים ומודעות", to: "/events" },
     { icon: Briefcase, title: "דרושים", desc: "הזדמנויות בשכונה", to: "/jobs" },
     { icon: Users, title: "אינדקס חברים", desc: "חברי המועדון", to: "/members" },
-    { icon: Calendar, title: "אירועים", desc: "מפגשים קרובים", to: "/events" },
     { icon: UserCircle, title: "הפרופיל שלי", desc: "ערוך פרטים אישיים", to: "/profile" },
   ];
 

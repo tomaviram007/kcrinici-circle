@@ -163,13 +163,13 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
           <div className="text-center py-8 rounded-lg border border-border bg-card">
             <ShoppingBag className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
             <p className="font-body text-sm text-muted-foreground">{t("landing.sales.noSales")}</p>
-            <Link to="/announcements" className="font-body text-xs text-gold hover:underline mt-1 inline-block">{t("landing.sales.postSale")}</Link>
+            <Link to="/events" className="font-body text-xs text-gold hover:underline mt-1 inline-block">{t("landing.sales.postSale")}</Link>
           </div>
         )}
 
         {isApproved && (
           <div className="mt-8 text-center">
-            <Link to="/announcements" className="font-body text-sm text-gold hover:underline">
+            <Link to="/events" className="font-body text-sm text-gold hover:underline">
               {t("landing.sales.allSales")}
             </Link>
           </div>
