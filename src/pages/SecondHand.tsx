@@ -11,13 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Phone, Tag, Trash2, Pencil, CheckCircle2, X, Package, Lock } from "lucide-react";
+import { Plus, Phone, Tag, Trash2, Pencil, CheckCircle2, Package, Lock } from "lucide-react";
 import MembersOnlyNotice from "@/components/MembersOnlyNotice";
 import { useContentAccess } from "@/hooks/useContentAccess";
 import PageHero from "@/components/PageHero";
 import { usePageCover } from "@/hooks/usePageCover";
 import { useLanguage } from "@/contexts/LanguageContext";
-import SaleImageUpload from "@/components/announcements/SaleImageUpload";
+import ListingImageManager, { MAX_LISTING_IMAGES } from "@/components/listings/ListingImageManager";
+import ImageLightbox from "@/components/listings/ImageLightbox";
 import heroImg from "@/assets/hero-secondhand.jpg";
 import ShareButtons from "@/components/ShareButtons";
 import Seo from "@/components/Seo";
@@ -80,6 +81,7 @@ const SecondHand = () => {
   const [viewItem, setViewItem] = useState<Item | null>(null);
   const [imageUrlInput, setImageUrlInput] = useState("");
   const [showLockedNotice, setShowLockedNotice] = useState(false);
+  const [lightbox, setLightbox] = useState<{ item: Item; index: number } | null>(null);
 
 
   const fetchItems = async () => {
@@ -106,6 +108,19 @@ const SecondHand = () => {
       return true;
     });
   }, [items, search, catFilter]);
+
+  // The details dialog blocks clicks outside itself, so it steps aside while the
+  // full screen viewer is open and comes back when the viewer closes.
+  const openLightbox = (item: Item, index: number) => {
+    setViewItem(null);
+    setLightbox({ item, index });
+  };
+
+  const closeLightbox = () => {
+    const item = lightbox?.item ?? null;
+    setLightbox(null);
+    if (item) setViewItem(item);
+  };
 
   const openNew = () => {
     setEditId(null);
@@ -134,6 +149,14 @@ const SecondHand = () => {
   const handleSubmit = async () => {
     if (!form.title.trim()) {
       toast({ title: t("secondhand.toastTitleRequired"), variant: "destructive" });
+      return;
+    }
+    if (form.images.length === 0) {
+      toast({
+        title: "צריך תמונה ראשית",
+        description: "מודעה בלי תמונה לא מתפרסמת. אפשר להוסיף עוד ארבע תמונות לגלריה.",
+        variant: "destructive",
+      });
       return;
     }
     if (isGuestFlow && !editId) {
@@ -418,22 +441,19 @@ const SecondHand = () => {
 
             {/* Images column */}
             <div className="space-y-3">
-              <Label className="font-body text-xs">{t("secondhand.fieldImages")}</Label>
-              {user && (
-                <SaleImageUpload
-                  userId={user.id}
-                  mainImage={form.images[0] || null}
-                  galleryImages={form.images.slice(1)}
-                  onMainImageChange={(url) => {
-                    const rest = form.images.slice(1);
-                    setForm({ ...form, images: url ? [url, ...rest] : rest });
-                  }}
-                  onGalleryChange={(urls) => {
-                    const main = form.images[0];
-                    setForm({ ...form, images: main ? [main, ...urls] : urls });
-                  }}
+              <Label className="font-body text-xs">
+                {t("secondhand.fieldImages")} <span className="text-gold">*</span>
+              </Label>
+              <p className="font-body text-[11px] leading-snug text-muted-foreground">
+                תמונה ראשית היא חובה, ואפשר להוסיף עוד ארבע לגלריה. כל תמונה יכולה להפוך לראשית בלחיצה.
+              </p>
+              <div className={form.images.length === 0 ? "rounded-lg border border-gold/40 p-2" : undefined}>
+                <ListingImageManager
+                  userId={user?.id ?? null}
+                  images={form.images}
+                  onChange={(urls) => setForm({ ...form, images: urls })}
                 />
-              )}
+              </div>
               <div className="pt-2 border-t border-border/40">
                 <Label className="font-body text-xs">{t("secondhand.addFromUrl")}</Label>
                 <div className="flex gap-2 mt-1">
@@ -454,6 +474,10 @@ const SecondHand = () => {
                         toast({ title: t("secondhand.toastInvalidUrl"), description: t("secondhand.toastInvalidUrlDesc"), variant: "destructive" });
                         return;
                       }
+                      if (form.images.length >= MAX_LISTING_IMAGES) {
+                        toast({ title: `אפשר עד ${MAX_LISTING_IMAGES} תמונות במודעה`, variant: "destructive" });
+                        return;
+                      }
                       setForm({ ...form, images: [...form.images, url] });
                       setImageUrlInput("");
                     }}
@@ -462,28 +486,6 @@ const SecondHand = () => {
                     <Plus className="h-4 w-4 ml-1" /> {t("secondhand.addButton")}
                   </Button>
                 </div>
-                {form.images.length > 0 && (
-                  <div className="grid grid-cols-4 gap-2 mt-3">
-                    {form.images.map((url, i) => (
-                      <div key={i} className="relative group aspect-square rounded-md overflow-hidden border border-border">
-                        <img src={url} alt={`img-${i}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setForm({ ...form, images: form.images.filter((_, idx) => idx !== i) })}
-                          className="absolute top-1 left-1 bg-background/80 hover:bg-destructive text-foreground hover:text-destructive-foreground rounded-full p-0.5 transition-colors"
-                          aria-label="מחק תמונה"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                        {i === 0 && (
-                          <span className="absolute bottom-1 right-1 bg-gold text-primary-foreground text-[9px] font-body px-1.5 py-0.5 rounded">
-                            {t("secondhand.mainImage")}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
 
@@ -553,7 +555,24 @@ const SecondHand = () => {
                 {viewItem.images?.length > 0 && (
                   <div className="grid grid-cols-2 gap-2">
                     {viewItem.images.map((url, i) => (
-                      <img key={i} src={url} alt={`${viewItem.title} ${i + 1}`} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => openLightbox(viewItem, i)}
+                        className="group relative overflow-hidden rounded-lg border border-border transition-colors hover:border-gold"
+                        aria-label={`הגדלת תמונה ${i + 1}`}
+                      >
+                        <img
+                          src={url}
+                          alt={`${viewItem.title} ${i + 1}`}
+                          className="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        {i === 0 && (
+                          <span className="absolute bottom-1 right-1 rounded bg-gold px-1.5 py-0.5 font-body text-[9px] text-primary-foreground">
+                            {t("secondhand.mainImage")}
+                          </span>
+                        )}
+                      </button>
                     ))}
                   </div>
                 )}
@@ -592,6 +611,16 @@ const SecondHand = () => {
           <MembersOnlyNotice variant="secondhand" />
         </DialogContent>
       </Dialog>
+
+      {lightbox && (
+        <ImageLightbox
+          images={lightbox.item.images}
+          startIndex={lightbox.index}
+          title={lightbox.item.title}
+          caption={[lightbox.item.category, conditionLabel(lightbox.item.condition)].join(" | ")}
+          onClose={closeLightbox}
+        />
+      )}
     </>
   );
 };
