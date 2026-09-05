@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Tag, Store, X, Link as LinkIcon, MousePointerClick, ExternalLink, CheckCircle, Clock } from "lucide-react";
 import BenefitFields from "@/components/deals/BenefitFields";
 import { logAuditAction } from "@/lib/audit-log";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 import CreatorBadge from "@/components/admin/CreatorBadge";
 
 const CATEGORIES = ["אוכל", "פנאי", "רכב", "לבית", "אופנה", "טכנולוגיה", "בריאות", "כללי"];
@@ -126,6 +127,14 @@ const AdminDeals = () => {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
     } else {
       toast({ title: editingId ? "ההטבה עודכנה!" : "ההטבה נוספה!" });
+      if (!editingId) {
+        sendTelegramNotification("new_deal", {
+          title: form.title,
+          business_name: form.business_name,
+          discount_label: payload.discount_label,
+          description: form.description,
+        });
+      }
       logAuditAction(editingId ? "update" : "create", "deal", editingId || undefined, form.title);
       setShowForm(false);
       setEditingId(null);

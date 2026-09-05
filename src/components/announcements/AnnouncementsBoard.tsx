@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import { fireConfetti } from "@/lib/confetti";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import gsap from "gsap";
 import { avatarSrc } from "@/lib/default-avatar";
@@ -154,6 +155,11 @@ const AnnouncementsBoard = () => {
       return;
     }
     toast({ title: "המודעה נשלחה לאישור!", description: "המודעה תפורסם לאחר אישור מנהל המערכת." });
+    sendTelegramNotification("new_announcement", {
+      title: formTitle.trim(),
+      content: formContent.trim(),
+      publisher: session.user.email || "חבר מועדון",
+    });
     fireConfetti();
     resetForm();
     setShowForm(false);

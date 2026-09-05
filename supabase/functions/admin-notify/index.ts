@@ -23,6 +23,9 @@ const EVENT_LABELS: Record<string, string> = {
   new_job: "💼 משרה חדשה פורסמה",
   new_event: "🎉 אירוע חדש נוצר",
   new_deal: "🏷️ הטבה חדשה הוגשה לאישור",
+  new_secondhand: "📦 מודעת יד שנייה חדשה פורסמה",
+  new_realestate: "🏠 מודעת נדל״ן חדשה פורסמה",
+  new_gallery_album: "🖼️ אלבום חדש נוסף לגלריה",
 };
 
 const fieldLabels: Record<string, string> = {
@@ -40,6 +43,13 @@ const fieldLabels: Record<string, string> = {
   date: "תאריך",
   business_name: "שם העסק",
   discount_label: "הנחה",
+  price: "מחיר",
+  condition: "מצב",
+  publisher: "מפרסם",
+  listing_type: "סוג מודעה",
+  property_type: "סוג נכס",
+  rooms: "חדרים",
+  photos: "תמונות",
 };
 
 function formatDate(value: string): string {
@@ -188,6 +198,61 @@ async function sendWhatsApp(eventType: string, data: Record<string, any>): Promi
   }
 }
 
+// ── Guest publishing ──
+// Guests can post on some boards without an account, and the admin wants to hear
+// about those too. Rather than trusting whatever an anonymous caller sends, we
+// look the ad up with the service role and build the message from the stored row.
+// So an anonymous call can only announce something that really is on the board.
+const GUEST_EVENT_TABLES: Record<string, string> = {
+  new_secondhand: "secondhand_items",
+  new_realestate: "realestate_listings",
+};
+
+async function loadGuestListing(
+  eventType: string,
+  title: unknown
+): Promise<Record<string, any> | null> {
+  const table = GUEST_EVENT_TABLES[eventType];
+  if (!table || typeof title !== "string" || !title.trim()) return null;
+
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
+  const { data, error } = await admin
+    .from(table)
+    .select("*")
+    .eq("title", title.trim())
+    .is("created_by", null)
+    .gte("created_at", new Date(Date.now() - 5 * 60 * 1000).toISOString())
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  const common = {
+    title: data.title,
+    description: data.description || undefined,
+    price: data.price != null ? `₪${data.price}` : undefined,
+    publisher: data.guest_name || "אורח",
+    phone: data.contact_phone || undefined,
+  };
+
+  if (eventType === "new_realestate") {
+    return {
+      ...common,
+      listing_type: data.listing_type === "sale" ? "למכירה" : "להשכרה",
+      property_type: data.property_type || undefined,
+      rooms: data.rooms || undefined,
+      location: data.address || undefined,
+    };
+  }
+
+  return { ...common, category: data.category || undefined, condition: data.condition || undefined };
+}
+
 // ── Main handler ──
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -195,7 +260,6 @@ serve(async (req) => {
   }
 
   try {
-    // ── Authentication: require a valid Supabase JWT ──
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -207,20 +271,29 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    const { data: { user } } = await supabase.auth.getUser();
 
-    const { event_type, data } = await req.json();
+    const body = await req.json();
+    const event_type = body?.event_type;
+    let data = body?.data;
 
     if (!event_type || !data) {
       return new Response(
         JSON.stringify({ error: "Missing event_type or data" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // No signed in user means a guest ad. Only the guest boards are allowed here,
+    // and only with the content that was actually saved.
+    if (!user) {
+      const listing = await loadGuestListing(event_type, data.title);
+      if (!listing) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      data = listing;
     }
 
     // Send to all channels in parallel – failures are independent

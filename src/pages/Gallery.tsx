@@ -19,6 +19,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { validateImageFile } from "@/lib/file-validation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { avatarSrc } from "@/lib/default-avatar";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 import Seo from "@/components/Seo";
 
 type Album = Tables<"gallery_albums">;
@@ -133,6 +134,11 @@ const Gallery = () => {
       if (error) throw error;
       toast({
         title: isAdmin ? t("gallery.toastAlbumCreated") : "האלבום נוצר וממתין לאישור מנהל",
+      });
+      sendTelegramNotification("new_gallery_album", {
+        title: newTitle.trim(),
+        description: newDesc.trim() || "ללא תיאור",
+        publisher: isAdmin ? "מנהל" : "חבר מועדון",
       });
       setNewTitle("");
       setNewDesc("");

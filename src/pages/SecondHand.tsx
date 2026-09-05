@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { trackAction } from "@/lib/analytics";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -25,8 +26,8 @@ const CATEGORIES = ["כללי", "רכב", "אלקטרוניקה", "ריהוט", 
 const CONDITIONS = [
   { value: "new", label: "חדש באריזה" },
   { value: "like_new", label: "כמו חדש" },
-  { value: "used_good", label: "משומש — טוב מאוד" },
-  { value: "used_fair", label: "משומש — סביר" },
+  { value: "used_good", label: "משומש, טוב מאוד" },
+  { value: "used_fair", label: "משומש, סביר" },
   { value: "needs_repair", label: "דורש תיקון" },
 ];
 const conditionLabel = (v: string) => CONDITIONS.find(c => c.value === v)?.label || v;
@@ -176,13 +177,18 @@ const SecondHand = () => {
       toast({ title: t("secondhand.toastError"), description: error.message, variant: "destructive" });
     } else {
       toast({
-        title: editId
-          ? t("secondhand.toastUpdated")
-          : isGuestFlow
-            ? "המודעה התקבלה וממתינה לאישור מנהל"
-            : t("secondhand.toastPublished"),
+        title: editId ? t("secondhand.toastUpdated") : t("secondhand.toastPublished"),
       });
       trackAction(editId ? "secondhand_update" : "secondhand_submit", { guest: isGuestFlow });
+      if (!editId) {
+        sendTelegramNotification("new_secondhand", {
+          title: basePayload.title,
+          category: basePayload.category,
+          price: basePayload.price !== null ? `₪${basePayload.price}` : "לא צוין",
+          publisher: isGuestFlow ? form.guest_name.trim() : "חבר מועדון",
+          phone: basePayload.contact_phone || "לא צוין",
+        });
+      }
       setDialogOpen(false);
       setForm(emptyForm);
       setEditId(null);
@@ -216,7 +222,7 @@ const SecondHand = () => {
 
   return (
     <>
-      <Seo title="יד שנייה" description="פריטי יד שנייה למכירה ולמסירה בשכונה — פרסום מודעה חינם וקנייה מחברי הקהילה." path="/secondhand" />
+      <Seo title="יד שנייה" description="פריטי יד שנייה למכירה ולמסירה בשכונה. פרסום מודעה חינם וקנייה מחברי הקהילה." path="/secondhand" />
       <PageHero
         image={cover}
         title={t("secondhand.heroTitle")}
@@ -249,7 +255,7 @@ const SecondHand = () => {
             </Button>
             {isGuestFlow && (
               <p className="font-body text-[11px] text-muted-foreground mt-1 text-center md:text-right">
-                המודעה תפורסם לאחר אישור מנהל
+                המודעה מתפרסמת מיד
               </p>
             )}
           </div>
@@ -311,7 +317,7 @@ const SecondHand = () => {
                       </Badge>
                       <ShareButtons
                         title={it.title}
-                        text={`${it.title}${it.price !== null ? ` — ₪${it.price.toLocaleString("he-IL")}` : ""} | יד שנייה — הגברים של ק.קרניצי`}
+                        text={`${it.title}${it.price !== null ? ` | ₪${it.price.toLocaleString("he-IL")}` : ""} | יד שנייה, הגברים של ק.קרניצי`}
                       />
                     </div>
                     {isOwner && (
@@ -360,7 +366,7 @@ const SecondHand = () => {
               {isGuestFlow && !editId && (
                 <div className="rounded-lg border border-gold/30 bg-gold/5 p-3 space-y-3">
                   <p className="font-body text-xs text-gold">
-                    פרסום כאורח — המודעה תעבור אישור מנהל לפני שתופיע באתר.
+                    פרסום כאורח. המודעה עולה לאתר מיד, ונשארים איתך פרטי קשר כדי שיוכלו לחזור אליך.
                   </p>
                   <div>
                     <Label className="font-body text-xs">שם מלא *</Label>

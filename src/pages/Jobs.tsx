@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { trackAction } from "@/lib/analytics";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Briefcase, Plus, MapPin, Banknote, Building2, FileText, MessageCircle, User, LayoutGrid, List, Search, Pencil, Lock } from "lucide-react";
@@ -96,6 +97,12 @@ const Jobs = () => {
     }
     toast({ title: t("jobs.successTitle"), description: t("jobs.successDesc") });
     trackAction("job_submit", { category: form.category || null });
+    sendTelegramNotification("new_job", {
+      title: form.title.trim(),
+      description: form.description.trim(),
+      company: form.company_name.trim() || "לא צוין",
+      location: form.location.trim() || "לא צוין",
+    });
     fireConfetti();
     setForm(EMPTY_FORM);
     setShowForm(false);

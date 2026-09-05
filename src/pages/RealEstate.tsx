@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useRef, type ReactNode } from "react";
 import { trackAction } from "@/lib/analytics";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -482,6 +483,19 @@ const RealEstate = () => {
             : t("realestate.toastPublished"),
       });
       trackAction(editId ? "realestate_update" : "realestate_submit", { guest: isGuestFlow });
+      if (!editId) {
+        sendTelegramNotification("new_realestate", {
+          title: basePayload.title,
+          listing_type: listingTypeLabel(basePayload.listing_type),
+          property_type: basePayload.property_type,
+          rooms: basePayload.rooms ?? "לא צוין",
+          price: basePayload.price !== null ? `₪${basePayload.price}` : "לא צוין",
+          location: basePayload.address || "לא צוין",
+          publisher: isGuestFlow ? form.guest_name.trim() : "חבר מועדון",
+          phone: basePayload.contact_phone || "לא צוין",
+          photos: basePayload.images.length,
+        });
+      }
       setDialogOpen(false);
       setForm(emptyForm);
       setEditId(null);
