@@ -174,6 +174,7 @@ const Register = () => {
       if (error) throw error;
 
       const newUserId = signUpData.user?.id;
+      let avatarUrl: string | undefined;
       if (newUserId && avatarFile) {
         try {
           const ext = avatarFile.name.split(".").pop() || "jpg";
@@ -183,6 +184,7 @@ const Register = () => {
             const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
             const urlWithCache = `${publicUrl}?t=${Date.now()}`;
             await supabase.from("profiles").update({ avatar_url: urlWithCache }).eq("user_id", newUserId);
+            avatarUrl = urlWithCache;
           }
         } catch { /* non-blocking */ }
       }
@@ -194,6 +196,7 @@ const Register = () => {
         profession: form.profession,
         email: form.email,
         user_id: newUserId,
+        image_url: avatarUrl,
       });
 
       toast({

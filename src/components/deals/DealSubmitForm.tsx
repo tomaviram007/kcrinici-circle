@@ -123,6 +123,7 @@ const DealSubmitForm = ({ onSubmitted, externalOpen }: { onSubmitted?: () => voi
         description: form.description,
         category: form.category,
         discount_label: buildDiscountLabel(form.benefit_type, form.benefit_value),
+        image_url: cardImageUrl || logoUrl || undefined,
       });
       setForm(emptyForm);
       setLogoFile(null);

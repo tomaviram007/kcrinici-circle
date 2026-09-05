@@ -247,7 +247,13 @@ const AdminEvents = () => {
       }
       toast({ title: "נוסף!" });
       fireConfetti();
-      sendTelegramNotification("new_event", { title: form.title, description: form.description, date: form.event_date, location: form.location });
+      sendTelegramNotification("new_event", {
+        title: form.title,
+        description: form.description,
+        date: form.event_date,
+        location: form.location,
+        image_url: form.image_url || undefined,
+      });
       logAuditAction("create", "event", inserted?.id, form.title);
     }
     setForm(EMPTY_FORM);

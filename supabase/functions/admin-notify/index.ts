@@ -62,10 +62,22 @@ function formatDate(value: string): string {
   }
 }
 
+// Keys that are carried in the payload but are not shown as text lines
+const HIDDEN_KEYS = new Set(["user_id", "image_url"]);
+
+// The picture that rides along with the notification, when there is one.
+// Only public http(s) links are accepted so a bad value can't break the send.
+function pickImage(data: Record<string, any>): string | null {
+  const raw = data?.image_url;
+  if (typeof raw !== "string") return null;
+  const url = raw.trim();
+  return /^https?:\/\/\S+$/i.test(url) ? url : null;
+}
+
 function buildFields(data: Record<string, any>): Array<{ label: string; value: string }> {
   const fields: Array<{ label: string; value: string }> = [];
   for (const [key, value] of Object.entries(data)) {
-    if (!value || key === "user_id") continue;
+    if (!value || HIDDEN_KEYS.has(key)) continue;
     const label = fieldLabels[key] || key;
     const displayValue = key === "date" ? formatDate(value) : String(value);
     fields.push({ label, value: displayValue });
@@ -92,10 +104,11 @@ async function sendTelegram(eventType: string, data: Record<string, any>): Promi
   }
 
   const text = formatTelegramHTML(eventType, data);
-  const payload: any = { chat_id: chatId, text, parse_mode: "HTML" };
+  const image = pickImage(data);
 
+  let replyMarkup: any = undefined;
   if (eventType === "new_member" && data.user_id) {
-    payload.reply_markup = {
+    replyMarkup = {
       inline_keyboard: [[
         { text: "✅ אשר חבר", callback_data: `approve:${data.user_id}` },
         { text: "❌ דחה בקשה", callback_data: `reject:${data.user_id}` },
@@ -103,15 +116,39 @@ async function sendTelegram(eventType: string, data: Record<string, any>): Promi
     };
   }
 
-  const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const err = await res.json();
-    console.error("Telegram error:", JSON.stringify(err));
+  const call = async (method: string, payload: Record<string, any>): Promise<boolean> => {
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/${method}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, parse_mode: "HTML", ...payload }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      console.error(`Telegram ${method} error:`, err);
+    }
+    return res.ok;
+  };
+
+  // With a picture, the details go in the photo caption so it reads as one
+  // message. Telegram caps captions at 1024 characters, so a long message
+  // becomes a photo with the headline plus a second text message.
+  if (image) {
+    const fitsCaption = text.length <= 1024;
+    const caption = fitsCaption ? text : text.split("\n")[0];
+    const sent = await call("sendPhoto", {
+      photo: image,
+      caption,
+      ...(fitsCaption && replyMarkup ? { reply_markup: replyMarkup } : {}),
+    });
+    if (sent && fitsCaption) return;
+    if (sent) {
+      await call("sendMessage", { text, ...(replyMarkup ? { reply_markup: replyMarkup } : {}) });
+      return;
+    }
+    // Telegram could not fetch the picture. Fall through so the details still arrive.
   }
+
+  await call("sendMessage", { text, ...(replyMarkup ? { reply_markup: replyMarkup } : {}) });
 }
 
 // ── Email (Resend) ──
@@ -121,9 +158,15 @@ function formatEmailHTML(eventType: string, data: Record<string, any>): string {
     .map(({ label, value }) => `<tr><td style="padding:6px 12px;font-weight:bold;color:#D4AF37;">${escapeHtml(label)}</td><td style="padding:6px 12px;color:#d9c9a8;">${escapeHtml(value)}</td></tr>`)
     .join("");
 
+  const image = pickImage(data);
+  const imageBlock = image
+    ? `<img src="${escapeHtml(image)}" alt="" style="display:block;width:100%;max-height:360px;object-fit:cover;border-radius:10px;margin-bottom:18px;" />`
+    : "";
+
   return `
     <div dir="rtl" style="font-family:'Tel Aviv','Assistant','Heebo',Arial,sans-serif;max-width:520px;margin:0 auto;padding:30px 20px;background:#1a1410;color:#d9c9a8;border-radius:12px;">
       <h2 style="color:#D4AF37;text-align:center;margin-bottom:20px;">${title}</h2>
+      ${imageBlock}
       <table style="width:100%;border-collapse:collapse;">${rows}</table>
       <p style="text-align:center;margin-top:24px;font-size:12px;color:#8a7a5a;">מועדון הגברים של ק.קרניצי</p>
     </div>
@@ -182,20 +225,33 @@ async function sendWhatsApp(eventType: string, data: Record<string, any>): Promi
 
   const message = formatWhatsAppText(eventType, data);
   const chatId = phone.replace(/\+/g, "") + "@c.us";
+  const image = pickImage(data);
 
-  const res = await fetch(
-    `https://api.green-api.com/waInstance${instanceId}/sendMessage/${token}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chatId, message }),
+  const call = async (method: string, payload: Record<string, any>): Promise<boolean> => {
+    const res = await fetch(
+      `https://api.green-api.com/waInstance${instanceId}/${method}/${token}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId, ...payload }),
+      }
+    );
+    if (!res.ok) {
+      const err = await res.text();
+      console.error(`Green API ${method} error:`, err);
     }
-  );
+    return res.ok;
+  };
 
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("Green API error:", err);
+  // Same idea as Telegram: picture with the details as its caption, and the
+  // plain text message as a fallback if the picture can't be delivered.
+  if (image) {
+    const fileName = image.split("?")[0].split("/").pop() || "image.jpg";
+    const sent = await call("sendFileByUrl", { urlFile: image, fileName, caption: message });
+    if (sent) return;
   }
+
+  await call("sendMessage", { message });
 }
 
 // ── Guest publishing ──
@@ -238,6 +294,7 @@ async function loadGuestListing(
     price: data.price != null ? `₪${data.price}` : undefined,
     publisher: data.guest_name || "אורח",
     phone: data.contact_phone || undefined,
+    image_url: Array.isArray(data.images) ? data.images[0] : undefined,
   };
 
   if (eventType === "new_realestate") {

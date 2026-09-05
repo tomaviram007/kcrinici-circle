@@ -127,7 +127,12 @@ const AdminMembers = () => {
     if (error) { toast({ title: "שגיאה", description: error.message, variant: "destructive" }); return; }
     supabase.functions.invoke("notify-member", { body: { userId, action: "approve" } });
     const profile = profiles.find(p => p.user_id === userId);
-    sendTelegramNotification("member_approved", { name: profile?.full_name, phone: profile?.phone, profession: profile?.profession });
+    sendTelegramNotification("member_approved", {
+      name: profile?.full_name,
+      phone: profile?.phone,
+      profession: profile?.profession,
+      image_url: profile?.avatar_url || undefined,
+    });
     fireMemberApproved();
     toast({ title: "אושר!", description: "החבר אושר בהצלחה." });
     fetchProfiles();
@@ -156,7 +161,14 @@ const AdminMembers = () => {
       await supabase.from("profiles").update({ is_approved: true, is_removed: false }).eq("user_id", userId);
       supabase.functions.invoke("notify-member", { body: { userId, action: "approve" } });
       const profile = profiles.find(p => p.user_id === userId);
-      if (profile) sendTelegramNotification("member_approved", { name: profile.full_name, phone: profile.phone, profession: profile.profession });
+      if (profile) {
+        sendTelegramNotification("member_approved", {
+          name: profile.full_name,
+          phone: profile.phone,
+          profession: profile.profession,
+          image_url: profile.avatar_url || undefined,
+        });
+      }
     }
     toast({ title: "אושרו!", description: `${ids.length} חברים אושרו בהצלחה.` });
     setSelected(new Set());

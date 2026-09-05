@@ -133,6 +133,7 @@ const AdminDeals = () => {
           business_name: form.business_name,
           discount_label: payload.discount_label,
           description: form.description,
+          image_url: form.card_image_url || form.business_logo_url || undefined,
         });
       }
       logAuditAction(editingId ? "update" : "create", "deal", editingId || undefined, form.title);

@@ -210,6 +210,7 @@ const SecondHand = () => {
           price: basePayload.price !== null ? `₪${basePayload.price}` : "לא צוין",
           publisher: isGuestFlow ? form.guest_name.trim() : "חבר מועדון",
           phone: basePayload.contact_phone || "לא צוין",
+          image_url: basePayload.images[0],
         });
       }
       setDialogOpen(false);

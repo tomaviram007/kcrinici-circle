@@ -494,6 +494,7 @@ const RealEstate = () => {
           publisher: isGuestFlow ? form.guest_name.trim() : "חבר מועדון",
           phone: basePayload.contact_phone || "לא צוין",
           photos: basePayload.images.length,
+          image_url: basePayload.images[0],
         });
       }
       setDialogOpen(false);
