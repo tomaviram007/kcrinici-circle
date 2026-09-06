@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Package, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
+import CategoryImage from "@/components/listings/CategoryImage";
 import gsap from "gsap";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -66,18 +67,13 @@ const SecondHandPreviewSection = ({ isApproved }: Props) => {
               className="sh-card opacity-0 group block rounded-lg overflow-hidden border border-border bg-card transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_hsl(43_72%_52%/0.08)]"
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary">
-                {item.images && item.images.length > 0 ? (
-                  <img
-                    src={item.images[0]}
-                    alt={item.title}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Package className="h-10 w-10 text-gold/40" />
-                  </div>
-                )}
+                <CategoryImage
+                  category={item.category}
+                  src={item.images?.[0]}
+                  alt={item.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
                 {item.is_sold && (
                   <div className="absolute top-2 right-2 rounded bg-red-600/90 px-2 py-0.5 font-body text-xs text-white">
                     {item.sold_status === "given" ? "נמסר" : "נמכר"}

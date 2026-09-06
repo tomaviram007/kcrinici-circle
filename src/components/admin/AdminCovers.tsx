@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Upload, Image, Trash2 } from "lucide-react";
 import { validateImageFile } from "@/lib/file-validation";
+import AdminCategoryImages from "@/components/admin/AdminCategoryImages";
 
 const PAGE_DEFINITIONS = [
   { key: "dashboard", label: "דף הבית (דשבורד)" },
@@ -165,6 +166,10 @@ const AdminCovers = () => {
             </div>
           );
         })}
+      </div>
+
+      <div className="border-t border-border pt-6">
+        <AdminCategoryImages />
       </div>
     </div>
   );

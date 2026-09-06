@@ -19,11 +19,13 @@ import { usePageCover } from "@/hooks/usePageCover";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ListingImageManager, { MAX_LISTING_IMAGES } from "@/components/listings/ListingImageManager";
 import ImageLightbox from "@/components/listings/ImageLightbox";
+import CategoryImage from "@/components/listings/CategoryImage";
+import { CATEGORY_NAMES } from "@/lib/secondhand-categories";
 import heroImg from "@/assets/hero-secondhand.jpg";
 import ShareButtons from "@/components/ShareButtons";
 import Seo from "@/components/Seo";
 
-const CATEGORIES = ["כללי", "רכב", "אלקטרוניקה", "ריהוט", "ביגוד / אופנה", "ספורט ופנאי", "כלי בית", "נדל״ן", "אחר"];
+const CATEGORIES = CATEGORY_NAMES;
 const CONDITIONS = [
   { value: "new", label: "חדש באריזה" },
   { value: "like_new", label: "כמו חדש" },
@@ -307,13 +309,13 @@ const SecondHand = () => {
                   onClick={() => (canOpenCard ? setViewItem(it) : setShowLockedNotice(true))}
                 >
                   <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
-                    {it.images?.[0] ? (
-                      <img src={it.images[0]} alt={it.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="h-12 w-12 text-muted-foreground/30" />
-                      </div>
-                    )}
+                    <CategoryImage
+                      category={it.category}
+                      src={it.images?.[0]}
+                      alt={it.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
                     {it.is_sold && (
                       <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
                         <span className="rotate-[-12deg] border-4 border-destructive text-destructive font-serif font-bold text-3xl px-6 py-1 rounded">
@@ -498,13 +500,12 @@ const SecondHand = () => {
               <Label className="font-body text-xs">{t("secondhand.preview")}</Label>
               <article className="rounded-2xl border border-gold/40 bg-card overflow-hidden shadow-[0_0_30px_hsl(43_72%_52%/0.1)]">
                 <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
-                  {form.images[0] ? (
-                    <img src={form.images[0]} alt="preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Package className="h-12 w-12 text-muted-foreground/30" />
-                    </div>
-                  )}
+                  <CategoryImage
+                    category={form.category}
+                    src={form.images[0]}
+                    alt="preview"
+                    className="w-full h-full object-cover"
+                  />
                   <Badge className="absolute top-2 right-2 bg-background/80 text-foreground border-border backdrop-blur-sm">
                     {form.category}
                   </Badge>

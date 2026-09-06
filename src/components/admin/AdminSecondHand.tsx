@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, EyeOff, Eye, Package } from "lucide-react";
+import CategoryImage from "@/components/listings/CategoryImage";
 
 interface Item {
   id: string;
@@ -75,13 +76,7 @@ const AdminSecondHand = () => {
           {items.map(it => (
             <div key={it.id} className="rounded-xl border border-border bg-card p-3 flex gap-3">
               <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary shrink-0">
-                {it.images?.[0] ? (
-                  <img src={it.images[0]} alt={it.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package className="h-6 w-6 text-muted-foreground/40" />
-                  </div>
-                )}
+                <CategoryImage compact category={it.category} src={it.images?.[0]} alt={it.title} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
