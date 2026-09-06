@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-ro
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
+import { useVersionCheck } from "@/hooks/useVersionCheck";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Header from "@/components/layout/Header";
 import PageTransition from "@/components/layout/PageTransition";
@@ -54,6 +55,7 @@ const AppLayout = () => {
   const navigate = useNavigate();
   const { sessionExpired } = useAuth();
   usePageAnalytics();
+  useVersionCheck();
   const hideHeader =
     ["/login", "/register", "/pending", "/reset-password", "/unsubscribe"].includes(location.pathname) ||
     location.pathname.startsWith("/feedback/");
