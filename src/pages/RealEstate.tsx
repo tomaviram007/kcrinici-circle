@@ -343,7 +343,7 @@ const Field = ({ label, hint, children }: { label: string; hint?: string; childr
 );
 
 const RealEstate = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { isMember, canOpenCard, canSeeContact } = useContentAccess("realestate");
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -585,7 +585,7 @@ const RealEstate = () => {
             {filtered.map(it => {
               // The public RPC omits created_by, so both sides can be undefined.
               // Owner controls require a signed in user matching a real owner id.
-              const isOwner = !!user?.id && !!it.created_by && user.id === it.created_by;
+              const isOwner = isAdmin || (!!user?.id && !!it.created_by && user.id === it.created_by);
               return (
                 <ListingCard
                   key={it.id}

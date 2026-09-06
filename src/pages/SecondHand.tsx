@@ -65,7 +65,7 @@ const emptyForm = {
 };
 
 const SecondHand = () => {
-  const { user, isApproved } = useAuth();
+  const { user, isApproved, isAdmin } = useAuth();
   const { isMember, canOpenCard, canSeeContact } = useContentAccess("secondhand");
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -296,7 +296,10 @@ const SecondHand = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map(it => {
-              const isOwner = user?.id === it.created_by;
+              // The public RPC omits created_by, so both sides can be undefined and
+              // a plain equality would hand the owner controls to every visitor.
+              // Only the signed in owner of a real ad, or an admin, gets them.
+              const isOwner = isAdmin || (!!user?.id && !!it.created_by && user.id === it.created_by);
               return (
                 <article
                   key={it.id}
