@@ -202,6 +202,25 @@ const AnnouncementsBoard = () => {
   });
 
   const filteredAnnouncements = filterItems(items);
+  const filteredSales = filterItems(saleItems);
+
+  const saleData = (item: any) => (item.sale_data && typeof item.sale_data === "object" ? item.sale_data as Record<string, string> : {});
+
+  const buildSaleShareMessage = (item: any) => {
+    let msg = `🛍️ *${item.title}*\n\n${item.content}`;
+    const entries = Object.entries(saleData(item)).filter(([, v]) => v);
+    if (entries.length > 0) {
+      msg += "\n\n📋 *פרטים:*";
+      entries.forEach(([k, v]) => { msg += `\n• ${k}: ${v}`; });
+    }
+    if (item.created_by && creatorProfiles[item.created_by]) {
+      const c = creatorProfiles[item.created_by];
+      msg += `\n\n👤 *מפרסם:* ${c.full_name}`;
+      if (c.phone) msg += `\n📱 ${c.phone}`;
+    }
+    msg += "\n\n🏘️ _מכירה מלוח המודעות של הגברים של ק.קרניצי_";
+    return encodeURIComponent(msg);
+  };
 
   const buildWhatsAppUrl = (name: string, phone: string) => {
     const cleanPhone = phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
