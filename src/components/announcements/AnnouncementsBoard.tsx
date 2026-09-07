@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, MessageCircle, Gift, Megaphone, Calendar } from "lucide-react";
+import { Plus, MessageCircle, Gift, Megaphone, Calendar, ShoppingBag, Banknote } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,18 +21,27 @@ interface BirthdayMember {
   avatar_url: string | null;
 }
 
+const SALE_TYPES_MAP: Record<string, string> = {
+  car: "רכב", electronics: "אלקטרוניקה", furniture: "ריהוט",
+  fashion: "ביגוד / אופנה", real_estate: "נדל״ן", general: "כללי",
+};
+
 /**
- * לוח המודעות המלא: באנרים, ימי הולדת, סינון, טופס פרסום ורשימת מודעות.
+ * לוח המודעות המלא: באנרים, ימי הולדת, סינון, טופס פרסום, מודעות ומכירות.
  * מוצב בתוך עמוד "אירועים ומודעות" המאוחד.
  */
 const AnnouncementsBoard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [items, setItems] = useState<any[]>([]);
+  const [saleItems, setSaleItems] = useState<any[]>([]);
   const [promoBanners, setPromoBanners] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [formCategory, setFormCategory] = useState<"announcement" | "sale">("announcement");
   const [formTitle, setFormTitle] = useState("");
   const [formContent, setFormContent] = useState("");
+  const [formSaleType, setFormSaleType] = useState("general");
+  const [formPrice, setFormPrice] = useState("");
   const [searchText, setSearchText] = useState("");
   const [filterMonth, setFilterMonth] = useState("all");
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<BirthdayMember[]>([]);
@@ -42,15 +51,22 @@ const AnnouncementsBoard = () => {
   const resetForm = () => {
     setFormTitle("");
     setFormContent("");
+    setFormCategory("announcement");
+    setFormSaleType("general");
+    setFormPrice("");
   };
 
   const [creatorProfiles, setCreatorProfiles] = useState<Record<string, any>>({});
 
   const fetchItems = async () => {
-    const { data } = await supabase.from("announcements").select("*").eq("is_approved", true).eq("category", "announcement").order("created_at", { ascending: false });
-    setItems(data || []);
+    const [{ data: announcements }, { data: sales }] = await Promise.all([
+      supabase.from("announcements").select("*").eq("is_approved", true).eq("category", "announcement").order("created_at", { ascending: false }),
+      supabase.from("announcements").select("*").eq("is_approved", true).eq("category", "sale").order("created_at", { ascending: false }),
+    ]);
+    setItems(announcements || []);
+    setSaleItems(sales || []);
 
-    const creatorIds = [...new Set((data || []).map((a: any) => a.created_by).filter(Boolean))];
+    const creatorIds = [...new Set([...(announcements || []), ...(sales || [])].map((a: any) => a.created_by).filter(Boolean))];
     if (creatorIds.length > 0) {
       const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, phone").in("user_id", creatorIds);
       const map: Record<string, any> = {};
@@ -143,12 +159,18 @@ const AnnouncementsBoard = () => {
       return;
     }
 
-    const { error } = await supabase.from("announcements").insert({
+    const payload: Record<string, any> = {
       title: formTitle.trim(),
       content: formContent.trim(),
-      category: "announcement",
+      category: formCategory,
       created_by: session.user.id,
-    });
+    };
+    if (formCategory === "sale") {
+      payload.sale_type = formSaleType;
+      if (formPrice.trim()) payload.sale_data = { מחיר: formPrice.trim() };
+    }
+
+    const { error } = await supabase.from("announcements").insert(payload);
 
     if (error) {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
@@ -180,6 +202,25 @@ const AnnouncementsBoard = () => {
   });
 
   const filteredAnnouncements = filterItems(items);
+  const filteredSales = filterItems(saleItems);
+
+  const saleData = (item: any) => (item.sale_data && typeof item.sale_data === "object" ? item.sale_data as Record<string, string> : {});
+
+  const buildSaleShareMessage = (item: any) => {
+    let msg = `🛍️ *${item.title}*\n\n${item.content}`;
+    const entries = Object.entries(saleData(item)).filter(([, v]) => v);
+    if (entries.length > 0) {
+      msg += "\n\n📋 *פרטים:*";
+      entries.forEach(([k, v]) => { msg += `\n• ${k}: ${v}`; });
+    }
+    if (item.created_by && creatorProfiles[item.created_by]) {
+      const c = creatorProfiles[item.created_by];
+      msg += `\n\n👤 *מפרסם:* ${c.full_name}`;
+      if (c.phone) msg += `\n📱 ${c.phone}`;
+    }
+    msg += "\n\n🏘️ _מכירה מלוח המודעות של הגברים של ק.קרניצי_";
+    return encodeURIComponent(msg);
+  };
 
   const buildWhatsAppUrl = (name: string, phone: string) => {
     const cleanPhone = phone.replace(/[^0-9]/g, "").replace(/^0/, "972");
@@ -243,6 +284,56 @@ const AnnouncementsBoard = () => {
           <MessageCircle className="h-4 w-4" />
           <span className="hidden sm:inline">לקבוצה</span>
         </a>
+      </div>
+    );
+  };
+
+  const renderSaleCard = (item: any) => {
+    const creator = item.created_by ? creatorProfiles[item.created_by] : null;
+    return (
+      <div
+        key={item.id}
+        className="group relative rounded-xl border border-gold/30 bg-card/60 p-4 sm:p-5 flex flex-col gap-3 hover:border-gold/60 transition-colors"
+      >
+        {item.sale_image_url && (
+          <div className="rounded-lg overflow-hidden h-36">
+            <img src={item.sale_image_url} alt={item.title} className="w-full h-full object-cover" />
+          </div>
+        )}
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="shrink-0 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg bg-gold/10 border border-gold/30">
+            <ShoppingBag className="h-5 w-5 text-gold" />
+          </div>
+          <div className="flex-1 min-w-0 text-right">
+            <span className="font-body text-[11px] text-gold/70">{SALE_TYPES_MAP[item.sale_type] || "מכירה"}</span>
+            <h3 className="font-serif text-base sm:text-lg font-bold text-gold leading-tight mb-1">
+              {item.title}
+            </h3>
+            <p className="font-body text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+              {item.content}
+            </p>
+            {saleData(item)["מחיר"] && (
+              <p className="mt-2 font-body text-sm font-bold text-gold flex items-center justify-end gap-1">
+                <Banknote className="h-3.5 w-3.5" /> {saleData(item)["מחיר"]}
+              </p>
+            )}
+            <div className="mt-2 flex items-center justify-end gap-2 text-[11px] font-body text-muted-foreground/70">
+              <Calendar className="h-3 w-3" />
+              <span>{new Date(item.created_at).toLocaleDateString("he-IL")}</span>
+              {creator?.full_name && <span>• {creator.full_name}</span>}
+            </div>
+          </div>
+          <a
+            href={`https://api.whatsapp.com/send?text=${buildSaleShareMessage(item)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-xs sm:text-sm text-green-600 hover:bg-green-600/20 transition-colors"
+            title="שתף בוואטסאפ"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">לקבוצה</span>
+          </a>
+        </div>
       </div>
     );
   };
@@ -336,8 +427,37 @@ const AnnouncementsBoard = () => {
       {/* Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 rounded-lg border border-border bg-card p-5 space-y-3">
-          <Input placeholder="כותרת המודעה" value={formTitle} onChange={(e) => setFormTitle(e.target.value)} required className="bg-background" autoComplete="off" />
-          <Textarea placeholder="תוכן המודעה" value={formContent} onChange={(e) => setFormContent(e.target.value)} required className="bg-background min-h-[100px]" autoComplete="off" />
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setFormCategory("announcement")}
+              className={`h-11 rounded-lg border font-body text-sm transition-colors ${formCategory === "announcement" ? "border-gold bg-gold/10 text-gold" : "border-border bg-background text-muted-foreground hover:border-gold/40"}`}
+            >
+              מודעה
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormCategory("sale")}
+              className={`h-11 rounded-lg border font-body text-sm transition-colors ${formCategory === "sale" ? "border-gold bg-gold/10 text-gold" : "border-border bg-background text-muted-foreground hover:border-gold/40"}`}
+            >
+              מכירה
+            </button>
+          </div>
+          <Input placeholder={formCategory === "sale" ? "מה מוכרים?" : "כותרת המודעה"} value={formTitle} onChange={(e) => setFormTitle(e.target.value)} required className="bg-background h-11" autoComplete="off" />
+          <Textarea placeholder={formCategory === "sale" ? "תיאור הפריט, מצב, אזור איסוף" : "תוכן המודעה"} value={formContent} onChange={(e) => setFormContent(e.target.value)} required className="bg-background min-h-[100px]" autoComplete="off" />
+          {formCategory === "sale" && (
+            <div className="grid grid-cols-2 gap-2">
+              <Select value={formSaleType} onValueChange={setFormSaleType}>
+                <SelectTrigger className="bg-background font-body h-11"><SelectValue placeholder="קטגוריה" /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(SALE_TYPES_MAP).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input placeholder="מחיר, לדוגמה ₪500" value={formPrice} onChange={(e) => setFormPrice(e.target.value)} className="bg-background h-11" autoComplete="off" />
+            </div>
+          )}
 
           <p className="font-body text-xs text-muted-foreground">* המודעה תפורסם לאחר אישור מנהל המערכת</p>
           <div className="flex gap-2">
@@ -352,6 +472,27 @@ const AnnouncementsBoard = () => {
       ) : (
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           {filteredAnnouncements.map((item) => renderAnnouncementCard(item))}
+        </div>
+      )}
+
+      {/* Members' sales board */}
+      {(filteredSales.length > 0 || (!searchText && filterMonth === "all")) && (
+        <div className="mt-12">
+          <div className="mb-6">
+            <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl flex items-center gap-2">
+              <ShoppingBag className="h-6 w-6 text-gold" />
+              מכירות <span className="text-gold">בין חברים</span>
+            </h2>
+            <p className="mt-1 font-body text-sm text-muted-foreground">פריטים שחברי המועדון מוכרים אחד לשני</p>
+            <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
+          </div>
+          {filteredSales.length === 0 ? (
+            <p className="font-body text-muted-foreground text-center py-8">אין מכירות כרגע.</p>
+          ) : (
+            <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+              {filteredSales.map((item) => renderSaleCard(item))}
+            </div>
+          )}
         </div>
       )}
 
