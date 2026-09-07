@@ -296,7 +296,7 @@ const SecondHand = () => {
             <p className="font-body text-muted-foreground">{t("secondhand.noItems")}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filtered.map(it => {
               // The public RPC omits created_by, so both sides can be undefined and
               // a plain equality would hand the owner controls to every visitor.
