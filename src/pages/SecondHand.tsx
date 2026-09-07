@@ -296,7 +296,7 @@ const SecondHand = () => {
             <p className="font-body text-muted-foreground">{t("secondhand.noItems")}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filtered.map(it => {
               // The public RPC omits created_by, so both sides can be undefined and
               // a plain equality would hand the owner controls to every visitor.
@@ -305,10 +305,10 @@ const SecondHand = () => {
               return (
                 <article
                   key={it.id}
-                  className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-gold/40 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)] transition-all cursor-pointer"
+                  className="group rounded-xl border border-border bg-card overflow-hidden hover:border-gold/40 hover:shadow-[0_0_30px_hsl(43_72%_52%/0.08)] transition-all cursor-pointer"
                   onClick={() => (canOpenCard ? setViewItem(it) : setShowLockedNotice(true))}
                 >
-                  <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
+                  <div className="relative aspect-[16/10] bg-secondary overflow-hidden">
                     <CategoryImage
                       category={it.category}
                       src={it.images?.[0]}
@@ -318,25 +318,25 @@ const SecondHand = () => {
                     />
                     {it.is_sold && (
                       <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
-                        <span className="rotate-[-12deg] border-4 border-destructive text-destructive font-serif font-bold text-3xl px-6 py-1 rounded">
+                        <span className="rotate-[-12deg] border-4 border-destructive text-destructive font-serif font-bold text-2xl px-4 py-1 rounded">
                           {soldLabel(it)}
                         </span>
                       </div>
                     )}
-                    <Badge className="absolute top-2 right-2 bg-background/80 text-foreground border-border backdrop-blur-sm">
+                    <Badge className="absolute top-2 right-2 bg-background/80 text-foreground border-border backdrop-blur-sm text-[10px]">
                       {it.category}
                     </Badge>
                   </div>
-                  <div className="p-4 space-y-2">
+                  <div className="p-3 space-y-1.5">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-serif text-lg font-bold text-foreground line-clamp-1">{it.title}</h3>
+                      <h3 className="font-serif text-base font-bold text-foreground line-clamp-1">{it.title}</h3>
                       {it.price !== null && (
-                        <p className="font-serif text-lg font-bold text-gold whitespace-nowrap">
+                        <p className="font-serif text-base font-bold text-gold whitespace-nowrap">
                           ₪{it.price.toLocaleString("he-IL")}
                         </p>
                       )}
                     </div>
-                    <p className="font-body text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
+                    <p className="font-body text-xs text-muted-foreground line-clamp-2 min-h-[2rem]">
                       {it.description || "—"}
                     </p>
                     <div className="flex items-center justify-between gap-2 pt-1">
@@ -347,29 +347,32 @@ const SecondHand = () => {
                       <ShareButtons
                         title={it.title}
                         text={`${it.title}${it.price !== null ? ` | ₪${it.price.toLocaleString("he-IL")}` : ""} | יד שנייה, הגברים של ק.קרניצי`}
+                        size="sm"
                       />
                     </div>
                     {isOwner && (
-                      <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
-                        <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => openEdit(it)}>
-                          <Pencil className="h-3 w-3 ml-1" /> {t("secondhand.edit")}
-                        </Button>
-                        {it.is_sold ? (
-                          <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setSoldStatus(it, null)}>
-                            <CheckCircle2 className="h-3 w-3 ml-1" /> החזר למכירה
+                      <div className="flex items-center justify-between gap-1 pt-2 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-1">
+                          <Button size="icon" variant="ghost" className="h-7 w-7" title={t("secondhand.edit")} onClick={() => openEdit(it)}>
+                            <Pencil className="h-3.5 w-3.5" />
                           </Button>
-                        ) : (
-                          <>
-                            <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setSoldStatus(it, "sold")}>
-                              <CheckCircle2 className="h-3 w-3 ml-1" /> סמן כנמכר
+                          {it.is_sold ? (
+                            <Button size="icon" variant="ghost" className="h-7 w-7" title="החזר למכירה" onClick={() => setSoldStatus(it, null)}>
+                              <CheckCircle2 className="h-3.5 w-3.5" />
                             </Button>
-                            <Button size="sm" variant="ghost" className="h-7 text-xs flex-1" onClick={() => setSoldStatus(it, "given")}>
-                              <CheckCircle2 className="h-3 w-3 ml-1" /> סמן כנמסר
-                            </Button>
-                          </>
-                        )}
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => handleDelete(it.id)}>
-                          <Trash2 className="h-3 w-3" />
+                          ) : (
+                            <>
+                              <Button size="icon" variant="ghost" className="h-7 w-7" title="סמן כנמכר" onClick={() => setSoldStatus(it, "sold")}>
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button size="icon" variant="ghost" className="h-7 w-7" title="סמן כנמסר" onClick={() => setSoldStatus(it, "given")}>
+                                <Package className="h-3.5 w-3.5" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" title="מחק" onClick={() => handleDelete(it.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     )}
