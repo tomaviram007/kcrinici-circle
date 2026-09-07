@@ -288,6 +288,56 @@ const AnnouncementsBoard = () => {
     );
   };
 
+  const renderSaleCard = (item: any) => {
+    const creator = item.created_by ? creatorProfiles[item.created_by] : null;
+    return (
+      <div
+        key={item.id}
+        className="group relative rounded-xl border border-gold/30 bg-card/60 p-4 sm:p-5 flex flex-col gap-3 hover:border-gold/60 transition-colors"
+      >
+        {item.sale_image_url && (
+          <div className="rounded-lg overflow-hidden h-36">
+            <img src={item.sale_image_url} alt={item.title} className="w-full h-full object-cover" />
+          </div>
+        )}
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="shrink-0 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg bg-gold/10 border border-gold/30">
+            <ShoppingBag className="h-5 w-5 text-gold" />
+          </div>
+          <div className="flex-1 min-w-0 text-right">
+            <span className="font-body text-[11px] text-gold/70">{SALE_TYPES_MAP[item.sale_type] || "מכירה"}</span>
+            <h3 className="font-serif text-base sm:text-lg font-bold text-gold leading-tight mb-1">
+              {item.title}
+            </h3>
+            <p className="font-body text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+              {item.content}
+            </p>
+            {saleData(item)["מחיר"] && (
+              <p className="mt-2 font-body text-sm font-bold text-gold flex items-center justify-end gap-1">
+                <Banknote className="h-3.5 w-3.5" /> {saleData(item)["מחיר"]}
+              </p>
+            )}
+            <div className="mt-2 flex items-center justify-end gap-2 text-[11px] font-body text-muted-foreground/70">
+              <Calendar className="h-3 w-3" />
+              <span>{new Date(item.created_at).toLocaleDateString("he-IL")}</span>
+              {creator?.full_name && <span>• {creator.full_name}</span>}
+            </div>
+          </div>
+          <a
+            href={`https://api.whatsapp.com/send?text=${buildSaleShareMessage(item)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-2 font-body text-xs sm:text-sm text-green-600 hover:bg-green-600/20 transition-colors"
+            title="שתף בוואטסאפ"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">לקבוצה</span>
+          </a>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="mt-10 sm:mt-14 border-t border-border/60 pt-8 sm:pt-10">
       {/* Dynamic promo banners (managed in admin) */}
