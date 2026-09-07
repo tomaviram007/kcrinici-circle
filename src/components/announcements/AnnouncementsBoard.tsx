@@ -21,18 +21,27 @@ interface BirthdayMember {
   avatar_url: string | null;
 }
 
+const SALE_TYPES_MAP: Record<string, string> = {
+  car: "רכב", electronics: "אלקטרוניקה", furniture: "ריהוט",
+  fashion: "ביגוד / אופנה", real_estate: "נדל״ן", general: "כללי",
+};
+
 /**
- * לוח המודעות המלא: באנרים, ימי הולדת, סינון, טופס פרסום ורשימת מודעות.
+ * לוח המודעות המלא: באנרים, ימי הולדת, סינון, טופס פרסום, מודעות ומכירות.
  * מוצב בתוך עמוד "אירועים ומודעות" המאוחד.
  */
 const AnnouncementsBoard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [items, setItems] = useState<any[]>([]);
+  const [saleItems, setSaleItems] = useState<any[]>([]);
   const [promoBanners, setPromoBanners] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [formCategory, setFormCategory] = useState<"announcement" | "sale">("announcement");
   const [formTitle, setFormTitle] = useState("");
   const [formContent, setFormContent] = useState("");
+  const [formSaleType, setFormSaleType] = useState("general");
+  const [formPrice, setFormPrice] = useState("");
   const [searchText, setSearchText] = useState("");
   const [filterMonth, setFilterMonth] = useState("all");
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<BirthdayMember[]>([]);
@@ -42,15 +51,22 @@ const AnnouncementsBoard = () => {
   const resetForm = () => {
     setFormTitle("");
     setFormContent("");
+    setFormCategory("announcement");
+    setFormSaleType("general");
+    setFormPrice("");
   };
 
   const [creatorProfiles, setCreatorProfiles] = useState<Record<string, any>>({});
 
   const fetchItems = async () => {
-    const { data } = await supabase.from("announcements").select("*").eq("is_approved", true).eq("category", "announcement").order("created_at", { ascending: false });
-    setItems(data || []);
+    const [{ data: announcements }, { data: sales }] = await Promise.all([
+      supabase.from("announcements").select("*").eq("is_approved", true).eq("category", "announcement").order("created_at", { ascending: false }),
+      supabase.from("announcements").select("*").eq("is_approved", true).eq("category", "sale").order("created_at", { ascending: false }),
+    ]);
+    setItems(announcements || []);
+    setSaleItems(sales || []);
 
-    const creatorIds = [...new Set((data || []).map((a: any) => a.created_by).filter(Boolean))];
+    const creatorIds = [...new Set([...(announcements || []), ...(sales || [])].map((a: any) => a.created_by).filter(Boolean))];
     if (creatorIds.length > 0) {
       const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, phone").in("user_id", creatorIds);
       const map: Record<string, any> = {};
