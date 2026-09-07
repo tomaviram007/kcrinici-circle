@@ -475,6 +475,27 @@ const AnnouncementsBoard = () => {
         </div>
       )}
 
+      {/* Members' sales board */}
+      {(filteredSales.length > 0 || (!searchText && filterMonth === "all")) && (
+        <div className="mt-12">
+          <div className="mb-6">
+            <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl flex items-center gap-2">
+              <ShoppingBag className="h-6 w-6 text-gold" />
+              מכירות <span className="text-gold">בין חברים</span>
+            </h2>
+            <p className="mt-1 font-body text-sm text-muted-foreground">פריטים שחברי המועדון מוכרים אחד לשני</p>
+            <div className="mt-3 h-px w-12 gradient-gold opacity-40" />
+          </div>
+          {filteredSales.length === 0 ? (
+            <p className="font-body text-muted-foreground text-center py-8">אין מכירות כרגע.</p>
+          ) : (
+            <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+              {filteredSales.map((item) => renderSaleCard(item))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Premium ad */}
       <div className="my-8">
         <SmartAdBanner
