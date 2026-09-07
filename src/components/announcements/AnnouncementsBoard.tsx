@@ -427,8 +427,37 @@ const AnnouncementsBoard = () => {
       {/* Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 rounded-lg border border-border bg-card p-5 space-y-3">
-          <Input placeholder="כותרת המודעה" value={formTitle} onChange={(e) => setFormTitle(e.target.value)} required className="bg-background" autoComplete="off" />
-          <Textarea placeholder="תוכן המודעה" value={formContent} onChange={(e) => setFormContent(e.target.value)} required className="bg-background min-h-[100px]" autoComplete="off" />
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setFormCategory("announcement")}
+              className={`h-11 rounded-lg border font-body text-sm transition-colors ${formCategory === "announcement" ? "border-gold bg-gold/10 text-gold" : "border-border bg-background text-muted-foreground hover:border-gold/40"}`}
+            >
+              מודעה
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormCategory("sale")}
+              className={`h-11 rounded-lg border font-body text-sm transition-colors ${formCategory === "sale" ? "border-gold bg-gold/10 text-gold" : "border-border bg-background text-muted-foreground hover:border-gold/40"}`}
+            >
+              מכירה
+            </button>
+          </div>
+          <Input placeholder={formCategory === "sale" ? "מה מוכרים?" : "כותרת המודעה"} value={formTitle} onChange={(e) => setFormTitle(e.target.value)} required className="bg-background h-11" autoComplete="off" />
+          <Textarea placeholder={formCategory === "sale" ? "תיאור הפריט, מצב, אזור איסוף" : "תוכן המודעה"} value={formContent} onChange={(e) => setFormContent(e.target.value)} required className="bg-background min-h-[100px]" autoComplete="off" />
+          {formCategory === "sale" && (
+            <div className="grid grid-cols-2 gap-2">
+              <Select value={formSaleType} onValueChange={setFormSaleType}>
+                <SelectTrigger className="bg-background font-body h-11"><SelectValue placeholder="קטגוריה" /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(SALE_TYPES_MAP).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input placeholder="מחיר, לדוגמה ₪500" value={formPrice} onChange={(e) => setFormPrice(e.target.value)} className="bg-background h-11" autoComplete="off" />
+            </div>
+          )}
 
           <p className="font-body text-xs text-muted-foreground">* המודעה תפורסם לאחר אישור מנהל המערכת</p>
           <div className="flex gap-2">
