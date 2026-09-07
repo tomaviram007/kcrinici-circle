@@ -371,7 +371,7 @@ const SecondHand = () => {
                             </>
                           )}
                         </div>
-                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" title={t("secondhand.delete")} onClick={() => handleDelete(it.id)}>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" title="מחק" onClick={() => handleDelete(it.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
