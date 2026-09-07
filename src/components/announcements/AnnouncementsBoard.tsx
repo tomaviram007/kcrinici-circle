@@ -159,12 +159,18 @@ const AnnouncementsBoard = () => {
       return;
     }
 
-    const { error } = await supabase.from("announcements").insert({
+    const payload: Record<string, any> = {
       title: formTitle.trim(),
       content: formContent.trim(),
-      category: "announcement",
+      category: formCategory,
       created_by: session.user.id,
-    });
+    };
+    if (formCategory === "sale") {
+      payload.sale_type = formSaleType;
+      if (formPrice.trim()) payload.sale_data = { מחיר: formPrice.trim() };
+    }
+
+    const { error } = await supabase.from("announcements").insert(payload);
 
     if (error) {
       toast({ title: "שגיאה", description: error.message, variant: "destructive" });
