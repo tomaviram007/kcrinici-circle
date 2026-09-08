@@ -26,9 +26,16 @@ const EVENT_LABELS: Record<string, string> = {
   new_secondhand: "📦 מודעת יד שנייה חדשה פורסמה",
   new_realestate: "🏠 מודעת נדל״ן חדשה פורסמה",
   new_gallery_album: "🖼️ אלבום חדש נוסף לגלריה",
+  new_feedback_form: "📝 נפתח שאלון חדש",
+  new_feedback_response: "✍️ מישהו ענה על השאלון",
 };
 
 const fieldLabels: Record<string, string> = {
+  respondent: "שם העונה",
+  answered_count: "מספר שאלות שנענו",
+  form_title: "שאלון",
+  link: "קישור",
+  share_text: "הודעה לשיתוף",
   name: "שם",
   phone: "טלפון",
   email: "אימייל",
