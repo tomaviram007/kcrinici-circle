@@ -801,6 +801,7 @@ const AdminEventFeedback = () => {
                   {filteredForms.map((f) => (
                     <QuestionnaireRow
                       key={f.id}
+                      kind="form"
                       id={f.id}
                       title={f.title}
                       date={f.form_date}
@@ -831,6 +832,7 @@ const AdminEventFeedback = () => {
                   {filteredEvents.map((e) => (
                     <QuestionnaireRow
                       key={e.id}
+                      kind="event"
                       id={e.id}
                       title={e.title}
                       date={e.event_date}
