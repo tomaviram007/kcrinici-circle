@@ -632,9 +632,19 @@ const EventFeedback = () => {
       if (typeof value === "number") return value > 0;
       return typeof value === "string" && value.trim().length > 0;
     }).length;
+    const { data: userData } = await supabase.auth.getUser();
+    let respondent = "משיב ללא שם (אנונימי)";
+    if (userData.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name, full_name")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+      respondent = profile?.display_name || profile?.full_name || userData.user.email || respondent;
+    }
     void sendTelegramNotification("new_feedback_response", {
       form_title: event?.title,
-      respondent: respondentName || "משיב ללא שם (אנונימי)",
+      respondent,
       answered_count: baseAnswered + customAnswered,
     });
 
