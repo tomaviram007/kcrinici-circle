@@ -3,6 +3,7 @@ import MonthCelebrants from "./birthdays/MonthCelebrants";
 import BirthdayEmailEditor from "./birthdays/BirthdayEmailEditor";
 import BirthdayScheduleSettings from "./birthdays/BirthdayScheduleSettings";
 import BirthdayHistory from "./birthdays/BirthdayHistory";
+import BirthdayDeliveryReport from "./birthdays/BirthdayDeliveryReport";
 import { Cake } from "lucide-react";
 
 const AdminBirthdays = () => {
@@ -18,11 +19,13 @@ const AdminBirthdays = () => {
           <TabsTrigger value="month">חוגגי החודש</TabsTrigger>
           <TabsTrigger value="email">תבנית מייל</TabsTrigger>
           <TabsTrigger value="schedule">תזמון ו-WhatsApp</TabsTrigger>
-          <TabsTrigger value="history">היסטוריה</TabsTrigger>
+          <TabsTrigger value="report">דוח שליחה</TabsTrigger>
+          <TabsTrigger value="history">יומן שליחות</TabsTrigger>
         </TabsList>
         <TabsContent value="month" className="mt-4"><MonthCelebrants /></TabsContent>
         <TabsContent value="email" className="mt-4"><BirthdayEmailEditor /></TabsContent>
         <TabsContent value="schedule" className="mt-4"><BirthdayScheduleSettings /></TabsContent>
+        <TabsContent value="report" className="mt-4"><BirthdayDeliveryReport /></TabsContent>
         <TabsContent value="history" className="mt-4"><BirthdayHistory /></TabsContent>
       </Tabs>
     </div>
