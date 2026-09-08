@@ -1217,6 +1217,13 @@ const AdminEventFeedback = () => {
                 <Copy className="h-4 w-4" /> העתקת קישור
               </Button>
             </div>
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => qrEvent && shareWhatsapp(qrEvent.id, qrEvent.title)}
+            >
+              <MessageSquare className="h-4 w-4" /> שליחה בווטסאפ
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
