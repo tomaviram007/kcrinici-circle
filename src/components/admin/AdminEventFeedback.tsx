@@ -29,6 +29,11 @@ import {
 import QRCode from "qrcode";
 import FeedbackQuestionsDialog from "@/components/admin/FeedbackQuestionsDialog";
 import QuestionsAccordion from "@/components/admin/QuestionsAccordion";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
+
+// The message the club forwards to members, in plain human Hebrew.
+const shareMessage = (title: string, url: string) =>
+  `שלום לכולם 🍻\nפתחנו שאלון קצר: ${title}\nלוקח דקה למלא, והתשובות עוזרות לנו לתכנן את המפגשים הבאים.\n${url}`;
 
 interface EventOption {
   id: string;
