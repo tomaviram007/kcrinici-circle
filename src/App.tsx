@@ -40,6 +40,7 @@ import Privacy from "./pages/Privacy";
 import Regulations from "./pages/Regulations";
 import Unsubscribe from "./pages/Unsubscribe";
 import EventFeedback from "./pages/EventFeedback";
+import EventCheckin from "./pages/EventCheckin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,7 +59,8 @@ const AppLayout = () => {
   useVersionCheck();
   const hideHeader =
     ["/login", "/register", "/pending", "/reset-password", "/unsubscribe"].includes(location.pathname) ||
-    location.pathname.startsWith("/feedback/");
+    location.pathname.startsWith("/feedback/") ||
+    location.pathname.startsWith("/checkin/");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -102,6 +104,8 @@ const AppLayout = () => {
         <Route path="/unsubscribe" element={<Unsubscribe />} />
         {/* Hidden: reachable only via per-event QR code */}
         <Route path="/feedback/:eventId" element={<EventFeedback />} />
+        {/* Hidden: reachable only via per-event check-in QR code */}
+        <Route path="/checkin/:eventId" element={<EventCheckin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </PageTransition>

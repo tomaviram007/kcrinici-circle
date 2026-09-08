@@ -77,7 +77,7 @@ const EventCheckin = () => {
 
   return (
     <div dir="rtl" className="min-h-screen bg-background flex items-center justify-center px-5 py-10">
-      <Seo title="כניסה לאירוע | הגברים של ק.קרניצי" description="סימון נוכחות באירוע" />
+      <Seo title="כניסה לאירוע | הגברים של ק.קרניצי" description="סימון נוכחות באירוע" path={`/checkin/${eventId ?? ""}`} />
       <div className="w-full max-w-sm rounded-3xl border border-gold/25 bg-card/80 p-6 text-center shadow-xl backdrop-blur">
         {checking || authLoading ? (
           <div className="py-10">
