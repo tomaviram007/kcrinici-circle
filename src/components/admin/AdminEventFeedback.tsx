@@ -45,6 +45,7 @@ interface FeedbackRow {
   id: string;
   event_id: string | null;
   form_id: string | null;
+  member_id?: string | null;
   created_at: string;
   enjoyment: number;
   met_new_person: boolean;
@@ -57,7 +58,19 @@ interface FeedbackRow {
   improvement: string | null;
   next_event_likelihood: number | null;
   nps: number | null;
+  membership_interest?: string | null;
+  membership_fair_price?: string | null;
+  membership_benefits?: string[] | null;
+  membership_benefits_other?: string | null;
   custom_answers?: Record<string, { question: string; type: string; answer: unknown }> | null;
+}
+
+interface DrillItem {
+  id: string;
+  name: string;
+  detail: string;
+  source: string;
+  date: string;
 }
 
 interface Summary {
@@ -90,21 +103,40 @@ const StatCard = ({
   label,
   value,
   hint,
+  onClick,
+  count,
 }: {
   icon: React.ElementType;
   label: string;
   value: string;
   hint?: string;
-}) => (
-  <div className="rounded-xl border border-border bg-card p-4 text-right">
-    <div className="mb-2 flex items-center justify-end gap-2 text-muted-foreground">
-      <span className="font-body text-xs">{label}</span>
-      <Icon className="h-4 w-4 text-primary" />
-    </div>
-    <p className="font-serif text-2xl font-bold text-foreground">{value}</p>
-    {hint && <p className="mt-1 font-body text-[11px] text-muted-foreground">{hint}</p>}
-  </div>
-);
+  onClick?: () => void;
+  count?: number;
+}) => {
+  const Tag = onClick ? "button" : "div";
+  return (
+    <Tag
+      type={onClick ? "button" : undefined}
+      onClick={onClick}
+      className={
+        "w-full rounded-xl border border-border bg-card p-4 text-right transition-colors" +
+        (onClick ? " cursor-pointer hover:border-primary/60 hover:bg-primary/5" : "")
+      }
+    >
+      <div className="mb-2 flex items-center justify-end gap-2 text-muted-foreground">
+        <span className="font-body text-xs">{label}</span>
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <p className="font-serif text-2xl font-bold text-foreground">{value}</p>
+      {hint && <p className="mt-1 font-body text-[11px] text-muted-foreground">{hint}</p>}
+      {onClick && (
+        <p className="mt-1 font-body text-[11px] text-primary">
+          לחצו לרשימת המשיבים{typeof count === "number" ? ` (${count})` : ""}
+        </p>
+      )}
+    </Tag>
+  );
+};
 
 const Panel = ({
   title,
@@ -155,6 +187,9 @@ const AdminEventFeedback = () => {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [questionsTarget, setQuestionsTarget] = useState<{ kind: "form" | "event"; id: string; title: string } | null>(null);
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
+  const [memberNames, setMemberNames] = useState<Record<string, string>>({});
+  const [drill, setDrill] = useState<{ title: string; items: DrillItem[] } | null>(null);
+
 
   const loadQuestionCounts = async () => {
     const { data } = await supabase.from("feedback_questions").select("form_id, event_id");
@@ -232,7 +267,21 @@ const AdminEventFeedback = () => {
     ]);
 
     setSummary((summaryData as unknown as Summary) || null);
-    setRows((listResult.data as unknown as FeedbackRow[]) || []);
+    const list = (listResult.data as unknown as FeedbackRow[]) || [];
+    setRows(list);
+
+    const memberIds = Array.from(new Set(list.map((r) => r.member_id).filter(Boolean))) as string[];
+    if (memberIds.length) {
+      const { data: memberRows } = await supabase
+        .from("community_members")
+        .select("id, full_name")
+        .in("id", memberIds);
+      setMemberNames(
+        Object.fromEntries(((memberRows as { id: string; full_name: string }[] | null) || []).map((m) => [m.id, m.full_name]))
+      );
+    } else {
+      setMemberNames({});
+    }
     setLoading(false);
   };
 
@@ -422,6 +471,22 @@ const AdminEventFeedback = () => {
     URL.revokeObjectURL(a.href);
   };
 
+  const respondentName = (r: FeedbackRow) =>
+    (r.member_id && memberNames[r.member_id]) || "משיב ללא שם (אנונימי)";
+
+  const openDrill = (title: string, list: FeedbackRow[], detail: (r: FeedbackRow) => string) =>
+    setDrill({
+      title,
+      items: list.map((r) => ({
+        id: r.id,
+        name: respondentName(r),
+        detail: detail(r),
+        source: eventTitles[(r.event_id || r.form_id) as string] || "שאלון",
+        date: new Date(r.created_at).toLocaleString("he-IL"),
+      })),
+    });
+
+
   const responseCounts = useMemo(() => {
     const map: Record<string, number> = {};
     rows.forEach((r) => {
@@ -568,24 +633,62 @@ const AdminEventFeedback = () => {
           {/* ===== Overview ===== */}
           <TabsContent value="overview" className="space-y-5">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-              <StatCard icon={MessageSquare} label="סך התגובות" value={String(summary?.total ?? 0)} />
+              <StatCard
+                icon={MessageSquare}
+                label="סך התגובות"
+                value={String(summary?.total ?? 0)}
+                count={rows.length}
+                onClick={() => openDrill("כל המשיבים", rows, (r) => `דירוג ${r.enjoyment}/5`)}
+              />
               <StatCard
                 icon={Star}
                 label="ממוצע דירוג"
                 value={summary?.avg_enjoyment ? `${summary.avg_enjoyment}/5` : "—"}
+                count={rows.length}
+                onClick={() => openDrill("דירוג ההנאה לפי משיב", rows, (r) => `${r.enjoyment}/5`)}
               />
               <StatCard
                 icon={Users}
                 label="הכירו מישהו חדש"
                 value={`${summary?.met_new_pct ?? 0}%`}
                 hint={summary?.avg_new_people ? `ממוצע ${summary.avg_new_people} אנשים` : undefined}
+                count={rows.filter((r) => r.met_new_person).length}
+                onClick={() =>
+                  openDrill(
+                    "מי הכיר מישהו חדש",
+                    rows.filter((r) => r.met_new_person),
+                    (r) =>
+                      `הכיר ${r.new_people_count ?? "?"} אנשים` +
+                      (r.keep_in_touch ? ` · רוצה קשר${r.keep_in_touch_name ? ` עם ${r.keep_in_touch_name}` : ""}` : "")
+                  )
+                }
               />
-              <StatCard icon={Repeat} label="רוצים לחזור" value={`${summary?.return_pct ?? 0}%`} />
+              <StatCard
+                icon={Repeat}
+                label="רוצים לחזור"
+                value={`${summary?.return_pct ?? 0}%`}
+                count={rows.filter((r) => (r.next_event_likelihood ?? 0) >= 4).length}
+                onClick={() =>
+                  openDrill(
+                    "מי רוצה להגיע גם למפגש הבא",
+                    rows.filter((r) => (r.next_event_likelihood ?? 0) >= 4),
+                    (r) => `סבירות ${r.next_event_likelihood}/5`
+                  )
+                }
+              />
               <StatCard
                 icon={Star}
                 label="ציון המלצה (NPS)"
                 value={summary?.nps === null || summary?.nps === undefined ? "—" : String(summary.nps)}
                 hint={summary?.avg_nps ? `ממוצע ${summary.avg_nps}/10` : undefined}
+                count={rows.filter((r) => r.nps !== null).length}
+                onClick={() =>
+                  openDrill(
+                    "ציוני המלצה לפי משיב",
+                    rows.filter((r) => r.nps !== null),
+                    (r) => `${r.nps}/10`
+                  )
+                }
               />
             </div>
 
@@ -596,7 +699,18 @@ const AdminEventFeedback = () => {
                     {summary.meetup_types.map((m) => {
                       const pct = summary.total ? Math.round((m.count / summary.total) * 100) : 0;
                       return (
-                        <div key={m.name} className="space-y-1">
+                        <button
+                          type="button"
+                          key={m.name}
+                          onClick={() =>
+                            openDrill(
+                              `מי בחר: ${m.name}`,
+                              rows.filter((r) => r.preferred_meetup_type === m.name),
+                              (r) => `דירוג ${r.enjoyment}/5`
+                            )
+                          }
+                          className="w-full space-y-1 rounded-lg p-1 text-right transition-colors hover:bg-primary/5"
+                        >
                           <div className="flex justify-between font-body text-sm">
                             <span className="text-muted-foreground">
                               {m.count} ({pct}%)
@@ -606,7 +720,7 @@ const AdminEventFeedback = () => {
                           <div className="h-2 overflow-hidden rounded-full bg-muted">
                             <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
                           </div>
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -619,10 +733,21 @@ const AdminEventFeedback = () => {
                 {summary?.attend_reasons?.length ? (
                   <div className="space-y-2">
                     {summary.attend_reasons.map((m) => (
-                      <div key={m.name} className="flex justify-between font-body text-sm">
+                      <button
+                        type="button"
+                        key={m.name}
+                        onClick={() =>
+                          openDrill(
+                            `מי ענה: ${m.name}`,
+                            rows.filter((r) => r.attend_reason === m.name),
+                            (r) => `דירוג ${r.enjoyment}/5`
+                          )
+                        }
+                        className="flex w-full justify-between rounded-lg p-1 text-right font-body text-sm transition-colors hover:bg-primary/5"
+                      >
                         <span className="text-muted-foreground">{m.count}</span>
                         <span className="text-foreground">{m.name}</span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 ) : (
@@ -679,12 +804,20 @@ const AdminEventFeedback = () => {
               </div>
 
               <div className="grid gap-4 lg:grid-cols-3">
-                {[
-                  { title: "נכונות להצטרף", rows: summary?.membership?.interest ?? [] },
-                  { title: "סכום שנתי הוגן", rows: summary?.membership?.prices ?? [] },
-                  { title: "הטבות מבוקשות", rows: summary?.membership?.benefits ?? [] },
-                ].map((block) => {
+                {([
+                  { title: "נכונות להצטרף", rows: summary?.membership?.interest ?? [], field: "interest" },
+                  { title: "סכום שנתי הוגן", rows: summary?.membership?.prices ?? [], field: "price" },
+                  { title: "הטבות מבוקשות", rows: summary?.membership?.benefits ?? [], field: "benefit" },
+                ] as const).map((block) => {
                   const base = summary?.membership?.respondents || 0;
+                  const matches = (name: string) =>
+                    rows.filter((r) =>
+                      block.field === "interest"
+                        ? r.membership_interest === name
+                        : block.field === "price"
+                          ? r.membership_fair_price === name
+                          : (r.membership_benefits || []).includes(name)
+                    );
                   return (
                     <div key={block.title} className="rounded-xl border border-border bg-background/40 p-3">
                       <h4 className="mb-2 text-right font-body text-sm font-bold text-foreground">{block.title}</h4>
@@ -693,7 +826,14 @@ const AdminEventFeedback = () => {
                           {block.rows.map((r) => {
                             const pct = base ? Math.round((r.count / base) * 100) : 0;
                             return (
-                              <div key={r.name} className="space-y-1">
+                              <button
+                                type="button"
+                                key={r.name}
+                                onClick={() =>
+                                  openDrill(`${block.title}: ${r.name}`, matches(r.name), () => r.name)
+                                }
+                                className="w-full space-y-1 rounded-lg p-1 text-right transition-colors hover:bg-primary/5"
+                              >
                                 <div className="flex justify-between gap-2 font-body text-xs">
                                   <span className="shrink-0 text-muted-foreground">
                                     {r.count} ({pct}%)
@@ -703,7 +843,7 @@ const AdminEventFeedback = () => {
                                 <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                                   <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
                                 </div>
-                              </div>
+                              </button>
                             );
                           })}
                         </div>
@@ -917,6 +1057,37 @@ const AdminEventFeedback = () => {
           </TabsContent>
         </Tabs>
       )}
+
+      <Dialog open={!!drill} onOpenChange={(o) => !o && setDrill(null)}>
+        <DialogContent dir="rtl" className="max-h-[80vh] max-w-lg overflow-y-auto text-right">
+          <DialogHeader>
+            <DialogTitle className="text-right font-serif">
+              {drill?.title} ({drill?.items.length ?? 0})
+            </DialogTitle>
+          </DialogHeader>
+          {drill?.items.length ? (
+            <div className="space-y-2">
+              {drill.items.map((it) => (
+                <div key={it.id} className="rounded-xl border border-border/60 bg-background/40 p-3 text-right">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 font-body text-xs text-primary">
+                      {it.detail}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate font-body text-sm font-bold text-foreground">{it.name}</p>
+                      <p className="font-body text-xs text-muted-foreground">
+                        {it.source} · {it.date}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="font-body text-sm text-muted-foreground">אין משיבים בקטגוריה הזו</p>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <FeedbackQuestionsDialog
         open={!!questionsTarget}
