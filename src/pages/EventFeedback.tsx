@@ -11,6 +11,16 @@ import gsap from "gsap";
 
 type EventInfo = { id: string; title: string; event_date: string };
 
+type CustomQuestion = {
+  id: string;
+  question_text: string;
+  question_type: "text" | "single" | "multi" | "rating";
+  options: string[];
+  is_required: boolean;
+};
+
+type CustomAnswer = string | string[] | number | null;
+
 const ATTEND_REASONS = [
   "סקרנות והיכרות עם המועדון",
   "הנושא של המפגש עניין אותי",
@@ -145,6 +155,8 @@ const EventFeedback = () => {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [questions, setQuestions] = useState<CustomQuestion[]>([]);
+  const [answers, setAnswers] = useState<Record<string, CustomAnswer>>({});
   const cardRef = useRef<HTMLDivElement>(null);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
@@ -157,8 +169,20 @@ const EventFeedback = () => {
   useEffect(() => {
     const load = async () => {
       if (!eventId) return;
-      const { data } = await supabase.rpc("get_event_feedback_info", { _event_id: eventId });
+      const [{ data }, { data: questionRows }] = await Promise.all([
+        supabase.rpc("get_event_feedback_info", { _event_id: eventId }),
+        supabase
+          .from("feedback_questions")
+          .select("id, question_text, question_type, options, is_required, display_order")
+          .or(`form_id.eq.${eventId},event_id.eq.${eventId}`)
+          .order("display_order", { ascending: true }),
+      ]);
       setEvent(((data as EventInfo[] | null) || [])[0] || null);
+      const list = ((questionRows as CustomQuestion[] | null) || []);
+      setQuestions(list);
+      setAnswers(
+        Object.fromEntries(list.map((q) => [q.id, q.question_type === "multi" ? [] : q.question_type === "rating" ? null : ""]))
+      );
       setLoading(false);
     };
     load();
@@ -485,8 +509,94 @@ const EventFeedback = () => {
       ),
     });
 
+    questions.forEach((q) => {
+      const value = answers[q.id];
+      const setAnswer = (v: CustomAnswer) => setAnswers((prev) => ({ ...prev, [q.id]: v }));
+      const answered =
+        q.question_type === "multi"
+          ? Array.isArray(value) && value.length > 0
+          : q.question_type === "rating"
+            ? typeof value === "number" && value > 0
+            : typeof value === "string" && value.trim().length > 0;
+
+      list.push({
+        key: `custom-${q.id}`,
+        valid: q.is_required ? answered : true,
+        render: () => (
+          <StepShell title={q.question_text} subtitle={q.is_required ? "שאלת חובה" : "אפשר גם לדלג"}>
+            {q.question_type === "text" && (
+              <Textarea
+                dir="rtl"
+                className="min-h-28 text-right"
+                maxLength={1000}
+                placeholder="כתוב כאן..."
+                value={typeof value === "string" ? value : ""}
+                onChange={(e) => setAnswer(e.target.value)}
+              />
+            )}
+
+            {q.question_type === "single" && (
+              <div className="space-y-2">
+                {q.options.map((opt) => (
+                  <ChoiceButton key={opt} active={value === opt} onClick={() => setAnswer(opt)}>
+                    {opt}
+                  </ChoiceButton>
+                ))}
+              </div>
+            )}
+
+            {q.question_type === "multi" && (
+              <div className="space-y-2">
+                {q.options.map((opt) => {
+                  const selected = Array.isArray(value) && value.includes(opt);
+                  return (
+                    <ChoiceButton
+                      key={opt}
+                      active={selected}
+                      onClick={() =>
+                        setAnswer(
+                          selected
+                            ? (value as string[]).filter((x) => x !== opt)
+                            : [...(Array.isArray(value) ? value : []), opt]
+                        )
+                      }
+                    >
+                      {opt}
+                    </ChoiceButton>
+                  );
+                })}
+              </div>
+            )}
+
+            {q.question_type === "rating" && (
+              <div className="flex flex-row-reverse items-center justify-center gap-2 py-2">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    aria-label={`${n} כוכבים`}
+                    onClick={() => setAnswer(n)}
+                    className="p-1 transition-transform active:scale-90"
+                  >
+                    <Star
+                      className={cn(
+                        "h-10 w-10 transition-colors",
+                        typeof value === "number" && n <= value
+                          ? "fill-primary text-primary"
+                          : "text-muted-foreground/40"
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </StepShell>
+        ),
+      });
+    });
+
     return list;
-  }, [form]);
+  }, [form, questions, answers]);
 
   const current = steps[Math.min(step, steps.length - 1)];
   const isLast = step === steps.length - 1;
@@ -514,6 +624,24 @@ const EventFeedback = () => {
       _membership_fair_price: form.membership_fair_price || null,
       _membership_benefits: form.membership_benefits,
       _membership_benefits_other: form.membership_benefits_other.trim() || null,
+      _custom_answers: Object.fromEntries(
+        questions
+          .map((q) => {
+            const value = answers[q.id];
+            const filled =
+              Array.isArray(value)
+                ? value.length > 0
+                : typeof value === "number"
+                  ? value > 0
+                  : typeof value === "string" && value.trim().length > 0;
+            if (!filled) return null;
+            return [
+              q.id,
+              { question: q.question_text, type: q.question_type, answer: typeof value === "string" ? value.trim() : value },
+            ] as const;
+          })
+          .filter(Boolean) as [string, unknown][]
+      ),
     });
     setSubmitting(false);
     if (rpcError) {

@@ -22,8 +22,10 @@ import {
   ClipboardList,
   AlertTriangle,
   CalendarDays,
+  HelpCircle,
 } from "lucide-react";
 import QRCode from "qrcode";
+import FeedbackQuestionsDialog from "@/components/admin/FeedbackQuestionsDialog";
 
 interface EventOption {
   id: string;
@@ -55,6 +57,7 @@ interface FeedbackRow {
   improvement: string | null;
   next_event_likelihood: number | null;
   nps: number | null;
+  custom_answers?: Record<string, { question: string; type: string; answer: unknown }> | null;
 }
 
 interface Summary {
@@ -150,6 +153,22 @@ const AdminEventFeedback = () => {
   const [deleting, setDeleting] = useState(false);
 
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [questionsTarget, setQuestionsTarget] = useState<{ kind: "form" | "event"; id: string; title: string } | null>(null);
+  const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
+
+  const loadQuestionCounts = async () => {
+    const { data } = await supabase.from("feedback_questions").select("form_id, event_id");
+    const counts: Record<string, number> = {};
+    ((data as { form_id: string | null; event_id: string | null }[] | null) || []).forEach((q) => {
+      const key = q.form_id || q.event_id;
+      if (key) counts[key] = (counts[key] || 0) + 1;
+    });
+    setQuestionCounts(counts);
+  };
+
+  useEffect(() => {
+    void loadQuestionCounts();
+  }, []);
 
   const eventTitles = useMemo(
     () =>
@@ -213,7 +232,7 @@ const AdminEventFeedback = () => {
     ]);
 
     setSummary((summaryData as unknown as Summary) || null);
-    setRows((listResult.data as FeedbackRow[]) || []);
+    setRows((listResult.data as unknown as FeedbackRow[]) || []);
     setLoading(false);
   };
 
@@ -276,7 +295,7 @@ const AdminEventFeedback = () => {
     setNewEventOpen(false);
     setNewEvent({ title: "", date: "", time: "", location: "", description: "" });
     toast({ title: "האירוע נוצר והשאלון קושר אליו" });
-    void openQr(data as EventOption);
+    setQuestionsTarget({ kind: "event", id: data.id, title: data.title });
   };
 
   const createForm = async () => {
@@ -305,7 +324,7 @@ const AdminEventFeedback = () => {
     await loadForms();
     setNewForm({ title: "", description: "" });
     toast({ title: "השאלון נפתח" });
-    void openQr({ id: data.id, title: data.title, event_date: data.form_date });
+    setQuestionsTarget({ kind: "form", id: data.id, title: data.title });
   };
 
   const toggleForm = async (form: StandaloneForm) => {
@@ -430,6 +449,7 @@ const AdminEventFeedback = () => {
     onToggle,
     onDelete,
     deleteLabel,
+    kind,
   }: {
     id: string;
     title: string;
@@ -439,9 +459,19 @@ const AdminEventFeedback = () => {
     onToggle?: () => void;
     onDelete: () => void;
     deleteLabel: string;
+    kind: "form" | "event";
   }) => (
     <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/40 p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-1.5 sm:shrink-0">
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-1.5"
+          onClick={() => setQuestionsTarget({ kind, id, title })}
+        >
+          <HelpCircle className="h-4 w-4" /> שאלות
+          {questionCounts[id] ? ` (${questionCounts[id]})` : ""}
+        </Button>
         <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openQr({ id, title, event_date: date })}>
           <QrCode className="h-4 w-4" /> QR
         </Button>
@@ -771,6 +801,7 @@ const AdminEventFeedback = () => {
                   {filteredForms.map((f) => (
                     <QuestionnaireRow
                       key={f.id}
+                      kind="form"
                       id={f.id}
                       title={f.title}
                       date={f.form_date}
@@ -801,6 +832,7 @@ const AdminEventFeedback = () => {
                   {filteredEvents.map((e) => (
                     <QuestionnaireRow
                       key={e.id}
+                      kind="event"
                       id={e.id}
                       title={e.title}
                       date={e.event_date}
@@ -868,6 +900,15 @@ const AdminEventFeedback = () => {
                           {r.improvement && <p>לשיפור: {r.improvement}</p>}
                         </div>
                       )}
+                      {r.custom_answers && Object.keys(r.custom_answers).length > 0 && (
+                        <div className="mt-2 space-y-1 border-t border-border/50 pt-2 font-body text-sm text-muted-foreground">
+                          {Object.entries(r.custom_answers).map(([qid, a]) => (
+                            <p key={qid}>
+                              {a?.question}: {Array.isArray(a?.answer) ? (a.answer as string[]).join(", ") : String(a?.answer ?? "")}
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -876,6 +917,14 @@ const AdminEventFeedback = () => {
           </TabsContent>
         </Tabs>
       )}
+
+      <FeedbackQuestionsDialog
+        open={!!questionsTarget}
+        onOpenChange={(o) => !o && setQuestionsTarget(null)}
+        target={questionsTarget}
+        onSaved={loadQuestionCounts}
+      />
+
 
       <Dialog open={!!qrEvent} onOpenChange={(o) => !o && setQrEvent(null)}>
         <DialogContent dir="rtl" className="max-w-sm">

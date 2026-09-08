@@ -706,6 +706,7 @@ export type Database = {
           anon_id: string | null
           attend_reason: string | null
           created_at: string
+          custom_answers: Json
           enjoyment: number
           event_id: string | null
           form_id: string | null
@@ -730,6 +731,7 @@ export type Database = {
           anon_id?: string | null
           attend_reason?: string | null
           created_at?: string
+          custom_answers?: Json
           enjoyment: number
           event_id?: string | null
           form_id?: string | null
@@ -754,6 +756,7 @@ export type Database = {
           anon_id?: string | null
           attend_reason?: string | null
           created_at?: string
+          custom_answers?: Json
           enjoyment?: number
           event_id?: string | null
           form_id?: string | null
@@ -1055,6 +1058,63 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      feedback_questions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_order: number
+          event_id: string | null
+          form_id: string | null
+          id: string
+          is_required: boolean
+          options: string[]
+          question_text: string
+          question_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          event_id?: string | null
+          form_id?: string | null
+          id?: string
+          is_required?: boolean
+          options?: string[]
+          question_text: string
+          question_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          event_id?: string | null
+          form_id?: string | null
+          id?: string
+          is_required?: boolean
+          options?: string[]
+          question_text?: string
+          question_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_questions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_questions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_forms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gallery_albums: {
         Row: {
@@ -2370,6 +2430,7 @@ export type Database = {
             Args: {
               _anon_id: string
               _attend_reason?: string
+              _custom_answers?: Json
               _enjoyment: number
               _event_id: string
               _improvement?: string
