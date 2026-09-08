@@ -169,8 +169,20 @@ const EventFeedback = () => {
   useEffect(() => {
     const load = async () => {
       if (!eventId) return;
-      const { data } = await supabase.rpc("get_event_feedback_info", { _event_id: eventId });
+      const [{ data }, { data: questionRows }] = await Promise.all([
+        supabase.rpc("get_event_feedback_info", { _event_id: eventId }),
+        supabase
+          .from("feedback_questions")
+          .select("id, question_text, question_type, options, is_required, display_order")
+          .or(`form_id.eq.${eventId},event_id.eq.${eventId}`)
+          .order("display_order", { ascending: true }),
+      ]);
       setEvent(((data as EventInfo[] | null) || [])[0] || null);
+      const list = ((questionRows as CustomQuestion[] | null) || []);
+      setQuestions(list);
+      setAnswers(
+        Object.fromEntries(list.map((q) => [q.id, q.question_type === "multi" ? [] : q.question_type === "rating" ? null : ""]))
+      );
       setLoading(false);
     };
     load();
