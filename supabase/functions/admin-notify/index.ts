@@ -26,9 +26,16 @@ const EVENT_LABELS: Record<string, string> = {
   new_secondhand: "📦 מודעת יד שנייה חדשה פורסמה",
   new_realestate: "🏠 מודעת נדל״ן חדשה פורסמה",
   new_gallery_album: "🖼️ אלבום חדש נוסף לגלריה",
+  new_feedback_form: "📝 נפתח שאלון חדש",
+  new_feedback_response: "✍️ מישהו ענה על השאלון",
 };
 
 const fieldLabels: Record<string, string> = {
+  respondent: "שם העונה",
+  answered_count: "מספר שאלות שנענו",
+  form_title: "שאלון",
+  link: "קישור",
+  share_text: "הודעה לשיתוף",
   name: "שם",
   phone: "טלפון",
   email: "אימייל",
@@ -341,9 +348,24 @@ serve(async (req) => {
       );
     }
 
-    // No signed in user means a guest ad. Only the guest boards are allowed here,
-    // and only with the content that was actually saved.
-    if (!user) {
+    // Questionnaire alerts go to Telegram only, and never carry free content
+    // from the browser. A guest may answer a form, so the payload is trimmed
+    // down to a short name and a counter before anything is sent.
+    const telegramOnly = event_type === "new_feedback_form" || event_type === "new_feedback_response";
+    if (telegramOnly) {
+      const clean = (value: unknown, max: number) =>
+        typeof value === "string" && value.trim() ? value.trim().slice(0, max) : undefined;
+      const count = Number(data.answered_count);
+      data = {
+        form_title: clean(data.form_title, 120),
+        respondent: clean(data.respondent, 60),
+        answered_count: Number.isFinite(count) && count >= 0 ? String(Math.min(count, 999)) : undefined,
+        link: clean(data.link, 300),
+        share_text: clean(data.share_text, 600),
+      };
+    } else if (!user) {
+      // No signed in user means a guest ad. Only the guest boards are allowed here,
+      // and only with the content that was actually saved.
       const listing = await loadGuestListing(event_type, data.title);
       if (!listing) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -354,16 +376,16 @@ serve(async (req) => {
     }
 
     // Send to all channels in parallel – failures are independent
-    const results = await Promise.allSettled([
-      sendTelegram(event_type, data),
-      sendEmail(event_type, data),
-      sendWhatsApp(event_type, data),
-    ]);
+    const results = await Promise.allSettled(
+      telegramOnly
+        ? [sendTelegram(event_type, data)]
+        : [sendTelegram(event_type, data), sendEmail(event_type, data), sendWhatsApp(event_type, data)]
+    );
 
     const summary = {
       telegram: results[0].status,
-      email: results[1].status,
-      whatsapp: results[2].status,
+      email: results[1]?.status ?? "skipped",
+      whatsapp: results[2]?.status ?? "skipped",
     };
 
     return new Response(

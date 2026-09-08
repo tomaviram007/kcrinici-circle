@@ -29,6 +29,11 @@ import {
 import QRCode from "qrcode";
 import FeedbackQuestionsDialog from "@/components/admin/FeedbackQuestionsDialog";
 import QuestionsAccordion from "@/components/admin/QuestionsAccordion";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
+
+// The message the club forwards to members, in plain human Hebrew.
+const shareMessage = (title: string, url: string) =>
+  `שלום לכולם 🍻\nפתחנו שאלון קצר: ${title}\nלוקח דקה למלא, והתשובות עוזרות לנו לתכנן את המפגשים הבאים.\n${url}`;
 
 interface EventOption {
   id: string;
@@ -172,8 +177,10 @@ interface RowActions {
   openQr: (ev: EventOption) => void;
   openPreview: (ev: EventOption) => void;
   copyLink: (id: string) => void;
+  shareWhatsapp: (id: string, title: string) => void;
   onQuestionsChanged: () => void;
 }
+
 
 const QuestionnaireRow = ({
   id,
@@ -228,9 +235,18 @@ const QuestionnaireRow = ({
           >
             <Eye className="h-4 w-4" /> תצוגה
           </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => actions.shareWhatsapp(id, title)}
+          >
+            <MessageSquare className="h-4 w-4" /> ווטסאפ
+          </Button>
           <Button size="icon" variant="ghost" aria-label="העתקת קישור" onClick={() => actions.copyLink(id)}>
             <Copy className="h-4 w-4" />
           </Button>
+
           {onToggle && (
             <Button size="sm" variant="ghost" className="font-body text-xs" onClick={onToggle}>
               {inactive ? "הפעלה" : "השהיה"}
@@ -426,6 +442,22 @@ const AdminEventFeedback = () => {
     toast({ title: "הקישור הועתק" });
   };
 
+  const shareWhatsapp = (id: string, title: string) => {
+    const text = encodeURIComponent(shareMessage(title, feedbackUrl(id)));
+    window.open(`https://wa.me/?text=${text}`, "_blank", "noopener");
+  };
+
+  // When a questionnaire is opened, the club Telegram gets the link plus a
+  // ready made message that can be forwarded to the group as is.
+  const notifyNewForm = (id: string, title: string) => {
+    void sendTelegramNotification("new_feedback_form", {
+      form_title: title,
+      link: feedbackUrl(id),
+      share_text: shareMessage(title, feedbackUrl(id)),
+    });
+  };
+
+
   const createEvent = async () => {
     if (!newEvent.title.trim() || !newEvent.date) {
       toast({ title: "יש למלא שם אירוע ותאריך", variant: "destructive" });
@@ -456,6 +488,7 @@ const AdminEventFeedback = () => {
     setNewEvent({ title: "", date: "", time: "", location: "", description: "" });
     toast({ title: "האירוע נוצר והשאלון קושר אליו" });
     setQuestionsTarget({ kind: "event", id: data.id, title: data.title });
+    notifyNewForm(data.id, data.title);
   };
 
   const createForm = async () => {
@@ -485,6 +518,7 @@ const AdminEventFeedback = () => {
     setNewForm({ title: "", description: "" });
     toast({ title: "השאלון נפתח" });
     setQuestionsTarget({ kind: "form", id: data.id, title: data.title });
+    notifyNewForm(data.id, data.title);
   };
 
   const toggleForm = async (form: StandaloneForm) => {
@@ -625,6 +659,7 @@ const AdminEventFeedback = () => {
     openQr: (ev) => void openQr(ev),
     openPreview: (ev) => setPreviewEvent(ev),
     copyLink: (id) => void copyLink(id),
+    shareWhatsapp: (id, title) => shareWhatsapp(id, title),
     onQuestionsChanged: () => void loadQuestionCounts(),
   };
 
@@ -1182,6 +1217,13 @@ const AdminEventFeedback = () => {
                 <Copy className="h-4 w-4" /> העתקת קישור
               </Button>
             </div>
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => qrEvent && shareWhatsapp(qrEvent.id, qrEvent.title)}
+            >
+              <MessageSquare className="h-4 w-4" /> שליחה בווטסאפ
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

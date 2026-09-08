@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Check, Star, ArrowRight, ArrowLeft, PartyPopper } from "lucide-react";
 import { getAnonId, trackAction } from "@/lib/analytics";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 
@@ -610,6 +611,43 @@ const EventFeedback = () => {
       return;
     }
     trackAction("event_feedback_submit", { event_id: eventId });
+
+    // A short heads up to the club Telegram: who answered and how much they filled in.
+    const baseAnswered = [
+      form.enjoyment,
+      form.met_new_person,
+      form.keep_in_touch,
+      form.attend_reason,
+      form.preferred_meetup_type,
+      form.meaningful_moment.trim(),
+      form.improvement.trim(),
+      form.next_event_likelihood,
+      form.nps,
+      form.membership_interest,
+      form.membership_fair_price,
+    ].filter((v) => v !== null && v !== undefined && v !== "").length;
+    const customAnswered = questions.filter((q) => {
+      const value = answers[q.id];
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === "number") return value > 0;
+      return typeof value === "string" && value.trim().length > 0;
+    }).length;
+    const { data: userData } = await supabase.auth.getUser();
+    let respondent = "משיב ללא שם (אנונימי)";
+    if (userData.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name, full_name")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+      respondent = profile?.display_name || profile?.full_name || userData.user.email || respondent;
+    }
+    void sendTelegramNotification("new_feedback_response", {
+      form_title: event?.title,
+      respondent,
+      answered_count: baseAnswered + customAnswered,
+    });
+
     setDone(true);
   };
 

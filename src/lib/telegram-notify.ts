@@ -9,7 +9,9 @@ type EventType =
   | "new_deal"
   | "new_secondhand"
   | "new_realestate"
-  | "new_gallery_album";
+  | "new_gallery_album"
+  | "new_feedback_form"
+  | "new_feedback_response";
 
 export const sendTelegramNotification = async (eventType: EventType, data: Record<string, any>) => {
   try {
