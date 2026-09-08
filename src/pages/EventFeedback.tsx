@@ -624,6 +624,24 @@ const EventFeedback = () => {
       _membership_fair_price: form.membership_fair_price || null,
       _membership_benefits: form.membership_benefits,
       _membership_benefits_other: form.membership_benefits_other.trim() || null,
+      _custom_answers: Object.fromEntries(
+        questions
+          .map((q) => {
+            const value = answers[q.id];
+            const filled =
+              Array.isArray(value)
+                ? value.length > 0
+                : typeof value === "number"
+                  ? value > 0
+                  : typeof value === "string" && value.trim().length > 0;
+            if (!filled) return null;
+            return [
+              q.id,
+              { question: q.question_text, type: q.question_type, answer: typeof value === "string" ? value.trim() : value },
+            ] as const;
+          })
+          .filter(Boolean) as [string, unknown][]
+      ),
     });
     setSubmitting(false);
     if (rpcError) {
