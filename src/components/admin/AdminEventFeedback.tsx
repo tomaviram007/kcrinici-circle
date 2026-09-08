@@ -488,6 +488,7 @@ const AdminEventFeedback = () => {
     setNewEvent({ title: "", date: "", time: "", location: "", description: "" });
     toast({ title: "האירוע נוצר והשאלון קושר אליו" });
     setQuestionsTarget({ kind: "event", id: data.id, title: data.title });
+    notifyNewForm(data.id, data.title);
   };
 
   const createForm = async () => {
@@ -517,6 +518,7 @@ const AdminEventFeedback = () => {
     setNewForm({ title: "", description: "" });
     toast({ title: "השאלון נפתח" });
     setQuestionsTarget({ kind: "form", id: data.id, title: data.title });
+    notifyNewForm(data.id, data.title);
   };
 
   const toggleForm = async (form: StandaloneForm) => {
