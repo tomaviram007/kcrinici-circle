@@ -610,6 +610,33 @@ const EventFeedback = () => {
       return;
     }
     trackAction("event_feedback_submit", { event_id: eventId });
+
+    // A short heads up to the club Telegram: who answered and how much they filled in.
+    const baseAnswered = [
+      form.enjoyment,
+      form.met_new_person,
+      form.keep_in_touch,
+      form.attend_reason,
+      form.preferred_meetup_type,
+      form.meaningful_moment.trim(),
+      form.improvement.trim(),
+      form.next_event_likelihood,
+      form.nps,
+      form.membership_interest,
+      form.membership_fair_price,
+    ].filter((v) => v !== null && v !== undefined && v !== "").length;
+    const customAnswered = questions.filter((q) => {
+      const value = answers[q.id];
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === "number") return value > 0;
+      return typeof value === "string" && value.trim().length > 0;
+    }).length;
+    void sendTelegramNotification("new_feedback_response", {
+      form_title: event?.title,
+      respondent: respondentName || "משיב ללא שם (אנונימי)",
+      answered_count: baseAnswered + customAnswered,
+    });
+
     setDone(true);
   };
 
