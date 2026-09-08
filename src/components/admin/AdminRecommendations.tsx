@@ -301,7 +301,7 @@ const AdminRecommendations = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-0.5" dir="ltr">
+                    <div className="flex gap-0.5" dir="rtl">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star key={s} className={`h-3.5 w-3.5 ${s <= rec.rating ? "fill-primary text-primary" : "text-muted-foreground/20"}`} />
                       ))}
@@ -377,7 +377,7 @@ const AdminRecommendations = () => {
             </div>
             <div>
               <Label className="font-body text-sm mb-2 block">דירוג</Label>
-              <div className="flex gap-1" dir="ltr">
+              <div className="flex gap-1" dir="rtl">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Star key={s} className={`h-6 w-6 cursor-pointer transition-colors ${s <= formData.rating ? "fill-primary text-primary" : "text-muted-foreground/30"}`} onClick={() => setFormData({ ...formData, rating: s })} />
                 ))}
