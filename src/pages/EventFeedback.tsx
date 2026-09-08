@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Check, Star, ArrowRight, ArrowLeft, PartyPopper } from "lucide-react";
 import { getAnonId, trackAction } from "@/lib/analytics";
+import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 
