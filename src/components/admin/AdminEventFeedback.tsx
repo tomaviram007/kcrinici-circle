@@ -187,6 +187,9 @@ const AdminEventFeedback = () => {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [questionsTarget, setQuestionsTarget] = useState<{ kind: "form" | "event"; id: string; title: string } | null>(null);
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
+  const [memberNames, setMemberNames] = useState<Record<string, string>>({});
+  const [drill, setDrill] = useState<{ title: string; items: DrillItem[] } | null>(null);
+
 
   const loadQuestionCounts = async () => {
     const { data } = await supabase.from("feedback_questions").select("form_id, event_id");
