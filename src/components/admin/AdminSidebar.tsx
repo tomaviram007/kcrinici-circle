@@ -35,6 +35,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   content_access: "manage_settings",
   analytics: "manage_settings",
   event_feedback: "manage_events",
+  community: "manage_members",
   promo_banners: "manage_announcements",
 };
 
@@ -44,6 +45,7 @@ const groups = [
     items: [
       { id: "members", label: "בקשות הצטרפות", icon: Users, showBadge: true },
       { id: "birthdays", label: "ימי הולדת", icon: Cake },
+      { id: "community", label: "חברי הקהילה", icon: Users },
       { id: "team", label: "צוות", icon: Shield },
     ],
   },
