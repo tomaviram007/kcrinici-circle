@@ -167,6 +167,7 @@ const AdminDashboard = () => {
             {activeTab === "content_access" && hasPermission("manage_settings") && <AdminContentAccess />}
             {activeTab === "analytics" && hasPermission("manage_settings") && <AdminAnalytics />}
             {activeTab === "event_feedback" && hasPermission("manage_events") && <AdminEventFeedback />}
+            {activeTab === "community" && hasPermission("manage_members") && <AdminCommunityMembers />}
             {activeTab === "team" && hasPermission("manage_team") && <AdminTeam />}
             {/* Show access denied message if no permission */}
             {TAB_PERMISSION_MAP[activeTab] && !hasPermission(TAB_PERMISSION_MAP[activeTab]) && (
