@@ -449,6 +449,7 @@ const AdminEventFeedback = () => {
     onToggle,
     onDelete,
     deleteLabel,
+    kind,
   }: {
     id: string;
     title: string;
@@ -458,9 +459,19 @@ const AdminEventFeedback = () => {
     onToggle?: () => void;
     onDelete: () => void;
     deleteLabel: string;
+    kind: "form" | "event";
   }) => (
     <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/40 p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-1.5 sm:shrink-0">
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-1.5"
+          onClick={() => setQuestionsTarget({ kind, id, title })}
+        >
+          <HelpCircle className="h-4 w-4" /> שאלות
+          {questionCounts[id] ? ` (${questionCounts[id]})` : ""}
+        </Button>
         <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openQr({ id, title, event_date: date })}>
           <QrCode className="h-4 w-4" /> QR
         </Button>
