@@ -3,6 +3,7 @@ import MonthCelebrants from "./birthdays/MonthCelebrants";
 import BirthdayEmailEditor from "./birthdays/BirthdayEmailEditor";
 import BirthdayScheduleSettings from "./birthdays/BirthdayScheduleSettings";
 import BirthdayHistory from "./birthdays/BirthdayHistory";
+import BirthdayDeliveryReport from "./birthdays/BirthdayDeliveryReport";
 import { Cake } from "lucide-react";
 
 const AdminBirthdays = () => {
