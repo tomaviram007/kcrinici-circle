@@ -509,8 +509,94 @@ const EventFeedback = () => {
       ),
     });
 
+    questions.forEach((q) => {
+      const value = answers[q.id];
+      const setAnswer = (v: CustomAnswer) => setAnswers((prev) => ({ ...prev, [q.id]: v }));
+      const answered =
+        q.question_type === "multi"
+          ? Array.isArray(value) && value.length > 0
+          : q.question_type === "rating"
+            ? typeof value === "number" && value > 0
+            : typeof value === "string" && value.trim().length > 0;
+
+      list.push({
+        key: `custom-${q.id}`,
+        valid: q.is_required ? answered : true,
+        render: () => (
+          <StepShell title={q.question_text} subtitle={q.is_required ? "שאלת חובה" : "אפשר גם לדלג"}>
+            {q.question_type === "text" && (
+              <Textarea
+                dir="rtl"
+                className="min-h-28 text-right"
+                maxLength={1000}
+                placeholder="כתוב כאן..."
+                value={typeof value === "string" ? value : ""}
+                onChange={(e) => setAnswer(e.target.value)}
+              />
+            )}
+
+            {q.question_type === "single" && (
+              <div className="space-y-2">
+                {q.options.map((opt) => (
+                  <ChoiceButton key={opt} active={value === opt} onClick={() => setAnswer(opt)}>
+                    {opt}
+                  </ChoiceButton>
+                ))}
+              </div>
+            )}
+
+            {q.question_type === "multi" && (
+              <div className="space-y-2">
+                {q.options.map((opt) => {
+                  const selected = Array.isArray(value) && value.includes(opt);
+                  return (
+                    <ChoiceButton
+                      key={opt}
+                      active={selected}
+                      onClick={() =>
+                        setAnswer(
+                          selected
+                            ? (value as string[]).filter((x) => x !== opt)
+                            : [...(Array.isArray(value) ? value : []), opt]
+                        )
+                      }
+                    >
+                      {opt}
+                    </ChoiceButton>
+                  );
+                })}
+              </div>
+            )}
+
+            {q.question_type === "rating" && (
+              <div className="flex flex-row-reverse items-center justify-center gap-2 py-2">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    aria-label={`${n} כוכבים`}
+                    onClick={() => setAnswer(n)}
+                    className="p-1 transition-transform active:scale-90"
+                  >
+                    <Star
+                      className={cn(
+                        "h-10 w-10 transition-colors",
+                        typeof value === "number" && n <= value
+                          ? "fill-primary text-primary"
+                          : "text-muted-foreground/40"
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </StepShell>
+        ),
+      });
+    });
+
     return list;
-  }, [form]);
+  }, [form, questions, answers]);
 
   const current = steps[Math.min(step, steps.length - 1)];
   const isLast = step === steps.length - 1;
