@@ -177,8 +177,10 @@ interface RowActions {
   openQr: (ev: EventOption) => void;
   openPreview: (ev: EventOption) => void;
   copyLink: (id: string) => void;
+  shareWhatsapp: (id: string, title: string) => void;
   onQuestionsChanged: () => void;
 }
+
 
 const QuestionnaireRow = ({
   id,
@@ -233,9 +235,18 @@ const QuestionnaireRow = ({
           >
             <Eye className="h-4 w-4" /> תצוגה
           </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => actions.shareWhatsapp(id, title)}
+          >
+            <MessageSquare className="h-4 w-4" /> ווטסאפ
+          </Button>
           <Button size="icon" variant="ghost" aria-label="העתקת קישור" onClick={() => actions.copyLink(id)}>
             <Copy className="h-4 w-4" />
           </Button>
+
           {onToggle && (
             <Button size="sm" variant="ghost" className="font-body text-xs" onClick={onToggle}>
               {inactive ? "הפעלה" : "השהיה"}
