@@ -153,6 +153,22 @@ const AdminEventFeedback = () => {
   const [deleting, setDeleting] = useState(false);
 
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [questionsTarget, setQuestionsTarget] = useState<{ kind: "form" | "event"; id: string; title: string } | null>(null);
+  const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
+
+  const loadQuestionCounts = async () => {
+    const { data } = await supabase.from("feedback_questions").select("form_id, event_id");
+    const counts: Record<string, number> = {};
+    ((data as { form_id: string | null; event_id: string | null }[] | null) || []).forEach((q) => {
+      const key = q.form_id || q.event_id;
+      if (key) counts[key] = (counts[key] || 0) + 1;
+    });
+    setQuestionCounts(counts);
+  };
+
+  useEffect(() => {
+    void loadQuestionCounts();
+  }, []);
 
   const eventTitles = useMemo(
     () =>
