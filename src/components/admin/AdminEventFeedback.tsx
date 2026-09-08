@@ -267,7 +267,21 @@ const AdminEventFeedback = () => {
     ]);
 
     setSummary((summaryData as unknown as Summary) || null);
-    setRows((listResult.data as unknown as FeedbackRow[]) || []);
+    const list = (listResult.data as unknown as FeedbackRow[]) || [];
+    setRows(list);
+
+    const memberIds = Array.from(new Set(list.map((r) => r.member_id).filter(Boolean))) as string[];
+    if (memberIds.length) {
+      const { data: memberRows } = await supabase
+        .from("community_members")
+        .select("id, full_name")
+        .in("id", memberIds);
+      setMemberNames(
+        Object.fromEntries(((memberRows as { id: string; full_name: string }[] | null) || []).map((m) => [m.id, m.full_name]))
+      );
+    } else {
+      setMemberNames({});
+    }
     setLoading(false);
   };
 
