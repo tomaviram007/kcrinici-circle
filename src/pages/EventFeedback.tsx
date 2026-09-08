@@ -462,48 +462,9 @@ const EventFeedback = () => {
               </ChoiceButton>
             ))}
           </div>
-        </StepShell>
-      ),
-    });
-
-    list.push({
-      key: "membership_benefits",
-      valid: form.membership_benefits.length > 0 || !!form.membership_benefits_other.trim(),
-      render: () => (
-        <StepShell
-          title="מה היית רוצה לקבל כחבר מועדון בתמורה לדמי החברות?"
-          subtitle="אפשר לבחור כמה תשובות"
-        >
-          <div className="grid gap-2">
-            {MEMBERSHIP_BENEFITS.map((b) => (
-              <ChoiceButton
-                key={b}
-                active={form.membership_benefits.includes(b)}
-                onClick={() =>
-                  set(
-                    "membership_benefits",
-                    form.membership_benefits.includes(b)
-                      ? form.membership_benefits.filter((x) => x !== b)
-                      : [...form.membership_benefits, b]
-                  )
-                }
-              >
-                {b}
-              </ChoiceButton>
-            ))}
-            <Input
-              dir="rtl"
-              placeholder="אחר: מה עוד היית רוצה לקבל?"
-              maxLength={300}
-              value={form.membership_benefits_other}
-              onChange={(e) => set("membership_benefits_other", e.target.value)}
-              className="text-right"
-            />
-          </div>
           <p className="rounded-xl border border-border/60 bg-muted/30 p-3 text-right font-body text-xs leading-relaxed text-muted-foreground">
             חשוב לנו להבהיר: אנחנו עדיין לא מחליטים על דמי חברות ולא מתחייבים למודל מסוים. המטרה של
-            השאלות האלה היא להבין יחד אתכם האם יש עניין בחברות שנתית, מה יהיה מחיר שנראה הוגן ומה
-            הייתם רוצים לקבל כחברי המועדון.
+            השאלות האלה היא להבין יחד אתכם האם יש עניין בחברות שנתית ומה יהיה מחיר שנראה הוגן.
           </p>
         </StepShell>
       ),
