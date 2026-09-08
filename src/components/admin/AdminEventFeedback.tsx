@@ -295,7 +295,7 @@ const AdminEventFeedback = () => {
     setNewEventOpen(false);
     setNewEvent({ title: "", date: "", time: "", location: "", description: "" });
     toast({ title: "האירוע נוצר והשאלון קושר אליו" });
-    void openQr(data as EventOption);
+    setQuestionsTarget({ kind: "event", id: data.id, title: data.title });
   };
 
   const createForm = async () => {
@@ -324,7 +324,7 @@ const AdminEventFeedback = () => {
     await loadForms();
     setNewForm({ title: "", description: "" });
     toast({ title: "השאלון נפתח" });
-    void openQr({ id: data.id, title: data.title, event_date: data.form_date });
+    setQuestionsTarget({ kind: "form", id: data.id, title: data.title });
   };
 
   const toggleForm = async (form: StandaloneForm) => {
