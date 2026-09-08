@@ -22,8 +22,10 @@ import {
   ClipboardList,
   AlertTriangle,
   CalendarDays,
+  HelpCircle,
 } from "lucide-react";
 import QRCode from "qrcode";
+import FeedbackQuestionsDialog from "@/components/admin/FeedbackQuestionsDialog";
 
 interface EventOption {
   id: string;
@@ -55,6 +57,7 @@ interface FeedbackRow {
   improvement: string | null;
   next_event_likelihood: number | null;
   nps: number | null;
+  custom_answers?: Record<string, { question: string; type: string; answer: unknown }> | null;
 }
 
 interface Summary {
