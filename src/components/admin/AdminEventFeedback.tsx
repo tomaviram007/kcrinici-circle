@@ -28,6 +28,7 @@ import {
 
 import QRCode from "qrcode";
 import FeedbackQuestionsDialog from "@/components/admin/FeedbackQuestionsDialog";
+import QuestionsAccordion from "@/components/admin/QuestionsAccordion";
 
 interface EventOption {
   id: string;
@@ -615,71 +616,17 @@ const AdminEventFeedback = () => {
     [events, search]
   );
 
-  const QuestionnaireRow = ({
-    id,
-    title,
-    date,
-    badge,
-    inactive,
-    onToggle,
-    onDelete,
-    deleteLabel,
-    kind,
-  }: {
-    id: string;
-    title: string;
-    date: string;
-    badge: string;
-    inactive?: boolean;
-    onToggle?: () => void;
-    onDelete: () => void;
-    deleteLabel: string;
-    kind: "form" | "event";
-  }) => (
-    <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/40 p-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-wrap items-center gap-1.5 sm:shrink-0">
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-1.5"
-          onClick={() => setQuestionsTarget({ kind, id, title })}
-        >
-          <HelpCircle className="h-4 w-4" /> שאלות
-          {questionCounts[id] ? ` (${questionCounts[id]})` : ""}
-        </Button>
-        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openQr({ id, title, event_date: date })}>
-          <QrCode className="h-4 w-4" /> QR
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-1.5"
-          onClick={() => setPreviewEvent({ id, title, event_date: date })}
-        >
-          <Eye className="h-4 w-4" /> תצוגה
-        </Button>
-        <Button size="icon" variant="ghost" aria-label="העתקת קישור" onClick={() => copyLink(id)}>
-          <Copy className="h-4 w-4" />
-        </Button>
-        {onToggle && (
-          <Button size="sm" variant="ghost" className="font-body text-xs" onClick={onToggle}>
-            {inactive ? "הפעלה" : "השהיה"}
-          </Button>
-        )}
-        <Button size="icon" variant="ghost" aria-label={deleteLabel} onClick={onDelete}>
-          <Trash2 className="h-4 w-4 text-destructive" />
-        </Button>
-      </div>
-
-      <div className="min-w-0 text-right">
-        <p className="truncate font-body text-sm font-bold text-foreground">{title}</p>
-        <p className="font-body text-xs text-muted-foreground">
-          {new Date(date).toLocaleDateString("he-IL")} · {badge}
-          {inactive && " · מושהה"}
-        </p>
-      </div>
-    </div>
-  );
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const rowActions: RowActions = {
+    questionCounts,
+    expanded: expandedRows,
+    toggleExpand: (id) => setExpandedRows((p) => ({ ...p, [id]: !p[id] })),
+    openQuestions: (t) => setQuestionsTarget(t),
+    openQr: (ev) => void openQr(ev),
+    openPreview: (ev) => setPreviewEvent(ev),
+    copyLink: (id) => void copyLink(id),
+    onQuestionsChanged: () => void loadQuestionCounts(),
+  };
 
   return (
     <div dir="rtl" className="space-y-6 text-right">
@@ -1052,6 +999,7 @@ const AdminEventFeedback = () => {
                     <QuestionnaireRow
                       key={f.id}
                       kind="form"
+                      actions={rowActions}
                       id={f.id}
                       title={f.title}
                       date={f.form_date}
@@ -1083,6 +1031,7 @@ const AdminEventFeedback = () => {
                     <QuestionnaireRow
                       key={e.id}
                       kind="event"
+                      actions={rowActions}
                       id={e.id}
                       title={e.title}
                       date={e.event_date}
