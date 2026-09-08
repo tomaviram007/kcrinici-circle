@@ -216,7 +216,7 @@ const AdminEventFeedback = () => {
     ]);
 
     setSummary((summaryData as unknown as Summary) || null);
-    setRows((listResult.data as FeedbackRow[]) || []);
+    setRows((listResult.data as unknown as FeedbackRow[]) || []);
     setLoading(false);
   };
 
