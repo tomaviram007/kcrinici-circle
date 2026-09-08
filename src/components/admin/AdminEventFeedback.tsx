@@ -442,6 +442,22 @@ const AdminEventFeedback = () => {
     toast({ title: "הקישור הועתק" });
   };
 
+  const shareWhatsapp = (id: string, title: string) => {
+    const text = encodeURIComponent(shareMessage(title, feedbackUrl(id)));
+    window.open(`https://wa.me/?text=${text}`, "_blank", "noopener");
+  };
+
+  // When a questionnaire is opened, the club Telegram gets the link plus a
+  // ready made message that can be forwarded to the group as is.
+  const notifyNewForm = (id: string, title: string) => {
+    void sendTelegramNotification("new_feedback_form", {
+      form_title: title,
+      link: feedbackUrl(id),
+      share_text: shareMessage(title, feedbackUrl(id)),
+    });
+  };
+
+
   const createEvent = async () => {
     if (!newEvent.title.trim() || !newEvent.date) {
       toast({ title: "יש למלא שם אירוע ותאריך", variant: "destructive" });
