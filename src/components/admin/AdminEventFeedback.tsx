@@ -103,21 +103,40 @@ const StatCard = ({
   label,
   value,
   hint,
+  onClick,
+  count,
 }: {
   icon: React.ElementType;
   label: string;
   value: string;
   hint?: string;
-}) => (
-  <div className="rounded-xl border border-border bg-card p-4 text-right">
-    <div className="mb-2 flex items-center justify-end gap-2 text-muted-foreground">
-      <span className="font-body text-xs">{label}</span>
-      <Icon className="h-4 w-4 text-primary" />
-    </div>
-    <p className="font-serif text-2xl font-bold text-foreground">{value}</p>
-    {hint && <p className="mt-1 font-body text-[11px] text-muted-foreground">{hint}</p>}
-  </div>
-);
+  onClick?: () => void;
+  count?: number;
+}) => {
+  const Tag = onClick ? "button" : "div";
+  return (
+    <Tag
+      type={onClick ? "button" : undefined}
+      onClick={onClick}
+      className={
+        "w-full rounded-xl border border-border bg-card p-4 text-right transition-colors" +
+        (onClick ? " cursor-pointer hover:border-primary/60 hover:bg-primary/5" : "")
+      }
+    >
+      <div className="mb-2 flex items-center justify-end gap-2 text-muted-foreground">
+        <span className="font-body text-xs">{label}</span>
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <p className="font-serif text-2xl font-bold text-foreground">{value}</p>
+      {hint && <p className="mt-1 font-body text-[11px] text-muted-foreground">{hint}</p>}
+      {onClick && (
+        <p className="mt-1 font-body text-[11px] text-primary">
+          לחצו לרשימת המשיבים{typeof count === "number" ? ` (${count})` : ""}
+        </p>
+      )}
+    </Tag>
+  );
+};
 
 const Panel = ({
   title,
