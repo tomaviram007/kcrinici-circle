@@ -471,6 +471,22 @@ const AdminEventFeedback = () => {
     URL.revokeObjectURL(a.href);
   };
 
+  const respondentName = (r: FeedbackRow) =>
+    (r.member_id && memberNames[r.member_id]) || "משיב ללא שם (אנונימי)";
+
+  const openDrill = (title: string, list: FeedbackRow[], detail: (r: FeedbackRow) => string) =>
+    setDrill({
+      title,
+      items: list.map((r) => ({
+        id: r.id,
+        name: respondentName(r),
+        detail: detail(r),
+        source: eventTitles[(r.event_id || r.form_id) as string] || "שאלון",
+        date: new Date(r.created_at).toLocaleString("he-IL"),
+      })),
+    });
+
+
   const responseCounts = useMemo(() => {
     const map: Record<string, number> = {};
     rows.forEach((r) => {
