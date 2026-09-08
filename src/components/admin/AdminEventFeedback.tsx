@@ -23,7 +23,9 @@ import {
   AlertTriangle,
   CalendarDays,
   HelpCircle,
+  ChevronDown,
 } from "lucide-react";
+
 import QRCode from "qrcode";
 import FeedbackQuestionsDialog from "@/components/admin/FeedbackQuestionsDialog";
 
