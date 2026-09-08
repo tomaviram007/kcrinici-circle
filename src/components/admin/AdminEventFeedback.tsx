@@ -45,6 +45,7 @@ interface FeedbackRow {
   id: string;
   event_id: string | null;
   form_id: string | null;
+  member_id?: string | null;
   created_at: string;
   enjoyment: number;
   met_new_person: boolean;
@@ -57,7 +58,19 @@ interface FeedbackRow {
   improvement: string | null;
   next_event_likelihood: number | null;
   nps: number | null;
+  membership_interest?: string | null;
+  membership_fair_price?: string | null;
+  membership_benefits?: string[] | null;
+  membership_benefits_other?: string | null;
   custom_answers?: Record<string, { question: string; type: string; answer: unknown }> | null;
+}
+
+interface DrillItem {
+  id: string;
+  name: string;
+  detail: string;
+  source: string;
+  date: string;
 }
 
 interface Summary {
