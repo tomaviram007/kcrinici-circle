@@ -389,6 +389,66 @@ export type Database = {
         }
         Relationships: []
       }
+      community_members: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string | null
+          email_norm: string | null
+          full_name: string
+          id: string
+          joined_at: string
+          membership_end: string | null
+          membership_payment_status: string | null
+          membership_start: string | null
+          membership_status: string
+          membership_type: string | null
+          phone: string | null
+          phone_norm: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string | null
+          email_norm?: string | null
+          full_name?: string
+          id?: string
+          joined_at?: string
+          membership_end?: string | null
+          membership_payment_status?: string | null
+          membership_start?: string | null
+          membership_status?: string
+          membership_type?: string | null
+          phone?: string | null
+          phone_norm?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string | null
+          email_norm?: string | null
+          full_name?: string
+          id?: string
+          joined_at?: string
+          membership_end?: string | null
+          membership_payment_status?: string | null
+          membership_start?: string | null
+          membership_status?: string
+          membership_type?: string | null
+          phone?: string | null
+          phone_norm?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       content_access_settings: {
         Row: {
           content_type: string
@@ -596,6 +656,51 @@ export type Database = {
         }
         Relationships: []
       }
+      event_attendance: {
+        Row: {
+          checked_in_at: string
+          created_at: string
+          event_id: string
+          id: string
+          member_id: string
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          checked_in_at?: string
+          created_at?: string
+          event_id: string
+          id?: string
+          member_id: string
+          source?: string
+          user_id?: string | null
+        }
+        Update: {
+          checked_in_at?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          member_id?: string
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendance_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_attendance_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "community_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_feedback: {
         Row: {
           anon_id: string | null
@@ -609,6 +714,7 @@ export type Database = {
           keep_in_touch: boolean
           keep_in_touch_name: string | null
           meaningful_moment: string | null
+          member_id: string | null
           membership_benefits: string[]
           membership_benefits_other: string | null
           membership_fair_price: string | null
@@ -632,6 +738,7 @@ export type Database = {
           keep_in_touch?: boolean
           keep_in_touch_name?: string | null
           meaningful_moment?: string | null
+          member_id?: string | null
           membership_benefits?: string[]
           membership_benefits_other?: string | null
           membership_fair_price?: string | null
@@ -655,6 +762,7 @@ export type Database = {
           keep_in_touch?: boolean
           keep_in_touch_name?: string | null
           meaningful_moment?: string | null
+          member_id?: string | null
           membership_benefits?: string[]
           membership_benefits_other?: string | null
           membership_fair_price?: string | null
@@ -679,6 +787,13 @@ export type Database = {
             columns: ["form_id"]
             isOneToOne: false
             referencedRelation: "feedback_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_feedback_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "community_members"
             referencedColumns: ["id"]
           },
         ]
@@ -1823,6 +1938,51 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_community_member_detail: {
+        Args: { _member_id: string }
+        Returns: Json
+      }
+      admin_community_members: {
+        Args: { _limit?: number; _search?: string }
+        Returns: {
+          admin_notes: string
+          avatar_url: string
+          email: string
+          events_attended: number
+          events_registered: number
+          feedback_count: number
+          full_name: string
+          id: string
+          joined_at: string
+          last_event_at: string
+          last_event_title: string
+          membership_fair_price: string
+          membership_interest: string
+          membership_status: string
+          phone: string
+          status: string
+          user_id: string
+        }[]
+      }
+      admin_event_engagement: {
+        Args: { _event_id?: string; _limit?: number }
+        Returns: {
+          attendance_pct: number
+          attended: number
+          avg_enjoyment: number
+          event_date: string
+          event_id: string
+          feedback_count: number
+          feedback_pct: number
+          met_new_count: number
+          new_attendees: number
+          registered: number
+          returning_attendees: number
+          returning_pct: number
+          title: string
+          want_return_count: number
+        }[]
+      }
       admin_event_feedback_summary: {
         Args: { _end?: string; _event_id?: string; _start?: string }
         Returns: Json
@@ -1869,6 +2029,15 @@ export type Database = {
       admin_set_email_opt_in: {
         Args: { _opt_in: boolean; _user_id: string }
         Returns: undefined
+      }
+      checkin_event: {
+        Args: {
+          _email?: string
+          _event_id: string
+          _full_name?: string
+          _phone?: string
+        }
+        Returns: Json
       }
       get_active_ad_campaigns: {
         Args: never
@@ -2166,6 +2335,17 @@ export type Database = {
       mark_email_suppressed: {
         Args: { _email: string; _metadata?: Json; _reason: string }
         Returns: undefined
+      }
+      norm_email: { Args: { _e: string }; Returns: string }
+      norm_phone: { Args: { _p: string }; Returns: string }
+      resolve_community_member: {
+        Args: {
+          _email: string
+          _full_name: string
+          _phone: string
+          _user_id: string
+        }
+        Returns: string
       }
       submit_event_feedback:
         | {
