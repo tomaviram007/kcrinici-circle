@@ -1058,6 +1058,37 @@ const AdminEventFeedback = () => {
         </Tabs>
       )}
 
+      <Dialog open={!!drill} onOpenChange={(o) => !o && setDrill(null)}>
+        <DialogContent dir="rtl" className="max-h-[80vh] max-w-lg overflow-y-auto text-right">
+          <DialogHeader>
+            <DialogTitle className="text-right font-serif">
+              {drill?.title} ({drill?.items.length ?? 0})
+            </DialogTitle>
+          </DialogHeader>
+          {drill?.items.length ? (
+            <div className="space-y-2">
+              {drill.items.map((it) => (
+                <div key={it.id} className="rounded-xl border border-border/60 bg-background/40 p-3 text-right">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 font-body text-xs text-primary">
+                      {it.detail}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate font-body text-sm font-bold text-foreground">{it.name}</p>
+                      <p className="font-body text-xs text-muted-foreground">
+                        {it.source} · {it.date}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="font-body text-sm text-muted-foreground">אין משיבים בקטגוריה הזו</p>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <FeedbackQuestionsDialog
         open={!!questionsTarget}
         onOpenChange={(o) => !o && setQuestionsTarget(null)}
