@@ -8,6 +8,7 @@ import AdminBirthdays from "@/components/admin/AdminBirthdays";
 import AdminContentAccess from "@/components/admin/AdminContentAccess";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import AdminEventFeedback from "@/components/admin/AdminEventFeedback";
+import AdminCommunityMembers from "@/components/admin/AdminCommunityMembers";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "react-router-dom";
@@ -69,6 +70,7 @@ const TAB_PERMISSION_MAP: Record<string, string> = {
   content_access: "manage_settings",
   analytics: "manage_settings",
   event_feedback: "manage_events",
+  community: "manage_members",
 };
 
 const AdminDashboard = () => {
