@@ -60,7 +60,7 @@ interface Recommendation {
 }
 
 const StarRating = ({ rating, onRate, interactive = false }: { rating: number; onRate?: (r: number) => void; interactive?: boolean }) => (
-  <div className="flex gap-0.5" dir="ltr">
+  <div className="flex gap-0.5" dir="rtl">
     {[1, 2, 3, 4, 5].map((star) => (
       <Star
         key={star}

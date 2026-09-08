@@ -201,7 +201,7 @@ const EventFeedback = () => {
       valid: form.enjoyment !== null,
       render: () => (
         <StepShell title="עד כמה נהנית מהמפגש היום?" subtitle="פשוט תבחר כוכבים, בלי לחשוב יותר מדי">
-          <div className="flex flex-row-reverse items-center justify-center gap-2 py-2">
+          <div className="flex flex-row items-center justify-center gap-2 py-2">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
@@ -530,7 +530,7 @@ const EventFeedback = () => {
             )}
 
             {q.question_type === "rating" && (
-              <div className="flex flex-row-reverse items-center justify-center gap-2 py-2">
+              <div className="flex flex-row items-center justify-center gap-2 py-2">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
                     key={n}
