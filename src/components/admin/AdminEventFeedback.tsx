@@ -641,6 +641,7 @@ const AdminEventFeedback = () => {
     openQr: (ev) => void openQr(ev),
     openPreview: (ev) => setPreviewEvent(ev),
     copyLink: (id) => void copyLink(id),
+    shareWhatsapp: (id, title) => shareWhatsapp(id, title),
     onQuestionsChanged: () => void loadQuestionCounts(),
   };
 
