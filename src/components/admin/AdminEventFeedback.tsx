@@ -804,12 +804,20 @@ const AdminEventFeedback = () => {
               </div>
 
               <div className="grid gap-4 lg:grid-cols-3">
-                {[
-                  { title: "נכונות להצטרף", rows: summary?.membership?.interest ?? [] },
-                  { title: "סכום שנתי הוגן", rows: summary?.membership?.prices ?? [] },
-                  { title: "הטבות מבוקשות", rows: summary?.membership?.benefits ?? [] },
-                ].map((block) => {
+                {([
+                  { title: "נכונות להצטרף", rows: summary?.membership?.interest ?? [], field: "interest" },
+                  { title: "סכום שנתי הוגן", rows: summary?.membership?.prices ?? [], field: "price" },
+                  { title: "הטבות מבוקשות", rows: summary?.membership?.benefits ?? [], field: "benefit" },
+                ] as const).map((block) => {
                   const base = summary?.membership?.respondents || 0;
+                  const matches = (name: string) =>
+                    rows.filter((r) =>
+                      block.field === "interest"
+                        ? r.membership_interest === name
+                        : block.field === "price"
+                          ? r.membership_fair_price === name
+                          : (r.membership_benefits || []).includes(name)
+                    );
                   return (
                     <div key={block.title} className="rounded-xl border border-border bg-background/40 p-3">
                       <h4 className="mb-2 text-right font-body text-sm font-bold text-foreground">{block.title}</h4>
@@ -818,7 +826,14 @@ const AdminEventFeedback = () => {
                           {block.rows.map((r) => {
                             const pct = base ? Math.round((r.count / base) * 100) : 0;
                             return (
-                              <div key={r.name} className="space-y-1">
+                              <button
+                                type="button"
+                                key={r.name}
+                                onClick={() =>
+                                  openDrill(`${block.title}: ${r.name}`, matches(r.name), () => r.name)
+                                }
+                                className="w-full space-y-1 rounded-lg p-1 text-right transition-colors hover:bg-primary/5"
+                              >
                                 <div className="flex justify-between gap-2 font-body text-xs">
                                   <span className="shrink-0 text-muted-foreground">
                                     {r.count} ({pct}%)
@@ -828,7 +843,7 @@ const AdminEventFeedback = () => {
                                 <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                                   <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
                                 </div>
-                              </div>
+                              </button>
                             );
                           })}
                         </div>
