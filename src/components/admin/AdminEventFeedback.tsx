@@ -918,6 +918,14 @@ const AdminEventFeedback = () => {
         </Tabs>
       )}
 
+      <FeedbackQuestionsDialog
+        open={!!questionsTarget}
+        onOpenChange={(o) => !o && setQuestionsTarget(null)}
+        target={questionsTarget}
+        onSaved={loadQuestionCounts}
+      />
+
+
       <Dialog open={!!qrEvent} onOpenChange={(o) => !o && setQrEvent(null)}>
         <DialogContent dir="rtl" className="max-w-sm">
           <DialogHeader>
