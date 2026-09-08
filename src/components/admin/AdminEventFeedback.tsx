@@ -633,24 +633,62 @@ const AdminEventFeedback = () => {
           {/* ===== Overview ===== */}
           <TabsContent value="overview" className="space-y-5">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-              <StatCard icon={MessageSquare} label="סך התגובות" value={String(summary?.total ?? 0)} />
+              <StatCard
+                icon={MessageSquare}
+                label="סך התגובות"
+                value={String(summary?.total ?? 0)}
+                count={rows.length}
+                onClick={() => openDrill("כל המשיבים", rows, (r) => `דירוג ${r.enjoyment}/5`)}
+              />
               <StatCard
                 icon={Star}
                 label="ממוצע דירוג"
                 value={summary?.avg_enjoyment ? `${summary.avg_enjoyment}/5` : "—"}
+                count={rows.length}
+                onClick={() => openDrill("דירוג ההנאה לפי משיב", rows, (r) => `${r.enjoyment}/5`)}
               />
               <StatCard
                 icon={Users}
                 label="הכירו מישהו חדש"
                 value={`${summary?.met_new_pct ?? 0}%`}
                 hint={summary?.avg_new_people ? `ממוצע ${summary.avg_new_people} אנשים` : undefined}
+                count={rows.filter((r) => r.met_new_person).length}
+                onClick={() =>
+                  openDrill(
+                    "מי הכיר מישהו חדש",
+                    rows.filter((r) => r.met_new_person),
+                    (r) =>
+                      `הכיר ${r.new_people_count ?? "?"} אנשים` +
+                      (r.keep_in_touch ? ` · רוצה קשר${r.keep_in_touch_name ? ` עם ${r.keep_in_touch_name}` : ""}` : "")
+                  )
+                }
               />
-              <StatCard icon={Repeat} label="רוצים לחזור" value={`${summary?.return_pct ?? 0}%`} />
+              <StatCard
+                icon={Repeat}
+                label="רוצים לחזור"
+                value={`${summary?.return_pct ?? 0}%`}
+                count={rows.filter((r) => (r.next_event_likelihood ?? 0) >= 4).length}
+                onClick={() =>
+                  openDrill(
+                    "מי רוצה להגיע גם למפגש הבא",
+                    rows.filter((r) => (r.next_event_likelihood ?? 0) >= 4),
+                    (r) => `סבירות ${r.next_event_likelihood}/5`
+                  )
+                }
+              />
               <StatCard
                 icon={Star}
                 label="ציון המלצה (NPS)"
                 value={summary?.nps === null || summary?.nps === undefined ? "—" : String(summary.nps)}
                 hint={summary?.avg_nps ? `ממוצע ${summary.avg_nps}/10` : undefined}
+                count={rows.filter((r) => r.nps !== null).length}
+                onClick={() =>
+                  openDrill(
+                    "ציוני המלצה לפי משיב",
+                    rows.filter((r) => r.nps !== null),
+                    (r) => `${r.nps}/10`
+                  )
+                }
               />
             </div>
 
@@ -661,7 +699,18 @@ const AdminEventFeedback = () => {
                     {summary.meetup_types.map((m) => {
                       const pct = summary.total ? Math.round((m.count / summary.total) * 100) : 0;
                       return (
-                        <div key={m.name} className="space-y-1">
+                        <button
+                          type="button"
+                          key={m.name}
+                          onClick={() =>
+                            openDrill(
+                              `מי בחר: ${m.name}`,
+                              rows.filter((r) => r.preferred_meetup_type === m.name),
+                              (r) => `דירוג ${r.enjoyment}/5`
+                            )
+                          }
+                          className="w-full space-y-1 rounded-lg p-1 text-right transition-colors hover:bg-primary/5"
+                        >
                           <div className="flex justify-between font-body text-sm">
                             <span className="text-muted-foreground">
                               {m.count} ({pct}%)
@@ -671,7 +720,7 @@ const AdminEventFeedback = () => {
                           <div className="h-2 overflow-hidden rounded-full bg-muted">
                             <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
                           </div>
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -684,10 +733,21 @@ const AdminEventFeedback = () => {
                 {summary?.attend_reasons?.length ? (
                   <div className="space-y-2">
                     {summary.attend_reasons.map((m) => (
-                      <div key={m.name} className="flex justify-between font-body text-sm">
+                      <button
+                        type="button"
+                        key={m.name}
+                        onClick={() =>
+                          openDrill(
+                            `מי ענה: ${m.name}`,
+                            rows.filter((r) => r.attend_reason === m.name),
+                            (r) => `דירוג ${r.enjoyment}/5`
+                          )
+                        }
+                        className="flex w-full justify-between rounded-lg p-1 text-right font-body text-sm transition-colors hover:bg-primary/5"
+                      >
                         <span className="text-muted-foreground">{m.count}</span>
                         <span className="text-foreground">{m.name}</span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 ) : (
