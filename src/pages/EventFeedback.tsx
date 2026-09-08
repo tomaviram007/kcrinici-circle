@@ -11,6 +11,16 @@ import gsap from "gsap";
 
 type EventInfo = { id: string; title: string; event_date: string };
 
+type CustomQuestion = {
+  id: string;
+  question_text: string;
+  question_type: "text" | "single" | "multi" | "rating";
+  options: string[];
+  is_required: boolean;
+};
+
+type CustomAnswer = string | string[] | number | null;
+
 const ATTEND_REASONS = [
   "סקרנות והיכרות עם המועדון",
   "הנושא של המפגש עניין אותי",
@@ -145,6 +155,8 @@ const EventFeedback = () => {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [questions, setQuestions] = useState<CustomQuestion[]>([]);
+  const [answers, setAnswers] = useState<Record<string, CustomAnswer>>({});
   const cardRef = useRef<HTMLDivElement>(null);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
