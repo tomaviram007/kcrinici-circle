@@ -900,6 +900,15 @@ const AdminEventFeedback = () => {
                           {r.improvement && <p>לשיפור: {r.improvement}</p>}
                         </div>
                       )}
+                      {r.custom_answers && Object.keys(r.custom_answers).length > 0 && (
+                        <div className="mt-2 space-y-1 border-t border-border/50 pt-2 font-body text-sm text-muted-foreground">
+                          {Object.entries(r.custom_answers).map(([qid, a]) => (
+                            <p key={qid}>
+                              {a?.question}: {Array.isArray(a?.answer) ? (a.answer as string[]).join(", ") : String(a?.answer ?? "")}
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
