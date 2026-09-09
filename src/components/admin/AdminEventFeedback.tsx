@@ -179,6 +179,7 @@ interface RowActions {
   copyLink: (id: string) => void;
   shareWhatsapp: (id: string, title: string) => void;
   onQuestionsChanged: () => void;
+  questionsVersion: number;
 }
 
 
@@ -282,6 +283,7 @@ const QuestionnaireRow = ({
           targetId={id}
           onAdd={() => actions.openQuestions({ kind, id, title })}
           onChanged={actions.onQuestionsChanged}
+          refreshKey={actions.questionsVersion}
         />
       )}
     </div>
@@ -651,6 +653,11 @@ const AdminEventFeedback = () => {
   );
 
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [questionsVersion, setQuestionsVersion] = useState(0);
+  const handleQuestionsChanged = () => {
+    void loadQuestionCounts();
+    setQuestionsVersion((v) => v + 1);
+  };
   const rowActions: RowActions = {
     questionCounts,
     expanded: expandedRows,
@@ -660,7 +667,8 @@ const AdminEventFeedback = () => {
     openPreview: (ev) => setPreviewEvent(ev),
     copyLink: (id) => void copyLink(id),
     shareWhatsapp: (id, title) => shareWhatsapp(id, title),
-    onQuestionsChanged: () => void loadQuestionCounts(),
+    onQuestionsChanged: () => handleQuestionsChanged(),
+    questionsVersion,
   };
 
   return (
@@ -1187,7 +1195,7 @@ const AdminEventFeedback = () => {
         open={!!questionsTarget}
         onOpenChange={(o) => !o && setQuestionsTarget(null)}
         target={questionsTarget}
-        onSaved={loadQuestionCounts}
+        onSaved={handleQuestionsChanged}
       />
 
 
