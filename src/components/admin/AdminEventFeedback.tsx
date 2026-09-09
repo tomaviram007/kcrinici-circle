@@ -653,6 +653,11 @@ const AdminEventFeedback = () => {
   );
 
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [questionsVersion, setQuestionsVersion] = useState(0);
+  const handleQuestionsChanged = () => {
+    void loadQuestionCounts();
+    setQuestionsVersion((v) => v + 1);
+  };
   const rowActions: RowActions = {
     questionCounts,
     expanded: expandedRows,

@@ -17,9 +17,10 @@ interface Props {
   targetId: string;
   onAdd: () => void;
   onChanged?: () => void;
+  refreshKey?: number;
 }
 
-const QuestionsAccordion = ({ kind, targetId, onAdd, onChanged }: Props) => {
+const QuestionsAccordion = ({ kind, targetId, onAdd, onChanged, refreshKey = 0 }: Props) => {
   const { toast } = useToast();
   const [questions, setQuestions] = useState<FeedbackQuestion[]>([]);
   const [loading, setLoading] = useState(true);
