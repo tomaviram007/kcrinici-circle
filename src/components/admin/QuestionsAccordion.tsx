@@ -41,7 +41,7 @@ const QuestionsAccordion = ({ kind, targetId, onAdd, onChanged, refreshKey = 0 }
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, refreshKey]);
 
   const persist = async (list: FeedbackQuestion[]) => {
     await Promise.all(
