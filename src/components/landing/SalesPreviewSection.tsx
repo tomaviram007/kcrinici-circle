@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ShoppingBag, Lock, Banknote, Phone, Share2, Pencil } from "lucide-react";
+import { ShoppingBag, Banknote, Phone, Share2, Pencil } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -27,10 +27,10 @@ const SalesPreviewSection = ({ isApproved }: Props) => {
       const { data } = await (supabase as any).rpc(
         isApproved ? "get_member_secondhand" : "get_public_secondhand"
       );
-      const visibleSales = (data || []).slice(0, 3);
+      const visibleSales: any[] = (data || []).slice(0, 3);
       setSales(visibleSales);
 
-      const ids = [...new Set(visibleSales.map((a: any) => a.created_by).filter(Boolean))];
+      const ids = [...new Set<string>(visibleSales.map((a: any) => a.created_by).filter((id: unknown): id is string => typeof id === "string"))];
       if (ids.length > 0) {
         const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, phone").in("user_id", ids);
         const map: Record<string, any> = {};
