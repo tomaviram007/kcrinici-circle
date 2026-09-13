@@ -13,6 +13,7 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import SmartAdBanner from "@/components/ads/SmartAdBanner";
 import gsap from "gsap";
 import { avatarSrc } from "@/lib/default-avatar";
+import CategoryImage from "@/components/listings/CategoryImage";
 
 interface BirthdayMember {
   full_name: string;
@@ -31,7 +32,7 @@ const SALE_TYPES_MAP: Record<string, string> = {
  * מוצב בתוך עמוד "אירועים ומודעות" המאוחד.
  */
 const AnnouncementsBoard = () => {
-  const { user } = useAuth();
+  const { user, isApproved } = useAuth();
   const { toast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [saleItems, setSaleItems] = useState<any[]>([]);
@@ -61,7 +62,7 @@ const AnnouncementsBoard = () => {
   const fetchItems = async () => {
     const [{ data: announcements }, { data: sales }] = await Promise.all([
       supabase.from("announcements").select("*").eq("is_approved", true).eq("category", "announcement").order("created_at", { ascending: false }),
-      supabase.from("announcements").select("*").eq("is_approved", true).eq("category", "sale").order("created_at", { ascending: false }),
+      (supabase as any).rpc(isApproved ? "get_member_secondhand" : "get_public_secondhand"),
     ]);
     setItems(announcements || []);
     setSaleItems(sales || []);
@@ -115,7 +116,7 @@ const AnnouncementsBoard = () => {
     setPromoBanners(filtered);
   };
 
-  useEffect(() => { fetchItems(); fetchUpcomingBirthdays(); fetchPromoBanners(); }, []);
+  useEffect(() => { fetchItems(); fetchUpcomingBirthdays(); fetchPromoBanners(); }, [isApproved]);
 
   // Mark announcements as seen when user views the board
   useEffect(() => {
@@ -204,15 +205,9 @@ const AnnouncementsBoard = () => {
   const filteredAnnouncements = filterItems(items);
   const filteredSales = filterItems(saleItems);
 
-  const saleData = (item: any) => (item.sale_data && typeof item.sale_data === "object" ? item.sale_data as Record<string, string> : {});
-
   const buildSaleShareMessage = (item: any) => {
-    let msg = `🛍️ *${item.title}*\n\n${item.content}`;
-    const entries = Object.entries(saleData(item)).filter(([, v]) => v);
-    if (entries.length > 0) {
-      msg += "\n\n📋 *פרטים:*";
-      entries.forEach(([k, v]) => { msg += `\n• ${k}: ${v}`; });
-    }
+    let msg = `🛍️ *${item.title}*\n\n${item.description || ""}`;
+    if (item.price !== null) msg += `\n\n💰 ₪${Number(item.price).toLocaleString("he-IL")}`;
     if (item.created_by && creatorProfiles[item.created_by]) {
       const c = creatorProfiles[item.created_by];
       msg += `\n\n👤 *מפרסם:* ${c.full_name}`;
@@ -295,26 +290,24 @@ const AnnouncementsBoard = () => {
         key={item.id}
         className="group relative rounded-xl border border-gold/30 bg-card/60 p-4 sm:p-5 flex flex-col gap-3 hover:border-gold/60 transition-colors"
       >
-        {item.sale_image_url && (
-          <div className="rounded-lg overflow-hidden h-36">
-            <img src={item.sale_image_url} alt={item.title} className="w-full h-full object-cover" />
-          </div>
-        )}
+        <div className="rounded-lg overflow-hidden h-36">
+          <CategoryImage category={item.category} src={item.images?.[0]} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
+        </div>
         <div className="flex items-start gap-3 sm:gap-4">
           <div className="shrink-0 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg bg-gold/10 border border-gold/30">
             <ShoppingBag className="h-5 w-5 text-gold" />
           </div>
           <div className="flex-1 min-w-0 text-right">
-            <span className="font-body text-[11px] text-gold/70">{SALE_TYPES_MAP[item.sale_type] || "מכירה"}</span>
+            <span className="font-body text-[11px] text-gold/70">{item.category || "מכירה"}</span>
             <h3 className="font-serif text-base sm:text-lg font-bold text-gold leading-tight mb-1">
               {item.title}
             </h3>
             <p className="font-body text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-              {item.content}
+              {item.description}
             </p>
-            {saleData(item)["מחיר"] && (
+            {item.price !== null && (
               <p className="mt-2 font-body text-sm font-bold text-gold flex items-center justify-end gap-1">
-                <Banknote className="h-3.5 w-3.5" /> {saleData(item)["מחיר"]}
+                <Banknote className="h-3.5 w-3.5" /> ₪{Number(item.price).toLocaleString("he-IL")}
               </p>
             )}
             <div className="mt-2 flex items-center justify-end gap-2 text-[11px] font-body text-muted-foreground/70">
