@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { sendRawEmail } from "../_shared/send-raw-email.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -57,27 +58,8 @@ function emailShell(title: string, rows: Array<[string, string]>, intro?: string
 }
 
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
-  const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  if (!resendApiKey) {
-    console.warn("Resend not configured, skipping email");
-    return;
-  }
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${resendApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "מועדון ק.קרניצי <onboarding@resend.dev>",
-      to: [to],
-      subject,
-      html,
-    }),
-  });
-  if (!res.ok) {
-    console.error("Resend error:", await res.text());
-  }
+  const res = await sendRawEmail(to, subject, html);
+  if (!res.ok) console.error("Email error:", res.error);
 }
 
 function sendAdminEmail(registration: Record<string, any>, event: Record<string, any>): Promise<void> {

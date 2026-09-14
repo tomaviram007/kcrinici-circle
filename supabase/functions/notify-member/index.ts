@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { sendRawEmail } from "../_shared/send-raw-email.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -166,28 +167,9 @@ serve(async (req) => {
       `;
     }
 
-    // Try to send email via Resend
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (resendApiKey) {
-      const resendRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${resendApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: "מועדון ק.קרניצי <onboarding@resend.dev>",
-          to: [email],
-          subject,
-          html: htmlBody,
-        }),
-      });
-
-      if (!resendRes.ok) {
-        const resendData = await resendRes.json();
-        console.error("Resend error:", JSON.stringify(resendData));
-      }
-    }
+    // Send email via Lovable managed email
+    const emailRes = await sendRawEmail(email, subject, htmlBody);
+    if (!emailRes.ok) console.error("Email error:", emailRes.error);
 
     return new Response(
       JSON.stringify({ success: true, message: `Notification processed for ${email}` }),

@@ -2,6 +2,7 @@
 // GET  /handle-unsubscribe?token=...&email=... -> resolves email for confirmation UI
 // POST /handle-unsubscribe { token?, email?, reason? } -> suppress & notify admin
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendRawEmail } from "../_shared/send-raw-email.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -67,21 +68,10 @@ Deno.serve(async (req) => {
         .eq("token", token);
     }
 
-    // Notify admin via Resend
+    // Notify admin via Lovable managed email
     try {
       const adminEmail = Deno.env.get("ADMIN_NOTIFY_EMAIL") || "tomaviram2187@gmail.com";
-      const from = Deno.env.get("BIRTHDAY_FROM_EMAIL") || "מועדון K. קריניצי <onboarding@resend.dev>";
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
-        },
-        body: JSON.stringify({
-          from,
-          to: [adminEmail],
-          subject: `בקשת הסרה מרשימת תפוצה: ${email}`,
-          html: `
+      await sendRawEmail(adminEmail, `בקשת הסרה מרשימת תפוצה: ${email}`, `
             <div dir="rtl" style="font-family:Arial,sans-serif;padding:16px">
               <h2 style="color:#4B2C20">בקשה להסרה מרשימת תפוצה</h2>
               <p><b>אימייל:</b> ${email}</p>
@@ -89,9 +79,7 @@ Deno.serve(async (req) => {
               <p><b>זמן:</b> ${new Date().toLocaleString("he-IL")}</p>
               <p style="color:#666;font-size:13px">המשתמש סומן כמושעה ולא יקבל מיילים נוספים. ניתן לנהל זאת מתוך לוח הניהול → תקשורת → ניהול תפוצה.</p>
             </div>
-          `,
-        }),
-      });
+          `);
     } catch (e) {
       console.error("admin notify failed", e);
     }
