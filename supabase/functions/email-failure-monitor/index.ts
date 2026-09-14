@@ -1,6 +1,7 @@
 // Cron: scan email_send_log for new failures and alert admins (Telegram + Email)
 // Specifically flags SPF/DKIM/DMARC/bounce/complaint errors.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendRawEmail } from "../_shared/send-raw-email.ts";
 
 const FAILURE_STATUSES = ["failed", "dlq", "bounced", "complained"];
 const AUTH_KEYWORDS = /(spf|dkim|dmarc|domainkeys|authentication|reject|bounce|complain|blocked)/i;
@@ -67,19 +68,10 @@ Deno.serve(async () => {
             <pre style="background:#f5f5f5;padding:12px;border-radius:8px;white-space:pre-wrap;font-size:12px">${escapeHtml(lines)}</pre>
             <p style="color:#888;font-size:12px">לוגים מלאים: שולחן המנהל → תקשורת.</p>
           </div>`;
-          await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
-            },
-            body: JSON.stringify({
-              from: Deno.env.get("BIRTHDAY_FROM_EMAIL") || "K.Krinici Alerts <onboarding@resend.dev>",
-              to: emails,
-              subject: `🚨 ${rows.length} כשלי שליחת מייל${authIssues.length ? ", כולל בעיות אימות דומיין" : ""}`,
-              html,
-            }),
-          }).catch(e => console.error("email alert", e));
+          for (const to of emails) {
+            await sendRawEmail(to, `🚨 ${rows.length} כשלי שליחת מייל${authIssues.length ? ", כולל בעיות אימות דומיין" : ""}`, html)
+              .catch(e => console.error("email alert", e));
+          }
         }
       }
     } catch (e) {

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendRawEmail } from "../_shared/send-raw-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,14 +33,8 @@ function shell(title: string, rows: Array<[string, string]>, intro?: string): st
 }
 
 async function sendEmail(to: string, subject: string, html: string) {
-  const key = Deno.env.get("RESEND_API_KEY");
-  if (!key) { console.warn("Resend not configured"); return; }
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: "מועדון ק.קרניצי <onboarding@resend.dev>", to: [to], subject, html }),
-  });
-  if (!res.ok) console.error("Resend error:", await res.text());
+  const res = await sendRawEmail(to, subject, html);
+  if (!res.ok) console.error("Email error:", res.error);
 }
 
 async function sendWhatsApp(text: string) {

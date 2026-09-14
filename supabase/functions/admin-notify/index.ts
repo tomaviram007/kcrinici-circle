@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { sendRawEmail } from "../_shared/send-raw-email.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -181,33 +182,10 @@ function formatEmailHTML(eventType: string, data: Record<string, any>): string {
 }
 
 async function sendEmail(eventType: string, data: Record<string, any>): Promise<void> {
-  const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  if (!resendApiKey) {
-    console.warn("Resend not configured, skipping email");
-    return;
-  }
-
   const title = EVENT_LABELS[eventType] || eventType;
   const html = formatEmailHTML(eventType, data);
-
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${resendApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "מועדון ק.קרניצי <onboarding@resend.dev>",
-      to: ["tomaviram2187@gmail.com"],
-      subject: `🔔 ${title}`,
-      html,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    console.error("Resend error:", JSON.stringify(err));
-  }
+  const res = await sendRawEmail("tomaviram2187@gmail.com", `🔔 ${title}`, html);
+  if (!res.ok) console.error("Email error:", res.error);
 }
 
 // ── WhatsApp (Green API) ──

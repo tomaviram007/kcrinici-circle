@@ -197,7 +197,8 @@ const AnnouncementsBoard = () => {
       const q = searchText.trim().toLowerCase();
       const creator = i.created_by && creatorProfiles[i.created_by];
       const creatorName = creator?.full_name?.toLowerCase() || "";
-      if (!i.title.toLowerCase().includes(q) && !i.content.toLowerCase().includes(q) && !creatorName.includes(q)) return false;
+      const body = (i.content || i.description || "").toLowerCase();
+      if (!i.title.toLowerCase().includes(q) && !body.includes(q) && !creatorName.includes(q)) return false;
     }
     return true;
   });

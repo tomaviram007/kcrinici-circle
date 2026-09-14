@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { sendRawEmail } from "../_shared/send-raw-email.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -197,28 +198,10 @@ async function sendWhatsApp(phone: string, message: string): Promise<void> {
   }
 }
 
-// ── Email via Resend ──
+// ── Email via Lovable managed email ──
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
-  const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  if (!resendApiKey) return;
-
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${resendApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "מועדון ק.קרניצי <onboarding@resend.dev>",
-      to: [to],
-      subject,
-      html,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Resend error: ${err}`);
-  }
+  const res = await sendRawEmail(to, subject, html);
+  if (!res.ok) throw new Error(`Email error: ${res.error}`);
 }
 
 // ── Telegram summary to admin ──
