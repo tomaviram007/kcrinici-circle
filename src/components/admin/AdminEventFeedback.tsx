@@ -545,6 +545,14 @@ const AdminEventFeedback = () => {
   const duplicateForm = async (source: { kind: "form" | "event"; id: string; title: string }) => {
     if (duplicating) return;
     setDuplicating(source.id);
+    const { data: sourceForm, error: formError } = source.kind === "form"
+      ? await supabase.from("feedback_forms").select("description").eq("id", source.id).single()
+      : { data: null, error: null };
+    if (formError) {
+      setDuplicating(null);
+      toast({ title: "לא ניתן לטעון את השאלון לשכפול", description: formError.message, variant: "destructive" });
+      return;
+    }
     const { data: original, error: readError } = await supabase
       .from("feedback_questions")
       .select("question_text, question_type, options, is_required, display_order")
@@ -558,6 +566,7 @@ const AdminEventFeedback = () => {
     const { data: userData } = await supabase.auth.getUser();
     const { data: copy, error: createError } = await supabase.from("feedback_forms").insert({
       title: `${source.title} (עותק)`,
+      description: sourceForm?.description ?? null,
       created_by: userData.user?.id ?? null,
       form_date: new Date().toISOString(),
       is_active: false,
