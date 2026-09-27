@@ -154,7 +154,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
       return;
     }
     const cleanOptions = options.map((o) => o.trim()).filter(Boolean);
-    if (needsOptions && cleanOptions.length < 2) {
+    if (!editingLegacy && needsOptions && cleanOptions.length < 2) {
       toast({ title: "צריך לפחות שתי אפשרויות לבחירה", variant: "destructive" });
       return;
     }
@@ -168,7 +168,8 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
           return supabase.from("feedback_questions").insert({
             ...changes,
             [target.kind === "form" ? "form_id" : "event_id"]: target.id,
-            display_order: questions.length,
+            display_order: editingLegacy ? FEEDBACK_FIXED_QUESTIONS.findIndex((q) => q.key === editingLegacy) * 100 : Math.max(...allQuestions.map((q) => q.display_order)) + 100,
+            legacy_key: editingLegacy,
             created_by: userData.user?.id ?? null,
           } as never);
         })();

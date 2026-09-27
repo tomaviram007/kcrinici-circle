@@ -444,7 +444,7 @@ const EventFeedback = () => {
         >
           <div className="space-y-3">
             <p className="text-right font-body text-[15px] font-bold text-foreground">
-              האם היית שוקל להצטרף כחבר במועדון בתשלום שנתי?
+              {label("membership_interest")}
             </p>
             <div className="grid gap-2">
               {MEMBERSHIP_INTEREST.map((r) => (
