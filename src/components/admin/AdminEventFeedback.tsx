@@ -701,7 +701,7 @@ const AdminEventFeedback = () => {
     const fail = (title: string, error: { message: string }) => {
       setDeleting(false);
       toast({ title, description: error.message, variant: "destructive" });
-ec    };
+};
     if (deleteTarget.kind === "form") {
       // 1. answers, 2. custom questions, 3. the form itself
       const { error: ansErr } = await supabase.from("event_feedback").delete().eq("form_id", deleteTarget.id);
@@ -718,7 +718,7 @@ ec    };
       load();
       loadQuestionCounts();
       toast({ title: "השאלון וכל התשובות שנאספו בו נמחקו" });
-ec    } else {
+} else {
       // event-based questionnaire: remove its questions and answers, keep the event itself
       const { error: ansErr } = await supabase.from("event_feedback").delete().eq("event_id", deleteTarget.id);
       if (ansErr) return fail("שגיאה במחיקת התשובות", ansErr);
