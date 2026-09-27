@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, ArrowUp, ArrowDown, X, HelpCircle, Pencil } from "lucide-react";
+import { Loader2, Plus, Trash2, ArrowUp, ArrowDown, X, HelpCircle, Pencil, GripVertical } from "lucide-react";
 import { FEEDBACK_FIXED_QUESTIONS } from "@/lib/feedback-fixed-questions";
 
 export type QuestionType = "text" | "single" | "multi" | "rating";
@@ -47,6 +47,9 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
   const [draftDate, setDraftDate] = useState("");
   const [savingTitle, setSavingTitle] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const dragIdRef = useRef<string | null>(null);
 
   const [text, setText] = useState("");
   const [type, setType] = useState<QuestionType>("text");
@@ -77,6 +80,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
       setOptions(["", ""]);
       setQuestions([]);
       setShowAdd(false);
+      setEditingId(null);
       setEditingTitle(false);
       setDraftTitle(target?.title ?? "");
       setDraftDate(target?.date ? new Date(target.date).toLocaleDateString("en-CA") : "");
@@ -119,6 +123,24 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
     toast({ title: "פרטי השאלון עודכנו" });
   };
 
+  const openEditor = (q: FeedbackQuestion) => {
+    setEditingId(q.id);
+    setText(q.question_text);
+    setType(q.question_type);
+    setRequired(q.is_required);
+    setOptions(q.options.length ? q.options : ["", ""]);
+    setShowAdd(true);
+  };
+
+  const resetEditor = () => {
+    setEditingId(null);
+    setText("");
+    setType("text");
+    setOptions(["", ""]);
+    setRequired(false);
+    setShowAdd(false);
+  };
+
   const addQuestion = async () => {
     if (!target) return;
     if (!text.trim()) {
@@ -131,50 +153,65 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
       return;
     }
     setSaving(true);
-    const { data: userData } = await supabase.auth.getUser();
-    const { error } = await supabase.from("feedback_questions").insert({
-      [target.kind === "form" ? "form_id" : "event_id"]: target.id,
-      question_text: text.trim(),
-      question_type: type,
-      options: needsOptions ? cleanOptions : [],
-      is_required: required,
-      display_order: questions.length,
-      created_by: userData.user?.id ?? null,
-    } as never);
+    const changes = { question_text: text.trim(), question_type: type, options: needsOptions ? cleanOptions : [], is_required: required };
+    const { error } = editingId
+      ? await supabase.from("feedback_questions").update(changes).eq("id", editingId)
+      : await (async () => {
+          const { data: userData } = await supabase.auth.getUser();
+          return supabase.from("feedback_questions").insert({
+            ...changes,
+            [target.kind === "form" ? "form_id" : "event_id"]: target.id,
+            display_order: questions.length,
+            created_by: userData.user?.id ?? null,
+          } as never);
+        })();
     setSaving(false);
     if (error) {
       toast({ title: "שגיאה בשמירת השאלה", description: error.message, variant: "destructive" });
       return;
     }
-    setText("");
-    setOptions(["", ""]);
-    setRequired(false);
-    setShowAdd(false);
+    resetEditor();
     await load();
     onSaved?.();
-    toast({ title: "השאלה נוספה לשאלון" });
+    toast({ title: editingId ? "השאלה עודכנה" : "השאלה נוספה לשאלון" });
   };
 
   const removeQuestion = async (id: string) => {
+    if (!window.confirm("למחוק את השאלה מהשאלון? התשובות שכבר התקבלו יישארו שמורות.")) return;
     const { error } = await supabase.from("feedback_questions").delete().eq("id", id);
     if (error) {
       toast({ title: "שגיאה במחיקה", description: error.message, variant: "destructive" });
       return;
     }
     await load();
+    if (editingId === id) resetEditor();
     onSaved?.();
   };
 
-  const move = async (index: number, dir: -1 | 1) => {
-    const next = index + dir;
-    if (next < 0 || next >= questions.length) return;
+  const reorder = async (index: number, next: number) => {
+    if (next < 0 || next >= questions.length || next === index || saving) return;
     const reordered = [...questions];
-    [reordered[index], reordered[next]] = [reordered[next], reordered[index]];
+    const [moved] = reordered.splice(index, 1);
+    reordered.splice(next, 0, moved);
     setQuestions(reordered);
-    await Promise.all(
-      reordered.map((q, i) => supabase.from("feedback_questions").update({ display_order: i }).eq("id", q.id))
-    );
+    setSaving(true);
+    const results = await Promise.all(reordered.map((q, i) => supabase.from("feedback_questions").update({ display_order: i }).eq("id", q.id)));
     await load();
+    setSaving(false);
+    const failure = results.find((result) => result.error);
+    if (failure?.error) toast({ title: "לא ניתן לשמור את סדר השאלות", description: failure.error.message, variant: "destructive" });
+    else onSaved?.();
+  };
+
+  const move = (index: number, dir: -1 | 1) => void reorder(index, index + dir);
+
+  const finishDrag = (clientX: number, clientY: number) => {
+    const source = questions.findIndex((q) => q.id === dragIdRef.current);
+    const targetElement = document.elementFromPoint(clientX, clientY)?.closest("[data-question-id]");
+    const destination = questions.findIndex((q) => q.id === targetElement?.getAttribute("data-question-id"));
+    dragIdRef.current = null;
+    setDragId(null);
+    if (source >= 0 && destination >= 0) void reorder(source, destination);
   };
 
   return (
@@ -206,7 +243,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h4 className="flex items-center gap-2 font-body text-sm font-bold text-foreground"><HelpCircle className="h-4 w-4 text-primary" /> שאלות השאלון</h4>
-              <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setShowAdd((v) => !v)}><Plus className="h-4 w-4" /> הוספת שאלה</Button>
+               <Button size="sm" variant="outline" className="gap-1.5" onClick={() => { if (showAdd) resetEditor(); else { resetEditor(); setShowAdd(true); } }}><Plus className="h-4 w-4" /> הוספת שאלה</Button>
             </div>
             {loading ? <Loader2 className="h-5 w-5 animate-spin text-primary" /> : loadError ? (
               <p role="alert" className="font-body text-sm text-destructive">לא הצלחנו לטעון את השאלות. נסה לסגור ולפתוח את החלון שוב.</p>
@@ -224,15 +261,17 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
                 <div className="space-y-2">
                   <p className="font-body text-xs font-bold text-muted-foreground">שאלות שהוספת ({questions.length})</p>
                   {questions.length === 0 ? <p className="font-body text-sm text-muted-foreground">עדיין לא נוספו שאלות נוספות.</p> : questions.map((q, i) => (
-                    <div key={q.id} className="flex flex-col gap-2 rounded-lg border border-border/60 bg-background/40 p-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0 text-right">
+                     <div key={q.id} data-question-id={q.id} className={`flex items-center gap-2 rounded-lg border bg-background/40 p-2.5 ${dragId === q.id ? "border-primary opacity-60" : "border-border/60"}`}>
+                       <Button type="button" size="icon" variant="ghost" disabled={saving} className="shrink-0 cursor-grab touch-none active:cursor-grabbing" aria-label={`גרירת שאלה ${i + 1} לשינוי סדר`} title="גררו לשינוי סדר" onPointerDown={(e) => { if (saving) return; dragIdRef.current = q.id; setDragId(q.id); e.currentTarget.setPointerCapture(e.pointerId); }} onPointerUp={(e) => finishDrag(e.clientX, e.clientY)} onPointerCancel={() => { dragIdRef.current = null; setDragId(null); }}><GripVertical className="h-4 w-4" /></Button>
+                       <button type="button" className="min-w-0 flex-1 text-right" onClick={() => openEditor(q)} aria-label={`עריכת שאלה: ${q.question_text}`}>
                         <p className="font-body text-sm font-bold text-foreground">{FEEDBACK_FIXED_QUESTIONS.length + i + 1}. {q.question_text}</p>
                         <p className="font-body text-xs text-muted-foreground">{TYPE_LABELS[q.question_type]}{q.is_required && " · חובה"}{q.options.length > 0 && ` · ${q.options.join(" / ")}`}</p>
-                      </div>
+                       </button>
                       <div className="flex shrink-0 items-center gap-1">
-                        <Button size="icon" variant="ghost" aria-label="העלאה למעלה" disabled={i === 0} onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" aria-label="הורדה למטה" disabled={i === questions.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" aria-label="מחיקת שאלה" onClick={() => removeQuestion(q.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                         <Button size="icon" variant="ghost" aria-label="עריכת שאלה" onClick={() => openEditor(q)}><Pencil className="h-4 w-4" /></Button>
+                         <Button size="icon" variant="ghost" aria-label="העלאה למעלה" disabled={saving || i === 0} onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4" /></Button>
+                         <Button size="icon" variant="ghost" aria-label="הורדה למטה" disabled={saving || i === questions.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4" /></Button>
+                         <Button size="icon" variant="ghost" aria-label="מחיקת שאלה" onClick={() => removeQuestion(q.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                       </div>
                     </div>
                   ))}
@@ -243,7 +282,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
 
           {showAdd && <section className="rounded-lg border border-border bg-background/40 p-4">
             <h4 className="mb-3 flex items-center gap-2 font-body text-sm font-bold text-foreground">
-              <Plus className="h-4 w-4 text-primary" /> הוספת שאלה
+               <Pencil className="h-4 w-4 text-primary" /> {editingId ? "עריכת שאלה" : "הוספת שאלה"}
             </h4>
             <div className="space-y-3">
               <Textarea
@@ -308,10 +347,10 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
                 </div>
               )}
 
-              <Button className="w-full gap-1.5" disabled={saving} onClick={addQuestion}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                שמירת השאלה
-              </Button>
+               <div className="flex gap-2"><Button className="flex-1 gap-1.5" disabled={saving} onClick={addQuestion}>
+                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                 שמירת השאלה
+               </Button><Button variant="outline" onClick={resetEditor}>ביטול</Button></div>
             </div>
           </section>}
         </div>
