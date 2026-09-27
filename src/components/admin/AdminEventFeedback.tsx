@@ -24,6 +24,7 @@ import {
   CalendarDays,
   HelpCircle,
   ChevronDown,
+  Files,
 } from "lucide-react";
 
 import QRCode from "qrcode";
@@ -173,7 +174,9 @@ interface RowActions {
   questionCounts: Record<string, number>;
   expanded: Record<string, boolean>;
   toggleExpand: (id: string) => void;
-  openQuestions: (t: { kind: "form" | "event"; id: string; title: string }) => void;
+  openQuestions: (t: { kind: "form" | "event"; id: string; title: string; date: string }) => void;
+  duplicate: (t: { kind: "form" | "event"; id: string; title: string }) => void;
+  duplicating: string | null;
   openQr: (ev: EventOption) => void;
   openPreview: (ev: EventOption) => void;
   copyLink: (id: string) => void;
@@ -215,10 +218,13 @@ const QuestionnaireRow = ({
             size="sm"
             variant="outline"
             className="gap-1.5"
-            onClick={() => actions.openQuestions({ kind, id, title })}
+            onClick={() => actions.openQuestions({ kind, id, title, date })}
           >
             <HelpCircle className="h-4 w-4" /> שאלות
             {actions.questionCounts[id] ? ` (${actions.questionCounts[id]})` : ""}
+          </Button>
+          <Button size="sm" variant="outline" className="gap-1.5" disabled={actions.duplicating !== null} onClick={() => actions.duplicate({ kind, id, title })}>
+            {actions.duplicating === id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Files className="h-4 w-4" />} שכפול
           </Button>
           <Button
             size="sm"
@@ -281,7 +287,7 @@ const QuestionnaireRow = ({
         <QuestionsAccordion
           kind={kind}
           targetId={id}
-          onAdd={() => actions.openQuestions({ kind, id, title })}
+            onAdd={() => actions.openQuestions({ kind, id, title, date })}
           onChanged={actions.onQuestionsChanged}
           refreshKey={actions.questionsVersion}
         />
@@ -314,7 +320,8 @@ const AdminEventFeedback = () => {
   const [deleting, setDeleting] = useState(false);
 
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
-  const [questionsTarget, setQuestionsTarget] = useState<{ kind: "form" | "event"; id: string; title: string } | null>(null);
+  const [questionsTarget, setQuestionsTarget] = useState<{ kind: "form" | "event"; id: string; title: string; date: string } | null>(null);
+  const [duplicating, setDuplicating] = useState<string | null>(null);
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
   const [memberNames, setMemberNames] = useState<Record<string, string>>({});
   const [drill, setDrill] = useState<{ title: string; items: DrillItem[] } | null>(null);
@@ -489,7 +496,7 @@ const AdminEventFeedback = () => {
     setNewEventOpen(false);
     setNewEvent({ title: "", date: "", time: "", location: "", description: "" });
     toast({ title: "האירוע נוצר והשאלון קושר אליו" });
-    setQuestionsTarget({ kind: "event", id: data.id, title: data.title });
+    setQuestionsTarget({ kind: "event", id: data.id, title: data.title, date: data.event_date });
     notifyNewForm(data.id, data.title);
   };
 
@@ -519,7 +526,7 @@ const AdminEventFeedback = () => {
     await loadForms();
     setNewForm({ title: "", description: "" });
     toast({ title: "השאלון נפתח" });
-    setQuestionsTarget({ kind: "form", id: data.id, title: data.title });
+    setQuestionsTarget({ kind: "form", id: data.id, title: data.title, date: data.form_date });
     notifyNewForm(data.id, data.title);
   };
 
@@ -533,6 +540,65 @@ const AdminEventFeedback = () => {
       return;
     }
     await loadForms();
+  };
+
+  const duplicateForm = async (source: { kind: "form" | "event"; id: string; title: string }) => {
+    if (duplicating) return;
+    setDuplicating(source.id);
+    const { data: sourceForm, error: formError } = source.kind === "form"
+      ? await supabase.from("feedback_forms").select("description").eq("id", source.id).single()
+      : { data: null, error: null };
+    if (formError) {
+      setDuplicating(null);
+      toast({ title: "לא ניתן לטעון את השאלון לשכפול", description: formError.message, variant: "destructive" });
+      return;
+    }
+    const { data: original, error: readError } = await supabase
+      .from("feedback_questions")
+      .select("question_text, question_type, options, is_required, display_order")
+      .eq(source.kind === "form" ? "form_id" : "event_id", source.id)
+      .order("display_order", { ascending: true });
+    if (readError) {
+      setDuplicating(null);
+      toast({ title: "לא ניתן לטעון את השאלות לשכפול", description: readError.message, variant: "destructive" });
+      return;
+    }
+    const { data: userData } = await supabase.auth.getUser();
+    const { data: copy, error: createError } = await supabase.from("feedback_forms").insert({
+      title: `${source.title} (עותק)`,
+      description: sourceForm?.description ?? null,
+      created_by: userData.user?.id ?? null,
+      form_date: new Date().toISOString(),
+      is_active: false,
+    }).select("id, title, form_date").single();
+    if (createError || !copy) {
+      setDuplicating(null);
+      toast({ title: "לא ניתן לשכפל את השאלון", description: createError?.message, variant: "destructive" });
+      return;
+    }
+    if (original?.length) {
+      const { error: questionsError } = await supabase.from("feedback_questions").insert(
+        original.map((q, i) => ({
+          form_id: copy.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options,
+          is_required: q.is_required,
+          display_order: i,
+          created_by: userData.user?.id ?? null,
+        }))
+      );
+      if (questionsError) {
+        await supabase.from("feedback_forms").delete().eq("id", copy.id);
+        setDuplicating(null);
+        toast({ title: "השכפול נכשל, השאלון המקורי לא השתנה", description: questionsError.message, variant: "destructive" });
+        return;
+      }
+    }
+    setDuplicating(null);
+    await Promise.all([loadForms(), loadQuestionCounts()]);
+    setQuestionsTarget({ kind: "form", id: copy.id, title: copy.title, date: copy.form_date });
+    toast({ title: "נוצר עותק מושהה עם השאלות, ללא תשובות. אפשר לערוך ולהפעיל אותו ברשימה." });
   };
 
   const confirmDelete = async () => {
@@ -663,6 +729,8 @@ const AdminEventFeedback = () => {
     expanded: expandedRows,
     toggleExpand: (id) => setExpandedRows((p) => ({ ...p, [id]: !p[id] })),
     openQuestions: (t) => setQuestionsTarget(t),
+    duplicate: (t) => void duplicateForm(t),
+    duplicating,
     openQr: (ev) => void openQr(ev),
     openPreview: (ev) => setPreviewEvent(ev),
     copyLink: (id) => void copyLink(id),
@@ -1196,9 +1264,9 @@ const AdminEventFeedback = () => {
         onOpenChange={(o) => !o && setQuestionsTarget(null)}
         target={questionsTarget}
         onSaved={handleQuestionsChanged}
-        onTitleSaved={(title) => {
+        onDetailsSaved={(title, date) => {
           if (!questionsTarget) return;
-          setQuestionsTarget({ ...questionsTarget, title });
+          setQuestionsTarget({ ...questionsTarget, title, date });
           if (questionsTarget.kind === "form") void loadForms();
           else void loadEvents();
         }}
