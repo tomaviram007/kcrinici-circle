@@ -106,13 +106,12 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
     original.setFullYear(year, month - 1, day);
     const date = original.toISOString();
     setSavingTitle(true);
-    const { error } = await supabase
-      .from(target.kind === "form" ? "feedback_forms" : "events")
-      .update(target.kind === "form" ? { title, form_date: date } : { title, event_date: date })
-      .eq("id", target.id);
+    const { error } = target.kind === "form"
+      ? await supabase.from("feedback_forms").update({ title, form_date: date }).eq("id", target.id)
+      : await supabase.from("events").update({ title, event_date: date }).eq("id", target.id);
     setSavingTitle(false);
     if (error) {
-      toast({ title: "שגיאה בעדכון הכותרת", description: error.message, variant: "destructive" });
+      toast({ title: "שגיאה בעדכון פרטי השאלון", description: error.message, variant: "destructive" });
       return;
     }
     setEditingTitle(false);
