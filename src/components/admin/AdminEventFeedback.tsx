@@ -353,7 +353,7 @@ const AdminEventFeedback = () => {
       if (error) {
         setResponsesError(true);
       } else {
-        const list = (data as FeedbackRow[] | null) || [];
+        const list = (data as unknown as FeedbackRow[] | null) || [];
         setResponseRows(list);
         setResponsesMore(list.length === 50);
         const ids = Array.from(new Set(list.map((r) => r.member_id).filter((id): id is string => !!id)));
@@ -377,7 +377,7 @@ const AdminEventFeedback = () => {
     if (error) {
       setResponsesError(true);
     } else {
-      const list = (data as FeedbackRow[] | null) || [];
+      const list = (data as unknown as FeedbackRow[] | null) || [];
       setResponseRows((prev) => [...prev, ...list]);
       setResponsesMore(list.length === 50);
       const ids = Array.from(new Set(list.map((r) => r.member_id).filter((id): id is string => !!id)));
