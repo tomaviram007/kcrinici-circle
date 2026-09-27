@@ -164,6 +164,7 @@ const EventFeedback = () => {
   const label = (key: string) => arranged.find((q) => q.legacy_key === key)?.question_text ?? "";
   const [coverImage, setCoverImage] = useState(feedbackHero);
   const [answers, setAnswers] = useState<Record<string, CustomAnswer>>({});
+  const [guestName, setGuestName] = useState("");
   const cardRef = useRef<HTMLDivElement>(null);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
@@ -200,6 +201,22 @@ const EventFeedback = () => {
     };
     load();
   }, [eventId]);
+
+  useEffect(() => {
+    // Prefill the name for logged-in members so they can just continue.
+    const prefillName = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name, full_name")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+      const name = profile?.display_name || profile?.full_name || "";
+      if (name) setGuestName(name);
+    };
+    void prefillName();
+  }, []);
 
   useEffect(() => {
     if (!cardRef.current) return;
