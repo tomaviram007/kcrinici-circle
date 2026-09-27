@@ -10,7 +10,7 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import feedbackHero from "@/assets/hero-feedback.jpg";
-import { FEEDBACK_FIXED_QUESTIONS } from "@/lib/feedback-fixed-questions";
+import { FEEDBACK_FIXED_QUESTIONS, feedbackQuestionList, type FeedbackQuestionRow } from "@/lib/feedback-fixed-questions";
 
 type EventInfo = { id: string; title: string; event_date: string };
 
@@ -159,6 +159,9 @@ const EventFeedback = () => {
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [questions, setQuestions] = useState<CustomQuestion[]>([]);
+  const [questionRows, setQuestionRows] = useState<FeedbackQuestionRow[]>([]);
+  const arranged = feedbackQuestionList(questionRows);
+  const label = (key: string) => arranged.find((q) => q.legacy_key === key)?.question_text ?? "";
   const [coverImage, setCoverImage] = useState(feedbackHero);
   const [answers, setAnswers] = useState<Record<string, CustomAnswer>>({});
   const cardRef = useRef<HTMLDivElement>(null);
@@ -177,7 +180,7 @@ const EventFeedback = () => {
         supabase.rpc("get_event_feedback_info", { _event_id: eventId }),
         supabase
           .from("feedback_questions")
-          .select("id, question_text, question_type, options, is_required, display_order")
+          .select("id, legacy_key, question_text, question_type, options, is_required, display_order")
           .or(`form_id.eq.${eventId},event_id.eq.${eventId}`)
           .order("display_order", { ascending: true }),
       ]);
@@ -186,7 +189,9 @@ const EventFeedback = () => {
         const { data: eventImage } = await supabase.from("events").select("image_url").eq("id", eventId).maybeSingle();
         if (eventImage?.image_url) setCoverImage(eventImage.image_url);
       }
-      const list = ((questionRows as CustomQuestion[] | null) || []);
+      const all = (questionRows as FeedbackQuestionRow[] | null) || [];
+      setQuestionRows(all);
+      const list = all.filter((q) => !q.legacy_key);
       setQuestions(list);
       setAnswers(
         Object.fromEntries(list.map((q) => [q.id, q.question_type === "multi" ? [] : q.question_type === "rating" ? null : ""]))
@@ -208,7 +213,7 @@ const EventFeedback = () => {
       key: "enjoyment",
       valid: form.enjoyment !== null,
       render: () => (
-        <StepShell title="עד כמה נהנית מהמפגש היום?" subtitle="פשוט תבחר כוכבים, בלי לחשוב יותר מדי">
+        <StepShell title={label("enjoyment")} subtitle="פשוט תבחר כוכבים, בלי לחשוב יותר מדי">
           <div className="flex flex-row items-center justify-center gap-2 py-2">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
@@ -237,7 +242,7 @@ const EventFeedback = () => {
       key: "met_new",
       valid: form.met_new_person !== null && (form.met_new_person === false || form.new_people_count !== null),
       render: () => (
-        <StepShell title="הכרת לפחות אדם אחד חדש הערב?">
+        <StepShell title={label("met_new")}>
           <div className="grid grid-cols-2 gap-3">
             <ChoiceButton active={form.met_new_person === true} onClick={() => set("met_new_person", true)}>
               <span className="block text-center">כן</span>
@@ -274,7 +279,7 @@ const EventFeedback = () => {
         key: "keep_in_touch",
         valid: form.keep_in_touch !== null,
         render: () => (
-          <StepShell title="יש מישהו שהכרת היום שתרצה להמשיך איתו בקשר?">
+          <StepShell title={label("keep_in_touch")}>
             <div className="grid grid-cols-2 gap-3">
               <ChoiceButton active={form.keep_in_touch === true} onClick={() => set("keep_in_touch", true)}>
                 <span className="block text-center">כן</span>
@@ -308,7 +313,7 @@ const EventFeedback = () => {
       key: "reason",
       valid: !!form.attend_reason,
       render: () => (
-        <StepShell title="מה הביא אותך למפגש?">
+        <StepShell title={label("reason")}>
           <div className="grid gap-2">
             {ATTEND_REASONS.map((r) => (
               <ChoiceButton key={r} active={form.attend_reason === r} onClick={() => set("attend_reason", r)}>
@@ -324,7 +329,7 @@ const EventFeedback = () => {
       key: "meetup_type",
       valid: !!form.preferred_meetup_type,
       render: () => (
-        <StepShell title="איזה מפגש היית הכי רוצה שנעשה בהמשך?">
+        <StepShell title={label("meetup_type")}>
           <div className="grid gap-2">
             {MEETUP_TYPES.map((r) => (
               <ChoiceButton
@@ -341,7 +346,7 @@ const EventFeedback = () => {
     });
 
     list.push({
-      key: "free_text",
+      key: "meaningful_moment",
       valid: true,
       render: () => (
         <StepShell title="בכמה מילים שלך" subtitle="אפשר גם לדלג, אבל זה מה שהכי עוזר לנו">
@@ -381,7 +386,7 @@ const EventFeedback = () => {
       key: "likelihood",
       valid: form.next_event_likelihood !== null,
       render: () => (
-        <StepShell title="עד כמה סביר שתגיע גם למפגש הבא?">
+        <StepShell title={label("likelihood")}>
           <div className="grid gap-2">
             {LIKELIHOOD_LABELS.map((label, i) => (
               <ChoiceButton
@@ -402,7 +407,7 @@ const EventFeedback = () => {
       valid: form.nps !== null,
       render: () => (
         <StepShell
-          title="עד כמה תמליץ לחבר מהשכונה להצטרף למועדון?"
+          title={label("nps")}
           subtitle="0 = ממש לא, 10 = בטוח כן"
         >
           <div dir="ltr" className="grid grid-cols-6 gap-2">
@@ -458,7 +463,7 @@ const EventFeedback = () => {
       key: "membership_price",
       valid: !!form.membership_fair_price,
       render: () => (
-        <StepShell title="מה לדעתך יהיה סכום שנתי הוגן לחברות במועדון?">
+        <StepShell title={label("membership_price")}>
           <div className="grid gap-2">
             {MEMBERSHIP_PRICES.map((r) => (
               <ChoiceButton
@@ -564,8 +569,9 @@ const EventFeedback = () => {
       });
     });
 
-    return list;
-  }, [form, questions, answers]);
+    const order = new Map(arranged.map((q, i) => [q.legacy_key ?? `custom-${q.id}`, i]));
+    return list.sort((a, b) => (order.get(a.key) ?? 999) - (order.get(b.key) ?? 999));
+  }, [form, questions, answers, questionRows]);
 
   const current = steps[Math.min(step, steps.length - 1)];
   const isLast = step === steps.length - 1;
