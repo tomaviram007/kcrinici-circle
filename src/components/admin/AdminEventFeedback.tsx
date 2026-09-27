@@ -448,6 +448,7 @@ const AdminEventFeedback = () => {
     const { data } = await supabase
       .from("events")
       .select("id, title, event_date")
+      .eq("feedback_hidden", false)
       .order("event_date", { ascending: false });
     const list = (data as EventOption[]) || [];
     setEvents(list);
@@ -725,12 +726,16 @@ const AdminEventFeedback = () => {
       if (ansErr) return fail("שגיאה במחיקת התשובות", ansErr);
       const { error: qErr } = await supabase.from("feedback_questions").delete().eq("event_id", deleteTarget.id);
       if (qErr) return fail("שגיאה במחיקת השאלות", qErr);
+      const { error: hideErr } = await supabase.from("events").update({ feedback_hidden: true }).eq("id", deleteTarget.id);
+      if (hideErr) return fail("שגיאה בהסרת השאלון מהרשימה", hideErr);
       setDeleting(false);
+      if (eventId === deleteTarget.id) setEventId("all");
       setDeleteTarget(null);
       setDeleteStep(1);
+      await loadEvents();
       load();
       loadQuestionCounts();
-      toast({ title: "השאלון והתשובות שלו נמחקו, האירוע עצמו נשאר" });
+      toast({ title: "השאלון נמחק, וגיבוי שלו ושל התשובות נשמר" });
     }
   };
 
