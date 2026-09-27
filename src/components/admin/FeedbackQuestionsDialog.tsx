@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, ArrowUp, ArrowDown, X, HelpCircle, Pencil, GripVertical } from "lucide-react";
-import { FEEDBACK_FIXED_QUESTIONS } from "@/lib/feedback-fixed-questions";
+import { FEEDBACK_FIXED_QUESTIONS, feedbackQuestionList } from "@/lib/feedback-fixed-questions";
 
 export type QuestionType = "text" | "single" | "multi" | "rating";
 
@@ -19,6 +19,7 @@ export interface FeedbackQuestion {
   options: string[];
   is_required: boolean;
   display_order: number;
+  legacy_key: string | null;
 }
 
 const TYPE_LABELS: Record<QuestionType, string> = {
@@ -48,6 +49,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
   const [savingTitle, setSavingTitle] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingLegacy, setEditingLegacy] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const dragIdRef = useRef<string | null>(null);
 
@@ -55,6 +57,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
   const [type, setType] = useState<QuestionType>("text");
   const [required, setRequired] = useState(false);
   const [options, setOptions] = useState<string[]>(["", ""]);
+  const allQuestions = feedbackQuestionList(questions);
   const targetId = target?.id;
   const targetKind = target?.kind;
 
@@ -64,7 +67,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
     const column = targetKind === "form" ? "form_id" : "event_id";
     const { data, error } = await supabase
       .from("feedback_questions")
-      .select("id, question_text, question_type, options, is_required, display_order")
+      .select("id, legacy_key, question_text, question_type, options, is_required, display_order")
       .eq(column, targetId)
       .order("display_order", { ascending: true });
     setLoadError(!!error);
@@ -81,6 +84,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
       setQuestions([]);
       setShowAdd(false);
       setEditingId(null);
+      setEditingLegacy(null);
       setEditingTitle(false);
       setDraftTitle(target?.title ?? "");
       setDraftDate(target?.date ? new Date(target.date).toLocaleDateString("en-CA") : "");
@@ -123,8 +127,9 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
     toast({ title: "פרטי השאלון עודכנו" });
   };
 
-  const openEditor = (q: FeedbackQuestion) => {
-    setEditingId(q.id);
+  const openEditor = (q: (typeof allQuestions)[number]) => {
+    setEditingId(q.legacy_key ? (questions.find((row) => row.legacy_key === q.legacy_key)?.id ?? null) : q.id);
+    setEditingLegacy(q.legacy_key);
     setText(q.question_text);
     setType(q.question_type);
     setRequired(q.is_required);
@@ -134,6 +139,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
 
   const resetEditor = () => {
     setEditingId(null);
+    setEditingLegacy(null);
     setText("");
     setType("text");
     setOptions(["", ""]);
@@ -153,7 +159,8 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
       return;
     }
     setSaving(true);
-    const changes = { question_text: text.trim(), question_type: type, options: needsOptions ? cleanOptions : [], is_required: required };
+    const fixed = FEEDBACK_FIXED_QUESTIONS.find((q) => q.key === editingLegacy);
+    const changes = { question_text: text.trim(), question_type: fixed?.question_type ?? type, options: fixed ? [] : needsOptions ? cleanOptions : [], is_required: fixed ? false : required };
     const { error } = editingId
       ? await supabase.from("feedback_questions").update(changes).eq("id", editingId)
       : await (async () => {
@@ -173,7 +180,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
     resetEditor();
     await load();
     onSaved?.();
-    toast({ title: editingId ? "השאלה עודכנה" : "השאלה נוספה לשאלון" });
+    toast({ title: editingId || editingLegacy ? "השאלה עודכנה" : "השאלה נוספה לשאלון" });
   };
 
   const removeQuestion = async (id: string) => {
@@ -189,26 +196,39 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
   };
 
   const reorder = async (index: number, next: number) => {
-    if (next < 0 || next >= questions.length || next === index || saving) return;
-    const reordered = [...questions];
+    if (next < 0 || next >= allQuestions.length || next === index || saving || !target) return;
+    const reordered = [...allQuestions];
     const [moved] = reordered.splice(index, 1);
     reordered.splice(next, 0, moved);
-    setQuestions(reordered);
     setSaving(true);
-    const results = await Promise.all(reordered.map((q, i) => supabase.from("feedback_questions").update({ display_order: i }).eq("id", q.id)));
+    const { data: userData } = await supabase.auth.getUser();
+    let failure: string | undefined;
+    for (const [i, q] of reordered.entries()) {
+      const row = questions.find((r) => r.id === q.id);
+      const result = row
+        ? await supabase.from("feedback_questions").update({ display_order: i * 100 }).eq("id", row.id)
+        : await supabase.from("feedback_questions").insert({
+            [target.kind === "form" ? "form_id" : "event_id"]: target.id,
+            legacy_key: q.legacy_key,
+            question_text: q.question_text,
+            question_type: q.question_type,
+            display_order: i * 100,
+            created_by: userData.user?.id ?? null,
+          } as never);
+      if (result.error) { failure = result.error.message; break; }
+    }
     await load();
     setSaving(false);
-    const failure = results.find((result) => result.error);
-    if (failure?.error) toast({ title: "לא ניתן לשמור את סדר השאלות", description: failure.error.message, variant: "destructive" });
+    if (failure) toast({ title: "לא ניתן לשמור את סדר השאלות", description: failure, variant: "destructive" });
     else onSaved?.();
   };
 
   const move = (index: number, dir: -1 | 1) => void reorder(index, index + dir);
 
   const finishDrag = (clientX: number, clientY: number) => {
-    const source = questions.findIndex((q) => q.id === dragIdRef.current);
+    const source = allQuestions.findIndex((q) => q.id === dragIdRef.current);
     const targetElement = document.elementFromPoint(clientX, clientY)?.closest("[data-question-id]");
-    const destination = questions.findIndex((q) => q.id === targetElement?.getAttribute("data-question-id"));
+    const destination = allQuestions.findIndex((q) => q.id === targetElement?.getAttribute("data-question-id"));
     dragIdRef.current = null;
     setDragId(null);
     if (source >= 0 && destination >= 0) void reorder(source, destination);
@@ -248,41 +268,26 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
             {loading ? <Loader2 className="h-5 w-5 animate-spin text-primary" /> : loadError ? (
               <p role="alert" className="font-body text-sm text-destructive">לא הצלחנו לטעון את השאלות. נסה לסגור ולפתוח את החלון שוב.</p>
             ) : (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <p className="font-body text-xs font-bold text-muted-foreground">שאלות קבועות ({FEEDBACK_FIXED_QUESTIONS.length})</p>
-                  {FEEDBACK_FIXED_QUESTIONS.map((q, i) => (
-                    <div key={q.label} className="border-b border-border/60 py-2 text-right font-body text-sm text-foreground">
-                      <span className="text-muted-foreground">{i + 1}. </span>{q.label}
-                      {"note" in q && <span className="block text-xs text-muted-foreground">{q.note}</span>}
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-2">
-                  <p className="font-body text-xs font-bold text-muted-foreground">שאלות שהוספת ({questions.length})</p>
-                  {questions.length === 0 ? <p className="font-body text-sm text-muted-foreground">עדיין לא נוספו שאלות נוספות.</p> : questions.map((q, i) => (
-                     <div key={q.id} data-question-id={q.id} className={`flex items-center gap-2 rounded-lg border bg-background/40 p-2.5 ${dragId === q.id ? "border-primary opacity-60" : "border-border/60"}`}>
-                       <Button type="button" size="icon" variant="ghost" disabled={saving} className="shrink-0 cursor-grab touch-none active:cursor-grabbing" aria-label={`גרירת שאלה ${i + 1} לשינוי סדר`} title="גררו לשינוי סדר" onPointerDown={(e) => { if (saving) return; dragIdRef.current = q.id; setDragId(q.id); e.currentTarget.setPointerCapture(e.pointerId); }} onPointerUp={(e) => finishDrag(e.clientX, e.clientY)} onPointerCancel={() => { dragIdRef.current = null; setDragId(null); }}><GripVertical className="h-4 w-4" /></Button>
-                       <button type="button" className="min-w-0 flex-1 text-right" onClick={() => openEditor(q)} aria-label={`עריכת שאלה: ${q.question_text}`}>
-                        <p className="font-body text-sm font-bold text-foreground">{FEEDBACK_FIXED_QUESTIONS.length + i + 1}. {q.question_text}</p>
-                        <p className="font-body text-xs text-muted-foreground">{TYPE_LABELS[q.question_type]}{q.is_required && " · חובה"}{q.options.length > 0 && ` · ${q.options.join(" / ")}`}</p>
-                       </button>
-                      <div className="flex shrink-0 items-center gap-1">
-                         <Button size="icon" variant="ghost" aria-label="עריכת שאלה" onClick={() => openEditor(q)}><Pencil className="h-4 w-4" /></Button>
-                         <Button size="icon" variant="ghost" aria-label="העלאה למעלה" disabled={saving || i === 0} onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4" /></Button>
-                         <Button size="icon" variant="ghost" aria-label="הורדה למטה" disabled={saving || i === questions.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4" /></Button>
-                         <Button size="icon" variant="ghost" aria-label="מחיקת שאלה" onClick={() => removeQuestion(q.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className="space-y-2">
+                {allQuestions.map((q, i) => (
+                  <div key={q.id} data-question-id={q.id} className={`flex items-center gap-1 rounded-lg border bg-background/40 p-2 ${dragId === q.id ? "border-primary opacity-60" : "border-border/60"}`}>
+                    <Button type="button" size="icon" variant="ghost" disabled={saving} className="shrink-0 cursor-grab touch-none active:cursor-grabbing" aria-label={`גרירת שאלה ${i + 1} לשינוי סדר`} onPointerDown={(e) => { if (saving) return; dragIdRef.current = q.id; setDragId(q.id); e.currentTarget.setPointerCapture(e.pointerId); }} onPointerUp={(e) => finishDrag(e.clientX, e.clientY)} onPointerCancel={() => { dragIdRef.current = null; setDragId(null); }}><GripVertical className="h-4 w-4" /></Button>
+                    <Button type="button" variant="ghost" className="min-w-0 h-auto flex-1 whitespace-normal text-right" onClick={() => openEditor(q)} aria-label={`עריכת שאלה: ${q.question_text}`}>
+                      <span className="w-full text-right font-body text-sm text-foreground">{i + 1}. {q.question_text}</span>
+                    </Button>
+                    <Button size="icon" variant="ghost" aria-label="עריכת שאלה" onClick={() => openEditor(q)}><Pencil className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" aria-label="העלאה למעלה" disabled={saving || i === 0} onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" aria-label="הורדה למטה" disabled={saving || i === allQuestions.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4" /></Button>
+                    {!q.legacy_key && <Button size="icon" variant="ghost" aria-label="מחיקת שאלה" onClick={() => removeQuestion(q.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>}
+                  </div>
+                ))}
               </div>
             )}
           </section>
 
           {showAdd && <section className="rounded-lg border border-border bg-background/40 p-4">
             <h4 className="mb-3 flex items-center gap-2 font-body text-sm font-bold text-foreground">
-               <Pencil className="h-4 w-4 text-primary" /> {editingId ? "עריכת שאלה" : "הוספת שאלה"}
+               <Pencil className="h-4 w-4 text-primary" /> {editingId || editingLegacy ? "עריכת שאלה" : "הוספת שאלה"}
             </h4>
             <div className="space-y-3">
               <Textarea
@@ -293,7 +298,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
                 maxLength={300}
                 onChange={(e) => setText(e.target.value)}
               />
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+              {!editingLegacy && <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
                 <Select value={type} onValueChange={(v) => setType(v as QuestionType)}>
                   <SelectTrigger className="text-right">
                     <SelectValue />
@@ -310,9 +315,9 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetail
                   <span className="font-body text-sm text-muted-foreground">שאלת חובה</span>
                   <Switch checked={required} onCheckedChange={setRequired} />
                 </div>
-              </div>
+              </div>}
 
-              {needsOptions && (
+              {needsOptions && !editingLegacy && (
                 <div className="space-y-2">
                   {options.map((o, i) => (
                     <div key={i} className="flex gap-2">
