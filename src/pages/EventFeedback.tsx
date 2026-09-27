@@ -349,12 +349,9 @@ const EventFeedback = () => {
       key: "meaningful_moment",
       valid: true,
       render: () => (
-        <StepShell title="בכמה מילים שלך" subtitle="אפשר גם לדלג, אבל זה מה שהכי עוזר לנו">
+        <StepShell title={label("meaningful_moment")} subtitle="אפשר גם לדלג, אבל זה מה שהכי עוזר לנו">
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <label className="block text-right font-body text-sm text-muted-foreground">
-                מה היה הרגע הכי משמעותי עבורך הערב?
-              </label>
               <Textarea
                 dir="rtl"
                 rows={3}
@@ -364,10 +361,17 @@ const EventFeedback = () => {
                 className="resize-none text-right"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="block text-right font-body text-sm text-muted-foreground">
-                מה אפשר לשפר במפגש הבא?
-              </label>
+          </div>
+        </StepShell>
+      ),
+    });
+
+    list.push({
+      key: "improvement",
+      valid: true,
+      render: () => (
+        <StepShell title={label("improvement")} subtitle="אפשר גם לדלג">
+          <div className="space-y-1.5">
               <Textarea
                 dir="rtl"
                 rows={3}
@@ -376,7 +380,6 @@ const EventFeedback = () => {
                 onChange={(e) => set("improvement", e.target.value)}
                 className="resize-none text-right"
               />
-            </div>
           </div>
         </StepShell>
       ),
