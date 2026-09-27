@@ -158,12 +158,12 @@ const Panel = ({
   children: React.ReactNode;
 }) => (
   <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-      {action}
+    <div dir="rtl" className="mb-4 flex flex-wrap items-center justify-between gap-2 text-right">
       <h3 className="flex items-center gap-2 font-serif text-lg font-bold text-foreground">
         {title}
         {Icon && <Icon className="h-5 w-5 text-primary" />}
       </h3>
+      {action}
     </div>
     {children}
   </section>
@@ -1196,6 +1196,12 @@ const AdminEventFeedback = () => {
         onOpenChange={(o) => !o && setQuestionsTarget(null)}
         target={questionsTarget}
         onSaved={handleQuestionsChanged}
+        onTitleSaved={(title) => {
+          if (!questionsTarget) return;
+          setQuestionsTarget({ ...questionsTarget, title });
+          if (questionsTarget.kind === "form") void loadForms();
+          else void loadEvents();
+        }}
       />
 
 
