@@ -31,6 +31,7 @@ import QRCode from "qrcode";
 import FeedbackQuestionsDialog from "@/components/admin/FeedbackQuestionsDialog";
 import QuestionsAccordion from "@/components/admin/QuestionsAccordion";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
+import { FEEDBACK_FIXED_QUESTIONS } from "@/lib/feedback-fixed-questions";
 
 // The message the club forwards to members, in plain human Hebrew.
 const shareMessage = (title: string, url: string) =>
@@ -179,6 +180,7 @@ interface RowActions {
   duplicating: string | null;
   openQr: (ev: EventOption) => void;
   openPreview: (ev: EventOption) => void;
+  openResponses: (t: { kind: "form" | "event"; id: string; title: string }) => void;
   copyLink: (id: string) => void;
   shareWhatsapp: (id: string, title: string) => void;
   onQuestionsChanged: () => void;
@@ -241,6 +243,9 @@ const QuestionnaireRow = ({
             onClick={() => actions.openPreview({ id, title, event_date: date })}
           >
             <Eye className="h-4 w-4" /> תצוגה
+          </Button>
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => actions.openResponses({ kind, id, title })}>
+            <MessageSquare className="h-4 w-4" /> תשובות
           </Button>
           <Button
             size="sm"
@@ -325,6 +330,88 @@ const AdminEventFeedback = () => {
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
   const [memberNames, setMemberNames] = useState<Record<string, string>>({});
   const [drill, setDrill] = useState<{ title: string; items: DrillItem[] } | null>(null);
+  const [responsesTarget, setResponsesTarget] = useState<{ kind: "form" | "event"; id: string; title: string } | null>(null);
+  const [responseRows, setResponseRows] = useState<FeedbackRow[]>([]);
+  const [responseNames, setResponseNames] = useState<Record<string, string>>({});
+  const [responsesLoading, setResponsesLoading] = useState(false);
+  const [responsesMore, setResponsesMore] = useState(false);
+  const [responsesError, setResponsesError] = useState(false);
+
+  useEffect(() => {
+    setResponseRows([]);
+    setResponseNames({});
+    setResponsesMore(false);
+    setResponsesError(false);
+    if (!responsesTarget) return;
+    let cancelled = false;
+    const fetchResponses = async () => {
+      setResponsesLoading(true);
+      const { data, error } = await supabase.from("event_feedback").select("*")
+        .eq(responsesTarget.kind === "form" ? "form_id" : "event_id", responsesTarget.id)
+        .order("created_at", { ascending: false }).range(0, 49);
+      if (cancelled) return;
+      if (error) {
+        setResponsesError(true);
+      } else {
+        const list = (data as FeedbackRow[] | null) || [];
+        setResponseRows(list);
+        setResponsesMore(list.length === 50);
+        const ids = Array.from(new Set(list.map((r) => r.member_id).filter((id): id is string => !!id)));
+        if (ids.length) {
+          const { data: members } = await supabase.from("community_members").select("id, full_name").in("id", ids);
+          if (!cancelled) setResponseNames(Object.fromEntries(((members as { id: string; full_name: string }[] | null) || []).map((m) => [m.id, m.full_name])));
+        }
+      }
+      if (!cancelled) setResponsesLoading(false);
+    };
+    void fetchResponses();
+    return () => { cancelled = true; };
+  }, [responsesTarget]);
+
+  const loadMoreResponses = async () => {
+    if (!responsesTarget || responsesLoading) return;
+    setResponsesLoading(true);
+    const { data, error } = await supabase.from("event_feedback").select("*")
+      .eq(responsesTarget.kind === "form" ? "form_id" : "event_id", responsesTarget.id)
+      .order("created_at", { ascending: false }).range(responseRows.length, responseRows.length + 49);
+    if (error) {
+      setResponsesError(true);
+    } else {
+      const list = (data as FeedbackRow[] | null) || [];
+      setResponseRows((prev) => [...prev, ...list]);
+      setResponsesMore(list.length === 50);
+      const ids = Array.from(new Set(list.map((r) => r.member_id).filter((id): id is string => !!id)));
+      if (ids.length) {
+        const { data: members } = await supabase.from("community_members").select("id, full_name").in("id", ids);
+        setResponseNames((prev) => ({ ...prev, ...Object.fromEntries(((members as { id: string; full_name: string }[] | null) || []).map((m) => [m.id, m.full_name])) }));
+      }
+    }
+    setResponsesLoading(false);
+  };
+
+  const answerLines = (r: FeedbackRow) => {
+    const values: Record<string, string | number | null> = {
+      enjoyment: r.enjoyment == null ? null : `${r.enjoyment}/5`,
+      met_new: r.met_new_person ? `כן${r.new_people_count != null ? `, ${r.new_people_count} אנשים` : ""}` : "לא",
+      keep_in_touch: r.keep_in_touch ? `כן${r.keep_in_touch_name ? `, ${r.keep_in_touch_name}` : ""}` : "לא",
+      reason: r.attend_reason,
+      meetup_type: r.preferred_meetup_type,
+      meaningful_moment: r.meaningful_moment,
+      improvement: r.improvement,
+      likelihood: r.next_event_likelihood == null ? null : `${r.next_event_likelihood}/5`,
+      nps: r.nps == null ? null : `${r.nps}/10`,
+      membership_interest: r.membership_interest ?? null,
+      membership_price: r.membership_fair_price ?? null,
+    };
+    return [
+      ...FEEDBACK_FIXED_QUESTIONS.filter((q) => values[q.key] !== null && values[q.key] !== "" && values[q.key] !== undefined)
+        .map((q) => ({ question: q.label, answer: String(values[q.key]) })),
+      ...(r.membership_benefits?.length ? [{ question: "הטבות מבוקשות", answer: r.membership_benefits.join(", ") }] : []),
+      ...(r.membership_benefits_other ? [{ question: "הטבה אחרת", answer: r.membership_benefits_other }] : []),
+      ...Object.values(r.custom_answers || {}).filter((a) => a?.answer !== null && a?.answer !== "" && (!Array.isArray(a?.answer) || a.answer.length > 0))
+        .map((a) => ({ question: a.question, answer: Array.isArray(a.answer) ? a.answer.join(", ") : String(a.answer) })),
+    ];
+  };
 
 
   const loadQuestionCounts = async () => {
@@ -734,6 +821,7 @@ const AdminEventFeedback = () => {
     duplicating,
     openQr: (ev) => void openQr(ev),
     openPreview: (ev) => setPreviewEvent(ev),
+    openResponses: (t) => setResponsesTarget(t),
     copyLink: (id) => void copyLink(id),
     shareWhatsapp: (id, title) => shareWhatsapp(id, title),
     onQuestionsChanged: () => handleQuestionsChanged(),
@@ -1257,6 +1345,36 @@ const AdminEventFeedback = () => {
           ) : (
             <p className="font-body text-sm text-muted-foreground">אין משיבים בקטגוריה הזו</p>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!responsesTarget} onOpenChange={(open) => !open && setResponsesTarget(null)}>
+        <DialogContent dir="rtl" className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-2xl overflow-y-auto text-right">
+          <DialogHeader>
+            <DialogTitle className="pr-0 text-right font-serif">תשובות השאלון: {responsesTarget?.title}</DialogTitle>
+          </DialogHeader>
+          {responsesError && <p className="font-body text-sm text-destructive">לא ניתן לטעון את התשובות כרגע.</p>}
+          {!responsesLoading && !responsesError && responseRows.length === 0 && <p className="font-body text-sm text-muted-foreground">עדיין לא התקבלו תשובות לשאלון הזה.</p>}
+          <div className="space-y-3">
+            {responseRows.map((r) => (
+              <article key={r.id} className="rounded-lg border border-border bg-card p-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2 font-body text-sm">
+                  <strong className="text-foreground">{(r.member_id && responseNames[r.member_id]) || "משיב ללא שם (אנונימי)"}</strong>
+                  <time className="text-muted-foreground">{new Date(r.created_at).toLocaleString("he-IL")}</time>
+                </div>
+                <dl className="space-y-3">
+                  {answerLines(r).map((line, index) => (
+                    <div key={index} className="font-body text-sm">
+                      <dt className="font-bold text-foreground">{line.question}</dt>
+                      <dd className="mt-0.5 whitespace-pre-wrap break-words text-muted-foreground">{line.answer}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </article>
+            ))}
+          </div>
+          {responsesLoading && <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />}
+          {responsesMore && !responsesLoading && <Button variant="outline" onClick={() => void loadMoreResponses()}>עוד תשובות</Button>}
         </DialogContent>
       </Dialog>
 

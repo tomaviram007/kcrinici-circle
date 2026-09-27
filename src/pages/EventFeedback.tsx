@@ -695,10 +695,12 @@ const EventFeedback = () => {
 
   if (!started && !done) {
     return (
-      <main dir="rtl" className="relative flex min-h-screen flex-col justify-end overflow-hidden bg-background text-right">
-        <img src={coverImage} alt="" width={1536} height={1024} className="absolute inset-0 h-full w-full object-cover" onError={() => setCoverImage(feedbackHero)} />
-        <div className="absolute inset-0 bg-background/65" aria-hidden="true" />
-        <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-end px-6 pb-12 pt-24 sm:px-10 sm:pb-20">
+      <main dir="rtl" className="relative flex min-h-screen flex-col bg-background text-right sm:justify-end sm:overflow-hidden">
+        <div className="relative w-full shrink-0 sm:absolute sm:inset-0 sm:h-full">
+          <img src={coverImage} alt="" width={1536} height={1024} className="block h-auto w-full sm:h-full sm:object-cover" onError={() => setCoverImage(feedbackHero)} />
+          <div className="absolute inset-0 bg-background/25 sm:bg-background/65" aria-hidden="true" />
+        </div>
+        <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col justify-end px-6 pb-12 pt-8 sm:min-h-screen sm:px-10 sm:pb-20 sm:pt-24">
           <p className="mb-4 font-body text-sm text-primary">{eventDate}</p>
           <h1 className="mb-5 break-words font-serif text-4xl font-bold leading-tight text-foreground sm:text-5xl">{event.title}</h1>
           <p className="mb-7 font-body text-lg text-foreground">{FEEDBACK_FIXED_QUESTIONS.length + questions.length} שאלות</p>
