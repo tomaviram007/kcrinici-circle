@@ -28,7 +28,7 @@ export const feedbackQuestionList = (rows: FeedbackQuestionRow[]) => {
     const override = rows.find((row) => row.legacy_key === q.key);
     return { ...q, id: override?.id ?? q.key, legacy_key: q.key, question_text: override?.question_text ?? q.label, question_type: q.question_type, options: override?.options ?? [], is_required: override?.is_required ?? false, display_order: override?.display_order ?? i * 100, note: "note" in q ? q.note : undefined };
   });
-  const hasOverrides = rows.some((row) => row.legacy_key);
+  const hasOverrides = rows.filter((row) => row.legacy_key).length === FEEDBACK_FIXED_QUESTIONS.length;
   const custom = rows.filter((row) => !row.legacy_key).map((row) => ({ ...row, display_order: hasOverrides ? row.display_order : 1100 + row.display_order }));
   return [...legacy, ...custom].sort((a, b) => a.display_order - b.display_order);
 };
