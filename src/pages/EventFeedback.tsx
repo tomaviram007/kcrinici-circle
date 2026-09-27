@@ -608,7 +608,7 @@ const EventFeedback = () => {
 
     const order = new Map(arranged.map((q, i) => [q.legacy_key ?? `custom-${q.id}`, i]));
     return list.sort((a, b) => (order.get(a.key) ?? 999) - (order.get(b.key) ?? 999));
-  }, [form, questions, answers, questionRows]);
+  }, [form, questions, answers, questionRows, guestName]);
 
   const current = steps[Math.min(step, steps.length - 1)];
   const isLast = step === steps.length - 1;
@@ -636,6 +636,7 @@ const EventFeedback = () => {
       _membership_fair_price: form.membership_fair_price || null,
       _membership_benefits: form.membership_benefits,
       _membership_benefits_other: form.membership_benefits_other.trim() || null,
+      _guest_name: guestName.trim() || null,
       _custom_answers: Object.fromEntries(
         questions
           .map((q) => {
@@ -683,7 +684,7 @@ const EventFeedback = () => {
       return typeof value === "string" && value.trim().length > 0;
     }).length;
     const { data: userData } = await supabase.auth.getUser();
-    let respondent = "משיב ללא שם (אנונימי)";
+    let respondent = guestName.trim() || "משיב ללא שם (אנונימי)";
     if (userData.user) {
       const { data: profile } = await supabase
         .from("profiles")
