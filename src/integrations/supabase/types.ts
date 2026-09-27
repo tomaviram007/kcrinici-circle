@@ -979,6 +979,7 @@ export type Database = {
           description: string
           end_date: string | null
           event_date: string
+          feedback_hidden: boolean
           id: string
           image_url: string | null
           is_admin_only: boolean
@@ -997,6 +998,7 @@ export type Database = {
           description: string
           end_date?: string | null
           event_date: string
+          feedback_hidden?: boolean
           id?: string
           image_url?: string | null
           is_admin_only?: boolean
@@ -1015,6 +1017,7 @@ export type Database = {
           description?: string
           end_date?: string | null
           event_date?: string
+          feedback_hidden?: boolean
           id?: string
           image_url?: string | null
           is_admin_only?: boolean
@@ -1026,6 +1029,33 @@ export type Database = {
           title?: string
           updated_at?: string
           waze_url?: string | null
+        }
+        Relationships: []
+      }
+      feedback_backup: {
+        Row: {
+          data: Json
+          deleted_at: string
+          deleted_by: string | null
+          id: string
+          row_id: string | null
+          source_table: string
+        }
+        Insert: {
+          data: Json
+          deleted_at?: string
+          deleted_by?: string | null
+          id?: string
+          row_id?: string | null
+          source_table: string
+        }
+        Update: {
+          data?: Json
+          deleted_at?: string
+          deleted_by?: string | null
+          id?: string
+          row_id?: string | null
+          source_table?: string
         }
         Relationships: []
       }
