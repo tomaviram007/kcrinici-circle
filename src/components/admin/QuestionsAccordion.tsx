@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { GripVertical, Loader2, Plus } from "lucide-react";
+import { Loader2, Pencil, Plus } from "lucide-react";
 import type { FeedbackQuestion } from "@/components/admin/FeedbackQuestionsDialog";
 import { feedbackQuestionList } from "@/lib/feedback-fixed-questions";
 
@@ -45,7 +45,7 @@ const QuestionsAccordion = ({ kind, targetId, onAdd, onChanged, refreshKey = 0 }
     <div dir="rtl" className="space-y-2 border-t border-border/50 p-3 text-right">
       {feedbackQuestionList(questions).map((q, i) => (
         <Button key={q.id} variant="ghost" className="flex h-auto w-full justify-start gap-2 whitespace-normal border-b border-border/50 py-2 text-right font-body text-sm text-foreground" onClick={onAdd}>
-          <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <Pencil className="h-4 w-4 shrink-0 text-muted-foreground" />
           <span>{i + 1}. {q.question_text}</span>
         </Button>
       ))}
