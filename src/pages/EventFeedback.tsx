@@ -10,6 +10,7 @@ import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import feedbackHero from "@/assets/hero-feedback.jpg";
+import { FEEDBACK_FIXED_QUESTIONS } from "@/lib/feedback-fixed-questions";
 
 type EventInfo = { id: string; title: string; event_date: string };
 
@@ -691,7 +692,7 @@ const EventFeedback = () => {
         <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-end px-6 pb-12 pt-24 sm:px-10 sm:pb-20">
           <p className="mb-4 font-body text-sm text-primary">{eventDate}</p>
           <h1 className="mb-5 break-words font-serif text-4xl font-bold leading-tight text-foreground sm:text-5xl">{event.title}</h1>
-          <p className="mb-7 font-body text-lg text-foreground">{steps.length} שאלות</p>
+          <p className="mb-7 font-body text-lg text-foreground">{FEEDBACK_FIXED_QUESTIONS.length + questions.length} שאלות</p>
           <Button size="lg" className="w-full sm:w-48" onClick={() => { setStarted(true); trackAction("event_feedback_start", { event_id: event.id }); }}>מתחילים</Button>
         </div>
       </main>
