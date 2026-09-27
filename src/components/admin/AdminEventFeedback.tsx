@@ -555,7 +555,7 @@ const AdminEventFeedback = () => {
     }
     const { data: original, error: readError } = await supabase
       .from("feedback_questions")
-      .select("question_text, question_type, options, is_required, display_order")
+      .select("question_text, question_type, options, is_required, display_order, legacy_key")
       .eq(source.kind === "form" ? "form_id" : "event_id", source.id)
       .order("display_order", { ascending: true });
     if (readError) {
@@ -585,6 +585,7 @@ const AdminEventFeedback = () => {
           options: q.options,
           is_required: q.is_required,
           display_order: i,
+           legacy_key: q.legacy_key,
           created_by: userData.user?.id ?? null,
         }))
       );

@@ -1068,6 +1068,7 @@ export type Database = {
           form_id: string | null
           id: string
           is_required: boolean
+          legacy_key: string | null
           options: string[]
           question_text: string
           question_type: string
@@ -1081,6 +1082,7 @@ export type Database = {
           form_id?: string | null
           id?: string
           is_required?: boolean
+          legacy_key?: string | null
           options?: string[]
           question_text: string
           question_type?: string
@@ -1094,6 +1096,7 @@ export type Database = {
           form_id?: string | null
           id?: string
           is_required?: boolean
+          legacy_key?: string | null
           options?: string[]
           question_text?: string
           question_type?: string
