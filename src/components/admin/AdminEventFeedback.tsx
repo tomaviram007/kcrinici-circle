@@ -719,7 +719,7 @@ const AdminEventFeedback = () => {
       setDeleteStep(1);
       load();
       loadQuestionCounts();
-      toast({ title: "השאלון וכל התשובות שנאספו בו נמחקו" });
+      toast({ title: "השאלון נמחק, וגיבוי שלו ושל התשובות נשמר" });
 } else {
       // event-based questionnaire: remove its questions and answers, keep the event itself
       const { error: ansErr } = await supabase.from("event_feedback").delete().eq("event_id", deleteTarget.id);
