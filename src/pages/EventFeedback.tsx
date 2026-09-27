@@ -164,6 +164,7 @@ const EventFeedback = () => {
   const label = (key: string) => arranged.find((q) => q.legacy_key === key)?.question_text ?? "";
   const [coverImage, setCoverImage] = useState(feedbackHero);
   const [answers, setAnswers] = useState<Record<string, CustomAnswer>>({});
+  const [guestName, setGuestName] = useState("");
   const cardRef = useRef<HTMLDivElement>(null);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
@@ -202,12 +203,45 @@ const EventFeedback = () => {
   }, [eventId]);
 
   useEffect(() => {
+    // Prefill the name for logged-in members so they can just continue.
+    const prefillName = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name, full_name")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+      const name = profile?.display_name || profile?.full_name || "";
+      if (name) setGuestName(name);
+    };
+    void prefillName();
+  }, []);
+
+  useEffect(() => {
     if (!cardRef.current) return;
     gsap.fromTo(cardRef.current, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
   }, [step, started, done]);
 
   const steps = useMemo(() => {
     const list: Array<{ key: string; valid: boolean; render: () => React.ReactNode }> = [];
+
+    list.push({
+      key: "guest_name",
+      valid: guestName.trim().length >= 2,
+      render: () => (
+        <StepShell title="איך קוראים לך?" subtitle="כדי שנדע מי ענה, בלי זה התשובה נשארת אנונימית">
+          <Input
+            dir="rtl"
+            value={guestName}
+            onChange={(e) => setGuestName(e.target.value)}
+            placeholder="השם שלך"
+            autoComplete="off"
+            className="h-11 text-right"
+          />
+        </StepShell>
+      ),
+    });
 
     list.push({
       key: "enjoyment",
@@ -574,7 +608,7 @@ const EventFeedback = () => {
 
     const order = new Map(arranged.map((q, i) => [q.legacy_key ?? `custom-${q.id}`, i]));
     return list.sort((a, b) => (order.get(a.key) ?? 999) - (order.get(b.key) ?? 999));
-  }, [form, questions, answers, questionRows]);
+  }, [form, questions, answers, questionRows, guestName]);
 
   const current = steps[Math.min(step, steps.length - 1)];
   const isLast = step === steps.length - 1;
@@ -602,6 +636,7 @@ const EventFeedback = () => {
       _membership_fair_price: form.membership_fair_price || null,
       _membership_benefits: form.membership_benefits,
       _membership_benefits_other: form.membership_benefits_other.trim() || null,
+      _guest_name: guestName.trim() || null,
       _custom_answers: Object.fromEntries(
         questions
           .map((q) => {
@@ -649,7 +684,7 @@ const EventFeedback = () => {
       return typeof value === "string" && value.trim().length > 0;
     }).length;
     const { data: userData } = await supabase.auth.getUser();
-    let respondent = "משיב ללא שם (אנונימי)";
+    let respondent = guestName.trim() || "משיב ללא שם (אנונימי)";
     if (userData.user) {
       const { data: profile } = await supabase
         .from("profiles")

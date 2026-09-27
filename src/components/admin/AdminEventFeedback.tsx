@@ -56,6 +56,7 @@ interface FeedbackRow {
   event_id: string | null;
   form_id: string | null;
   member_id?: string | null;
+  guest_name?: string | null;
   created_at: string;
   enjoyment: number;
   met_new_person: boolean;
@@ -789,7 +790,7 @@ const AdminEventFeedback = () => {
   };
 
   const respondentName = (r: FeedbackRow) =>
-    (r.member_id && memberNames[r.member_id]) || "משיב ללא שם (אנונימי)";
+    (r.member_id && memberNames[r.member_id]) || r.guest_name || "משיב ללא שם (אנונימי)";
 
   const openDrill = (title: string, list: FeedbackRow[], detail: (r: FeedbackRow) => string) =>
     setDrill({
@@ -1375,7 +1376,7 @@ const AdminEventFeedback = () => {
             {responseRows.map((r) => (
               <article key={r.id} className="rounded-lg border border-border bg-card p-4">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2 font-body text-sm">
-                  <strong className="text-foreground">{(r.member_id && responseNames[r.member_id]) || "משיב ללא שם (אנונימי)"}</strong>
+                  <strong className="text-foreground">{(r.member_id && responseNames[r.member_id]) || r.guest_name || "משיב ללא שם (אנונימי)"}</strong>
                   <time className="text-muted-foreground">{new Date(r.created_at).toLocaleString("he-IL")}</time>
                 </div>
                 <dl className="space-y-3">

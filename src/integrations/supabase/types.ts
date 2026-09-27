@@ -710,6 +710,7 @@ export type Database = {
           enjoyment: number
           event_id: string | null
           form_id: string | null
+          guest_name: string | null
           id: string
           improvement: string | null
           keep_in_touch: boolean
@@ -735,6 +736,7 @@ export type Database = {
           enjoyment: number
           event_id?: string | null
           form_id?: string | null
+          guest_name?: string | null
           id?: string
           improvement?: string | null
           keep_in_touch?: boolean
@@ -760,6 +762,7 @@ export type Database = {
           enjoyment?: number
           event_id?: string | null
           form_id?: string | null
+          guest_name?: string | null
           id?: string
           improvement?: string | null
           keep_in_touch?: boolean
@@ -2436,6 +2439,7 @@ export type Database = {
               _custom_answers?: Json
               _enjoyment: number
               _event_id: string
+              _guest_name?: string
               _improvement?: string
               _keep_in_touch?: boolean
               _keep_in_touch_name?: string
