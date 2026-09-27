@@ -31,7 +31,7 @@ import QRCode from "qrcode";
 import FeedbackQuestionsDialog from "@/components/admin/FeedbackQuestionsDialog";
 import QuestionsAccordion from "@/components/admin/QuestionsAccordion";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
-import { FEEDBACK_FIXED_QUESTIONS } from "@/lib/feedback-fixed-questions";
+import { FEEDBACK_FIXED_QUESTIONS, feedbackQuestionList, type FeedbackQuestionRow } from "@/lib/feedback-fixed-questions";
 
 // The message the club forwards to members, in plain human Hebrew.
 const shareMessage = (title: string, url: string) =>
@@ -333,6 +333,7 @@ const AdminEventFeedback = () => {
   const [responsesTarget, setResponsesTarget] = useState<{ kind: "form" | "event"; id: string; title: string } | null>(null);
   const [responseRows, setResponseRows] = useState<FeedbackRow[]>([]);
   const [responseNames, setResponseNames] = useState<Record<string, string>>({});
+  const [responseLabels, setResponseLabels] = useState<Record<string, string>>({});
   const [responsesLoading, setResponsesLoading] = useState(false);
   const [responsesMore, setResponsesMore] = useState(false);
   const [responsesError, setResponsesError] = useState(false);
@@ -340,12 +341,17 @@ const AdminEventFeedback = () => {
   useEffect(() => {
     setResponseRows([]);
     setResponseNames({});
+    setResponseLabels({});
     setResponsesMore(false);
     setResponsesError(false);
     if (!responsesTarget) return;
     let cancelled = false;
     const fetchResponses = async () => {
       setResponsesLoading(true);
+      const { data: questions } = await supabase.from("feedback_questions")
+        .select("id, legacy_key, question_text, question_type, options, is_required, display_order")
+        .eq(responsesTarget.kind === "form" ? "form_id" : "event_id", responsesTarget.id);
+      if (!cancelled) setResponseLabels(Object.fromEntries(feedbackQuestionList((questions as FeedbackQuestionRow[] | null) || []).filter((q) => q.legacy_key).map((q) => [q.legacy_key, q.question_text])));
       const { data, error } = await supabase.from("event_feedback").select("*")
         .eq(responsesTarget.kind === "form" ? "form_id" : "event_id", responsesTarget.id)
         .order("created_at", { ascending: false }).range(0, 49);
@@ -405,7 +411,7 @@ const AdminEventFeedback = () => {
     };
     return [
       ...FEEDBACK_FIXED_QUESTIONS.filter((q) => values[q.key] !== null && values[q.key] !== "" && values[q.key] !== undefined)
-        .map((q) => ({ question: q.label, answer: String(values[q.key]) })),
+        .map((q) => ({ question: responseLabels[q.key] || q.label, answer: String(values[q.key]) })),
       ...(r.membership_benefits?.length ? [{ question: "הטבות מבוקשות", answer: r.membership_benefits.join(", ") }] : []),
       ...(r.membership_benefits_other ? [{ question: "הטבה אחרת", answer: r.membership_benefits_other }] : []),
       ...Object.values(r.custom_answers || {}).filter((a) => a?.answer !== null && a?.answer !== "" && (!Array.isArray(a?.answer) || a.answer.length > 0))
@@ -1449,6 +1455,18 @@ const AdminEventFeedback = () => {
             onClick={() => previewEvent && window.open(feedbackUrl(previewEvent.id), "_blank", "noopener")}
           >
             <ExternalLink className="h-4 w-4" /> פתיחה בכרטיסייה חדשה
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => {
+              if (!previewEvent) return;
+              const kind = forms.some((form) => form.id === previewEvent.id) ? "form" : "event";
+              setPreviewEvent(null);
+              setResponsesTarget({ kind, id: previewEvent.id, title: previewEvent.title });
+            }}
+          >
+            <MessageSquare className="h-4 w-4" /> תשובות השאלון
           </Button>
         </DialogContent>
       </Dialog>
