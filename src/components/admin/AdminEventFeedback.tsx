@@ -1545,8 +1545,8 @@ const AdminEventFeedback = () => {
             {deleteStep === 1 ? (
               <p className="font-body text-sm text-muted-foreground">
                 {deleteTarget?.kind === "form"
-                  ? `למחוק את השאלון "${deleteTarget?.title}"? הקישור וקוד ה-QR שלו יפסיקו לעבוד.`
-                  : `למחוק את כל התשובות שנאספו בשאלון של "${deleteTarget?.title}"? האירוע עצמו יישאר במערכת.`}
+                  ? `למחוק את השאלון "${deleteTarget?.title}"? הקישור וקוד ה-QR שלו יפסיקו לעבוד, וכל התשובות שנאספו בו יימחקו.`
+                  : `למחוק את השאלון של "${deleteTarget?.title}" ואת כל התשובות שנאספו בו? האירוע עצמו יישאר במערכת.`}
               </p>
             ) : (
               <p className="font-body text-sm text-muted-foreground">
