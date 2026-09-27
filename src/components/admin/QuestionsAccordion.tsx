@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { GripVertical, Loader2, Plus, Trash2 } from "lucide-react";
 import type { FeedbackQuestion, QuestionType } from "@/components/admin/FeedbackQuestionsDialog";
+import { FEEDBACK_FIXED_QUESTIONS } from "@/lib/feedback-fixed-questions";
 
 const TYPE_LABELS: Record<QuestionType, string> = {
   text: "תשובה חופשית",
@@ -79,9 +80,17 @@ const QuestionsAccordion = ({ kind, targetId, onAdd, onChanged, refreshKey = 0 }
 
   return (
     <div dir="rtl" className="space-y-2 border-t border-border/50 p-3 text-right">
+      <p className="font-body text-xs font-bold text-muted-foreground">שאלות קבועות ({FEEDBACK_FIXED_QUESTIONS.length})</p>
+      {FEEDBACK_FIXED_QUESTIONS.map((q, i) => (
+        <div key={q.label} className="border-b border-border/50 py-2 font-body text-sm text-foreground">
+          {i + 1}. {q.label}
+          {"note" in q && <span className="block text-xs text-muted-foreground">{q.note}</span>}
+        </div>
+      ))}
+      <p className="pt-2 font-body text-xs font-bold text-muted-foreground">שאלות שהוספת ({questions.length})</p>
       {questions.length === 0 ? (
         <p className="font-body text-sm text-muted-foreground">
-          עדיין אין שאלות משלך בשאלון הזה. השאלון יוצג עם השאלות הקבועות בלבד.
+          עדיין לא נוספו שאלות נוספות.
         </p>
       ) : (
         <>
@@ -119,7 +128,7 @@ const QuestionsAccordion = ({ kind, targetId, onAdd, onChanged, refreshKey = 0 }
               </Button>
               <div className="min-w-0 flex-1 text-right">
                 <p className="font-body text-sm font-bold text-foreground">
-                  {i + 1}. {q.question_text}
+                  {FEEDBACK_FIXED_QUESTIONS.length + i + 1}. {q.question_text}
                 </p>
                 <p className="font-body text-xs text-muted-foreground">
                   {TYPE_LABELS[q.question_type]}
