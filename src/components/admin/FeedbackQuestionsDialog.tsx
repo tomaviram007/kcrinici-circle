@@ -31,12 +31,12 @@ const TYPE_LABELS: Record<QuestionType, string> = {
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  target: { kind: "form" | "event"; id: string; title: string } | null;
+  target: { kind: "form" | "event"; id: string; title: string; date: string } | null;
   onSaved?: () => void;
-  onTitleSaved?: (title: string) => void;
+  onDetailsSaved?: (title: string, date: string) => void;
 }
 
-const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onTitleSaved }: Props) => {
+const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onDetailsSaved }: Props) => {
   const { toast } = useToast();
   const [questions, setQuestions] = useState<FeedbackQuestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,6 +44,7 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onTitleS
   const [showAdd, setShowAdd] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState("");
+  const [draftDate, setDraftDate] = useState("");
   const [savingTitle, setSavingTitle] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
@@ -51,20 +52,22 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onTitleS
   const [type, setType] = useState<QuestionType>("text");
   const [required, setRequired] = useState(false);
   const [options, setOptions] = useState<string[]>(["", ""]);
+  const targetId = target?.id;
+  const targetKind = target?.kind;
 
   const load = useCallback(async () => {
-    if (!target) return;
+    if (!targetId || !targetKind) return;
     setLoading(true);
-    const column = target.kind === "form" ? "form_id" : "event_id";
+    const column = targetKind === "form" ? "form_id" : "event_id";
     const { data, error } = await supabase
       .from("feedback_questions")
       .select("id, question_text, question_type, options, is_required, display_order")
-      .eq(column, target.id)
+      .eq(column, targetId)
       .order("display_order", { ascending: true });
     setLoadError(!!error);
     if (!error) setQuestions((data as FeedbackQuestion[] | null) || []);
     setLoading(false);
-  }, [target]);
+  }, [targetId, targetKind]);
 
   useEffect(() => {
     if (open) {
@@ -76,8 +79,11 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onTitleS
       setShowAdd(false);
       setEditingTitle(false);
       setDraftTitle(target?.title ?? "");
+      setDraftDate(target?.date ? new Date(target.date).toLocaleDateString("en-CA") : "");
       void load();
     }
+  // Only reset when opening a different questionnaire, not after updating its title/date.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, load]);
 
   const needsOptions = type === "single" || type === "multi";
@@ -85,18 +91,24 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onTitleS
   const saveTitle = async () => {
     if (!target || savingTitle) return;
     const title = draftTitle.trim();
-    if (!title) {
-      toast({ title: "יש למלא כותרת לשאלון", variant: "destructive" });
+    if (!title || !draftDate) {
+      toast({ title: "יש למלא כותרת ותאריך לשאלון", variant: "destructive" });
       return;
     }
-    if (title === target.title) {
+    const originalDate = new Date(target.date).toLocaleDateString("en-CA");
+    if (title === target.title && draftDate === originalDate) {
       setEditingTitle(false);
       return;
     }
+    const original = new Date(target.date);
+    const [year, month, day] = draftDate.split("-").map(Number);
+    if (!year || !month || !day || !Number.isFinite(original.getTime())) return;
+    original.setFullYear(year, month - 1, day);
+    const date = original.toISOString();
     setSavingTitle(true);
     const { error } = await supabase
       .from(target.kind === "form" ? "feedback_forms" : "events")
-      .update({ title })
+      .update(target.kind === "form" ? { title, form_date: date } : { title, event_date: date })
       .eq("id", target.id);
     setSavingTitle(false);
     if (error) {
@@ -104,8 +116,8 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onTitleS
       return;
     }
     setEditingTitle(false);
-    onTitleSaved?.(title);
-    toast({ title: "כותרת השאלון עודכנה" });
+    onDetailsSaved?.(title, date);
+    toast({ title: "פרטי השאלון עודכנו" });
   };
 
   const addQuestion = async () => {
@@ -177,17 +189,18 @@ const FeedbackQuestionsDialog = ({ open, onOpenChange, target, onSaved, onTitleS
             {editingTitle ? (
               <div className="flex w-full flex-wrap items-center gap-2">
                 <Input dir="rtl" aria-label="כותרת השאלון" className="min-w-0 flex-1 text-right" maxLength={200} value={draftTitle} onChange={(e) => setDraftTitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void saveTitle(); }} />
-                <Button size="sm" disabled={savingTitle || !draftTitle.trim()} onClick={saveTitle}>{savingTitle ? <Loader2 className="h-4 w-4 animate-spin" /> : "שמור"}</Button>
-                <Button size="sm" variant="ghost" onClick={() => { setDraftTitle(target?.title ?? ""); setEditingTitle(false); }}>ביטול</Button>
+                <Input type="date" aria-label="תאריך השאלון" className="w-full sm:w-40" value={draftDate} onChange={(e) => setDraftDate(e.target.value)} />
+                <Button size="sm" disabled={savingTitle || !draftTitle.trim() || !draftDate} onClick={saveTitle}>{savingTitle ? <Loader2 className="h-4 w-4 animate-spin" /> : "שמור"}</Button>
+                <Button size="sm" variant="ghost" onClick={() => { setDraftTitle(target?.title ?? ""); setDraftDate(target?.date ? new Date(target.date).toLocaleDateString("en-CA") : ""); setEditingTitle(false); }}>ביטול</Button>
               </div>
             ) : (
               <>
-                <span className="min-w-0 break-words font-body text-sm text-muted-foreground">{target?.title}</span>
-                <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" aria-label="עריכת כותרת השאלון" title="עריכת כותרת השאלון" onClick={() => setEditingTitle(true)}><Pencil className="h-4 w-4" /></Button>
+                <span className="min-w-0 break-words font-body text-sm text-muted-foreground">{target?.title} · {target?.date && new Date(target.date).toLocaleDateString("he-IL")}</span>
+                <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" aria-label="עריכת כותרת ותאריך השאלון" title="עריכת כותרת ותאריך השאלון" onClick={() => setEditingTitle(true)}><Pencil className="h-4 w-4" /></Button>
               </>
             )}
           </div>
-          {editingTitle && target?.kind === "event" && <p className="font-body text-xs text-muted-foreground">שינוי הכותרת יעדכן גם את שם האירוע באתר.</p>}
+          {editingTitle && target?.kind === "event" && <p className="font-body text-xs text-muted-foreground">שינוי הכותרת והתאריך יעדכן גם את האירוע באתר.</p>}
         </DialogHeader>
 
         <div className="space-y-5">
