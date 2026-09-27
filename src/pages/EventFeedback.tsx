@@ -227,6 +227,23 @@ const EventFeedback = () => {
     const list: Array<{ key: string; valid: boolean; render: () => React.ReactNode }> = [];
 
     list.push({
+      key: "guest_name",
+      valid: guestName.trim().length >= 2,
+      render: () => (
+        <StepShell title="איך קוראים לך?" subtitle="כדי שנדע מי ענה, בלי זה התשובה נשארת אנונימית">
+          <Input
+            dir="rtl"
+            value={guestName}
+            onChange={(e) => setGuestName(e.target.value)}
+            placeholder="השם שלך"
+            autoComplete="off"
+            className="h-11 text-right"
+          />
+        </StepShell>
+      ),
+    });
+
+    list.push({
       key: "enjoyment",
       valid: form.enjoyment !== null,
       render: () => (
