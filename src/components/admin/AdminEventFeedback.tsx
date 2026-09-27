@@ -698,29 +698,39 @@ const AdminEventFeedback = () => {
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
-
-    if (deleteTarget.kind === "form") {
-      const { error } = await supabase.from("feedback_forms").delete().eq("id", deleteTarget.id);
+    const fail = (title: string, error: { message: string }) => {
       setDeleting(false);
-      if (error) {
-        toast({ title: "שגיאה במחיקת השאלון", description: error.message, variant: "destructive" });
-        return;
-      }
+      toast({ title, description: error.message, variant: "destructive" });
+ec    };
+    if (deleteTarget.kind === "form") {
+      // 1. answers, 2. custom questions, 3. the form itself
+      const { error: ansErr } = await supabase.from("event_feedback").delete().eq("form_id", deleteTarget.id);
+      if (ansErr) return fail("שגיאה במחיקת התשובות", ansErr);
+      const { error: qErr } = await supabase.from("feedback_questions").delete().eq("form_id", deleteTarget.id);
+      if (qErr) return fail("שגיאה במחיקת השאלות", qErr);
+      const { error } = await supabase.from("feedback_forms").delete().eq("id", deleteTarget.id);
+      if (error) return fail("שגיאה במחיקת השאלון", error);
+      setDeleting(false);
       if (eventId === deleteTarget.id) setEventId("all");
       await loadForms();
-    } else {
-      const { error } = await supabase.from("event_feedback").delete().eq("event_id", deleteTarget.id);
+      setDeleteTarget(null);
+      setDeleteStep(1);
+      load();
+      loadQuestionCounts();
+      toast({ title: "השאלון וכל התשובות שנאספו בו נמחקו" });
+ec    } else {
+      // event-based questionnaire: remove its questions and answers, keep the event itself
+      const { error: ansErr } = await supabase.from("event_feedback").delete().eq("event_id", deleteTarget.id);
+      if (ansErr) return fail("שגיאה במחיקת התשובות", ansErr);
+      const { error: qErr } = await supabase.from("feedback_questions").delete().eq("event_id", deleteTarget.id);
+      if (qErr) return fail("שגיאה במחיקת השאלות", qErr);
       setDeleting(false);
-      if (error) {
-        toast({ title: "שגיאה במחיקת התשובות", description: error.message, variant: "destructive" });
-        return;
-      }
+      setDeleteTarget(null);
+      setDeleteStep(1);
+      load();
+      loadQuestionCounts();
+      toast({ title: "השאלון והתשובות שלו נמחקו, האירוע עצמו נשאר" });
     }
-
-    setDeleteTarget(null);
-    setDeleteStep(1);
-    load();
-    toast({ title: deleteTarget.kind === "form" ? "השאלון נמחק" : "תשובות השאלון נמחקו" });
   };
 
   const deleteRow = async (id: string) => {
