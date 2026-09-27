@@ -9,6 +9,7 @@ import { getAnonId, trackAction } from "@/lib/analytics";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
+import feedbackHero from "@/assets/hero-feedback.jpg";
 
 type EventInfo = { id: string; title: string; event_date: string };
 
@@ -157,6 +158,7 @@ const EventFeedback = () => {
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [questions, setQuestions] = useState<CustomQuestion[]>([]);
+  const [coverImage, setCoverImage] = useState(feedbackHero);
   const [answers, setAnswers] = useState<Record<string, CustomAnswer>>({});
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -179,6 +181,10 @@ const EventFeedback = () => {
           .order("display_order", { ascending: true }),
       ]);
       setEvent(((data as EventInfo[] | null) || [])[0] || null);
+      if ((data as EventInfo[] | null)?.[0]) {
+        const { data: eventImage } = await supabase.from("events").select("image_url").eq("id", eventId).maybeSingle();
+        if (eventImage?.image_url) setCoverImage(eventImage.image_url);
+      }
       const list = ((questionRows as CustomQuestion[] | null) || []);
       setQuestions(list);
       setAnswers(
@@ -677,6 +683,21 @@ const EventFeedback = () => {
     year: "numeric",
   });
 
+  if (!started && !done) {
+    return (
+      <main dir="rtl" className="relative flex min-h-screen flex-col justify-end overflow-hidden bg-background text-right">
+        <img src={coverImage} alt="" width={1536} height={1024} className="absolute inset-0 h-full w-full object-cover" onError={() => setCoverImage(feedbackHero)} />
+        <div className="absolute inset-0 bg-background/65" aria-hidden="true" />
+        <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-end px-6 pb-12 pt-24 sm:px-10 sm:pb-20">
+          <p className="mb-4 font-body text-sm text-primary">{eventDate}</p>
+          <h1 className="mb-5 break-words font-serif text-4xl font-bold leading-tight text-foreground sm:text-5xl">{event.title}</h1>
+          <p className="mb-7 font-body text-lg text-foreground">{steps.length} שאלות</p>
+          <Button size="lg" className="w-full sm:w-48" onClick={() => { setStarted(true); trackAction("event_feedback_start", { event_id: event.id }); }}>מתחילים</Button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <div dir="rtl" className="min-h-screen bg-background px-4 py-8 sm:py-12">
       <div className="mx-auto w-full max-w-md">
@@ -695,26 +716,6 @@ const EventFeedback = () => {
               </p>
               <Button asChild variant="outline" className="mt-2">
                 <Link to="/">לאתר המועדון</Link>
-              </Button>
-            </div>
-          ) : !started ? (
-            <div className="space-y-5 text-center">
-              <p className="font-body text-sm text-primary">{eventDate}</p>
-              <h1 className="font-serif text-2xl font-bold leading-snug text-foreground sm:text-3xl">
-                {event.title}
-              </h1>
-              <p className="font-body text-muted-foreground">
-                שמחנו שהיית איתנו. כמה שאלות קצרות, פחות מדקה, וזה נשאר בינינו.
-              </p>
-              <Button
-                size="lg"
-                className="w-full"
-                onClick={() => {
-                  setStarted(true);
-                  trackAction("event_feedback_start", { event_id: event.id });
-                }}
-              >
-                מתחילים
               </Button>
             </div>
           ) : (
