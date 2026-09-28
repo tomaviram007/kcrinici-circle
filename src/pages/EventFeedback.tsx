@@ -157,6 +157,7 @@ const EventFeedback = () => {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [alreadyDone, setAlreadyDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [questions, setQuestions] = useState<CustomQuestion[]>([]);
@@ -187,6 +188,11 @@ const EventFeedback = () => {
           .order("display_order", { ascending: true }),
       ]);
       setEvent(((data as EventInfo[] | null) || [])[0] || null);
+      try {
+        if (localStorage.getItem(`feedback_done_${eventId}`)) setAlreadyDone(true);
+      } catch {
+        // private mode: fall back to the server-side duplicate check
+      }
       if ((data as EventInfo[] | null)?.[0]) {
         const { data: eventImage } = await supabase.from("events").select("image_url").eq("id", eventId).maybeSingle();
         if (eventImage?.image_url) setCoverImage(eventImage.image_url);
@@ -659,8 +665,22 @@ const EventFeedback = () => {
     });
     setSubmitting(false);
     if (rpcError) {
+      if (rpcError.message?.includes("already_submitted")) {
+        try {
+          localStorage.setItem(`feedback_done_${eventId}`, "1");
+        } catch {
+          // ignore storage failures
+        }
+        setAlreadyDone(true);
+        return;
+      }
       setError("משהו השתבש בשליחה. נסה שוב בעוד רגע.");
       return;
+    }
+    try {
+      localStorage.setItem(`feedback_done_${eventId}`, "1");
+    } catch {
+      // ignore storage failures
     }
     trackAction("event_feedback_submit", { event_id: eventId });
 
