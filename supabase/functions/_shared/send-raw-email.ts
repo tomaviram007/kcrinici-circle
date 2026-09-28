@@ -11,6 +11,23 @@ export interface RawSendResult {
   error?: string
 }
 
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|h[1-6]|tr|li)>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 export async function sendRawEmail(to: string, subject: string, html: string): Promise<RawSendResult> {
   const apiKey = Deno.env.get('LOVABLE_API_KEY')
   if (!apiKey) {
@@ -25,6 +42,7 @@ export async function sendRawEmail(to: string, subject: string, html: string): P
         sender_domain: SENDER_DOMAIN,
         subject,
         html,
+        text: htmlToText(html),
         purpose: 'transactional',
         label: 'notification',
         idempotency_key: crypto.randomUUID(),
