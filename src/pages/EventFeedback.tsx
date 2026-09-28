@@ -773,7 +773,20 @@ const EventFeedback = () => {
           ref={cardRef}
           className="rounded-2xl border border-border/70 bg-card/80 p-5 shadow-xl backdrop-blur-sm sm:p-7"
         >
-          {done ? (
+          {alreadyDone ? (
+            <div className="space-y-4 py-6 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
+                <PartyPopper className="h-8 w-8 text-primary" />
+              </div>
+              <h1 className="font-serif text-2xl font-bold text-foreground">כבר ענית על השאלון הזה</h1>
+              <p className="font-body text-muted-foreground">
+                התשובה שלך אצלנו, תודה! כל אחד עונה פעם אחת, ככה התמונה שאנחנו מקבלים נשארת אמיתית.
+              </p>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/">לאתר המועדון</Link>
+              </Button>
+            </div>
+          ) : done ? (
             <div className="space-y-4 py-6 text-center">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
                 <PartyPopper className="h-8 w-8 text-primary" />
