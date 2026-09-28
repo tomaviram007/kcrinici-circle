@@ -562,6 +562,12 @@ const Gallery = () => {
               <Link2 className="h-3.5 w-3.5" />
               {t("gallery.addFromLink")}
             </Button>
+            {canManageAlbum(selectedAlbum) && (
+              <Button onClick={() => setShowCoverLink(true)} size="sm" variant="outline" className="font-body gap-1 border-gold/40 text-gold hover:bg-gold/10">
+                <Link2 className="h-3.5 w-3.5" />
+                קאבר מלינק
+              </Button>
+            )}
             <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleUploadPhoto} />
           </div>
         </div>
@@ -645,6 +651,30 @@ const Gallery = () => {
               )}
               <Button onClick={handleAddPhotoByLink} disabled={addingLink || !linkUrl.trim()} className="w-full gradient-gold text-primary-foreground font-body">
                 {addingLink ? t("gallery.adding") : t("gallery.addPhoto")}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Set cover by link dialog */}
+        <Dialog open={showCoverLink} onOpenChange={setShowCoverLink}>
+          <DialogContent dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="font-serif text-xl">קאבר לאלבום <span className="text-gold">מלינק</span></DialogTitle>
+              <DialogDescription className="sr-only">הדבק קישור לתמונה שתשמש כקאבר של האלבום</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-2">
+              <div>
+                <Label className="font-body text-sm">{t("gallery.photoLink")}</Label>
+                <Input value={coverLinkUrl} onChange={(e) => setCoverLinkUrl(e.target.value)} placeholder="https://example.com/image.jpg" dir="ltr" autoComplete="off" />
+              </div>
+              {coverLinkUrl && (
+                <div className="rounded-lg overflow-hidden bg-secondary border border-border aspect-video">
+                  <img src={coverLinkUrl} alt="preview" className="h-full w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                </div>
+              )}
+              <Button onClick={handleSetCoverByLink} disabled={savingCoverLink || !coverLinkUrl.trim()} className="w-full gradient-gold text-primary-foreground font-body">
+                {savingCoverLink ? t("gallery.adding") : "עדכן קאבר"}
               </Button>
             </div>
           </DialogContent>
