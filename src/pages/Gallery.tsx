@@ -76,6 +76,9 @@ const Gallery = () => {
   const [showAddByLink, setShowAddByLink] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [addingLink, setAddingLink] = useState(false);
+  const [showCoverLink, setShowCoverLink] = useState(false);
+  const [coverLinkUrl, setCoverLinkUrl] = useState("");
+  const [savingCoverLink, setSavingCoverLink] = useState(false);
 
   // Filters
   const [filterMonth, setFilterMonth] = useState("");
@@ -256,6 +259,25 @@ const Gallery = () => {
       await fetchAlbums();
     } catch (err: any) {
       toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleSetCoverByLink = async () => {
+    if (!coverLinkUrl.trim() || !selectedAlbum) return;
+    setSavingCoverLink(true);
+    try {
+      const url = coverLinkUrl.trim();
+      const { error } = await supabase.from("gallery_albums").update({ cover_image_url: url }).eq("id", selectedAlbum.id);
+      if (error) throw error;
+      setSelectedAlbum({ ...selectedAlbum, cover_image_url: url });
+      toast({ title: t("gallery.toastCoverUpdated") });
+      setCoverLinkUrl("");
+      setShowCoverLink(false);
+      await fetchAlbums();
+    } catch (err: any) {
+      toast({ title: t("gallery.toastError"), description: err.message, variant: "destructive" });
+    } finally {
+      setSavingCoverLink(false);
     }
   };
 
