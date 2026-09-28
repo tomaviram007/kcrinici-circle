@@ -157,6 +157,7 @@ const EventFeedback = () => {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [alreadyDone, setAlreadyDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [questions, setQuestions] = useState<CustomQuestion[]>([]);
@@ -187,6 +188,11 @@ const EventFeedback = () => {
           .order("display_order", { ascending: true }),
       ]);
       setEvent(((data as EventInfo[] | null) || [])[0] || null);
+      try {
+        if (localStorage.getItem(`feedback_done_${eventId}`)) setAlreadyDone(true);
+      } catch {
+        // private mode: fall back to the server-side duplicate check
+      }
       if ((data as EventInfo[] | null)?.[0]) {
         const { data: eventImage } = await supabase.from("events").select("image_url").eq("id", eventId).maybeSingle();
         if (eventImage?.image_url) setCoverImage(eventImage.image_url);
@@ -659,8 +665,22 @@ const EventFeedback = () => {
     });
     setSubmitting(false);
     if (rpcError) {
+      if (rpcError.message?.includes("already_submitted")) {
+        try {
+          localStorage.setItem(`feedback_done_${eventId}`, "1");
+        } catch {
+          // ignore storage failures
+        }
+        setAlreadyDone(true);
+        return;
+      }
       setError("משהו השתבש בשליחה. נסה שוב בעוד רגע.");
       return;
+    }
+    try {
+      localStorage.setItem(`feedback_done_${eventId}`, "1");
+    } catch {
+      // ignore storage failures
     }
     trackAction("event_feedback_submit", { event_id: eventId });
 
@@ -728,6 +748,25 @@ const EventFeedback = () => {
     month: "long",
     year: "numeric",
   });
+
+  if (alreadyDone) {
+    return (
+      <div dir="rtl" className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="w-full max-w-md rounded-2xl border border-border/70 bg-card/80 p-7 text-center shadow-xl backdrop-blur-sm">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
+            <PartyPopper className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="mb-3 font-serif text-2xl font-bold text-foreground">כבר ענית על השאלון הזה</h1>
+          <p className="mb-6 font-body text-muted-foreground">
+            התשובה שלך אצלנו, תודה! כל אחד עונה פעם אחת, ככה התמונה שאנחנו מקבלים נשארת אמיתית.
+          </p>
+          <Button asChild variant="outline" className="w-full">
+            <Link to="/">לאתר המועדון</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!started && !done) {
     return (
