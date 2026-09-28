@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Check, Star, ArrowRight, ArrowLeft, PartyPopper } from "lucide-react";
+import { Loader2, Check, Star, ArrowRight, ArrowLeft, PartyPopper, MessageCircle } from "lucide-react";
 import { getAnonId, trackAction } from "@/lib/analytics";
 import { sendTelegramNotification } from "@/lib/telegram-notify";
+import { WHATSAPP_GROUP_LINK } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import feedbackHero from "@/assets/hero-feedback.jpg";
@@ -757,11 +758,28 @@ const EventFeedback = () => {
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
                 <PartyPopper className="h-8 w-8 text-primary" />
               </div>
-              <h1 className="font-serif text-2xl font-bold text-foreground">תודה רבה!</h1>
+              <h1 className="font-serif text-2xl font-bold text-foreground">
+                {guestName.trim() ? `תודה רבה, ${guestName.trim().split(" ")[0]}!` : "תודה רבה!"}
+              </h1>
               <p className="font-body text-muted-foreground">
                 המשוב שלך נקלט, והוא בדיוק מה שעוזר לנו לעשות את המפגש הבא טוב יותר. נתראה בקרוב.
               </p>
-              <Button asChild variant="outline" className="mt-2">
+              <Button
+                className="mt-2 w-full gap-2 bg-green-600 text-white hover:bg-green-700"
+                onClick={() =>
+                  window.open(
+                    `https://wa.me/?text=${encodeURIComponent(
+                      `אני כבר עניתי על השאלון "${event.title}" 🍻\n${WHATSAPP_GROUP_LINK}`
+                    )}`,
+                    "_blank",
+                    "noopener,noreferrer"
+                  )
+                }
+              >
+                <MessageCircle className="h-4 w-4" />
+                שתף בקבוצת הגברים
+              </Button>
+              <Button asChild variant="outline" className="w-full">
                 <Link to="/">לאתר המועדון</Link>
               </Button>
             </div>
