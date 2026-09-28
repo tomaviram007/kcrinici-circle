@@ -1,8 +1,7 @@
 import { MessageCircle } from "lucide-react";
 import { trackAction } from "@/lib/analytics";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/JGaKYDD7DLzJvzyYyAJejo";
+import { WHATSAPP_GROUP_LINK } from "@/lib/whatsapp";
 
 const FloatingWhatsApp = () => {
   const { t } = useLanguage();
